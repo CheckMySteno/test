@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Advanced Test Analysis Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+  <style>
+    :root{
+      --white:#fff; --dark:#1f2937; --muted:#6b7280; --card:#ffffff; --bg:#f8f9fa;
+      --ok:#16a34a; --warn:#f59e0b; --bad:#dc2626;
+      --shadow: 0 5px 15px rgba(0, 0, 0, .05);
+      --border-color: #e9ecef;
+      --primary-blue: #4f46e5;
+    }
+    body.dark {
+      --white:#1f2937; --dark:#f9fafb; --muted:#9ca3af; --card:#2c3748; --bg:#111827;
+      --shadow:0 4px 12px rgba(0,0,0,.15);
+      --border-color: #374151;
+    }
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body{margin:0;font-family:'Inter',system-ui,Arial,sans-serif;background:var(--bg);color:var(--dark);transition: background-color 0.3s ease, color 0.3s ease;}
+    #loader { display: flex; flex-direction:column; justify-content: center; align-items: center; height: 100vh; }
+    #loader-text { margin-top:10px; font-weight:600; color:var(--muted); }
+    .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: var(--primary-blue); animation: spin 1s ease infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    .container{max-width:1100px;margin:24px auto;padding:0 16px; display: none;}
+    h1{margin:0 0 10px 0;font-size:28px;font-weight:800;letter-spacing:-.02em}
+    .sub{color:var(--muted);margin-bottom:20px}
+    .header-actions { display: flex; gap: 10px; align-items: center; position: absolute; top: 24px; right: 24px; }
+    .header-actions button { background: var(--card); border: 1px solid var(--border-color); color: var(--dark); border-radius: 8px; cursor: pointer; padding: 8px; width: 36px; height: 36px; font-size: 18px; display:flex; justify-content:center; align-items:center; }
+    .toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+    .pill{background:var(--card); border: 1px solid var(--border-color); border-radius:999px;padding:6px 12px;font-size:12px;color:var(--muted);font-weight:600;}
+    .access-pill{background:#dbeafe;color:#1d4ed8; border:none;}
+    
+    .summary-metrics{display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-bottom: 20px;}
+    .summary-item{background:var(--card); border-radius:14px; box-shadow:var(--shadow); padding:15px; text-align:center; font-size:14px; color:var(--dark); border:1px solid var(--border-color);}
+    .summary-item strong{display:block;font-size:22px;color:var(--dark); font-weight:700;}
+    
+    .attempts-header { display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px; margin-bottom:16px; }
+    .filter-controls { display:flex; flex-wrap:wrap; gap:10px; }
+    .filter-controls input { padding:10px 14px; border-radius:8px; border:1px solid var(--border-color); background: var(--card); color:var(--dark); }
+    
+    #loadMoreBtn { width: 100%; padding: 12px; margin-top: 20px; background-color: var(--card); border: 1px solid var(--border-color); border-radius: 8px; font-weight: 600; cursor: pointer; display: none; }
+
+    #attemptsList { display: flex; flex-direction: column; gap: 12px; }
+    .attempt-list-item { background: var(--card); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 16px; cursor: pointer; transition: background-color 0.2s ease, box-shadow 0.2s ease; }
+    .attempt-list-item:hover { background-color: var(--bg); box-shadow: 0 6px 16px rgba(0,0,0,.08); }
+    .list-item-main { flex: 1 1 250px; display:flex; align-items:center; gap:12px; }
+    .list-item-date { font-weight: 600; font-size: 15px; color: var(--dark); margin-bottom: 4px; }
+    .list-item-volume { font-size: 13px; color: var(--muted); }
+    .list-item-stats { flex: 2 1 400px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .stat-chip { text-align: left; }
+    .stat-chip-label { font-size: 12px; color: var(--muted); }
+    .stat-chip-value { font-size: 16px; font-weight: 700; color: var(--dark); }
+    .stat-chip-value .badge { color:#fff; font-size: 14px; padding: 4px 10px; border-radius: 999px; }
+    .badge.green{background:var(--ok)} .badge.orange{background:var(--warn)} .badge.red{background:var(--bad)}
+    
+    .analysis-section{ background: var(--card); border-radius: 14px; box-shadow:var(--shadow); margin-bottom: 20px; border: 1px solid var(--border-color); }
+    .analysis-header{ padding: 12px 16px; background: var(--bg); border-bottom: 1px solid var(--border-color); display:flex; justify-content:space-between; align-items:center; gap: 8px; flex-wrap: wrap;}
+    .analysis-title{ font-size: 18px; font-weight: 700; color: var(--dark); margin: 0; }
+    .analysis-actions { display:flex; flex-wrap:wrap; gap:8px; }
+    .analysis-action-btn { background: var(--card); border: 1px solid var(--border-color); padding: 6px 12px; border-radius: 8px; font-weight: 600; color: var(--muted); cursor: pointer; transition: all 0.2s ease; font-size: 13px; }
+    .analysis-action-btn.active { background-color: var(--primary-blue); color: white; border-color: var(--primary-blue); }
+    .analysis-content-area{ padding: 16px; }
+    .mistake-profile-container { display: grid; grid-template-columns: 180px 1fr; align-items: center; gap: 20px; }
+    @media (max-width: 600px) { .mistake-profile-container { grid-template-columns: 1fr; } }
+    #mistakeProfileChartContainer { position: relative; max-width: 180px; aspect-ratio: 1; }
+    .analysis-list{ list-style: none; padding: 0; margin: 0; border: 1px solid var(--border-color); border-radius: 8px; }
+    .analysis-list li{ display: flex; justify-content: space-between; align-items: center; padding: 10px 12px; font-size: 14px; }
+    .analysis-list li:nth-child(even){ background-color: var(--bg); }
+    .analysis-list .count{ font-weight: 700; color: var(--bad); }
+    .analysis-list .empty-state { padding: 20px; text-align: center; color: var(--muted); }
+    #problemWordsList .word { font-weight: 600; }
+    #problemWordsList li { transition: background-color 0.2s ease; }
+    
+    .chart-container { position: relative; height: 320px; max-width: 900px; margin: 20px auto 0 auto; background: var(--card); border-radius: 8px; padding: 10px; box-shadow: var(--shadow); }
+    
+    .tooltip-container { position: relative; display: inline-flex; align-items: center; gap: 4px; }
+    .tooltip-icon { font-size: 12px; color: var(--muted); cursor: help; border: 1px solid var(--muted); border-radius: 50%; width: 16px; height: 16px; display: inline-flex; justify-content: center; align-items: center; }
+    .tooltip-text { visibility: hidden; width: 220px; background-color: var(--dark); color: var(--bg); text-align: center; border-radius: 6px; padding: 8px; position: absolute; z-index: 1000; bottom: 150%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; }
+    .tooltip-container:hover .tooltip-text { visibility: visible; opacity: 1; }
+    
+    .empty{padding:14px;text-align:center;background:var(--card);border-radius:12px;border:1px dashed var(--border-color)}
+  </style>
+</head>
+<body>
+  <div id="loader"><div class="spinner"></div><div id="loader-text">Loading Dashboard...</div></div>
+  <div class="container">
+    <div class="header-actions">
+      <button id="themeToggleBtn" title="Toggle Theme">🌙</button>
+    </div>
+    <h1>Advanced Test Analysis</h1>
+    <div class="sub">Track your progress, analyze mistakes, and achieve your goals.</div>
+    <div class="toolbar">
+      <span id="ac-pill" class="pill access-pill"></span>
+      <span id="count-pill" class="pill">0 attempts</span>
+      <span id="avg-accuracy-pill" class="pill">Avg. Accuracy: —</span>
+    </div>
+    
+    <div class="summary-metrics">
+      <div class="summary-item"><span>Total Attempts</span><strong id="totalAttempts">0</strong></div>
+      <div class="summary-item"><span>Best Accuracy</span><strong id="bestAccuracy">—%</strong></div>
+      <div class="summary-item"><span>Best WPM</span><strong id="bestWPM">—</strong></div>
+      <div class="summary-item"><span>Avg. Accuracy</span><strong id="averageAccuracy">—%</strong></div>
+      <div class="summary-item"><span>Avg. WPM</span><strong id="averageWPM">—</strong></div>
+    </div>
+    
+    <div class="analysis-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 20px;">
+        <div id="commonMistakeAnalysis" class="analysis-section" style="display:none;">
+          <div class="analysis-header">
+            <div class="tooltip-container">
+                <h3 class="analysis-title">Mistake Profile</h3>
+                <span class="tooltip-icon">?</span>
+                <span class="tooltip-text">A breakdown of the types of mistakes you make most often.</span>
+            </div>
+            <div class="analysis-actions">
+                <button class="analysis-action-btn active" data-scope="recent">Recent</button>
+                <button class="analysis-action-btn" data-scope="overall">Overall</button>
+            </div>
+          </div>
+          <div class="analysis-content-area">
+            <div class="mistake-profile-container">
+                <div id="mistakeProfileChartContainer"><canvas id="mistakeProfileChart"></canvas></div>
+                <ul id="mistakeProfile" class="analysis-list">
+                    <div class="empty-state">Analyzing...</div>
+                </ul>
+            </div>
+          </div>
+        </div>
+
+        <div id="problemWordsAnalysis" class="analysis-section" style="display:none;">
+            <div class="analysis-header"> 
+                <div class="tooltip-container">
+                    <h3 class="analysis-title">Problem Words</h3>
+                    <span class="tooltip-icon">?</span>
+                    <span class="tooltip-text">The specific words you make the most errors on. More intense colors mean a higher error frequency.</span>
+                </div>
+                <div class="analysis-actions">
+                    <button class="analysis-action-btn active" data-scope="recent">Recent</button>
+                    <button class="analysis-action-btn" data-scope="overall">Overall</button>
+                </div>
+            </div>
+            <div class="analysis-content-area">
+                <ul id="problemWordsList" class="analysis-list">
+                    <div class="empty-state">Analyzing...</div>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="chart-container" class="chart-container" style="display:none;">
+        <canvas id="accuracyChart"></canvas>
+    </div>
+    
+    <hr style="margin: 24px 0; border: 1px solid var(--border-color); border-top: none;">
+
+    <div class="attempts-header">
+        <h2>Recent Attempts</h2>
+        <div class="filter-controls">
+            <input type="search" id="searchAttempts" placeholder="Search all attempts...">
+        </div>
+    </div>
+
+    <div id="attemptsList"></div>
+    <button id="loadMoreBtn">Show More</button>
+    <div id="emptyState" class="empty" style="display:none;">No attempts found. Please start practicing to see your results!</div>
+  </div>
+  
+<script>
+    const localDb = new Dexie("CheckMyStenoDB");
+    localDb.version(1).stores({
+      attempts: '++id, timestamp, dictationName, accuracy, wpm',
+      mistakeLibrary: '++id, &[originalWord+typedWord], count',
+      overallStats: 'id'
+    });
+
+    const dataCache = {
+        summaryStats: null,
+        allAttempts: null,
+    };
+
+    let chartInstance, mistakeChartInstance = null;
+    let displayedAttempts = [];
+    let attemptsOffset = 0;
+    const ATTEMPTS_PER_PAGE = 3;
+    let isLazyLoading = true;
+    let analysisScope = 'recent'; 
+
+    const accessCode = localStorage.getItem("currentAccessCode");
+    if (!accessCode) { 
+        alert("No access code found. Please log in first."); 
+        window.location.href = "index.html"; 
+    } else { 
+        document.getElementById("ac-pill").textContent = `Access Code: ${accessCode}`; 
+    }
+    
+    // --- [FIXED] Graph now shows all 3 metrics ---
+    function renderChart(dataToRender) {
+        if (dataToRender.length === 0) return;
+        document.getElementById('chart-container').style.display = 'block';
+        if (chartInstance) chartInstance.destroy();
+        const ctx = document.getElementById('accuracyChart')?.getContext('2d');
+        if (!ctx) return;
+        
+        const labels = dataToRender.map(d => new Date(d.timestamp).toLocaleDateString("en-IN", { month: 'short', day: 'numeric' }));
+        
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels,
+                datasets: [
+                    { label: 'Accuracy %', data: dataToRender.map(d => d.accuracy), borderColor: '#4f46e5', yAxisID: 'y' },
+                    { label: 'WPM', data: dataToRender.map(d => d.wpm), borderColor: '#f59e0b', yAxisID: 'y1' },
+                    { label: 'Mistakes', data: dataToRender.map(d => d.fullMistakes + d.halfMistakes * 0.5), borderColor: '#ef4444', yAxisID: 'y2'}
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+                scales: {
+                    y: { type: 'linear', position: 'left', title: { display: true, text: 'Accuracy (%)' }, min: 0, max: 100 },
+                    y1: { type: 'linear', position: 'right', title: { display: true, text: 'WPM' }, grid: { drawOnChartArea: false } },
+                    y2: { type: 'linear', position: 'right', title: { display: true, text: 'Mistakes' }, grid: { drawOnChartArea: false }, beginAtZero: true }
+                }
+            }
+        });
+    }
+
+    function renderMistakeProfileChart(profileData) {
+        if (mistakeChartInstance) mistakeChartInstance.destroy();
+        const ctx = document.getElementById('mistakeProfileChart')?.getContext('2d');
+        if (!ctx) return;
+        const labels = Object.keys(profileData).filter(key => profileData[key] > 0);
+        const data = Object.values(profileData).filter(value => value > 0);
+        if (labels.length === 0) { return; }
+        mistakeChartInstance = new Chart(ctx, {
+            type: 'doughnut', 
+            data: { 
+                labels: labels.map(l => l.charAt(0).toUpperCase() + l.slice(1)),
+                datasets: [{ data: data, backgroundColor: ['#ef4444', '#f97316', '#f59e0b', '#84cc16', '#22c55e', '#6366f1'], borderColor: 'var(--card)', borderWidth: 4 }] 
+            },
+            options: { responsive: true, maintainAspectRatio: true, cutout: '60%', plugins: { legend: { display: false } } }
+        });
+    }
+
+    function renderAttempts(attemptsToRender, append = false) {
+        const list = document.getElementById("attemptsList"), empty = document.getElementById("emptyState");
+        if (!append) list.innerHTML = "";
+        (displayedAttempts.length === 0 && !append) ? empty.style.display = "block" : empty.style.display = "none";
+        const fragment = document.createDocumentFragment();
+        attemptsToRender.forEach(attemptData => {
+            const badgeClass = attemptData.accuracy >= 90 ? "green" : attemptData.accuracy >= 70 ? "orange" : "red";
+            const listItem = document.createElement("div");
+            listItem.className = "attempt-list-item";
+            listItem.innerHTML = `<div class="list-item-main"><div><div class="list-item-date">${new Date(attemptData.timestamp).toLocaleString("en-IN")}</div><div class="list-item-volume">Transcript: ${escapeHtml(attemptData.dictationName)}</div></div></div><div class="list-item-stats"><div class="stat-chip"><div class="stat-chip-label">Accuracy</div><div class="stat-chip-value"><span class="badge ${badgeClass}">${attemptData.accuracy.toFixed(2)}%</span></div></div><div class="stat-chip"><div class="stat-chip-label">WPM</div><div class="stat-chip-value">${Number(attemptData.wpm).toFixed(1)}</div></div><div class="stat-chip"><div class="stat-chip-label">Mistakes</div><div class="stat-chip-value">${attemptData.fullMistakes} (F) / ${attemptData.halfMistakes} (H)</div></div></div>`;
+            listItem.addEventListener('click', () => { window.location.href = `details.html?id=${attemptData.id}`; });
+            fragment.appendChild(listItem);
+        });
+        list.appendChild(fragment);
+    }
+
+    async function runScopedAnalysis() {
+        if (!dataCache.allAttempts) {
+            dataCache.allAttempts = await localDb.attempts.orderBy('timestamp').reverse().toArray();
+        }
+        const attemptsToAnalyze = analysisScope === 'recent' 
+            ? dataCache.allAttempts.slice(0, 3) 
+            : dataCache.allAttempts;
+
+        document.querySelectorAll('.analysis-title').forEach(el => {
+            el.textContent = el.textContent.split('(')[0].trim() + ` (${analysisScope.charAt(0).toUpperCase() + analysisScope.slice(1)})`;
+        });
+        
+        loadMistakeProfile(attemptsToAnalyze);
+        loadProblemWords(attemptsToAnalyze);
+    }
+    
+    async function loadSummaryStats() {
+        if (dataCache.summaryStats) return renderSummaryStats(dataCache.summaryStats);
+        const stats = await localDb.overallStats.get(1);
+        if (stats) { dataCache.summaryStats = stats; renderSummaryStats(stats); }
+    }
+
+    function renderSummaryStats(stats) {
+        document.getElementById('totalAttempts').textContent = stats.totalAttempts || 0;
+        document.getElementById('bestAccuracy').textContent = `${(stats.bestAccuracy || 0).toFixed(2)}%`;
+        document.getElementById('bestWPM').textContent = (stats.bestWPM || 0).toFixed(1);
+        document.getElementById('averageAccuracy').textContent = `${(stats.avgAccuracy || 0).toFixed(2)}%`;
+        document.getElementById('averageWPM').textContent = (stats.avgWpm || 0).toFixed(1);
+        document.getElementById('count-pill').textContent = `${stats.totalAttempts || 0} attempt${stats.totalAttempts !== 1 ? "s" : ""}`;
+        document.getElementById('avg-accuracy-pill').textContent = `Avg. Accuracy: ${(stats.avgAccuracy || 0).toFixed(2)}%`;
+    }
+
+    // --- [FIXED] Mistake Profile is now backwards-compatible ---
+    function loadMistakeProfile(attempts) {
+        const profile = { omission: 0, extra: 0, spelling: 0, capitalization: 0, punctuation: 0 };
+        const tempDiv = document.createElement('div');
+
+        for (const attempt of attempts) {
+            // Method 1: Use pre-calculated data if it exists (fast)
+            if (attempt.mistakeProfile && Object.keys(attempt.mistakeProfile).length > 0) {
+                for (const [type, count] of Object.entries(attempt.mistakeProfile)) {
+                    const key = (type === 'substitution') ? 'spelling' : type;
+                    if (profile.hasOwnProperty(key)) profile[key] += count;
+                }
+            } 
+            // Method 2: Fallback for older attempts by parsing HTML (slower but ensures data is shown)
+            else if (attempt.highlightedHtml) {
+                tempDiv.innerHTML = attempt.highlightedHtml;
+                profile.omission += tempDiv.querySelectorAll('.omission').length;
+                profile.extra += tempDiv.querySelectorAll('.extra').length;
+                profile.spelling += tempDiv.querySelectorAll('.spelling, .substitution').length;
+                profile.capitalization += tempDiv.querySelectorAll('.capitalization').length;
+                profile.punctuation += tempDiv.querySelectorAll('.punctuation').length;
+            }
+        }
+
+        const listEl = document.getElementById('mistakeProfile');
+        listEl.innerHTML = '';
+        Object.entries(profile).forEach(([type, count]) => {
+            if (count > 0) listEl.innerHTML += `<li><span class="type">${type.charAt(0).toUpperCase() + type.slice(1)}</span><span class="count">${count}</span></li>`;
+        });
+        if (Object.values(profile).every(v => v === 0)) listEl.innerHTML = '<div class="empty-state">No mistakes found. Great job!</div>';
+        
+        renderMistakeProfileChart(profile);
+        document.getElementById('commonMistakeAnalysis').style.display = 'block';
+    }
+
+    function loadProblemWords(attempts) {
+        const mistakeCounts = new Map();
+        for (const attempt of attempts) {
+            if (attempt.highlightedHtml) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = attempt.highlightedHtml;
+                tempDiv.querySelectorAll('.spelling, .substitution').forEach(el => {
+                    const original = el.querySelector('b')?.textContent.trim();
+                    // --- [FIX] Remove trailing bracket from typed word ---
+                    let typed = el.childNodes.length > 0 ? el.childNodes[0].nodeValue.trim() : '';
+                    typed = typed.replace(/\s*\($/, '').trim();
+                    if (original && typed && original !== typed) {
+                        const key = `${original} ➔ ${typed}`;
+                        mistakeCounts.set(key, (mistakeCounts.get(key) || 0) + 1);
+                    }
+                });
+            }
+        }
+        const sortedMistakes = Array.from(mistakeCounts.entries()).map(([key, count]) => ({ key, count })).sort((a, b) => b.count - a.count).slice(0, 7);
+        const listEl = document.getElementById('problemWordsList');
+        if (sortedMistakes.length === 0) { listEl.innerHTML = '<div class="empty-state">No problem words detected.</div>'; }
+        else {
+            const maxCount = sortedMistakes.length > 0 ? sortedMistakes[0].count : 1;
+            listEl.innerHTML = sortedMistakes.map(m => {
+                const [originalWord, typedWord] = m.key.split(' ➔ ');
+                return `<li style="background: rgba(220, 38, 38, ${Math.max(0.2, m.count / maxCount)});"><span class="word" style="color:white;">${escapeHtml(originalWord)} ➔ ${escapeHtml(typedWord)}</span> <span class="count" style="color:white;">${m.count} times</span></li>`;
+            }).join('');
+        }
+        document.getElementById('problemWordsAnalysis').style.display = 'block';
+    }
+
+    async function loadMoreAttempts() {
+        if (!isLazyLoading) return;
+        const loadBtn = document.getElementById('loadMoreBtn');
+        loadBtn.textContent = 'Loading...'; loadBtn.disabled = true;
+
+        if (!dataCache.allAttempts) {
+            dataCache.allAttempts = await localDb.attempts.orderBy('timestamp').reverse().toArray();
+        }
+
+        const newAttempts = dataCache.allAttempts.slice(attemptsOffset, attemptsOffset + ATTEMPTS_PER_PAGE);
+
+        if (newAttempts.length > 0) {
+            displayedAttempts.push(...newAttempts);
+            renderAttempts(newAttempts, true);
+            attemptsOffset += newAttempts.length;
+        }
+
+        if (attemptsOffset >= dataCache.allAttempts.length) {
+            loadBtn.style.display = 'none';
+        } else {
+            loadBtn.style.display = 'block';
+        }
+
+        loadBtn.textContent = `Show ${ATTEMPTS_PER_PAGE} Older Attempts`;
+        loadBtn.disabled = false;
+        
+        if (displayedAttempts.length > 0) {
+            renderChart(displayedAttempts.slice().reverse());
+        }
+    }
+    
+    function handleFiltering() {
+        const searchValue = document.getElementById('searchAttempts').value.toLowerCase();
+        if (!searchValue) {
+            isLazyLoading = true;
+            document.getElementById('attemptsList').innerHTML = '';
+            displayedAttempts = []; attemptsOffset = 0;
+            loadMoreAttempts();
+            return;
+        }
+
+        isLazyLoading = false;
+        document.getElementById('loadMoreBtn').style.display = 'none';
+
+        let filtered = (dataCache.allAttempts || []).filter(d => {
+            const dateStr = new Date(d.timestamp).toLocaleString("en-IN");
+            return (dateStr.toLowerCase().includes(searchValue) || (d.dictationName||"").toLowerCase().includes(searchValue));
+        });
+        renderAttempts(filtered, false);
+    }
+    
+    function escapeHtml(s=""){ return s.toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    
+    async function initializeDashboard() {
+        const isDark = localStorage.getItem(`stenotheme_${accessCode}`) === 'dark'; 
+        document.body.classList.toggle('dark', isDark); 
+        document.getElementById('themeToggleBtn').textContent = isDark ? '☀️' : '🌙';
+
+        await loadMoreAttempts(); 
+
+        document.getElementById('loader').style.display = 'none';
+        document.querySelector('.container').style.display = 'block';
+
+        await loadSummaryStats();
+        await runScopedAnalysis();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeDashboard().catch(error => {
+            console.error("Failed to initialize dashboard:", error);
+            document.getElementById('loader-text').textContent = 'Error loading dashboard. Check console for details.';
+        });
+
+        document.getElementById('loadMoreBtn').addEventListener('click', loadMoreAttempts);
+        document.getElementById('searchAttempts').addEventListener('input', handleFiltering);
+        document.getElementById('themeToggleBtn').addEventListener('click', () => {
+            const isDark = document.body.classList.toggle('dark');
+            localStorage.setItem(`stenotheme_${accessCode}`, isDark ? 'dark' : 'light');
+            document.getElementById('themeToggleBtn').textContent = isDark ? '☀️' : '🌙';
+        });
+
+        document.querySelectorAll('.analysis-actions').forEach(container => {
+            container.addEventListener('click', (e) => {
+                if (e.target.matches('.analysis-action-btn')) {
+                    const newScope = e.target.dataset.scope;
+                    if (newScope === analysisScope) return;
+                    analysisScope = newScope;
+                    
+                    document.querySelectorAll('.analysis-actions').forEach(c => {
+                        c.querySelectorAll('.analysis-action-btn').forEach(btn => btn.classList.remove('active'));
+                        c.querySelector(`[data-scope="${newScope}"]`).classList.add('active');
+                    });
+
+                    runScopedAnalysis();
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>
