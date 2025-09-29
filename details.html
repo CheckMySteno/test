@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Attempt Details - Steno Analysis</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+    <style>
+        :root{
+          --white:#fff; --dark:#1f2937; --muted:#6b7280; --card:#ffffff; --bg:#f8f9fa;
+          --border-color: #e9ecef; --primary-blue: #4f46e5;
+          --mistake-full-bg-soft: #fee2e2; --mistake-full-text-soft: #b91c1c;
+          --mistake-half-bg-soft: #fef3c7; --mistake-half-text-soft: #b45309;
+          
+          --hl-extra-bg: #fecdd3; --hl-extra-text: #831843;
+          --hl-omission-bg: #d9f99d; --hl-omission-text: #065f46;
+          --hl-substitution-bg: #f28b82; --hl-substitution-text: #7f1d1d;
+          --hl-spelling-bg: #fde68a; --hl-spelling-text: #854d0e;
+          --hl-capitalization-bg: #bae6fd; --hl-capitalization-text: #1e40af;
+          --hl-punctuation-bg: #ddd6fe; --hl-punctuation-text: #581c87;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        body{margin:0;font-family:'Inter',system-ui,Arial,sans-serif;background:var(--bg);color:var(--dark);}
+        #loader { display: flex; flex-direction:column; justify-content: center; align-items: center; height: 100vh; }
+        #loader-text { margin-top:10px; font-weight:600; color:var(--muted); }
+        .spinner { border: 4px solid rgba(0, 0, 0, 0.1); width: 36px; height: 36px; border-radius: 50%; border-left-color: var(--primary-blue); animation: spin 1s ease infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .container{max-width:1100px;margin:24px auto;padding:0 16px; display: none;}
+        
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+        .back-button { 
+            display: inline-flex; align-items: center; gap: 8px; font-weight: 600;
+            color: var(--muted); text-decoration: none;
+        }
+        .print-button {
+            background-color: var(--primary-blue);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .result-header{padding:24px;background:var(--card); border-radius: 14px; border: 1px solid var(--border-color);}
+        .report-title{font-size:24px;font-weight:800;margin:0 0 16px;border-bottom:1px solid var(--border-color);padding-bottom:12px;}
+        .report-meta-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+        /* [UPDATED] Styles for better header readability */
+        .meta-item{background:var(--bg);padding:14px;border-radius:8px;border:1px solid var(--border-color); color:var(--dark); text-align:center; font-size: 1.05em;}
+        .meta-item b { font-weight: 700; color: var(--dark); margin-right: 8px; }
+
+        .transcription-details{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin:16px 0}
+        .pill-strong{background:#eef2ff; color:#4338ca; padding:10px 16px;border-radius:8px;font-weight:600}
+        .pill-full{background:var(--mistake-full-bg-soft); color: var(--mistake-full-text-soft); padding:10px 16px;border-radius:8px;font-weight:600}
+        .pill-half{background:var(--mistake-half-bg-soft); color: var(--mistake-half-text-soft); padding:10px 16px;border-radius:8px;font-weight:600}
+        
+        /* [NEW] Styles for the filter's new position */
+        .column-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .column-title { font-size: 18px; font-weight: 700; }
+        .filter-controls { display: flex; align-items: center; gap: 8px; }
+        .filter-controls label { font-weight: 600; color: var(--muted); font-size: 0.9em; }
+        .filter-controls select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card);
+            font-weight: 500;
+        }
+
+        .columns{display:grid;grid-template-columns:1fr;gap:16px;margin-top:24px}
+        @media (min-width:900px){ .columns{grid-template-columns:1fr 1fr;} }
+        .col{background:var(--bg);border-radius:10px;padding:16px;border:1px solid var(--border-color); line-height: 1.7; font-size: 1.1em; word-break: break-word;}
+        
+        .highlight{ position: relative; padding:1px 4px; border-radius:3px; margin:0 1px; font-weight:500; }
+        .highlight::after {
+          content: attr(data-tooltip-text); 
+          visibility: hidden; opacity: 0; transition: opacity 0.2s ease;
+          position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%);
+          background-color: var(--dark); color: var(--white); padding: 6px 10px; border-radius: 4px;
+          font-size: 0.85em; font-weight: 500; white-space: nowrap; z-index: 10;
+          pointer-events: none;
+        }
+        .highlight:hover::after { visibility: visible; opacity: 1; }
+
+        .extra{background:var(--hl-extra-bg); color: var(--hl-extra-text); text-decoration: line-through;} 
+        .omission{background:var(--hl-omission-bg); color: var(--hl-omission-text);} 
+        .substitution{background:var(--hl-substitution-bg); color: var(--hl-substitution-text);}
+        .spelling{background:var(--hl-spelling-bg); color: var(--hl-spelling-text);} 
+        .capitalization{background:var(--hl-capitalization-bg); color: var(--hl-capitalization-text);}
+        .punctuation{background:var(--hl-punctuation-bg); color: var(--hl-punctuation-text);}
+        .highlight b{font-weight:700}
+
+        .hidden-mistake { background: none !important; text-decoration: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; }
+        .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
+        
+        @media print {
+            body { background: #fff !important; color: #000 !important; }
+            .page-header, .filter-controls { display: none !important; }
+            .container { margin: 0; padding: 0; max-width: 100%; display: block !important; }
+            .result-header, .col { border: 1px solid #ccc; box-shadow: none; }
+        }
+    </style>
+</head>
+<body>
+    <div id="loader"><div class="spinner"></div><div id="loader-text">Loading Attempt Details...</div></div>
+    
+    <div class="container" id="details-container">
+        <div class="page-header">
+            <a href="test-analysis.html" class="back-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 010 1.06L9.06 10l3.73 3.71a.75.75 0 11-1.06 1.06l-4.25-4.25a.75.75 0 010-1.06l4.25-4.25a.75.75 0 011.06 0z" clip-rule="evenodd" /></svg>
+                Back to Dashboard
+            </a>
+            <button id="printBtn" class="print-button">Print Report</button>
+        </div>
+        <div id="result-content">
+            <!-- Details will be rendered here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const localDb = new Dexie("CheckMyStenoDB");
+        localDb.version(1).stores({
+          attempts: '++id, timestamp, dictationName, accuracy, wpm',
+          mistakeLibrary: '++id, &[originalWord+typedWord], count',
+          overallStats: 'id'
+        });
+
+        function getAttemptIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return parseInt(params.get('id'), 10);
+        }
+
+        function escapeHtml(s=""){ return s.toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+        function renderDetails(attemptData) {
+            if (!attemptData) {
+                document.getElementById('result-content').innerHTML = `<h1>Error</h1><p>Attempt not found. It may have been deleted.</p>`;
+                return;
+            }
+
+            const dateStr = new Date(attemptData.timestamp).toLocaleDateString("en-IN");
+            const originalWordsCount = (attemptData.originalText || "").trim().split(/\s+/).filter(Boolean).length;
+
+            const contentHtml = `
+              <div class="result-header">
+                <h2 class="report-title">Result Sheet</h2>
+                <div class="report-meta-grid">
+                  <div class="meta-item"><b>Transcript:</b> ${escapeHtml(attemptData.dictationName)}</div>
+                  <div class="meta-item"><b>Typing Speed:</b> ${Number(attemptData.wpm||0).toFixed(1)} WPM</div>
+                  <div class="meta-item"><b>Accuracy:</b> ${attemptData.accuracy.toFixed(2)}%</div>
+                  <div class="meta-item"><b>Date:</b> ${dateStr}</div>
+                </div>
+                <div class="transcription-details">
+                    <div class="pill-strong">Total Words: ${originalWordsCount}</div>
+                    <div class="pill-full">Full Mistakes: ${attemptData.fullMistakes}</div>
+                    <div class="pill-half">Half Mistakes: ${attemptData.halfMistakes}</div>
+                </div>
+                
+                <div class="columns"> 
+                    <div>
+                        <div class="column-header">
+                            <strong class="column-title">Your Transcription:</strong>
+                            <div class="filter-controls">
+                                <label for="mistakeFilter">Filter Mistakes:</label>
+                                <select id="mistakeFilter">
+                                    <option value="all">Show All</option>
+                                    <option value="omission">Omissions</option>
+                                    <option value="extra">Additions</option>
+                                    <option value="spelling">Spelling</option>
+                                    <option value="capitalization">Capitalization</option>
+                                    <option value="punctuation">Punctuation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col"><div class="typed">${attemptData.highlightedHtml || ''}</div></div> 
+                    </div>
+                    <div>
+                        <div class="column-header">
+                            <strong class="column-title">Original Text:</strong>
+                        </div>
+                        <div class="col"><div class="original">${escapeHtml(attemptData.originalText) || ''}</div></div> 
+                    </div>
+                </div>
+              </div>`;
+            
+            document.getElementById('result-content').innerHTML = contentHtml;
+        }
+
+        function filterMistakes(mistakeType) {
+            const highlights = document.querySelectorAll('.typed .highlight');
+            highlights.forEach(el => {
+                const type = el.dataset.mistakeType;
+                const effectiveType = (type === 'substitution') ? 'spelling' : type;
+                if (mistakeType === 'all' || effectiveType === mistakeType) {
+                    el.classList.remove('hidden-mistake');
+                } else {
+                    el.classList.add('hidden-mistake');
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const attemptId = getAttemptIdFromURL();
+            if (!attemptId) {
+                document.getElementById('loader-text').textContent = 'Error: No attempt ID provided.';
+                return;
+            }
+
+            try {
+                const attempt = await localDb.attempts.get(attemptId);
+                renderDetails(attempt);
+                
+                // Event listeners must be added *after* the content is rendered
+                document.getElementById('mistakeFilter').addEventListener('change', (e) => {
+                    filterMistakes(e.target.value);
+                });
+
+            } catch (error) {
+                console.error("Failed to fetch attempt:", error);
+                document.getElementById('loader-text').textContent = 'Could not load attempt data.';
+            } finally {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('details-container').style.display = 'block';
+            }
+
+            document.getElementById('printBtn').addEventListener('click', () => {
+                window.print();
+            });
+        });
+    </script>
+</body>
+</html>
