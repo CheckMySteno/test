@@ -20,6 +20,7 @@ let g_alignment = []; // This will now be populated by the evaluation logic
 let allPassageData = [];
 let g_lastTypedText = "";
 let isReevaluateModeActive = false;
+let analysisWorker; // Declare the worker variable
 
 document.addEventListener("DOMContentLoaded", initializePracticeKC);
 
@@ -60,6 +61,13 @@ async function initializePracticeKC() {
     setLogoSource();
     restoreSession();
 
+    // --- WORKER INITIALIZATION ---
+    if (window.Worker) {
+        analysisWorker = new Worker('worker.js');
+    } else {
+        alert("Your browser does not support Web Workers. The application may be slow.");
+    }
+    
     await generateAllPassageData();
     renderGrid();
 
@@ -477,23 +485,13 @@ function buildResultHtml(alignment) {
     return resultHtmlContent;
 }
 
-// =================================================================================
-// CHANGE 3: The entire submitTranscription function is replaced with this new
-// async version that uses the Web Worker for evaluation.
-// =================================================================================
-async function submitTranscription() {
+function submitTranscription() {
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
     clearState();
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
 
-    // Show the loader and set the initial message
-    const loader = document.getElementById('fullPageLoader');
-    const loaderMessage = document.getElementById('loaderMessage');
-    loaderMessage.textContent = 'Starting analysis...';
-    loader.style.display = 'flex';
-
     try {
-        if (!originalText) throw new Error("Original transcript not found.");
+        if (!originalText) throw new Error("Original transcript not found. Please try the test again.");
 
         const typedText = document.getElementById('typingBox').value;
         g_lastTypedText = typedText;
@@ -501,48 +499,47 @@ async function submitTranscription() {
         if (typedText.trim().split(/\s+/).filter(Boolean).length < 10) {
             alert("Please type at least 10 words.");
             goHome();
-            loader.style.display = 'none';
             return;
         }
-        
-        // Use the common worker. IMPORTANT: Update this path if you moved the worker.js file.
-        const analysisWorker = new Worker('/scripts/worker.js');
 
-        analysisWorker.onmessage = function(event) {
-            const data = event.data;
+        document.getElementById('fullPageLoader').style.display = 'flex';
 
-            if (data.type === 'progress') {
-                loaderMessage.textContent = data.message;
-            } else if (data.type === 'result') {
-                const analysisResult = data.payload;
-
-                showView('results-view');
-                renderResultSheet(analysisResult, false);
-
-                saveProgressToLocalStorage(analysisResult);
-                saveAttemptHybrid(originalText, typedText, analysisResult);
-
-                loader.style.display = 'none';
-                analysisWorker.terminate();
-                resetTimer();
-            }
-        };
-
-        const analysisOptions = {
-            countCommaMistakes: document.getElementById("includeComma")?.checked
-        };
-        
+        // --- Use the Web Worker for analysis ---
         analysisWorker.postMessage({
-            originalText: g_lastTypedText,
-            typedText: typedText,
+            originalText: originalText,
+            typedText: g_lastTypedText,
             timeTakenSeconds: timeTakenSeconds,
-            options: analysisOptions
+            options: {
+                countCommaMistakes: document.getElementById("includeComma")?.checked
+            }
         });
 
+        analysisWorker.onmessage = function(event) {
+            const analysisResult = event.data;
+            document.getElementById('fullPageLoader').style.display = 'none';
+            
+            // Render the results using the returned analysis object
+            showView('results-view');
+            renderResultSheet(analysisResult, false);
+
+            // Save progress and stats
+            saveProgressToLocalStorage(analysisResult);
+            saveAttemptHybrid(originalText, typedText, analysisResult);
+
+            resetTimer();
+        };
+
+        analysisWorker.onerror = function(error) {
+            console.error("!!! WORKER ERROR:", error);
+            document.getElementById('fullPageLoader').style.display = 'none';
+            showErrorModal("Result Error", "An error occurred in the analysis worker. Please try again.");
+            goHome();
+        };
+
     } catch (error) {
-        console.error("!!! ERROR during transcription processing:", error);
-        showErrorModal("Result Error", "An error occurred while generating your results. Please try again.");
-        loader.style.display = 'none';
+        console.error("!!! ERROR during transcription submission:", error);
+        document.getElementById('fullPageLoader').style.display = 'none';
+        showErrorModal("Result Error", "An error occurred while preparing your results. Please try again.");
         goHome();
     }
 }
@@ -735,10 +732,7 @@ function initializeResultInteractivity() {
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
 }
 
-// =================================================================================
-// CHANGE 4: The entire toggleReevaluateMode function is replaced with this new
-// version that uses the Web Worker for re-evaluation and shows the spinner.
-// =================================================================================
+// --- Re-evaluation Mode ---
 function toggleReevaluateMode() {
     isReevaluateModeActive = !isReevaluateModeActive;
     const resultsView = document.getElementById('results-view');
@@ -758,7 +752,6 @@ function toggleReevaluateMode() {
         originalTextP.contentEditable = true;
         alert("Re-evaluate Mode is ON. You can now edit both your transcription and the original text.");
     } else {
-        // --- THIS IS THE EXIT and RE-EVALUATION LOGIC ---
         resultsView.classList.remove('reevaluate-mode-active');
         toggleBtn.textContent = 'Enter Re-evaluate Mode';
         toggleBtn.style.backgroundColor = ''; 
@@ -769,48 +762,40 @@ function toggleReevaluateMode() {
         g_lastTypedText = correctedTypedText;
         typedTextP.contentEditable = false; 
         originalTextP.contentEditable = false;
+
+        if (!correctedOriginalText) {
+            alert("The original text cannot be empty for re-evaluation.");
+             // In case of error, re-render with last valid state
+            const lastAlignmentResult = { alignment: g_alignment, accuracy: "0.00" /*Dummy data*/, /*... other fields*/};
+            renderResultSheet(lastAlignmentResult, true); // Re-render with existing alignment
+            return;
+        }
         
-        // Show the interactive loader
-        const loader = document.getElementById('fullPageLoader');
-        const loaderMessage = document.getElementById('loaderMessage');
-        loaderMessage.textContent = 'Re-evaluating score...';
-        loader.style.display = 'flex';
+        document.getElementById('fullPageLoader').style.display = 'flex';
 
-        // Use the common worker for re-calculation
-        const reevaluateWorker = new Worker('/scripts/worker.js');
-
-        reevaluateWorker.onmessage = function(event) {
-            const data = event.data;
-
-            if (data.type === 'progress') {
-                loaderMessage.textContent = data.message;
-            } else if (data.type === 'result') {
-                const analysisResult = data.payload;
-
-                // Use the existing render function to update the UI
-                renderResultSheet(analysisResult, true); 
-                
-                alert("Score has been re-evaluated with your corrections. Note: This updated score is for your reference only and is not saved.");
-                
-                // Hide loader and clean up
-                loader.style.display = 'none';
-                reevaluateWorker.terminate();
-            }
-        };
-
-        const analysisOptions = {
-            countCommaMistakes: document.getElementById("includeComma")?.checked
-        };
-        
-        reevaluateWorker.postMessage({
-            originalText: correctedOriginalText || originalText, // Fallback to original if user deletes everything
+        analysisWorker.postMessage({
+            originalText: correctedOriginalText,
             typedText: correctedTypedText,
             timeTakenSeconds: 0, // Time is not relevant for re-evaluation
-            options: analysisOptions
+            options: {
+                countCommaMistakes: document.getElementById("includeComma")?.checked
+            }
         });
+
+        analysisWorker.onmessage = function(event) {
+            const analysisResult = event.data;
+            document.getElementById('fullPageLoader').style.display = 'none';
+            renderResultSheet(analysisResult, true);
+            alert("Score has been re-evaluated with your corrections. Note: This updated score is for your reference only and is not saved.");
+        };
+
+        analysisWorker.onerror = function(error) {
+             console.error("!!! RE-EVAL WORKER ERROR:", error);
+             document.getElementById('fullPageLoader').style.display = 'none';
+             alert("Could not re-evaluate the score due to an error.");
+        };
     }
 }
-
 
 function getCleanTextFromAlignment(type = 'typed') {
     if (!g_alignment || g_alignment.length === 0) return "";
