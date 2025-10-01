@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta name="robots" content="noindex">
 <title>Steno Practice Tool</title>
 
 <!-- External Scripts -->
@@ -1366,11 +1367,15 @@ function getCleanTextFromAlignment(type = 'typed') {
     let textParts = []; g_alignment.forEach(entry => { if (type === 'typed') { if (entry.type === 'match' || entry.type === 'sub' || entry.type === 'ins') { textParts.push(entry.t || ''); } } else { if (entry.type === 'match' || entry.type === 'sub' || entry.type === 'del') { textParts.push(entry.o || ''); } } });
     return textParts.join(' ').replace(/\s+/g, ' ').trim();
 }
+
 function toggleReevaluateMode() {
     isReevaluateModeActive = !isReevaluateModeActive;
     const resultsView = document.getElementById('results-view'); const toggleBtn = document.getElementById('toggleReevaluateBtn'); const typedTextP = document.getElementById('editableTypedText'); const originalTextP = document.getElementById('editableOriginalText');
     if (isReevaluateModeActive) { resultsView.classList.add('reevaluate-mode-active'); toggleBtn.textContent = 'Calculate & Exit Mode'; toggleBtn.style.backgroundColor = 'var(--accent-purple)'; toggleBtn.style.color = 'white'; const cleanTypedText = getCleanTextFromAlignment('typed'); const cleanOriginalText = getCleanTextFromAlignment('original'); typedTextP.innerHTML = cleanTypedText; originalTextP.innerHTML = cleanOriginalText; typedTextP.contentEditable = true; originalTextP.contentEditable = true; alert("Re-evaluate Mode is ON. You can now edit both your transcription and the original text.");
     } else { 
+        // --- SPINNER IS SHOWN HERE ---
+        document.getElementById('fullPageLoader').style.display = 'flex';
+        
         resultsView.classList.remove('reevaluate-mode-active'); 
         toggleBtn.textContent = 'Enter Re-evaluate Mode'; 
         toggleBtn.style.backgroundColor = ''; 
@@ -1385,13 +1390,13 @@ function toggleReevaluateMode() {
         
         if (!correctedOriginalText) { 
             alert("The original text cannot be empty for re-evaluation.");
-            // Re-render with the previous valid state - USING THE WORKER
             const analysisOptions = { countCommaMistakes: document.getElementById("includeComma")?.checked || false };
             
             const reevaluateWorker = new Worker('worker.js');
             reevaluateWorker.onmessage = function(event) {
                 const result = event.data;
                 displayAndRenderResults(result, originalText, true);
+                document.getElementById('fullPageLoader').style.display = 'none'; // Hide spinner on completion
                 reevaluateWorker.terminate();
             };
             reevaluateWorker.postMessage({
@@ -1403,13 +1408,16 @@ function toggleReevaluateMode() {
             return; 
         } 
         
-        // Re-evaluate with corrected text - USING THE WORKER
         const analysisOptions = { countCommaMistakes: document.getElementById("includeComma")?.checked || false };
         
         const finalReevaluateWorker = new Worker('worker.js');
         finalReevaluateWorker.onmessage = function(event) {
             const result = event.data;
             displayAndRenderResults(result, correctedOriginalText, true);
+            
+            // --- SPINNER IS HIDDEN HERE ---
+            document.getElementById('fullPageLoader').style.display = 'none';
+            
             alert("Score has been re-evaluated with your corrections. Note: This updated score is for your reference only and is not saved.");
             finalReevaluateWorker.terminate();
         };
@@ -1421,6 +1429,7 @@ function toggleReevaluateMode() {
         });
     }
 }
+
 
 // =================================================================================
 // CHANGE 2: THIS IS THE UPDATED FUNCTION THAT USES THE WEB WORKER
