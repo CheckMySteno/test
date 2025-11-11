@@ -199,11 +199,17 @@
         cursor: pointer; border: none;
     }
 
-    .test-setup { background-color: #f8fafc; padding: 1.5rem 2.5rem; border-top: 1px solid var(--border-color); }
-    .test-setup-options {
-        display: flex; justify-content: center; align-items: center;
-        gap: 2rem; margin-bottom: 1.25rem; flex-wrap: wrap;
+    /* --- REFINED TEST SETUP SECTION --- */
+    .test-setup { background-color: #f9fafb; padding: 2rem 2.5rem; border-top: 1px solid var(--border-color); }
+    .test-setup-grid {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1.5rem;
     }
+    .setup-col { flex: 1; }
+    .setup-col-center { text-align: center; }
+    .setup-col-right { text-align: right; }
     .timer-input-group { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
     .timer-input-group label { font-weight: 600; font-size: 0.9em; color: var(--text-muted); }
     #custom-timer-input {
@@ -213,17 +219,28 @@
     #custom-timer-input:focus { outline: 2px solid var(--accent-purple); border-color: var(--accent-purple); }
     #custom-timer-input::-webkit-outer-spin-button, #custom-timer-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
     #custom-timer-input[type=number] { -moz-appearance: textfield; }
-
-    .button-stack { display: flex; flex-direction: column; gap: 0.75rem; width: 100%; max-width: 450px; margin: 0 auto; }
-    #startTranscriptionBtn, #previewTranscriptBtn {
-        font-size: 1.1em; padding: 16px; width: 100%; border-radius: 12px;
-        font-weight: 600; transition: all 0.2s ease;
+    .comma-checkbox-label {
+        font-size: 0.9em; color: var(--text-muted); display:inline-flex;
+        align-items:center; gap: 5px; margin-top: 0.75rem; cursor: pointer;
     }
-    #previewTranscriptBtn { background-color: #e5e7eb; color: #374151; }
-    #previewTranscriptBtn:hover { background-color: #d1d5db; }
+    #startTranscriptionBtn, .secondary-action-btn {
+        font-size: 1.1em; padding: 16px 24px; width: 100%; max-width: 280px;
+        border-radius: 12px; font-weight: 600; transition: all 0.2s ease;
+    }
+    .secondary-action-btn {
+        background-color: transparent; color: #374151;
+        border: 2px solid #e5e7eb;
+    }
+    .secondary-action-btn:hover { background-color: #f8fafc; border-color: #d1d5db; }
     #startTranscriptionBtn:disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; box-shadow: none; }
     #startTranscriptionBtn:not(:disabled) { background-color: #1f2937; color: white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     #startTranscriptionBtn:not(:disabled):hover { background-color: #111827; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+    
+    @media (max-width: 768px) {
+        .test-setup-grid { flex-direction: column; gap: 2rem; }
+        .setup-col-right { text-align: center; }
+        .setup-col { width: 100%; }
+    }
 
     .back-btn { background: none; color: #9ca3af; font-size: 0.9em; margin-top: 1.5rem; width: 100%; text-decoration: none; font-weight: 500; }
     .back-btn:hover { text-decoration: underline; }
@@ -593,20 +610,24 @@
                 </div>
             </div>
             <div class="test-setup">
-                 <div class="test-setup-options">
-                    <div class="timer-input-group">
-                        <label for="custom-timer-input">Set Timer (minutes)</label>
-                        <input type="number" id="custom-timer-input" value="50" min="1" max="120">
-                    </div>
-                     <label style="font-size: 0.9em; color: var(--text-muted); display:flex; align-items:center; gap: 5px;">
-                      <input type="checkbox" id="includeComma" style="vertical-align: middle;">
-                      Count comma (,) mistakes
-                    </label>
+                 <div class="test-setup-grid">
+                     <div class="setup-col">
+                        <button id="previewTranscriptBtn" class="secondary-action-btn" onclick="showTranscriptPreview()">📄 Preview Transcript</button>
+                     </div>
+                     <div class="setup-col setup-col-center">
+                         <div class="timer-input-group">
+                            <label for="custom-timer-input">Set Timer (minutes)</label>
+                            <input type="number" id="custom-timer-input" value="50" min="1" max="120">
+                        </div>
+                        <label class="comma-checkbox-label">
+                          <input type="checkbox" id="includeComma">
+                          Count comma (,) mistakes
+                        </label>
+                     </div>
+                     <div class="setup-col setup-col-right">
+                        <button id="startTranscriptionBtn" onclick="showInstructions()" disabled>🚀 Start Transcription</button>
+                     </div>
                  </div>
-                <div class="button-stack">
-                    <button id="previewTranscriptBtn" onclick="showTranscriptPreview()">📄 Preview Transcript</button>
-                    <button id="startTranscriptionBtn" onclick="showInstructions()" disabled>🚀 Start Transcription Test</button>
-                </div>
             </div>
         </div>
         <button onclick="clearStateAndGoBack()" class="back-btn">Choose a different dictation</button>
