@@ -10,13 +10,16 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
+<!-- ADDED: The tool for our local database -->
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+
 
 <!-- Google Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 
 <style>
     /* --- 1. Global Styles --- */
@@ -157,12 +160,10 @@
     .time-display { display: flex; justify-content: space-between; font-size: 0.875rem; color: #6b7280; font-weight: 500; margin-top: 0.5rem; }
     .extra-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
     #wpmSpeed { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.4rem 2rem 0.4rem 0.8rem; font-family: 'Manrope', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
-    /* UPDATE: Styles for the new visible, horizontal volume slider */
-    .volume-control-group-visible { display: flex; align-items: center; gap: 8px; }
-    #volume-slider-horizontal { -webkit-appearance: none; appearance: none; width: 80px; height: 6px; background: #e5e7eb; border-radius: 3px; outline: none; transition: opacity 0.2s; }
-    #volume-slider-horizontal::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: #6366f1; border-radius: 50%; cursor: pointer; }
-    #volume-slider-horizontal::-moz-range-thumb { width: 16px; height: 16px; background: #6366f1; border-radius: 50%; cursor: pointer; }
-
+    .volume-control-group { position: relative; }
+    #volume-slider { display: none; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); -webkit-appearance: none; appearance: none; width: 8px; height: 100px; background: #e5e7eb; border-radius: 4px; padding: 0; margin: 0; }
+    #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: #6366f1; border-radius: 50%; cursor: pointer; }
+    #volume-btn:hover + #volume-slider, #volume-slider:hover { display: block; }
     .test-setup { background-color: #f9fafb; padding: 1.5rem 2rem; border-top: 1px solid var(--border-color); }
     #timer-select { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: white; border: 1px solid var(--border-color); padding: 14px; border-radius: 12px; margin-top: 0; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
     #startTranscriptionBtn { font-size: 1.1em; padding: 16px; margin-top: 1rem; width: 100%; border-radius: 12px; font-weight: 600; transition: all 0.2s ease; }
@@ -344,30 +345,15 @@
     #cancelResetBtn { background-color: #e5e7eb; color: #4b5563; }
     .full-page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; }
     
-    /* UPDATE: Styles for the new Detailed Analysis Report View */
-    #analysis-view { padding: 40px; max-width: 1000px; margin: auto; background-color: #fff; }
-    .analysis-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; border-bottom: 2px solid var(--border-subtle); padding-bottom: 20px; flex-wrap: wrap; gap: 15px;}
-    .analysis-header h1 { font-size: 1.8em; margin: 0; }
-    .analysis-header p { margin: 0; color: var(--text-muted); }
-    .analysis-actions button { margin-left: 10px; padding: 10px 20px; background-color: var(--primary-cyan); color: white; border-radius: 8px; font-weight: 600; }
-    .mistake-table { width: 100%; border-collapse: collapse; font-size: 1em; }
-    .mistake-table th, .mistake-table td { padding: 12px 15px; border: 1px solid var(--border-subtle); text-align: left; }
-    .mistake-table thead { background-color: var(--bg-main); }
-    .mistake-table th { font-weight: 700; color: var(--text-header); }
-    .mistake-table tbody tr:nth-child(even) { background-color: #f8fafc; }
-    .mistake-table td:nth-child(3) { background-color: #dcfce7; } /* Original */
-    .mistake-table td:nth-child(4) { background-color: #fee2e2; } /* Typed */
-
     /* --- PRINT STYLES --- */
     @media print {
-      body, .app-container, .result-sheet-container, #analysis-view { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
+      body, .app-container, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
       .view { display: none !important; }
-      #results-view, #analysis-view { display: block !important; }
-      .action-buttons, .result-controls, .legend-container, .back-btn, .analysis-header { display: none !important; }
-      .result-sheet-container, #analysis-view { padding: 0; }
+      #results-view { display: block !important; }
+      .action-buttons, .result-controls, .legend-container, .back-btn { display: none !important; }
+      .result-sheet-container { padding: 0; }
       .col { border: 1px solid #ccc; max-height: none; overflow-y: visible; }
       .columns { grid-template-columns: 1fr 1fr !important; }
-      .mistake-table { font-size: 12pt; }
     }
 
 </style>
@@ -382,6 +368,7 @@
     <div id="selection-view" class="view">
         <div class="page-header">
             <h1>Steno Practice Tool</h1>
+             <!-- NEW: Reset Button -->
             <button id="resetProgressBtn" class="view-switch-btn" style="background-color: transparent; color: var(--medium-grey); border: 1px solid var(--border-color);">Reset All Progress</button>
         </div>
         <div id="dictation-type-hub">
@@ -413,6 +400,7 @@
                 <h3>Most Important Kailash Chandra</h3>
                 <p>Curated selection of essential KC passages.</p>
             </div>
+            <!-- NEW CATEGORY 1: LEGAL DICTATION -->
             <div class="category-card" id="cat-legal">
                 <div class="icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5V21M5.25 3v18m13.5-18v18M2.25 6l19.5 0M2.25 12l19.5 0M2.25 18l19.5 0" /></svg>
@@ -420,6 +408,7 @@
                 <h3>Legal Dictations</h3>
                 <p>Passages from court proceedings and legal journals.</p>
             </div>
+            <!-- NEW CATEGORY 2: PRESIDENT SPEECH -->
             <div class="category-card" id="cat-speech">
                 <div class="icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 7.5l.415-.207a.75.75 0 011.085.67V10.5m0 0h6m-6 0a.75.75 0 00.75.75h4.5a.75.75 0 00.75-.75v-4.5a.75.75 0 00-.75-.75h-4.5a.75.75 0 00-.75.75v4.5z" /><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 9h6a.75.75 0 01.75.75v10.5a.75.75 0 01-1.5 0V10.5H3.75a.75.75 0 01-.75-.75V9z" /></svg>
@@ -427,6 +416,7 @@
                 <h3>President's Speeches</h3>
                 <p>Official speeches and addresses by the President.</p>
             </div>
+            <!-- NEW CATEGORY 3: MONTHLY PROGRESSIVE -->
             <div class="category-card" id="cat-monthly">
                 <div class="icon-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0h18M12 15.75h.008v.008H12v-.008z" /></svg>
@@ -452,27 +442,46 @@
             <div class="page-header"><h2>Most Important Kailash Chandra</h2><button class="view-switch-btn" onclick="showSelectionHub()">Back to Selection</button></div>
             <div id="important-kc-grid" class="passage-grid"></div>
         </div>
+        <!-- NEW VIEW CONTAINER 1: LEGAL -->
         <div id="legal-dictation-view-container" class="grid-container" style="display: none;">
             <div class="page-header"><h2>Legal Dictations</h2><button class="view-switch-btn" onclick="showSelectionHub()">Back to Selection</button></div>
             <div id="legal-dictation-grid" class="passage-grid"></div>
         </div>
+        <!-- NEW VIEW CONTAINER 2: SPEECH -->
         <div id="president-speech-view-container" class="grid-container" style="display: none;">
             <div class="page-header"><h2>President's Speeches</h2><button class="view-switch-btn" onclick="showSelectionHub()">Back to Selection</button></div>
             <div id="president-speech-grid" class="passage-grid"></div>
         </div>
+        <!-- NEW VIEW CONTAINER 3: MONTHLY -->
         <div id="monthly-progressive-view-container" class="grid-container" style="display: none;">
             <div class="page-header">
                 <h2>Monthly-wise Progressive</h2>
                 <button class="view-switch-btn" onclick="showSelectionHub()">Back to Selection</button>
             </div>
+            <!-- NEW: MONTH/YEAR FILTERS START -->
             <div class="filter-bar">
                 <label for="monthlyYearFilter">Year:</label>
-                <select id="monthlyYearFilter"><!-- Years will be populated by JS --></select>
+                <select id="monthlyYearFilter">
+                    <!-- Years will be populated by JS -->
+                </select>
                 <label for="monthlyMonthFilter">Month:</label>
                 <select id="monthlyMonthFilter">
-                    <option value="">All Months</option><option value="01">January</option><option value="02">February</option><option value="03">March</option><option value="04">April</option><option value="05">May</option><option value="06">June</option><option value="07">July</option><option value="08">August</option><option value="09">September</option><option value="10">October</option><option value="11">November</option><option value="12">December</option>
+                    <option value="">All Months</option>
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
                 </select>
             </div>
+            <!-- NEW: MONTH/YEAR FILTERS END -->
             <div id="monthly-progressive-grid" class="passage-grid"></div>
         </div>
     </div>
@@ -488,14 +497,11 @@
                   <button class="btn" onclick="restartVideo()" aria-label="Restart Audio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 12"></path></svg></button>
                   <button id="playBtn" class="btn btn-main" onclick="togglePlay()" aria-label="Play Audio"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6V18L18 12L7 6Z"></path></svg></button>
                   <button id="pauseBtn" class="btn btn-main" onclick="togglePlay()" aria-label="Pause Audio"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18H10V6H6V18ZM14 6V18H18V6H14Z"></path></svg></button>
-                  
-                  <!-- UPDATE: This is the new, always-visible horizontal volume slider. The old hidden one is removed. -->
-                  <div class="volume-control-group-visible">
+                  <div class="volume-control-group">
                       <button id="volume-btn" class="btn" aria-label="Adjust Volume"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
-                      <input type="range" id="volume-slider-horizontal" min="0" max="100" value="100" aria-label="Volume Slider">
+                      <input type="range" id="volume-slider" min="0" max="100" value="100" orient="vertical" aria-label="Volume Slider">
                   </div>
                 </div>
-
                 <div id="progressBar" class="progress-bar-wrapper"><div id="progress-fill"></div></div>
                 <div class="time-display"><span id="current-time">00:00</span><span id="total-time">00:00</span></div>
                 <div class="extra-controls">
@@ -512,6 +518,8 @@
                   <input type="checkbox" id="includeComma" style="vertical-align: middle; margin-right: 5px;">
                   Count comma (,) mistakes
                 </label>
+                 <!-- NEW: Preview Transcript Button -->
+                <button id="previewTranscriptBtn" onclick="showTranscriptPreview()" style="font-size: 1em; padding: 12px; margin-top: 1rem; width: 100%; border-radius: 12px; font-weight: 600; background-color: #f0f0f0; color: #333; border: 1px solid #ccc; cursor: pointer;">📄 Preview Transcript</button>
                 <button id="startTranscriptionBtn" onclick="showInstructions()" disabled>🚀 Start Transcription Test</button>
             </div>
         </div>
@@ -522,37 +530,20 @@
         <div id="resultSheetContainer"></div>
         <div class="action-buttons">
             <button id="printReportBtn" class="primary-btn">Download Report</button>
-            <!-- UPDATE: Button now calls the smart back function -->
-            <button onclick="goBackToCategory()" class="primary-btn">🏠 Try Another Dictation</button>
+            <button onclick="goHome()" class="primary-btn">🏠 Try Another Dictation</button>
         </div>
     </div>
 </div>
 
-<!-- UPDATE: This is the new view for the Detailed Analysis Report. -->
-<div id="analysis-view" class="view">
-    <div class="analysis-header">
-        <div>
-            <h1>Mistake Analysis Report</h1>
-            <p id="analysis-passage-title"><strong>Passage:</strong></p>
+<!-- NEW: Transcript Preview Modal -->
+<div id="transcript-preview-modal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 800px; text-align: left;">
+        <h2 style="text-align: center;">Dictation Transcript</h2>
+        <div id="transcript-content" style="max-height: 60vh; overflow-y: auto; padding: 15px; border: 1px solid #eee; background: #f9f9f9; border-radius: 8px; line-height: 1.8; text-align: justify;">
+            <!-- Transcript will be loaded here -->
         </div>
-        <div class="analysis-actions">
-            <button onclick="window.print()">🖨️ Print Report</button>
-            <button onclick="showView('results-view')">Back to Results</button>
-        </div>
+        <button id="transcript-close-btn" class="modal-close-btn" style="margin-top: 25px; display: block; margin-left: auto; margin-right: auto;">Close</button>
     </div>
-    <table class="mistake-table">
-        <thead>
-            <tr>
-                <th>#</th>
-                <th>Error Type</th>
-                <th>Original Text</th>
-                <th>Your Transcription</th>
-            </tr>
-        </thead>
-        <tbody id="mistake-table-body">
-            <!-- Rows will be generated by JavaScript -->
-        </tbody>
-    </table>
 </div>
 
 <div id="instructions-modal" class="modal-overlay">
@@ -691,7 +682,12 @@
     </div>
 </div>
 
+<!-- 
+    CHANGE 1: The script tag for evaluation2.js has been REMOVED from here.
+    Its logic is now inside the new worker.js file.
+-->
 <script>
+ // --- [NEW] Dexie.js Local Database Setup ---
  const localDb = new Dexie("CheckMyStenoDB");
  
  localDb.version(1).stores({
@@ -700,10 +696,12 @@
    overallStats: 'id'
  });
 
+ // --- Firebase Configuration ---
   const firebaseConfig = { apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE", authDomain: "checkmysteno.firebaseapp.com", projectId: "checkmysteno", storageBucket: "checkmysteno.appspot.com", messagingSenderId: "719325115943", appId: "1:719325115943:web:0dd50a67978816d42a8002" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
+  // --- Global State Variables ---
   let player;
   let originalText = "", wordCount = 0, currentPassageTitle = "";
   let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
@@ -711,9 +709,10 @@
   let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
   let g_alignment = [];
   let g_lastTypedText = ""; 
-  let g_fullMistakes = 0, g_halfMistakes = 0, g_resultData;
+  let g_fullMistakes = 0, g_halfMistakes = 0;
   let isReevaluateModeActive = false;
   
+  // --- Initialization ---
   document.addEventListener("DOMContentLoaded", () => {
     initializePractice();
   });
@@ -729,67 +728,41 @@
     document.getElementById('candidate-name-display').textContent = candidateId.toUpperCase();
     attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
     
+    // Core setup functions
     setupProgressBar();
     setupExtraControls();
     setLogoSource();
     
-    // UPDATE: Core state persistence logic
-    const savedState = JSON.parse(localStorage.getItem('stenoState'));
-    if (savedState && savedState.view) {
-        console.log("Restoring session to view:", savedState.view);
-        g_collection = savedState.g_collection;
-        g_docId = savedState.g_docId;
-        originalText = savedState.originalText;
-        wordCount = savedState.wordCount;
-        currentPassageTitle = savedState.title;
-        g_alignment = savedState.alignment || [];
-        g_resultData = savedState.resultData;
-
-        switch(savedState.view) {
-            case 'player-view':
-                showView('player-view');
-                setPlayerLoading(true);
-                document.getElementById('player-subtitle').textContent = currentPassageTitle;
-                loadVideo(savedState.audioUrl, false);
-                break;
-            case 'exam-view':
-                showView('exam-view');
-                document.documentElement.requestFullscreen().catch(err => {});
-                document.getElementById('typingBox').value = savedState.typedText || '';
-                transcriptionTimerTotalTime = savedState.totalTime;
-                timeLeft = savedState.timeLeft;
-                timerStarted = true;
-                startTimer();
-                break;
-            case 'results-view':
-                displayAndRenderResults(g_resultData, originalText);
-                showView('results-view');
-                break;
-            default:
-                showView('selection-view');
-                initializeEventListeners();
-                break;
-        }
-    } else {
-        showView('selection-view');
-        initializeEventListeners();
-    }
+    // Initial view is always the selection hub
+    showView('selection-view');
+    initializeEventListeners();
   }
 
   function setLogoSource() {
+    // Paste your Base64 codes in the variables below.
     const sscLogoBase64 = ""; 
     const candidatePhotoBase64 = "";
+
     const logoImg = document.getElementById('ssc-logo-img');
     const candidatePhotoImg = document.querySelector('.ssc-candidate-photo img');
-    if (logoImg && sscLogoBase64) logoImg.src = sscLogoBase64;
-    if (candidatePhotoImg && candidatePhotoBase64) candidatePhotoImg.src = candidatePhotoBase64;
+
+    if (logoImg && sscLogoBase64) {
+        logoImg.src = sscLogoBase64;
+    }
+    if (candidatePhotoImg && candidatePhotoBase64) {
+        candidatePhotoImg.src = candidatePhotoBase64;
+    }
   }
   
+  // --- UI AND VIEW MANAGEMENT ---
   function showView(viewId) {
       document.querySelectorAll('.view').forEach(el => el.style.display = 'none');
       document.getElementById('exam-view').style.display = 'none';
+      
       const viewToShow = document.getElementById(viewId);
-      if (viewToShow) viewToShow.style.display = 'block';
+      if (viewToShow) {
+        viewToShow.style.display = 'block';
+      }
       
       if (viewId === 'exam-view') {
         document.querySelector('.app-container').style.display = 'none';
@@ -800,6 +773,7 @@
       
       if (viewId === 'selection-view') {
           showSelectionHub();
+          clearState();
           if(player && typeof player.stopVideo === 'function') player.stopVideo();
       }
   }
@@ -812,65 +786,58 @@
   function showDictationGrid(type) {
       document.getElementById('dictation-type-hub').style.display = 'none';
       document.querySelectorAll('.grid-container').forEach(c => c.style.display = 'none');
-      document.getElementById(`${type}-view-container`).style.display = 'block';
+      
+      const containerId = `${type}-view-container`;
+      document.getElementById(containerId).style.display = 'block';
   }
   
   function goHome() {
       if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
-      clearState();
       showView('selection-view');
   }
   
   function clearStateAndGoBack() {
-      clearState();
-      goBackToCategory();
-  }
-
-  // UPDATE: New function for intelligent "back" navigation
-  function goBackToCategory() {
-      const lastCategory = localStorage.getItem('stenoLastCategory');
-      const categoryLoaders = {
-          'progressive': loadProgressiveDictations, 'ssc-previous-year': loadSscPreviousYearDictations,
-          'general-matter': loadGeneralMatterDictations, 'important-kc': loadImportantKCDictations,
-          'legal-dictation': loadLegalDictations, 'president-speech': loadPresidentSpeeches,
-          'monthly-progressive': loadMonthlyProgressive
-      };
       showView('selection-view');
-      if (lastCategory && categoryLoaders[lastCategory]) {
-          categoryLoaders[lastCategory]();
-      } else {
-          showSelectionHub();
-      }
   }
-
+  
+  // --- DATA LOADING AND GRID RENDERING ---
   async function loadAndRenderCategory(categoryConfig) {
       showDictationGrid(categoryConfig.type);
       const grid = document.getElementById(categoryConfig.gridId);
       grid.innerHTML = '<div class="spinner"></div>';
+
       try {
           const indexDocRef = db.collection(categoryConfig.indexCollection).doc('main');
           const indexDoc = await indexDocRef.get();
+
           if (!indexDoc.exists) throw new Error(`${categoryConfig.name} index not found.`);
+          
           const indexData = indexDoc.data();
           const totalPassages = indexData.totalPassages || 50;
           const passageStatusMap = indexData.passages || {};
           const progressData = JSON.parse(localStorage.getItem(`stenoProgress_${candidateId}`) || '{}');
+
           grid.innerHTML = ''; 
+
           const renderCard = (docId, data, passageNum) => {
               const card = document.createElement('div');
               card.className = 'passage-card';
               card.dataset.collection = categoryConfig.dataCollection;
               card.dataset.docId = docId;
+
               let status = data.status || 'unavailable';
               let title = data.title || `${categoryConfig.name} Passage ${passageNum || docId}`;
               let meta = data.meta || categoryConfig.defaultMeta;
               const key = `${categoryConfig.dataCollection}-${docId}`;
               const attemptData = progressData[key];
               const isAttempted = !!attemptData;
+              
               let statusTag = '', buttonHtml = '';
               switch(status) {
                   case 'available':
-                      statusTag = isAttempted ? `<div class="status-tag attempted">${attemptData.accuracy}% | ${attemptData.wpm} WPM</div>` : `<div class="status-tag attempted">Available</div>`;
+                      statusTag = isAttempted 
+                          ? `<div class="status-tag attempted">${attemptData.accuracy}% | ${attemptData.wpm} WPM</div>`
+                          : `<div class="status-tag attempted">Available</div>`;
                       buttonHtml = `<button class="take-test-btn">Take Test</button>`;
                       break;
                   case 'scheduled':
@@ -882,51 +849,94 @@
                       buttonHtml = `<button class="take-test-btn" disabled>Not Available</button>`;
                       break;
               }
-              card.innerHTML = `<div class="card-header"><div class="card-title-group"><span class="status-dot ${isAttempted ? 'attempted' : ''}"></span><h3>${title}</h3></div>${statusTag}</div><div class="card-meta">${meta}</div><div class="card-buttons">${buttonHtml}</div>`;
+
+              card.innerHTML = `
+                  <div class="card-header">
+                      <div class="card-title-group">
+                          <span class="status-dot ${isAttempted ? 'attempted' : ''}"></span>
+                          <h3>${title}</h3>
+                      </div>
+                      ${statusTag}
+                  </div>
+                  <div class="card-meta">${meta}</div>
+                  <div class="card-buttons">${buttonHtml}</div>
+              `;
               grid.appendChild(card);
           };
+
           if (categoryConfig.docPrefix) {
               for (let i = 1; i <= totalPassages; i++) {
                   const docId = `${categoryConfig.docPrefix}_${String(i).padStart(3, '0')}`;
-                  renderCard(docId, passageStatusMap[docId] || {}, i);
+                  const data = passageStatusMap[docId] || {};
+                  renderCard(docId, data, i);
               }
           } else {
               const sortedKeys = Object.keys(passageStatusMap).sort().reverse(); 
-              for (const docId of sortedKeys) renderCard(docId, passageStatusMap[docId], null);
+              for (const docId of sortedKeys) {
+                  const data = passageStatusMap[docId];
+                  renderCard(docId, data, null);
+              }
           }
+
       } catch (error) {
           console.error(`Error loading ${categoryConfig.name}:`, error);
           grid.innerHTML = `<p>Could not load ${categoryConfig.name.toLowerCase()}. Please try again.</p>`;
       }
   }
 
-  // UPDATE: Added localStorage calls to each category loader for smart back.
   function loadProgressiveDictations() {
-    localStorage.setItem('stenoLastCategory', 'progressive');
-    loadAndRenderCategory({type: 'progressive', name: 'Progressive Dictations', gridId: 'progressive-grid', indexCollection: 'progressive_index', dataCollection: 'progressive_passages', docPrefix: 'prog', defaultMeta: 'Progressive Magazine'});
+    loadAndRenderCategory({
+        type: 'progressive', name: 'Progressive Dictations', gridId: 'progressive-grid',
+        indexCollection: 'progressive_index', dataCollection: 'progressive_passages',
+        docPrefix: 'prog', defaultMeta: 'Progressive Magazine'
+    });
   }
+  
   function loadSscPreviousYearDictations() {
-    localStorage.setItem('stenoLastCategory', 'ssc-previous-year');
-    loadAndRenderCategory({type: 'ssc-previous-year', name: 'SSC Previous Year Dictations', gridId: 'ssc-previous-year-grid', indexCollection: 'sscPreviousYear_index', dataCollection: 'sscPreviousYear_passages', docPrefix: null, defaultMeta: 'Official SSC Exam Paper'});
+      loadAndRenderCategory({
+          type: 'ssc-previous-year',
+          name: 'SSC Previous Year Dictations',
+          gridId: 'ssc-previous-year-grid',
+          indexCollection: 'sscPreviousYear_index',
+          dataCollection: 'sscPreviousYear_passages',
+          docPrefix: null,
+          defaultMeta: 'Official SSC Exam Paper'
+      });
   }
+
   function loadGeneralMatterDictations() {
-    localStorage.setItem('stenoLastCategory', 'general-matter');
-    loadAndRenderCategory({type: 'general-matter', name: 'General Matter Dictations', gridId: 'general-matter-grid', indexCollection: 'generalMatter_index', dataCollection: 'generalMatter_passages', docPrefix: 'gen', defaultMeta: 'General Topic'});
+    loadAndRenderCategory({
+        type: 'general-matter', name: 'General Matter Dictations', gridId: 'general-matter-grid',
+        indexCollection: 'generalMatter_index', dataCollection: 'generalMatter_passages',
+        docPrefix: 'gen', defaultMeta: 'General Topic'
+    });
   }
+
   function loadImportantKCDictations() {
-    localStorage.setItem('stenoLastCategory', 'important-kc');
-    loadAndRenderCategory({type: 'important-kc', name: 'Most Important Kailash Chandra', gridId: 'important-kc-grid', indexCollection: 'importantKC_index', dataCollection: 'importantKC_passages', docPrefix: 'kc', defaultMeta: 'Kailash Chandra Magazine'});
+    loadAndRenderCategory({
+        type: 'important-kc', name: 'Most Important Kailash Chandra', gridId: 'important-kc-grid',
+        indexCollection: 'importantKC_index', dataCollection: 'importantKC_passages',
+        docPrefix: 'kc', defaultMeta: 'Kailash Chandra Magazine'
+    });
   }
+
   function loadLegalDictations() {
-    localStorage.setItem('stenoLastCategory', 'legal-dictation');
-    loadAndRenderCategory({type: 'legal-dictation', name: 'Legal Dictations', gridId: 'legal-dictation-grid', indexCollection: 'legal_index', dataCollection: 'legal_passages', docPrefix: 'legal', defaultMeta: 'Legal Matter'});
+    loadAndRenderCategory({
+        type: 'legal-dictation', name: 'Legal Dictations', gridId: 'legal-dictation-grid',
+        indexCollection: 'legal_index', dataCollection: 'legal_passages',
+        docPrefix: 'legal', defaultMeta: 'Legal Matter'
+    });
   }
+
   function loadPresidentSpeeches() {
-    localStorage.setItem('stenoLastCategory', 'president-speech');
-    loadAndRenderCategory({type: 'president-speech', name: "President's Speeches", gridId: 'president-speech-grid', indexCollection: 'presidentSpeech_index', dataCollection: 'presidentSpeech_passages', docPrefix: 'speech', defaultMeta: 'Official Address'});
+    loadAndRenderCategory({
+        type: 'president-speech', name: "President's Speeches", gridId: 'president-speech-grid',
+        indexCollection: 'presidentSpeech_index', dataCollection: 'presidentSpeech_passages',
+        docPrefix: 'speech', defaultMeta: 'Official Address'
+    });
   }
+
   function loadMonthlyProgressive() {
-    localStorage.setItem('stenoLastCategory', 'monthly-progressive');
     showDictationGrid('monthly-progressive');
     loadAndRenderMonthlyProgressive();
   }
@@ -934,38 +944,96 @@
   async function loadAndRenderMonthlyProgressive(filterYear = '', filterMonth = '') {
       const grid = document.getElementById('monthly-progressive-grid');
       grid.innerHTML = '<div class="spinner"></div>';
-      const config = { name: 'Monthly Progressive', indexCollection: 'monthlyProgressive_index', dataCollection: 'monthlyProgressive_passages', defaultMeta: 'Monthly Magazine Passage' };
+      
+      const config = {
+          name: 'Monthly Progressive',
+          indexCollection: 'monthlyProgressive_index',
+          dataCollection: 'monthlyProgressive_passages',
+          defaultMeta: 'Monthly Magazine Passage'
+      };
+
       const renderCard = (docId, data, passageNum) => {
           const card = document.createElement('div');
           card.className = 'passage-card';
           card.dataset.collection = config.dataCollection;
           card.dataset.docId = docId;
-          let status = data.status || 'unavailable', title = data.title || `${config.name} Passage ${passageNum || docId}`, meta = data.meta || config.defaultMeta;
-          const key = `${config.dataCollection}-${docId}`, progressData = JSON.parse(localStorage.getItem(`stenoProgress_${candidateId}`) || '{}'), attemptData = progressData[key], isAttempted = !!attemptData;
+
+          let status = data.status || 'unavailable';
+          let title = data.title || `${config.name} Passage ${passageNum || docId}`;
+          let meta = data.meta || config.defaultMeta;
+          const key = `${config.dataCollection}-${docId}`;
+          const progressData = JSON.parse(localStorage.getItem(`stenoProgress_${candidateId}`) || '{}');
+          const attemptData = progressData[key];
+          const isAttempted = !!attemptData;
+          
           let statusTag = '', buttonHtml = '';
           switch(status) {
-              case 'available': statusTag = isAttempted ? `<div class="status-tag attempted">${attemptData.accuracy}% | ${attemptData.wpm} WPM</div>` : `<div class="status-tag attempted">Available</div>`; buttonHtml = `<button class="take-test-btn">Take Test</button>`; break;
-              case 'scheduled': statusTag = `<div class="status-tag">Scheduled: ${data.scheduledDate || 'TBA'}</div>`; buttonHtml = `<button class="take-test-btn" disabled>Scheduled</button>`; break;
-              default: statusTag = `<div class="status-tag">Not Available</div>`; buttonHtml = `<button class="take-test-btn" disabled>Not Available</button>`; break;
+              case 'available':
+                  statusTag = isAttempted ? `<div class="status-tag attempted">${attemptData.accuracy}% | ${attemptData.wpm} WPM</div>` : `<div class="status-tag attempted">Available</div>`;
+                  buttonHtml = `<button class="take-test-btn">Take Test</button>`;
+                  break;
+              case 'scheduled':
+                  statusTag = `<div class="status-tag">Scheduled: ${data.scheduledDate || 'TBA'}</div>`;
+                  buttonHtml = `<button class="take-test-btn" disabled>Scheduled</button>`;
+                  break;
+              default:
+                  statusTag = `<div class="status-tag">Not Available</div>`;
+                  buttonHtml = `<button class="take-test-btn" disabled>Not Available</button>`;
+                  break;
           }
-          card.innerHTML = `<div class="card-header"><div class="card-title-group"><span class="status-dot ${isAttempted ? 'attempted' : ''}"></span><h3>${title}</h3></div>${statusTag}</div><div class="card-meta">${meta}</div><div class="card-buttons">${buttonHtml}</div>`;
+
+          card.innerHTML = `
+              <div class="card-header">
+                  <div class="card-title-group">
+                      <span class="status-dot ${isAttempted ? 'attempted' : ''}"></span>
+                      <h3>${title}</h3>
+                  </div>
+                  ${statusTag}
+              </div>
+              <div class="card-meta">${meta}</div>
+              <div class="card-buttons">${buttonHtml}</div>
+          `;
           grid.appendChild(card);
       };
+
       try {
           let query;
-          if (filterYear && filterMonth) query = db.collection(config.indexCollection).doc(`${filterYear}_${filterMonth}`).get();
-          else if (filterYear) query = db.collection(config.indexCollection).where(firebase.firestore.FieldPath.documentId(), '>=', `${filterYear}_01`).where(firebase.firestore.FieldPath.documentId(), '<=', `${filterYear}_12`).get();
-          else query = db.collection(config.indexCollection).orderBy(firebase.firestore.FieldPath.documentId(), "desc").get();
+          if (filterYear && filterMonth) {
+              const docId = `${filterYear}_${filterMonth}`;
+              query = db.collection(config.indexCollection).doc(docId).get();
+          } else if (filterYear) {
+               query = db.collection(config.indexCollection)
+                         .where(firebase.firestore.FieldPath.documentId(), '>=', `${filterYear}_01`)
+                         .where(firebase.firestore.FieldPath.documentId(), '<=', `${filterYear}_12`)
+                         .get();
+          } else {
+              query = db.collection(config.indexCollection).orderBy(firebase.firestore.FieldPath.documentId(), "desc").get();
+          }
+          
           const querySnapshot = await query;
-          grid.innerHTML = ''; let passagesFound = false;
+          grid.innerHTML = '';
+          let passagesFound = false;
+
           const processDoc = (doc) => {
-              if (!doc.exists) return; passagesFound = true; const passageStatusMap = doc.data().passages || {};
+              if (!doc.exists) return;
+              passagesFound = true;
+              const passageStatusMap = doc.data().passages || {};
               const sortedKeys = Object.keys(passageStatusMap).sort().reverse();
-              for (const docId of sortedKeys) renderCard(docId, passageStatusMap[docId], null);
+              for (const docId of sortedKeys) {
+                  renderCard(docId, passageStatusMap[docId], null);
+              }
           };
-          if (querySnapshot.docs) querySnapshot.forEach(processDoc);
-          else processDoc(querySnapshot);
-          if (!passagesFound) grid.innerHTML = `<p>No passages found for the selected filter.</p>`;
+
+          if (querySnapshot.docs) { 
+              querySnapshot.forEach(processDoc);
+          } else { 
+              processDoc(querySnapshot);
+          }
+
+          if (!passagesFound) {
+              grid.innerHTML = `<p>No passages found for the selected filter.</p>`;
+          }
+
       } catch (error) {
           console.error(`Error loading ${config.name}:`, error);
           grid.innerHTML = `<p>Could not load ${config.name.toLowerCase()}. Please try again.</p>`;
@@ -973,120 +1041,195 @@
   }
 
   async function loadPractice(collectionName, docId) {
-    g_collection = collectionName; g_docId = docId;
-    if (!collectionName || !docId) { showErrorModal("Passage Error", "Could not identify the passage."); return; }
+    g_collection = collectionName;
+    g_docId = docId;
+
+    if (!collectionName || !docId) {
+        showErrorModal("Passage Error", "Could not identify the passage.");
+        return;
+    }
+    
     document.getElementById('fullPageLoader').style.display = 'flex';
+
     try {
         const docRef = db.collection(collectionName).doc(docId);
         const docSnap = await docRef.get();
         if (!docSnap.exists) throw new Error("Passage data not found.");
+        
         const passageData = docSnap.data();
-        originalText = passageData.originalText; wordCount = passageData.wordCount; currentPassageTitle = passageData.title;
+        originalText = passageData.originalText;
+        wordCount = passageData.wordCount;
+        currentPassageTitle = passageData.title;
+        
         saveState({ view: 'player-view', g_collection, g_docId, originalText, wordCount, audioUrl: passageData.audioUrl, title: currentPassageTitle });
+
         showView('player-view');
         setPlayerLoading(true);
         document.getElementById('player-subtitle').textContent = currentPassageTitle;
         loadVideo(passageData.audioUrl, false);
+
     } catch (error) { 
         showErrorModal("Loading Error", "Error: " + error.message);
-        goHome();
+        showView('selection-view');
     } finally {
         document.getElementById('fullPageLoader').style.display = 'none';
     }
   }
 
+  // --- STATE MANAGEMENT ---
   function saveState(state) { localStorage.setItem('stenoState', JSON.stringify(state)); }
   function clearState() { localStorage.removeItem('stenoState'); }
+  function restoreSession() {
+      const savedState = JSON.parse(localStorage.getItem('stenoState'));
+      if (!savedState || savedState.view !== 'exam-view') {
+          showView('selection-view');
+          return;
+      }
+      g_collection = savedState.g_collection;
+      g_docId = savedState.g_docId;
+      originalText = savedState.originalText;
+      wordCount = savedState.wordCount;
+      currentPassageTitle = savedState.title;
+      showView('exam-view');
+      document.documentElement.requestFullscreen().catch(err => {});
+      document.getElementById('typingBox').value = savedState.typedText || '';
+      transcriptionTimerTotalTime = savedState.totalTime;
+      timeLeft = savedState.timeLeft;
+      timerStarted = true;
+      startTimer();
+  }
   
+  // --- PLAYER AND EXAM LOGIC ---
   function onYouTubeIframeAPIReady() {}
   function extractVideoID(url) { if (typeof url !== 'string') return null; const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/; return (url.match(regex) || [])[1] || null; }
-  
   function loadVideo(url, autoPlay = false) {
     const videoId = extractVideoID(url);
-    if (!videoId) { showErrorModal("Invalid URL", "Invalid YouTube URL provided: " + url); return; }
+    if (!videoId) {
+        showErrorModal("Invalid URL", "Invalid YouTube URL provided: " + url);
+        return;
+    }
     const onPlayerReady = (event) => {
-        totalVideoDuration = event.target.getDuration();
-        setPlayerLoading(false);
-        setPlaybackSpeed();
-    };
+    totalVideoDuration = event.target.getDuration();
+    setPlayerLoading(false);
+    setPlaybackSpeed();
+};
     if (player && typeof player.loadVideoById === 'function' && player.getIframe()?.isConnected) {
         player.loadVideoById(videoId);
         const readyCheck = setInterval(() => {
             if (player.getDuration() > 0 && player.getPlayerState() !== -1) {
-                clearInterval(readyCheck); onPlayerReady({target: player});
+                clearInterval(readyCheck);
+                onPlayerReady({target: player});
             }
         }, 100);
     } else {
         if(player && typeof player.destroy === 'function') player.destroy();
-        player = new YT.Player('player', { height: '1', width: '1', videoId, playerVars: { 'autoplay': autoPlay ? 1 : 0, 'controls': 0 }, events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange } });
+        player = new YT.Player('player', {
+            height: '1',
+            width: '1',
+            videoId,
+            playerVars: { 'autoplay': autoPlay ? 1 : 0, 'controls': 0 },
+            events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
+        });
     }
   }
-  
   function onPlayerStateChange(event){
-    const playBtn = document.getElementById("playBtn"), pauseBtn = document.getElementById("pauseBtn");
-    if(event.data === YT.PlayerState.PLAYING){ playBtn.style.display = 'none'; pauseBtn.style.display = 'flex'; trackProgress(); } 
-    else { playBtn.style.display = 'flex'; pauseBtn.style.display = 'none'; clearInterval(progressInterval); }
+    const playBtn = document.getElementById("playBtn");
+    const pauseBtn = document.getElementById("pauseBtn");
+    if(event.data === YT.PlayerState.PLAYING){
+        playBtn.style.display = 'none'; pauseBtn.style.display = 'flex';
+        trackProgress();
+    } else {
+        playBtn.style.display = 'flex'; pauseBtn.style.display = 'none';
+        clearInterval(progressInterval);
+    }
   }
-  
   function setPlaybackSpeed(){
       if(!player||!player.setPlaybackRate)return;
-      const targetWPM=parseInt(document.getElementById('wpmSpeed').value);
-      if(isNaN(targetWPM)||!wordCount||!totalVideoDuration) currentPlaybackRate=1;
+      const targetWPM = parseInt(document.getElementById('wpmSpeed').value);
+      if(isNaN(targetWPM)||!wordCount||!totalVideoDuration) currentPlaybackRate = 1;
       else { const originalWPM=wordCount/(totalVideoDuration/60); currentPlaybackRate=originalWPM>0?targetWPM/originalWPM:1; }
       player.setPlaybackRate(currentPlaybackRate);
       updateVideoTimeDisplay();
   }
-  
-  function togglePlay(){if(!player||!player.getPlayerState)return; player.getPlayerState()===YT.PlayerState.PLAYING?player.pauseVideo():player.playVideo();}
+  function togglePlay(){if(!player||!player.getPlayerState)return;player.getPlayerState()===YT.PlayerState.PLAYING?player.pauseVideo():player.playVideo();}
   function restartVideo() { if(player) { player.seekTo(0, true); player.playVideo(); } }
-  
+  function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
+  function trackProgress(){
+      clearInterval(progressInterval);
+      progressInterval = setInterval(() => {
+          if(!player || typeof player.getCurrentTime !== 'function' || !totalVideoDuration) return;
+          updateVideoTimeDisplay();
+      }, 250);
+  }
   function setupProgressBar(){
       document.getElementById("progressBar").addEventListener("click", function(e){
           if(!player || !player.seekTo || !totalVideoDuration) return;
-          const rect = e.currentTarget.getBoundingClientRect(), clickPosition = (e.clientX - rect.left) / rect.width;
+          const rect = e.currentTarget.getBoundingClientRect();
+          const clickPosition = (e.clientX - rect.left) / rect.width;
           player.seekTo(clickPosition * totalVideoDuration, true);
       });
   }
-  
-  function formatTime(s){ const m=Math.floor(s/60).toString().padStart(2,'0'), sec=Math.round(s%60).toString().padStart(2,'0'); return isNaN(m)||isNaN(sec)?"00:00":`${m}:${sec}` }
-  
+  function formatTime(s){const m=Math.floor(s/60).toString().padStart(2,'0');const sec=Math.round(s%60).toString().padStart(2,'0');return isNaN(m)||isNaN(sec)?"00:00":`${m}:${sec}`}
   function updateVideoTimeDisplay() {
       if (!player || typeof player.getCurrentTime !== 'function') return;
-      const rawCurrentTime = player.getCurrentTime(), effectiveCurrentTime = rawCurrentTime / currentPlaybackRate, effectiveTotalDuration = totalVideoDuration / currentPlaybackRate;
+      const rawCurrentTime = player.getCurrentTime();
+      const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate;
+      const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate;
       document.getElementById("progress-fill").style.width = (rawCurrentTime / totalVideoDuration) * 100 + "%";
       document.getElementById('current-time').innerText = formatTime(effectiveCurrentTime);
       document.getElementById('total-time').innerText = formatTime(effectiveTotalDuration);
   }
-  
   function setPlayerLoading(isLoading) {
       document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none';
-      document.querySelectorAll('#player-view button, #player-view select, #player-view input').forEach(el => { if(el.id !== 'startTranscriptionBtn') el.disabled = isLoading; });
+      document.querySelectorAll('#player-view button, #player-view select').forEach(el => {
+          if(el.id !== 'startTranscriptionBtn') el.disabled = isLoading;
+      });
       document.getElementById('startTranscriptionBtn').disabled = true;
-      if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false;
+      if (!isLoading) {
+          document.getElementById('startTranscriptionBtn').disabled = false;
+      }
   }
-  
   function setupExtraControls() {
-      // UPDATE: Pointing the listener to the new horizontal slider.
-      document.getElementById('volume-slider-horizontal').addEventListener('input', (e) => player?.setVolume(e.target.value));
+      document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value));
       document.addEventListener('keydown', (e) => {
-          if (document.getElementById('player-view').style.display === 'block' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-             if (e.code === 'Space') { e.preventDefault(); togglePlay(); }
+          if (document.getElementById('player-view').style.display === 'block') {
+             if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); }
+             if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); }
+             if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); }
           }
       });
       const today = new Date();
       document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`;
   }
-  
   function adjustSpeed(amount) {
-      const select = document.getElementById('wpmSpeed'), currentIndex = select.selectedIndex, newIndex = currentIndex + (amount / 5);
-      if (newIndex >= 0 && newIndex < select.options.length) { select.selectedIndex = newIndex; setPlaybackSpeed(); }
+      const select = document.getElementById('wpmSpeed');
+      const currentIndex = select.selectedIndex;
+      const newIndex = currentIndex + (amount / 5);
+      if (newIndex >= 0 && newIndex < select.options.length) {
+          select.selectedIndex = newIndex;
+          setPlaybackSpeed();
+      }
   }
-  
   function showInstructions() {
       if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
       document.getElementById('instructions-modal').classList.add('visible');
   }
-  
+
+    // NEW: Function to show transcript preview
+    function showTranscriptPreview() {
+        if (player && typeof player.pauseVideo === 'function') {
+            player.pauseVideo();
+        }
+        const transcriptModal = document.getElementById('transcript-preview-modal');
+        const transcriptContent = document.getElementById('transcript-content');
+        if (originalText) {
+            transcriptContent.textContent = originalText;
+        } else {
+            transcriptContent.textContent = "Transcript is not available.";
+        }
+        transcriptModal.classList.add('visible');
+    }
+
   function startTranscriptionTest() {
       document.getElementById('instructions-modal').classList.remove('visible');
       document.documentElement.requestFullscreen().catch(err => console.warn(`Fullscreen failed: ${err.message}.`));
@@ -1097,12 +1240,11 @@
       document.getElementById('typingBox').value = '';
       document.getElementById('typingBox').focus();
       document.getElementById('typingBox').addEventListener('keydown', handleFirstKeydown);
+      
       const currentState = JSON.parse(localStorage.getItem('stenoState'));
       saveState({ ...currentState, view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
   }
-  
   function handleFirstKeydown() { if (!timerStarted) { timerStarted = true; startTimer(); document.getElementById('typingBox').removeEventListener('keydown', handleFirstKeydown); } }
-  
   function startTimer() {
       if (timer) return;
       timer = setInterval(() => {
@@ -1111,192 +1253,435 @@
           } else {
               document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft);
               const currentState = JSON.parse(localStorage.getItem('stenoState'));
-              if(currentState && currentState.view === 'exam-view') saveState({ ...currentState, timeLeft, typedText: document.getElementById('typingBox').value });
+              if(currentState) saveState({ ...currentState, timeLeft, typedText: document.getElementById('typingBox').value });
           }
       }, 1000);
   }
-  
-  function resetTimer() { if (timer) clearInterval(timer); timer = null; timerStarted = false; timeLeft = transcriptionTimerTotalTime; document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft); }
+  function resetTimer() {
+    if (timer) clearInterval(timer);
+    timer = null; timerStarted = false; timeLeft = transcriptionTimerTotalTime;
+    document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft);
+  }
   
   function escapeHtml(s=""){ return s.toString().replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
   function displayAndRenderResults(resultData, originalTextForDisplay, isReevaluation = false) {
-    g_alignment = resultData.alignment; g_fullMistakes = resultData.fullMistakes; g_halfMistakes = resultData.halfMistakes; g_resultData = resultData;
+    g_alignment = resultData.alignment; // Save alignment for interactivity
+    g_fullMistakes = resultData.fullMistakes;
+    g_halfMistakes = resultData.halfMistakes;
+
     let resultHtmlContent = "";
+    // Generate the highlighted HTML for the user's typed text from the alignment data
     for (let k = 0; k < g_alignment.length; k++) {
-        const entry = g_alignment[k]; let wordHtml = '', tooltipText = '', statusIcon = '✔️';
+        const entry = g_alignment[k];
+        let wordHtml = '', tooltipText = '', statusIcon = '✔️';
+
         if (entry.type === "match") {
-            if(entry.mistakeType === 'capitalization') { wordHtml = `<span class='highlight capitalization' data-mistake-type='${entry.mistakeType}' data-tooltip-text='Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")'>${escapeHtml(entry.t)}</span>`; statusIcon = '⚠️'; }
-            else if (entry.mistakeType === 'punctuation') { wordHtml = `<span class='highlight punctuation' data-mistake-type='${entry.mistakeType}' data-tooltip-text='Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")'>${escapeHtml(entry.t)}</span>`; statusIcon = '⚠️'; }
-            else { wordHtml = `<span>${escapeHtml(entry.t) || ''}</span>`; }
-        } else if (entry.type === "del") { wordHtml = `<span class='highlight omission' data-mistake-type='omission' data-tooltip-text='Omitted: "${escapeHtml(entry.o)}"'>(${escapeHtml(entry.o)})</span>`; statusIcon = '❌';
-        } else if (entry.type === "ins") { wordHtml = `<span class='highlight extra' data-mistake-type='extra' data-tooltip-text='Extra Word: "${escapeHtml(entry.t)}"'>${escapeHtml(entry.t)}</span>`; statusIcon = '❌';
-        } else if (entry.type === "sub") { wordHtml = `<span class='highlight spelling' data-mistake-type='spelling' data-tooltip-text='You typed: "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")'>${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)</span>`; statusIcon = '⚠️'; }
+            if(entry.mistakeType === 'capitalization') {
+                tooltipText = `Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+                wordHtml = `<span class='highlight capitalization' data-mistake-type='${entry.mistakeType}' data-tooltip-text='${tooltipText}'>${escapeHtml(entry.t)}</span>`;
+                statusIcon = '⚠️';
+            } else if (entry.mistakeType === 'punctuation') {
+                tooltipText = `Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+                wordHtml = `<span class='highlight punctuation' data-mistake-type='${entry.mistakeType}' data-tooltip-text='${tooltipText}'>${escapeHtml(entry.t)}</span>`;
+                statusIcon = '⚠️';
+            } else {
+                 wordHtml = `<span>${escapeHtml(entry.t) || ''}</span>`;
+                 tooltipText = "Correct";
+            }
+        } else if (entry.type === "del") {
+            tooltipText = `Omitted: "${escapeHtml(entry.o)}"`;
+            wordHtml = `<span class='highlight omission' data-mistake-type='omission' data-tooltip-text='${tooltipText}'>(${escapeHtml(entry.o)})</span>`;
+            statusIcon = '❌';
+        } else if (entry.type === "ins") {
+            tooltipText = `Extra Word: "${escapeHtml(entry.t)}"`;
+            wordHtml = `<span class='highlight extra' data-mistake-type='extra' data-tooltip-text='${tooltipText}'>${escapeHtml(entry.t)}</span>`;
+            statusIcon = '❌';
+        } else if (entry.type === "sub") {
+            tooltipText = `You typed: "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+            wordHtml = `<span class='highlight spelling' data-mistake-type='spelling' data-tooltip-text='${tooltipText}'>${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)</span>`;
+            statusIcon = '⚠️';
+        }
         entry.statusIcon = statusIcon;
         resultHtmlContent += `<span class="word-wrapper" data-index="${k}" data-status-icon="${statusIcon}" data-mistake-type="${entry.mistakeType}">${wordHtml}</span> `;
     }
 
     if (isReevaluation) {
         const reevalContainer = document.getElementById('reevaluated-accuracy-container');
-        if(reevalContainer) reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${resultData.accuracy}%</div></div>`;
+        if(reevalContainer) { reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${resultData.accuracy}%</div></div>`; }
         document.getElementById('editableTypedText').innerHTML = resultHtmlContent;
         let originalTextHtml = g_alignment.map((entry, index) => { if (entry.type === 'ins') return ''; return `<span class="word-wrapper" data-index="${index}" data-mistake-type="${entry.mistakeType}">${escapeHtml(entry.o || '')}</span>`; }).join(' ');
         document.getElementById('editableOriginalText').innerHTML = originalTextHtml;
         initializeResultInteractivity();
     } else {
-        renderResultSheet({ dictationName: currentPassageTitle || "Practice Passage", totalWords: resultData.totalWords, typedWords: resultData.typedWords, fullMistakes: resultData.fullMistakes, halfMistakes: resultData.halfMistakes, mistakePercent: resultData.mistakePercent, accuracy: resultData.accuracy, typedKeystrokes: resultData.typedKeystrokes, typingSpeed: resultData.typingSpeed, testDate: new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' }), highlightedHtml: resultHtmlContent }, originalTextForDisplay);
-        const currentState = JSON.parse(localStorage.getItem('stenoState')) || {};
-        saveState({ ...currentState, view: 'results-view', resultData: resultData, alignment: g_alignment, originalText: originalTextForDisplay });
+        const renderData = {
+            dictationName: currentPassageTitle || "Practice Passage",
+            totalWords: resultData.totalWords,
+            typedWords: resultData.typedWords,
+            fullMistakes: resultData.fullMistakes,
+            halfMistakes: resultData.halfMistakes,
+            mistakePercent: resultData.mistakePercent,
+            accuracy: resultData.accuracy,
+            typedKeystrokes: resultData.typedKeystrokes,
+            typingSpeed: resultData.typingSpeed,
+            testDate: new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' }),
+            highlightedHtml: resultHtmlContent
+        };
+        renderResultSheet(renderData, originalTextForDisplay);
+        showView('results-view');
     }
   }
+
 
 function renderResultSheet(data, originalTextForDisplay) {
     const container = document.getElementById('resultSheetContainer');
     let originalTextHtml = g_alignment.map((entry, index) => { let mistakeType = entry.mistakeType || 'correct'; if (entry.type === 'ins') return ''; return `<span class="word-wrapper" data-index="${index}" data-mistake-type="${mistakeType}">${escapeHtml(entry.o || '')}</span>`; }).join(' ');
     
-    // UPDATE: Calculate mistake counts for the dynamic filter dropdown.
-    const mistakeCounts = { omission: 0, extra: 0, spelling: 0, capitalization: 0, punctuation: 0 };
-    g_alignment.forEach(item => { if(item.mistakeType && mistakeCounts.hasOwnProperty(item.mistakeType)) mistakeCounts[item.mistakeType]++; });
-
-    // UPDATE: Create the HTML for the filter options dynamically.
-    const filterOptionsHtml = `
-        <option value="all">Show All Mistakes</option>
-        <option value="omission-substitution">Omissions & Additions (${mistakeCounts.omission + mistakeCounts.extra})</option>
-        <option value="spelling">Spelling (${mistakeCounts.spelling})</option>
-        <option value="capitalization">Capitalization (${mistakeCounts.capitalization})</option>
-        <option value="punctuation">Punctuation (${mistakeCounts.punctuation})</option>
-    `;
+    container.innerHTML = `
+    <div class="result-sheet-container">
+        <h1>Result Sheet:</h1>
+        <div class="stats-container">
+            <div class="stats-row"><div class="stat-pill full-width">${escapeHtml(data.dictationName)}</div></div>
+            <div class="stats-row">
+                <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>Total Words: ${data.totalWords}</div>
+                <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10zm0 5.25a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75a.75.75 0 01-.75-.75z" clip-rule="evenodd" /></svg>Typed Words: ${data.typedWords}</div>
+                <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13.25a.75.75 0 00-1.5 0v6.5c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75v-5.5z" clip-rule="evenodd" /></svg>Typing Speed: ${data.typingSpeed} WPM</div>
+            </div>
+            <div class="stats-row">
+                <div class="stat-pill red"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>Full Mistakes: ${data.fullMistakes}</div>
+                <div class="stat-pill amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>Half Mistakes: ${data.halfMistakes}</div>
+                <div class="stat-pill">Total % of Mistakes: ${data.mistakePercent}%</div>
+                <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Accuracy: ${data.accuracy}%</div>
+            </div>
+            <div id="reevaluated-accuracy-container"></div>
+            <div class="stats-row"><div class="stat-pill">Test Date: ${escapeHtml(data.testDate)}</div></div>
+        </div>
+        <div class="legend-container">
+            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions / Substitutions</div>
+            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span> Omissions</div>
+            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span> Spelling Mistakes</div>
+            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span> Capitalization Mistakes</div>
+            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span> Punctuation Mistakes</div>
+        </div>
+        <div class="result-controls">
+            <div class="filter-section">
+                <label for="mistakeFilter">Filter Mistakes:</label>
+                <select id="mistakeFilter" onchange="filterMistakes(this.value)"><option value="all">Show All Mistakes</option><option value="omission">Omissions Only</option><option value="extra">Additions Only</option><option value="spelling">Spelling Only</option><option value="capitalization">Capitalization Only</option><option value="punctuation">Punctuation Only</option></select>
+            </div>
+            <div class="action-section"><div class="reevaluate-wrapper"><button id="toggleReevaluateBtn" class="view-switch-btn">Enter Re-evaluate Mode</button><span class="tooltip-icon" data-tooltip="Enter a special mode to edit BOTH your text and the original text, then recalculate your score to see the difference.">?</span></div><button id="reportErrorBtn" class="view-switch-btn" style="background-color: #f97316; color: white;">Report Error</button></div>
+            <button id="viewSwitchBtn" class="view-switch-btn">Switch to Top/Bottom View</button>
+        </div>
+        <div id="comparisonColumns" class="columns view-side-by-side">
+            <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText" contenteditable="false">${data.highlightedHtml}</p></div>
+            <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div>
+        </div>
+    </div>`;
     
-    container.innerHTML = `<div class="result-sheet-container"><h1>Result Sheet:</h1><div class="stats-container"><div class="stats-row"><div class="stat-pill full-width">${escapeHtml(data.dictationName)}</div></div><div class="stats-row"><div class="stat-pill">Total Words: ${data.totalWords}</div><div class="stat-pill">Typed Words: ${data.typedWords}</div><div class="stat-pill">Typing Speed: ${data.typingSpeed} WPM</div></div><div class="stats-row"><div class="stat-pill red">Full Mistakes: ${data.fullMistakes}</div><div class="stat-pill amber">Half Mistakes: ${data.halfMistakes}</div><div class="stat-pill">Total % of Mistakes: ${data.mistakePercent}%</div><div class="stat-pill">Accuracy: ${data.accuracy}%</div></div><div id="reevaluated-accuracy-container"></div><div class="stats-row"><div class="stat-pill">Test Date: ${escapeHtml(data.testDate)}</div></div></div><div class="legend-container"><div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions / Substitutions</div><div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span> Omissions</div><div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span> Spelling Mistakes</div><div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span> Capitalization Mistakes</div><div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span> Punctuation Mistakes</div></div><div class="result-controls"><div class="filter-section"><label for="mistakeFilter">Filter Mistakes:</label><select id="mistakeFilter" onchange="filterMistakes(this.value)">${filterOptionsHtml}</select></div><div class="action-section"><button id="detailedAnalysisBtn" class="view-switch-btn" style="background-color: var(--primary-cyan); color: white;">Detailed Analysis</button><div class="reevaluate-wrapper"><button id="toggleReevaluateBtn" class="view-switch-btn">Enter Re-evaluate Mode</button><span class="tooltip-icon" data-tooltip="Enter a special mode to edit BOTH your text and the original text, then recalculate your score to see the difference.">?</span></div><button id="reportErrorBtn" class="view-switch-btn" style="background-color: #f97316; color: white;">Report Error</button></div><button id="viewSwitchBtn" class="view-switch-btn">Switch to Top/Bottom View</button></div><div id="comparisonColumns" class="columns view-side-by-side"><div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText" contenteditable="false">${data.highlightedHtml}</p></div><div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div></div></div>`;
-    
-    if (!localStorage.getItem('hideResultsWelcome')) document.getElementById('resultsWelcomeModal').classList.add('visible');
-    const switchBtn = document.getElementById('viewSwitchBtn'), columnsContainer = document.getElementById('comparisonColumns'), typedCol = document.getElementById('typedCol'), originalCol = document.getElementById('originalCol');
-    switchBtn.addEventListener('click', () => {
-        const isSideBySide = columnsContainer.classList.contains('view-side-by-side');
-        if (isSideBySide) { columnsContainer.classList.replace('view-side-by-side', 'view-top-bottom'); columnsContainer.prepend(typedCol); switchBtn.textContent = 'Switch to Side-by-Side View'; }
-        else { columnsContainer.classList.replace('view-top-bottom', 'view-side-by-side'); columnsContainer.appendChild(originalCol); switchBtn.textContent = 'Switch to Top/Bottom View'; }
-    }); 
+    if (!localStorage.getItem('hideResultsWelcome')) { document.getElementById('resultsWelcomeModal').classList.add('visible'); }
+    const switchBtn = document.getElementById('viewSwitchBtn'); const columnsContainer = document.getElementById('comparisonColumns'); const typedCol = document.getElementById('typedCol'); const originalCol = document.getElementById('originalCol'); switchBtn.addEventListener('click', () => { const isSideBySide = columnsContainer.classList.contains('view-side-by-side'); if (isSideBySide) { columnsContainer.classList.remove('view-side-by-side'); columnsContainer.classList.add('view-top-bottom'); columnsContainer.prepend(typedCol); switchBtn.textContent = 'Switch to Side-by-Side View'; } else { columnsContainer.classList.remove('view-top-bottom'); columnsContainer.classList.add('view-side-by-side'); columnsContainer.appendChild(originalCol); switchBtn.textContent = 'Switch to Top/Bottom View'; } }); 
     document.getElementById('printReportBtn').addEventListener('click', () => window.print()); 
     initializeResultInteractivity(); 
 }
 
 function initializeResultInteractivity() {
     const columns = document.getElementById('comparisonColumns'); if (!columns) return;
-    document.getElementById('editableOriginalText').contentEditable = false;
-    columns.addEventListener('click', (e) => { const target = e.target.closest('.word-wrapper'); if (!target) return; const wordIndex = target.dataset.index; if (wordIndex === null) return; document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight')); document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => { el.classList.add('active-highlight'); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }); });
+    const originalTextP = document.getElementById('editableOriginalText'); if (originalTextP) { originalTextP.contentEditable = false; }
+    columns.addEventListener('click', (e) => { const target = e.target.closest('.word-wrapper'); if (!target) return; const wordIndex = target.dataset.index; if (wordIndex === null) return; document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight')); document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => el.classList.add('active-highlight')); const parentCol = target.closest('.col'); if (!parentCol) return; const otherColId = parentCol.id === 'typedCol' ? 'originalCol' : 'typedCol'; const correspondingWord = document.querySelector(`#${otherColId} .word-wrapper[data-index="${wordIndex}"]`); if (correspondingWord) { correspondingWord.scrollIntoView({ behavior: 'smooth', block: 'center' }); } });
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
-    document.getElementById('detailedAnalysisBtn').addEventListener('click', showDetailedAnalysis);
+}
+function getCleanTextFromAlignment(type = 'typed') {
+    if (!g_alignment || g_alignment.length === 0) return "";
+    let textParts = []; g_alignment.forEach(entry => { if (type === 'typed') { if (entry.type === 'match' || entry.type === 'sub' || entry.type === 'ins') { textParts.push(entry.t || ''); } } else { if (entry.type === 'match' || entry.type === 'sub' || entry.type === 'del') { textParts.push(entry.o || ''); } } });
+    return textParts.join(' ').replace(/\s+/g, ' ').trim();
 }
 
+function toggleReevaluateMode() {
+    isReevaluateModeActive = !isReevaluateModeActive;
+    const resultsView = document.getElementById('results-view'); const toggleBtn = document.getElementById('toggleReevaluateBtn'); const typedTextP = document.getElementById('editableTypedText'); const originalTextP = document.getElementById('editableOriginalText');
+    if (isReevaluateModeActive) { resultsView.classList.add('reevaluate-mode-active'); toggleBtn.textContent = 'Calculate & Exit Mode'; toggleBtn.style.backgroundColor = 'var(--accent-purple)'; toggleBtn.style.color = 'white'; const cleanTypedText = getCleanTextFromAlignment('typed'); const cleanOriginalText = getCleanTextFromAlignment('original'); typedTextP.innerHTML = cleanTypedText; originalTextP.innerHTML = cleanOriginalText; typedTextP.contentEditable = true; originalTextP.contentEditable = true; alert("Re-evaluate Mode is ON. You can now edit both your transcription and the original text.");
+    } else { 
+        // --- SPINNER IS SHOWN HERE ---
+        document.getElementById('fullPageLoader').style.display = 'flex';
+        
+        resultsView.classList.remove('reevaluate-mode-active'); 
+        toggleBtn.textContent = 'Enter Re-evaluate Mode'; 
+        toggleBtn.style.backgroundColor = ''; 
+        toggleBtn.style.color = ''; 
+        
+        const correctedOriginalText = originalTextP.innerText; 
+        const correctedTypedText = typedTextP.innerText; 
+        g_lastTypedText = correctedTypedText; 
+        
+        typedTextP.contentEditable = false; 
+        originalTextP.contentEditable = false; 
+        
+        if (!correctedOriginalText) { 
+            alert("The original text cannot be empty for re-evaluation.");
+            const analysisOptions = { countCommaMistakes: document.getElementById("includeComma")?.checked || false };
+            
+            const reevaluateWorker = new Worker('worker.js');
+            reevaluateWorker.onmessage = function(event) {
+                const result = event.data;
+                displayAndRenderResults(result, originalText, true);
+                document.getElementById('fullPageLoader').style.display = 'none'; // Hide spinner on completion
+                reevaluateWorker.terminate();
+            };
+            reevaluateWorker.postMessage({
+                originalText: originalText,
+                typedText: g_lastTypedText,
+                timeTakenSeconds: 0,
+                options: analysisOptions
+            });
+            return; 
+        } 
+        
+        const analysisOptions = { countCommaMistakes: document.getElementById("includeComma")?.checked || false };
+        
+        const finalReevaluateWorker = new Worker('worker.js');
+        finalReevaluateWorker.onmessage = function(event) {
+            const result = event.data;
+            displayAndRenderResults(result, correctedOriginalText, true);
+            
+            // --- SPINNER IS HIDDEN HERE ---
+            document.getElementById('fullPageLoader').style.display = 'none';
+            
+            alert("Score has been re-evaluated with your corrections. Note: This updated score is for your reference only and is not saved.");
+            finalReevaluateWorker.terminate();
+        };
+        finalReevaluateWorker.postMessage({
+            originalText: correctedOriginalText,
+            typedText: correctedTypedText,
+            timeTakenSeconds: 0,
+            options: analysisOptions
+        });
+    }
+}
+
+
+// =================================================================================
+// CHANGE 2: THIS IS THE UPDATED FUNCTION THAT USES THE WEB WORKER
+// =================================================================================
 async function submitTranscription() {
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
+    clearState();
     if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
+
+    // Show a loading spinner so the user knows work is being done in the background
     document.getElementById('fullPageLoader').style.display = 'flex';
+
     try {
-        if (!originalText) throw new Error("Original transcript not found.");
+        if (!originalText) {
+            throw new Error("Original transcript not found. Please try the test again.");
+        }
         const typedText = document.getElementById('typingBox').value;
         g_lastTypedText = typedText;
+
         if (typedText.trim().split(/\s+/).filter(Boolean).length < 10) {
-            alert("Please type at least 10 words."); goHome();
-            document.getElementById('fullPageLoader').style.display = 'none'; return;
+            alert("Please type at least 10 words.");
+            goHome();
+            document.getElementById('fullPageLoader').style.display = 'none'; // Hide loader
+            return;
         }
+
+        // --- CORE CHANGE IS HERE ---
+        // 1. Create a new worker from the worker.js file.
         const analysisWorker = new Worker('worker.js');
+
+        // 2. Set up a listener to wait for the worker to send the results back.
         analysisWorker.onmessage = function(event) {
-            const result = event.data;
+            console.log("Main page received results from worker!");
+            const result = event.data; // The result object is sent back from the worker
+
+            // 3. The job is done! Now use the results to update the page.
+            // This part is the same as your old function.
             displayAndRenderResults(result, originalText, false);
             saveProgressToLocalStorage({ accuracy: result.accuracy, typingSpeed: result.typingSpeed });
             saveAttemptHybrid(originalText, typedText, parseFloat(result.accuracy), result.fullMistakes, result.halfMistakes, parseFloat(result.typingSpeed), timeTakenSeconds, result.totalWords);
+            
+            // 4. Hide the loader and terminate the worker to save resources
             document.getElementById('fullPageLoader').style.display = 'none';
             analysisWorker.terminate();
             resetTimer();
         };
-        const analysisOptions = { countCommaMistakes: document.getElementById("includeComma")?.checked || false };
-        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds, options: analysisOptions });
+
+        // 5. Define the options and send the job TO the worker to start the calculation.
+        const analysisOptions = {
+            countCommaMistakes: document.getElementById("includeComma")?.checked || false
+        };
+
+        console.log("Main page is sending the job to the worker.");
+        analysisWorker.postMessage({
+            originalText: originalText,
+            typedText: typedText,
+            timeTakenSeconds: timeTakenSeconds,
+            options: analysisOptions
+        });
+        
     } catch (error) { 
         console.error("!!! ERROR during transcription processing:", error); 
-        showErrorModal("Result Error", "An error occurred while generating your results.");
-        document.getElementById('fullPageLoader').style.display = 'none';
-        goHome(); resetTimer();
+        showErrorModal("Result Error", "An error occurred while generating your results. Please try again.");
+        document.getElementById('fullPageLoader').style.display = 'none'; // Hide loader on error
+        goHome(); 
+        resetTimer();
     }
 }
 
-// UPDATE: Modified filter function to handle the new combined option.
+
 function filterMistakes(type) {
     document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
-    document.querySelectorAll('#comparisonColumns .word-wrapper').forEach(wrapper => {
-        const mistakeType = wrapper.getAttribute('data-mistake-type');
-        let shouldShow = false;
-        if (type === "all" || !mistakeType || mistakeType === 'correct') { shouldShow = true; } 
-        else if (type === "omission-substitution") { if (mistakeType === 'omission' || mistakeType === 'extra') shouldShow = true; }
-        else { if (mistakeType === type) shouldShow = true; }
-        wrapper.style.display = shouldShow ? 'inline' : 'none';
-    });
+    const wordWrappers = document.querySelectorAll('#comparisonColumns .word-wrapper');
+    wordWrappers.forEach(wrapper => { const mistakeType = wrapper.getAttribute('data-mistake-type'); let shouldShow = false; if (type === "all" || mistakeType === 'correct') { shouldShow = true; } else if (type === "omission-substitution") { if (mistakeType === 'omission' || mistakeType === 'extra') { shouldShow = true; } } else { if (mistakeType === type) { shouldShow = true; } } wrapper.style.display = shouldShow ? 'inline' : 'none'; });
 }
 
-// UPDATE: New function to show the Detailed Analysis Report.
-function showDetailedAnalysis() {
-    const tableBody = document.getElementById('mistake-table-body');
-    passageTitleEl = document.getElementById('analysis-passage-title');
-    tableBody.innerHTML = '';
-    passageTitleEl.innerHTML = `<strong>Passage:</strong> ${escapeHtml(currentPassageTitle)}`;
-    let mistakeCounter = 1, tableRowsHtml = '';
-    g_alignment.forEach(entry => {
-        if (entry.mistakeType && entry.mistakeType !== 'correct') {
-            let errorType = entry.mistakeType.charAt(0).toUpperCase() + entry.mistakeType.slice(1);
-            let original = '—', typed = '—';
-            if (entry.type === 'sub') { errorType = 'Spelling'; original = entry.o; typed = entry.t; }
-            else if (entry.type === 'del') { errorType = 'Omission'; original = entry.o; }
-            else if (entry.type === 'ins') { errorType = 'Addition'; typed = entry.t; }
-            else { original = entry.o; typed = entry.t; }
-            tableRowsHtml += `<tr><td>${mistakeCounter++}</td><td>${escapeHtml(errorType)}</td><td>${escapeHtml(original)}</td><td>${escapeHtml(typed)}</td></tr>`;
+// --- [NEW] UPDATE MISTAKE LIBRARY FUNCTION ---
+async function updateMistakeLibrary(alignmentData) {
+    const spellingMistakes = alignmentData.filter(e => e.type === 'sub');
+    if (spellingMistakes.length === 0) {
+        console.log("No spelling mistakes to log.");
+        return;
+    }
+
+    await localDb.transaction('rw', localDb.mistakeLibrary, async () => {
+        for (const mistake of spellingMistakes) {
+            const originalWord = (mistake.o || '').replace(/[.,]$/, '').toLowerCase();
+            const typedWord = (mistake.t || '').replace(/[.,]$/, '').toLowerCase();
+
+            if (!originalWord || !typedWord || originalWord === typedWord) continue;
+
+            const existingEntry = await localDb.mistakeLibrary.where({ originalWord, typedWord }).first();
+            
+            if (existingEntry) {
+                await localDb.mistakeLibrary.update(existingEntry.id, { count: existingEntry.count + 1 });
+            } else {
+                await localDb.mistakeLibrary.add({ originalWord, typedWord, count: 1 });
+            }
         }
     });
-    if (mistakeCounter === 1) tableRowsHtml = '<tr><td colspan="4" style="text-align:center;">No mistakes found!</td></tr>';
-    tableBody.innerHTML = tableRowsHtml;
-    showView('analysis-view');
+    console.log(`📚 ${spellingMistakes.length} spelling mistake(s) processed for the library.`);
 }
 
+// --- [NEW] UPDATE OVERALL STATS FUNCTION ---
+async function updateOverallStats(newAttemptStats) {
+    await localDb.transaction('rw', localDb.overallStats, async () => {
+        const stats = await localDb.overallStats.get(1);
+
+        if (!stats) {
+            await localDb.overallStats.put({
+                id: 1, totalAttempts: 1,
+                bestAccuracy: newAttemptStats.accuracy, bestWPM: newAttemptStats.wpm,
+                avgAccuracy: newAttemptStats.accuracy, avgWpm: newAttemptStats.wpm
+            });
+            console.log("📊 First-ever overall stats record created.");
+            return;
+        }
+
+        const oldTotal = stats.totalAttempts || 0;
+        const newTotal = oldTotal + 1;
+        const newAvgAccuracy = ((stats.avgAccuracy * oldTotal) + newAttemptStats.accuracy) / newTotal;
+        const newAvgWpm = ((stats.avgWpm * oldTotal) + newAttemptStats.wpm) / newTotal;
+
+        await localDb.overallStats.put({
+            id: 1, totalAttempts: newTotal,
+            avgAccuracy: newAvgAccuracy, avgWpm: newAvgWpm,
+            bestAccuracy: Math.max(stats.bestAccuracy, newAttemptStats.accuracy),
+            bestWPM: Math.max(stats.bestWPM, newAttemptStats.wpm)
+        });
+        console.log("📊 Overall stats updated in the background.");
+    });
+}
+
+// --- [MODIFIED] HYBRID SAVE SYSTEM ---
 async function saveAttemptHybrid(original, typed, accuracy, full, half, wpm, time, words) {
   if (!candidateId) { console.error("Candidate not initialized, cannot save."); return; }
-  const finalHtmlContent = document.getElementById('editableTypedText').innerHTML, numericAccuracy = parseFloat(accuracy), numericWpm = parseFloat(wpm);
+  
+  const finalHtmlContent = document.getElementById('editableTypedText').innerHTML;
+  const numericAccuracy = parseFloat(accuracy);
+  const numericWpm = parseFloat(wpm);
+
+  const fullResultData = {
+    timestamp: new Date().toISOString(),
+    dictationName: currentPassageTitle || `${g_collection} - ${g_docId}`,
+    accuracy: numericAccuracy, wpm: numericWpm,
+    originalText: original, typedText: typed,
+    fullMistakes: full, halfMistakes: half,
+    highlightedHtml: finalHtmlContent,
+  };
+
   try {
-    await localDb.attempts.add({ timestamp: new Date().toISOString(), dictationName: currentPassageTitle || `${g_collection} - ${g_docId}`, accuracy: numericAccuracy, wpm: numericWpm, originalText: original, typedText: typed, fullMistakes: full, halfMistakes: half, highlightedHtml: finalHtmlContent });
+    await localDb.attempts.add(fullResultData);
     console.log("✅ Full attempt with HTML saved locally.");
+    
     await updateOverallStats({ accuracy: numericAccuracy, wpm: numericWpm });
     await updateMistakeLibrary(g_alignment);
+    
     await sendLightweightStatsToFirebase(accuracy.toFixed(2), wpm.toFixed(2), time, words);
-  } catch (err) { console.error("❌ Failed to save attempt using hybrid system:", err); }
+    
+  } catch (err) {
+    console.error("❌ Failed to save attempt using hybrid system:", err);
+  }
 }
 
 async function sendLightweightStatsToFirebase(accuracy, spm, time, words) {
   const includeCommaMistakes = document.getElementById("includeComma")?.checked || false;
-  const lightweightStat = { accuracy: accuracy + "%", fullMistakes: g_fullMistakes, halfMistakes: g_halfMistakes, strokesPerMinute: spm, timeTakenSeconds: time, totalWords: words, collection: g_collection, docId: g_docId, title: currentPassageTitle || g_docId || "Untitled Passage", includeComma: includeCommaMistakes, timestamp: firebase.firestore.FieldValue.serverTimestamp() };
-  if (attemptsRef) { try { await attemptsRef.add(lightweightStat); console.log("✅ Lightweight stats sent to Firebase."); } catch (e) { console.error("Firebase save failed:", e); } }
+  const lightweightStat = {
+    accuracy: accuracy + "%", 
+    fullMistakes: g_fullMistakes, 
+    halfMistakes: g_halfMistakes, 
+    strokesPerMinute: spm, 
+    timeTakenSeconds: time, 
+    totalWords: words, 
+    collection: g_collection,
+    docId: g_docId,
+    title: currentPassageTitle || g_docId || "Untitled Passage", 
+    includeComma: includeCommaMistakes,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  };
+  
+  if (attemptsRef) {
+    try { await attemptsRef.add(lightweightStat); console.log("✅ Lightweight stats sent to Firebase."); } 
+    catch (e) { console.error("Firebase save failed:", e); }
+  }
 }
 
 function saveProgressToLocalStorage(resultData) {
     if (!candidateId) return; 
-    const key = `${g_collection}-${g_docId}`, progressData = JSON.parse(localStorage.getItem(`stenoProgress_${candidateId}`) || '{}'), newScore = { accuracy: parseFloat(resultData.accuracy), wpm: parseFloat(resultData.typingSpeed) }, existingScore = progressData[key]; 
-    if (!existingScore || newScore.accuracy > existingScore.accuracy) { progressData[key] = newScore; localStorage.setItem(`stenoProgress_${candidateId}`, JSON.stringify(progressData)); }
+    const key = `${g_collection}-${g_docId}`; 
+    const progressData = JSON.parse(localStorage.getItem(`stenoProgress_${candidateId}`) || '{}');
+    const newScore = { accuracy: parseFloat(resultData.accuracy), wpm: parseFloat(resultData.typingSpeed) };
+    const existingScore = progressData[key]; 
+    if (!existingScore || newScore.accuracy > existingScore.accuracy) { 
+        progressData[key] = newScore; 
+        localStorage.setItem(`stenoProgress_${candidateId}`, JSON.stringify(progressData)); 
+    }
     localStorage.setItem(`stenoLastAttempt_${candidateId}`, JSON.stringify({ collection: g_collection, docId: g_docId }));
 }
 
+// [NEW] Reset Progress Function
 async function resetProgress() {
-    if (!candidateId || !attemptsRef) { showErrorModal("Action Failed", "Cannot reset progress. User not identified."); return; }
+    if (!candidateId || !attemptsRef) {
+        showErrorModal("Action Failed", "Cannot reset progress. User not identified.");
+        return;
+    }
+    
     localStorage.removeItem(`stenoProgress_${candidateId}`);
     localStorage.removeItem(`stenoLastAttempt_${candidateId}`);
     localStorage.removeItem('hideResultsWelcome');
-    localStorage.removeItem('stenoState');
-    localStorage.removeItem('stenoLastCategory');
+    
     try {
-        await localDb.attempts.clear(); await localDb.overallStats.clear(); await localDb.mistakeLibrary.clear();
+        await localDb.attempts.clear();
+        await localDb.overallStats.clear();
+        await localDb.mistakeLibrary.clear();
         console.log("Local database cleared.");
+        
         const querySnapshot = await attemptsRef.get();
         const deletePromises = [];
-        querySnapshot.forEach(doc => deletePromises.push(doc.ref.delete()));
+        querySnapshot.forEach(doc => {
+            deletePromises.push(doc.ref.delete());
+        });
         await Promise.all(deletePromises);
         console.log("Firebase attempts cleared.");
+
         alert("Your progress has been successfully reset.");
         window.location.reload();
     } catch (error) {
@@ -1305,7 +1690,17 @@ async function resetProgress() {
     }
 }
 
-// UPDATE: This is the original, working event listener setup. It is now called correctly.
+function validateReportForm() {
+    const errorType = document.getElementById('errorTypeSelect').value; const otherText = document.getElementById('otherErrorText').value.trim(); const submitBtn = document.getElementById('submitReportBtn');
+    submitBtn.disabled = !(errorType && otherText);
+}
+function showReportModal() { document.getElementById('reportErrorModal').classList.add('visible'); validateReportForm(); }
+async function submitErrorReport() {
+    const reportModal = document.getElementById('reportErrorModal'); const errorType = document.getElementById('errorTypeSelect').value; const otherText = document.getElementById('otherErrorText').value; const correctedText = document.getElementById('editableOriginalText').innerText;
+    const reportData = { candidateId: candidateId, collection: g_collection, docId: g_docId, title: currentPassageTitle, originalTextInSystem: originalText, userCorrectedText: correctedText, reason: `${errorType}: ${otherText}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() };
+    try { await db.collection("transcriptionReports").add(reportData); alert("Thank you! Your report has been submitted successfully."); reportModal.classList.remove('visible'); } catch (error) { console.error("Error submitting report:", error); alert("Could not submit report. Please check your internet connection."); }
+}
+function debounce(func, delay) { let timeout; return function(...args) { const context = this; clearTimeout(timeout); timeout = setTimeout(() => func.apply(context, args), delay); }; }
 function initializeEventListeners() {
     document.getElementById('cat-prog').addEventListener('click', loadProgressiveDictations);
     document.getElementById('cat-ssc').addEventListener('click', loadSscPreviousYearDictations);
@@ -1318,43 +1713,57 @@ function initializeEventListeners() {
     document.querySelector('.app-container').addEventListener('click', (e) => { const button = e.target.closest('.take-test-btn'); if (button && !button.disabled) { const card = button.closest('.passage-card'); if (card && card.dataset.collection && card.dataset.docId) { loadPractice(card.dataset.collection, card.dataset.docId); } } });
     document.getElementById('error-close-btn').addEventListener('click', () => { document.getElementById('error-modal').classList.remove('visible'); });
     
+     // --- NEW: Transcript Preview Modal Listener ---
+    document.getElementById('transcript-close-btn').addEventListener('click', () => {
+        document.getElementById('transcript-preview-modal').classList.remove('visible');
+    });
+
+    // --- Reset Modal Listeners ---
     const resetModal = document.getElementById('resetConfirmModal');
     document.getElementById('resetProgressBtn').addEventListener('click', () => resetModal.classList.add('visible'));
     document.getElementById('cancelResetBtn').addEventListener('click', () => resetModal.classList.remove('visible'));
     document.getElementById('confirmResetBtn').addEventListener('click', () => { resetProgress(); resetModal.classList.remove('visible'); });
 
+    // --- Welcome Modal Listeners ---
     const welcomeModal = document.getElementById('resultsWelcomeModal');
     document.getElementById('closeWelcomeBtn').addEventListener('click', () => { if (document.getElementById('dontShowAgainCheckbox').checked) { localStorage.setItem('hideResultsWelcome', 'true'); } welcomeModal.classList.remove('visible'); });
     
+    // --- Report Modal Listeners ---
     const reportModal = document.getElementById('reportErrorModal');
     document.getElementById('cancelReportBtn').addEventListener('click', () => reportModal.classList.remove('visible'));
     document.getElementById('submitReportBtn').addEventListener('click', submitErrorReport);
     document.getElementById('errorTypeSelect').addEventListener('change', validateReportForm);
     document.getElementById('otherErrorText').addEventListener('input', validateReportForm);
     
+    // --- NEW: Monthly Filter Listeners ---
     const yearFilter = document.getElementById('monthlyYearFilter');
     const monthFilter = document.getElementById('monthlyMonthFilter');
+    
+    // Populate year filter dynamically
     const currentYear = new Date().getFullYear();
     yearFilter.innerHTML = '<option value="">All Years</option>';
-    for (let i = currentYear; i >= currentYear - 5; i--) yearFilter.innerHTML += `<option value="${i}">${i}</option>`;
+    for (let i = currentYear; i >= currentYear - 5; i--) {
+        yearFilter.innerHTML += `<option value="${i}">${i}</option>`;
+    }
+
     const applyMonthlyFilter = () => {
-        const selectedYear = yearFilter.value, selectedMonth = monthFilter.value;
-        if (!selectedYear) { monthFilter.value = ''; loadAndRenderMonthlyProgressive(); } 
-        else { loadAndRenderMonthlyProgressive(selectedYear, selectedMonth); }
+        const selectedYear = yearFilter.value;
+        const selectedMonth = monthFilter.value;
+        
+        if (!selectedYear) {
+            // If the year is cleared, reset the month filter and load all passages
+            monthFilter.value = '';
+            loadAndRenderMonthlyProgressive();
+        } else {
+             // If a year is selected (month can be "" for all months that year)
+            loadAndRenderMonthlyProgressive(selectedYear, selectedMonth);
+        }
     };
+    
     yearFilter.addEventListener('change', applyMonthlyFilter);
     monthFilter.addEventListener('change', applyMonthlyFilter);
 }
 function showErrorModal(title, message) { document.getElementById('error-title').textContent = title; document.getElementById('error-message').textContent = message; document.getElementById('error-modal').classList.add('visible'); }
-
-// --- Unchanged helper functions below ---
-function getCleanTextFromAlignment(type = 'typed') { if (!g_alignment || g_alignment.length === 0) return ""; let textParts = []; g_alignment.forEach(entry => { if (type === 'typed') { if (entry.type === 'match' || entry.type === 'sub' || entry.type === 'ins') textParts.push(entry.t || ''); } else { if (entry.type === 'match' || entry.type === 'sub' || entry.type === 'del') textParts.push(entry.o || ''); } }); return textParts.join(' ').replace(/\s+/g, ' ').trim(); }
-function toggleReevaluateMode() { isReevaluateModeActive = !isReevaluateModeActive; const resultsView = document.getElementById('results-view'), toggleBtn = document.getElementById('toggleReevaluateBtn'), typedTextP = document.getElementById('editableTypedText'), originalTextP = document.getElementById('editableOriginalText'); if (isReevaluateModeActive) { resultsView.classList.add('reevaluate-mode-active'); toggleBtn.textContent = 'Calculate & Exit Mode'; toggleBtn.style.backgroundColor = 'var(--accent-purple)'; toggleBtn.style.color = 'white'; const cleanTypedText = getCleanTextFromAlignment('typed'), cleanOriginalText = getCleanTextFromAlignment('original'); typedTextP.innerHTML = cleanTypedText; originalTextP.innerHTML = cleanOriginalText; typedTextP.contentEditable = true; originalTextP.contentEditable = true; alert("Re-evaluate Mode is ON. You can now edit both your transcription and the original text."); } else { document.getElementById('fullPageLoader').style.display = 'flex'; resultsView.classList.remove('reevaluate-mode-active'); toggleBtn.textContent = 'Enter Re-evaluate Mode'; toggleBtn.style.backgroundColor = ''; toggleBtn.style.color = ''; const correctedOriginalText = originalTextP.innerText, correctedTypedText = typedTextP.innerText; g_lastTypedText = correctedTypedText; typedTextP.contentEditable = false; originalTextP.contentEditable = false; if (!correctedOriginalText) { alert("The original text cannot be empty for re-evaluation."); const reevaluateWorker = new Worker('worker.js'); reevaluateWorker.onmessage = function(event) { displayAndRenderResults(event.data, originalText, true); document.getElementById('fullPageLoader').style.display = 'none'; reevaluateWorker.terminate(); }; reevaluateWorker.postMessage({ originalText: originalText, typedText: g_lastTypedText, timeTakenSeconds: 0, options: { countCommaMistakes: document.getElementById("includeComma")?.checked || false }}); return; } const finalReevaluateWorker = new Worker('worker.js'); finalReevaluateWorker.onmessage = function(event) { displayAndRenderResults(event.data, correctedOriginalText, true); document.getElementById('fullPageLoader').style.display = 'none'; alert("Score has been re-evaluated with your corrections. Note: This updated score is for your reference only and is not saved."); finalReevaluateWorker.terminate(); }; finalReevaluateWorker.postMessage({ originalText: correctedOriginalText, typedText: correctedTypedText, timeTakenSeconds: 0, options: { countCommaMistakes: document.getElementById("includeComma")?.checked || false }}); } }
-async function updateMistakeLibrary(alignmentData) { const spellingMistakes = alignmentData.filter(e => e.type === 'sub'); if (spellingMistakes.length === 0) return; await localDb.transaction('rw', localDb.mistakeLibrary, async () => { for (const mistake of spellingMistakes) { const originalWord = (mistake.o || '').replace(/[.,]$/, '').toLowerCase(), typedWord = (mistake.t || '').replace(/[.,]$/, '').toLowerCase(); if (!originalWord || !typedWord || originalWord === typedWord) continue; const existingEntry = await localDb.mistakeLibrary.where({ originalWord, typedWord }).first(); if (existingEntry) await localDb.mistakeLibrary.update(existingEntry.id, { count: existingEntry.count + 1 }); else await localDb.mistakeLibrary.add({ originalWord, typedWord, count: 1 }); } }); console.log(`📚 ${spellingMistakes.length} spelling mistake(s) processed for the library.`); }
-async function updateOverallStats(newAttemptStats) { await localDb.transaction('rw', localDb.overallStats, async () => { const stats = await localDb.overallStats.get(1); if (!stats) { await localDb.overallStats.put({ id: 1, totalAttempts: 1, bestAccuracy: newAttemptStats.accuracy, bestWPM: newAttemptStats.wpm, avgAccuracy: newAttemptStats.accuracy, avgWpm: newAttemptStats.wpm }); return; } const oldTotal = stats.totalAttempts || 0, newTotal = oldTotal + 1, newAvgAccuracy = ((stats.avgAccuracy * oldTotal) + newAttemptStats.accuracy) / newTotal, newAvgWpm = ((stats.avgWpm * oldTotal) + newAttemptStats.wpm) / newTotal; await localDb.overallStats.put({ id: 1, totalAttempts: newTotal, avgAccuracy: newAvgAccuracy, avgWpm: newAvgWpm, bestAccuracy: Math.max(stats.bestAccuracy, newAttemptStats.accuracy), bestWPM: Math.max(stats.bestWPM, newAttemptStats.wpm) }); }); }
-function validateReportForm() { const errorType = document.getElementById('errorTypeSelect').value, otherText = document.getElementById('otherErrorText').value.trim(), submitBtn = document.getElementById('submitReportBtn'); submitBtn.disabled = !(errorType && otherText); }
-function showReportModal() { document.getElementById('reportErrorModal').classList.add('visible'); validateReportForm(); }
-async function submitErrorReport() { const reportModal = document.getElementById('reportErrorModal'), errorType = document.getElementById('errorTypeSelect').value, otherText = document.getElementById('otherErrorText').value, correctedText = document.getElementById('editableOriginalText').innerText; const reportData = { candidateId: candidateId, collection: g_collection, docId: g_docId, title: currentPassageTitle, originalTextInSystem: originalText, userCorrectedText: correctedText, reason: `${errorType}: ${otherText}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() }; try { await db.collection("transcriptionReports").add(reportData); alert("Thank you! Your report has been submitted successfully."); reportModal.classList.remove('visible'); } catch (error) { console.error("Error submitting report:", error); alert("Could not submit report. Please check your internet connection."); } }
 </script>
 </body>
 </html>
