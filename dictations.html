@@ -18,6 +18,42 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;8
+An internal error has occurred.
+26.0s
+User
+give it again
+Model
+ThinkingThoughts
+Auto
+Expand to view model thoughts
+
+chevron_right
+Of course. My apologies for the interruption. Let's try that again.
+
+Here is the complete and final code with the fullscreen bug fixed. When you close the transcript preview from fullscreen mode, it will now correctly exit fullscreen and return the main site to its normal view.
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta name="robots" content="noindex">
+<title>Steno Practice Tool</title>
+
+<!-- External Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.youtube.com/iframe_api"></script>
+<!-- ADDED: The tool for our local database -->
+<script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
+
+
+<!-- Google Fonts & Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 
@@ -1831,6 +1867,10 @@ function initializeEventListeners() {
     // --- Transcript Preview Modal Listeners ---
     const transcriptModal = document.getElementById('transcript-preview-modal');
     document.getElementById('transcript-close-btn').addEventListener('click', () => {
+        // BUG FIX: Check for and exit fullscreen before closing
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        }
         transcriptModal.classList.remove('visible');
     });
     document.getElementById('transcript-fullscreen-btn').addEventListener('click', () => {
