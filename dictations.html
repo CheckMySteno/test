@@ -157,8 +157,15 @@
         overflow: hidden;
     }
     .player-card { padding: 1.5rem 2.5rem; text-align: center; position: relative; }
-    .player-title { margin: 0; font-size: 1.6rem; font-weight: 700; color: #374151; }
-    .player-subtitle { font-size: 1rem; color: var(--text-muted); margin-bottom: 1.5rem; }
+    .player-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 0.25rem;
+    }
+    .player-title { margin: 0; font-size: 1.6rem; font-weight: 700; color: #374151; text-align: left; }
+    .player-subtitle { font-size: 1rem; color: var(--text-muted); margin-bottom: 1.5rem; text-align: left; }
     .controls { display: flex; justify-content: center; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem; }
     .btn { background: #f3f4f8; color: #4b5563; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1rem; transition: all 0.2s ease; }
     .btn:hover { transform: scale(1.1); background-color: #e5e7eb; }
@@ -169,6 +176,14 @@
     .progress-bar-wrapper { position: relative; width: 100%; background-color: #e0e7ff; height: 8px; border-radius: 4px; cursor: pointer; }
     #progress-fill { height: 100%; width: 0%; background-color: #6366f1; border-radius: 4px; transition: width 0.1s linear; }
     .time-display { display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-muted); font-weight: 500; margin-top: 0.5rem; }
+
+    #previewTranscriptBtn {
+        font-size: 0.85rem; padding: 8px 14px; border-radius: 8px; font-weight: 600;
+        background: transparent; border: 1px solid var(--border-color); color: var(--text-muted);
+        white-space: nowrap;
+        transition: all 0.2s ease;
+    }
+    #previewTranscriptBtn:hover { background-color: #f8fafc; }
 
     .extra-controls {
         display: flex; justify-content: space-between; align-items: center;
@@ -223,23 +238,19 @@
         font-size: 0.9em; color: var(--text-muted); display:inline-flex;
         align-items:center; gap: 5px; margin-top: 0.75rem; cursor: pointer;
     }
-    #startTranscriptionBtn, .secondary-action-btn {
+    #startTranscriptionBtn {
         font-size: 1.1em; padding: 16px 24px; width: 100%; max-width: 280px;
         border-radius: 12px; font-weight: 600; transition: all 0.2s ease;
     }
-    .secondary-action-btn {
-        background-color: transparent; color: #374151;
-        border: 2px solid #e5e7eb;
-    }
-    .secondary-action-btn:hover { background-color: #f8fafc; border-color: #d1d5db; }
     #startTranscriptionBtn:disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; box-shadow: none; }
     #startTranscriptionBtn:not(:disabled) { background-color: #1f2937; color: white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     #startTranscriptionBtn:not(:disabled):hover { background-color: #111827; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
-    
+
     @media (max-width: 768px) {
         .test-setup-grid { flex-direction: column; gap: 2rem; }
         .setup-col-right { text-align: center; }
         .setup-col { width: 100%; }
+        .player-header { flex-direction: column; align-items: flex-start; }
     }
 
     .back-btn { background: none; color: #9ca3af; font-size: 0.9em; margin-top: 1.5rem; width: 100%; text-decoration: none; font-weight: 500; }
@@ -588,7 +599,10 @@
         <div class="practice-station">
             <div class="player-card">
                 <div id="player-loader" class="loader"><div class="spinner"></div></div>
-                <h2 class="player-title">Dictation Player</h2>
+                <div class="player-header">
+                    <h2 class="player-title">Dictation Player</h2>
+                    <button id="previewTranscriptBtn" onclick="showTranscriptPreview()">📄 Preview Transcript</button>
+                </div>
                 <p id="player-subtitle" class="player-subtitle">&nbsp;</p>
                 <div class="controls">
                   <button class="btn" onclick="restartVideo()" aria-label="Restart Audio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 12"></path></svg></button>
@@ -612,7 +626,7 @@
             <div class="test-setup">
                  <div class="test-setup-grid">
                      <div class="setup-col">
-                        <button id="previewTranscriptBtn" class="secondary-action-btn" onclick="showTranscriptPreview()">📄 Preview Transcript</button>
+                        <!-- This column is intentionally left blank for alignment -->
                      </div>
                      <div class="setup-col setup-col-center">
                          <div class="timer-input-group">
@@ -1180,7 +1194,8 @@
 
         showView('player-view');
         setPlayerLoading(true);
-        document.getElementById('player-subtitle').textContent = currentPassageTitle;
+        document.querySelector('.player-title').textContent = currentPassageTitle;
+        document.getElementById('player-subtitle').textContent = `Words: ${wordCount}`;
         loadVideo(passageData.audioUrl, false);
 
     } catch (error) {
