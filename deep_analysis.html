@@ -22,10 +22,10 @@
             
             /* CORRECTED COLORS TO MATCH THE MAIN PAGE */
             --hl-additions: #fecdd3;     /* Reddish */
-            --hl-omissions: #d9f99d;     /* Greenish */
-            --hl-spelling: #fde68a;      /* Yellowish */
-            --hl-capitalization: #bae6fd; 
-            --hl-punctuation: #ddd6fe;
+            --hl-omissions: #dcfce7;     /* Greenish */
+            --hl-spelling: #fef3c7;      /* Yellowish */
+            --hl-capitalization: #e0f2fe; 
+            --hl-punctuation: #ede9fe;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -72,7 +72,7 @@
             padding: 0.75rem;
             border-radius: 8px;
             color: var(--accent-purple);
-            background-color: var(--accent-purple-light);
+            background-color: #f5f3ff;
         }
         .summary-card .value {
             font-size: 2.5rem;
@@ -232,3 +232,224 @@
             <div id="analysis-content">
                 <div class="summary-grid">
                     <div class="summary-card">
+                        <span class="icon">🎯</span>
+                        <div>
+                            <div class="value" id="accuracy">--%</div>
+                            <div class="label">Final Accuracy</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="icon">❌</span>
+                        <div>
+                            <div class="value" id="total-mistakes">--</div>
+                            <div class="label">Total Mistakes</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="icon">🔴</span>
+                        <div>
+                            <div class="value" id="full-mistakes">--</div>
+                            <div class="label">Full Mistakes</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="icon">🟠</span>
+                        <div>
+                            <div class="value" id="half-mistakes">--</div>
+                            <div class="label">Half Mistakes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-grid">
+                    <div class="visual-card">
+                        <h2>Mistake Breakdown</h2>
+                        <div id="chart-container">
+                            <canvas id="mistakeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="visual-card">
+                        <h2>Top Problem Words</h2>
+                        <ul id="top-errors-list" class="top-errors-list">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="tabs-container">
+                    <nav class="tab-nav" id="tab-nav">
+                        <!-- Tabs will be generated here -->
+                    </nav>
+                    <div id="tab-content-container">
+                        <!-- Tab content will be generated here -->
+                    </div>
+                </div>
+            </div>
+            <div id="no-data-message" class="no-data" style="display: none;">
+                <h2>No Analysis Data Found</h2>
+                <p>Please generate a result and click "Deep Analysis" to see this page.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dataString = sessionStorage.getItem('deepAnalysisData');
+            if (!dataString) {
+                document.getElementById('analysis-content').style.display = 'none';
+                document.getElementById('no-data-message').style.display = 'block';
+                return;
+            }
+
+            const data = JSON.parse(dataString);
+            const accuracy = ((data.originalText.split(/\s+/).filter(Boolean).length - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / data.originalText.split(/\s+/).filter(Boolean).length * 100).toFixed(2);
+            
+            // Populate Header and Summary
+            document.getElementById('passage-title').textContent = data.passageTitle;
+            document.getElementById('test-date').textContent = `Analyzed on: ${data.testDate}`;
+            document.getElementById('total-mistakes').textContent = data.summary.fullMistakes + data.summary.halfMistakes;
+            document.getElementById('full-mistakes').textContent = data.summary.fullMistakes;
+            document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
+
+            // Process and Categorize Mistakes
+            const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
+            const allWords = data.originalText.split(/\s+/);
+            const mistakePatterns = {};
+
+            data.alignment.forEach((item, index) => {
+                const isMistake = item.type !== 'match' || item.mistakeType;
+                if (!isMistake) return;
+
+                const wordIndex = data.alignment.slice(0, index).filter(i => i.type !== 'ins').length;
+                const start = Math.max(0, wordIndex - 3);
+                const end = Math.min(allWords.length, wordIndex + 4);
+                const context = `...${allWords.slice(start, end).join(' ')}...`;
+
+                let type = item.mistakeType;
+                if (item.type === 'sub' && !type) type = 'spelling';
+                if (item.type === 'del') type = 'omission';
+                if (item.type === 'ins') type = 'extra';
+
+                if (mistakes[type]) {
+                    mistakes[type].push({ ...item, context, type });
+                }
+
+                if (type === 'spelling') {
+                    const key = `${item.o}|${item.t}`;
+                    if (!mistakePatterns[key]) {
+                        mistakePatterns[key] = { original: item.o, typed: item.t, count: 0 };
+                    }
+                    mistakePatterns[key].count++;
+                }
+            });
+
+            // Render Chart
+            const ctx = document.getElementById('mistakeChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Spelling', 'Omissions', 'Extra Words', 'Capitalization', 'Punctuation'],
+                    datasets: [{
+                        data: [
+                            mistakes.spelling.length,
+                            mistakes.omission.length,
+                            mistakes.extra.length,
+                            mistakes.capitalization.length,
+                            mistakes.punctuation.length
+                        ],
+                        // CORRECTED COLOR MAPPING
+                        backgroundColor: ['#fef3c7', '#dcfce7', '#fee2e2', '#e0f2fe', '#ede9fe'],
+                        borderColor: ['#fde68a', '#bbf7d0', '#fecaca', '#bae6fd', '#ddd6fe'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+            });
+
+            // Render Top Problem Words
+            const topErrorsList = document.getElementById('top-errors-list');
+            const sortedErrors = Object.values(mistakePatterns).sort((a, b) => b.count - a.count);
+            if (sortedErrors.length > 0) {
+                topErrorsList.innerHTML = ''; // Clear any existing content
+                sortedErrors.slice(0, 3).forEach(error => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span class="error-pair">
+                            <span class="original-word">${error.original}</span> → <span class="typed-word">${error.typed}</span>
+                        </span>
+                        <span class="error-count">${error.count} time(s)</span>
+                    `;
+                    topErrorsList.appendChild(li);
+                });
+            } else {
+                topErrorsList.innerHTML = '<li>No recurring spelling mistakes found. Well done!</li>';
+            }
+            
+            // Render Tabs
+            const tabNav = document.getElementById('tab-nav');
+            const tabContentContainer = document.getElementById('tab-content-container');
+            const allMistakes = Object.values(mistakes).flat().sort(() => Math.random() - 0.5); // Randomize for review
+            const tabData = [
+                { id: 'all', label: 'All Mistakes', icon: '📋', data: allMistakes, tip: "Reviewing all mistakes together helps you see the full picture of your performance. Look for patterns across different categories." },
+                { id: 'spelling', label: 'Spelling', icon: '✏️', data: mistakes.spelling, tip: "<b>Pro Tip:</b> Spelling errors often happen with similar-sounding words or fast typing. Create a personal error log of these words for focused practice." },
+                { id: 'omission', label: 'Omissions', icon: '➖', data: mistakes.omission, tip: "<b>Pro Tip:</b> Missing words can indicate that the dictation speed is slightly too fast for your current level. Try practicing at a 5 WPM slower speed to improve accuracy." },
+                { id: 'extra', label: 'Extra Words', icon: '➕', data: mistakes.extra, tip: "<b>Pro Tip:</b> Adding words often happens due to hesitation or trying to 'correct' grammar while typing. Focus on typing exactly what you hear." },
+                { id: 'capitalization', label: 'Capitalization', icon: '🔠', data: mistakes.capitalization, tip: "<b>Pro Tip:</b> These are half-mistakes. Pay close attention to proper nouns (names, places) and the first word of every sentence." },
+                { id: 'punctuation', label: 'Punctuation', icon: '⁉️', data: mistakes.punctuation, tip: "<b>Pro Tip:</b> Punctuation errors are half-mistakes. Listen carefully for pauses that indicate commas and changes in tone that indicate a full stop." }
+            ];
+
+            tabData.forEach((tab, index) => {
+                if (tab.data.length > 0 || tab.id === 'all') { // Only show tabs with mistakes, plus the "All" tab
+                    const navLink = document.createElement('div');
+                    navLink.className = `tab-link ${index === 0 ? 'active' : ''}`;
+                    navLink.dataset.tab = tab.id;
+                    navLink.textContent = `${tab.label} (${tab.data.length})`;
+                    tabNav.appendChild(navLink);
+
+                    const contentEl = document.createElement('div');
+                    contentEl.id = `tab-${tab.id}`;
+                    contentEl.className = `tab-content ${index === 0 ? 'active' : ''}`;
+                    
+                    let contentHTML = `<div class="insight-box">${tab.tip}</div><ul class="mistake-list">`;
+                    if (tab.data.length > 0) {
+                        tab.data.forEach(m => {
+                            let detailHTML = '';
+                            let highlightClass = m.type;
+
+                            if (m.type === 'spelling') detailHTML = `<span class="typed-word">${m.t}</span> instead of <span class="original-word">${m.o}</span>`;
+                            else if (m.type === 'omission') detailHTML = `Missed word: <b class="original-word">${m.o}</b>`;
+                            else if (m.type === 'extra') detailHTML = `Added extra word: <b class="typed-word">${m.t}</b>`;
+                            else if (m.type === 'capitalization') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+                            else if (m.type === 'punctuation') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+
+                            contentHTML += `
+                                <div class="mistake-card">
+                                    <div class="mistake-card-header highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)} Error</div>
+                                    <div class="mistake-card-body">${detailHTML}</div>
+                                    <div class="mistake-card-footer">${m.context}</div>
+                                </div>`;
+                        });
+                    } else {
+                        contentHTML += `<div class="no-data"><p>Congratulations! No mistakes found in this transcription.</p></div>`;
+                    }
+                    contentHTML += '</ul>';
+                    contentEl.innerHTML = contentHTML;
+                    tabContentContainer.appendChild(contentEl);
+                }
+            });
+            
+            // Add Tab Functionality
+            tabNav.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tab-link')) {
+                    const tabId = e.target.dataset.tab;
+                    tabNav.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+                    tabContentContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    e.target.classList.add('active');
+                    document.getElementById(`tab-${tabId}`).classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
