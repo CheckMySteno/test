@@ -16,13 +16,16 @@
             --text-header: #1e293b;
             --text-body: #334155;
             --text-muted: #64748b;
+            --accent-purple: #7c3aed;
             --accent-red: #ef4444;
             --accent-green: #22c55e;
-            --hl-spelling: #fef3c7;      
-            --hl-omission: #fee2e2;     
-            --hl-extra: #dcfce7;
-            --hl-capitalization: #e0f2fe; 
-            --hl-punctuation: #ede9fe;
+            
+            /* CORRECTED COLORS TO MATCH THE MAIN PAGE */
+            --hl-additions: #fecdd3;     /* Reddish */
+            --hl-omissions: #d9f99d;     /* Greenish */
+            --hl-spelling: #fde68a;      /* Yellowish */
+            --hl-capitalization: #bae6fd; 
+            --hl-punctuation: #ddd6fe;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -60,17 +63,27 @@
             border-radius: 12px;
             border: 1px solid var(--border-color);
             padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-        .summary-card .label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
+        .summary-card .icon {
+            font-size: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: var(--accent-purple);
+            background-color: var(--accent-purple-light);
         }
         .summary-card .value {
             font-size: 2.5rem;
             font-weight: 800;
             color: var(--text-header);
+            line-height: 1;
+        }
+        .summary-card .label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
         }
         .visual-grid {
             display: grid;
@@ -136,6 +149,7 @@
             display: flex;
             border-bottom: 1px solid var(--border-color);
             padding: 0 1rem;
+            overflow-x: auto;
         }
         .tab-link {
             padding: 1rem 1.5rem;
@@ -144,6 +158,7 @@
             color: var(--text-muted);
             border-bottom: 3px solid transparent;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
         .tab-link.active {
             color: var(--accent-purple);
@@ -154,33 +169,55 @@
             padding: 2rem;
         }
         .tab-content.active { display: block; }
+        .insight-box {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-left: 4px solid var(--accent-purple);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+        .insight-box b { color: var(--text-header); }
         .mistake-list {
             list-style: none; padding: 0; margin: 0;
         }
-        .mistake-item {
-            display: grid;
-            grid-template-columns: 2rem 1fr;
-            align-items: start;
-            gap: 1rem;
-            padding: 1rem;
+        .mistake-card {
+            background: var(--bg-color);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            margin-bottom: 0.75rem;
-            background: #f8fafc;
+            margin-bottom: 1rem;
+            overflow: hidden;
         }
-        .mistake-type-icon { font-size: 1.5rem; }
-        .context-snippet { font-size: 0.9em; color: var(--text-muted); margin-top: 0.25rem; font-style: italic; }
+        .mistake-card-header {
+            padding: 0.75rem 1rem;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+        }
+        .mistake-card-body {
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+        .mistake-card-footer {
+            padding: 0.75rem 1rem;
+            font-size: 0.9em;
+            color: var(--text-muted);
+            font-style: italic;
+            background-color: #f1f5f9;
+        }
+        .no-data { text-align: center; padding: 3rem; }
         .highlight { padding: 1px 3px; border-radius: 3px; }
         .spelling { background: var(--hl-spelling); }
-        .omission { background: var(--hl-omission); }
-        .extra { background: var(--hl-extra); }
+        .omission { background: var(--hl-omissions); }
+        .extra, .substitution { background: var(--hl-additions); }
         .capitalization { background: var(--hl-capitalization); }
         .punctuation { background: var(--hl-punctuation); }
-        .no-data { text-align: center; padding: 3rem; }
+
         @media (max-width: 768px) {
             body { padding: 1rem; }
             header h1 { font-size: 1.5rem; }
             .visual-grid { grid-template-columns: 1fr; }
-            .tab-nav { overflow-x: auto; }
         }
     </style>
 </head>
@@ -195,208 +232,3 @@
             <div id="analysis-content">
                 <div class="summary-grid">
                     <div class="summary-card">
-                        <div class="label">Total Mistakes</div>
-                        <div class="value" id="total-mistakes">--</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="label">Full Mistakes</div>
-                        <div class="value" id="full-mistakes">--</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="label">Half Mistakes</div>
-                        <div class="value" id="half-mistakes">--</div>
-                    </div>
-                    <div class="summary-card">
-                        <div class="label">Final Accuracy</div>
-                        <div class="value" id="accuracy">--%</div>
-                    </div>
-                </div>
-
-                <div class="visual-grid">
-                    <div class="visual-card">
-                        <h2>Mistake Breakdown</h2>
-                        <div id="chart-container">
-                            <canvas id="mistakeChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="visual-card">
-                        <h2>Top Problem Words</h2>
-                        <ul id="top-errors-list" class="top-errors-list">
-                            <!-- Populated by JS -->
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="tabs-container">
-                    <nav class="tab-nav" id="tab-nav">
-                        <!-- Tabs will be generated here -->
-                    </nav>
-                    <div id="tab-content-container">
-                        <!-- Tab content will be generated here -->
-                    </div>
-                </div>
-            </div>
-            <div id="no-data-message" class="no-data" style="display: none;">
-                <h2>No Analysis Data Found</h2>
-                <p>Please generate a result and click "Deep Analysis" to see this page.</p>
-            </div>
-        </main>
-    </div>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const dataString = sessionStorage.getItem('deepAnalysisData');
-            if (!dataString) {
-                document.getElementById('analysis-content').style.display = 'none';
-                document.getElementById('no-data-message').style.display = 'block';
-                return;
-            }
-
-            const data = JSON.parse(dataString);
-            const accuracy = ((data.originalText.split(/\s+/).filter(Boolean).length - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / data.originalText.split(/\s+/).filter(Boolean).length * 100).toFixed(2);
-            
-            // Populate Header and Summary
-            document.getElementById('passage-title').textContent = data.passageTitle;
-            document.getElementById('test-date').textContent = `Analyzed on: ${data.testDate}`;
-            document.getElementById('total-mistakes').textContent = data.summary.fullMistakes + data.summary.halfMistakes;
-            document.getElementById('full-mistakes').textContent = data.summary.fullMistakes;
-            document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
-            document.getElementById('accuracy').textContent = `${accuracy}%`;
-
-            // Process and Categorize Mistakes
-            const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
-            const allWords = data.originalText.split(/\s+/);
-            const mistakePatterns = {};
-
-            data.alignment.forEach((item, index) => {
-                const isMistake = item.type !== 'match' || item.mistakeType;
-                if (!isMistake) return;
-
-                const wordIndex = data.alignment.slice(0, index).filter(i => i.type !== 'ins').length;
-                const start = Math.max(0, wordIndex - 3);
-                const end = Math.min(allWords.length, wordIndex + 4);
-                const context = `...${allWords.slice(start, end).join(' ')}...`;
-
-                let type = item.mistakeType;
-                if (item.type === 'sub' && !type) type = 'spelling';
-                if (item.type === 'del') type = 'omission';
-                if (item.type === 'ins') type = 'extra';
-
-                if (mistakes[type]) {
-                    mistakes[type].push({ ...item, context, type });
-                }
-
-                if (type === 'spelling') {
-                    const key = `${item.o}|${item.t}`;
-                    if (!mistakePatterns[key]) {
-                        mistakePatterns[key] = { original: item.o, typed: item.t, count: 0 };
-                    }
-                    mistakePatterns[key].count++;
-                }
-            });
-
-            // Render Chart
-            const ctx = document.getElementById('mistakeChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Spelling', 'Omissions', 'Extra Words', 'Capitalization', 'Punctuation'],
-                    datasets: [{
-                        data: [
-                            mistakes.spelling.length,
-                            mistakes.omission.length,
-                            mistakes.extra.length,
-                            mistakes.capitalization.length,
-                            mistakes.punctuation.length
-                        ],
-                        backgroundColor: ['#fef3c7', '#fee2e2', '#dcfce7', '#e0f2fe', '#ede9fe'],
-                        borderColor: ['#fde68a', '#fecaca', '#bbf7d0', '#bae6fd', '#ddd6fe'],
-                        borderWidth: 1
-                    }]
-                },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-            });
-
-            // Render Top Problem Words
-            const topErrorsList = document.getElementById('top-errors-list');
-            const sortedErrors = Object.values(mistakePatterns).sort((a, b) => b.count - a.count);
-            if (sortedErrors.length > 0) {
-                sortedErrors.slice(0, 3).forEach(error => {
-                    const li = document.createElement('li');
-                    li.innerHTML = `
-                        <span class="error-pair">
-                            <span class="original-word">${error.original}</span> → <span class="typed-word">${error.typed}</span>
-                        </span>
-                        <span class="error-count">${error.count} time(s)</span>
-                    `;
-                    topErrorsList.appendChild(li);
-                });
-            } else {
-                topErrorsList.innerHTML = '<li>No recurring spelling mistakes found.</li>';
-            }
-            
-            // Render Tabs
-            const tabNav = document.getElementById('tab-nav');
-            const tabContentContainer = document.getElementById('tab-content-container');
-            const allMistakes = Object.values(mistakes).flat();
-            const tabData = [
-                { id: 'all', label: 'All', icon: '📋', data: allMistakes },
-                { id: 'spelling', label: 'Spelling', icon: '✏️', data: mistakes.spelling },
-                { id: 'omission', label: 'Omissions', icon: '➖', data: mistakes.omission },
-                { id: 'extra', label: 'Extra Words', icon: '➕', data: mistakes.extra },
-                { id: 'capitalization', label: 'Capitalization', icon: '🔠', data: mistakes.capitalization },
-                { id: 'punctuation', label: 'Punctuation', icon: '⁉️', data: mistakes.punctuation }
-            ];
-
-            tabData.forEach((tab, index) => {
-                const navLink = document.createElement('div');
-                navLink.className = `tab-link ${index === 0 ? 'active' : ''}`;
-                navLink.dataset.tab = tab.id;
-                navLink.textContent = `${tab.label} (${tab.data.length})`;
-                tabNav.appendChild(navLink);
-
-                const contentEl = document.createElement('div');
-                contentEl.id = `tab-${tab.id}`;
-                contentEl.className = `tab-content ${index === 0 ? 'active' : ''}`;
-                
-                let contentHTML = '<ul class="mistake-list">';
-                if (tab.data.length > 0) {
-                    tab.data.forEach(m => {
-                        let detailHTML = '';
-                        if (m.type === 'spelling') detailHTML = `You typed <b class="typed-word">${m.t}</b> instead of <b class="original-word">${m.o}</b>`;
-                        else if (m.type === 'omission') detailHTML = `You missed the word <b class="original-word">${m.o}</b>`;
-                        else if (m.type === 'extra') detailHTML = `You added an extra word <b class="typed-word">${m.t}</b>`;
-                        else if (m.type === 'capitalization') detailHTML = `Capitalization error: typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
-                        else if (m.type === 'punctuation') detailHTML = `Punctuation error: typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
-
-                        contentHTML += `
-                            <li class="mistake-item">
-                                <div class="mistake-type-icon">${tab.icon}</div>
-                                <div class="mistake-details">
-                                    <div>${detailHTML}</div>
-                                    <div class="context-snippet">${m.context.replace(m.o, `<span class="highlight ${m.type}"><b>${m.o || ''}</b></span>`)}</div>
-                                </div>
-                            </li>`;
-                    });
-                } else {
-                    contentHTML += `<div class="no-data"><p>No ${tab.label.toLowerCase()} mistakes found.</p></div>`;
-                }
-                contentHTML += '</ul>';
-                contentEl.innerHTML = contentHTML;
-                tabContentContainer.appendChild(contentEl);
-            });
-            
-            // Add Tab Functionality
-            tabNav.addEventListener('click', (e) => {
-                if (e.target.classList.contains('tab-link')) {
-                    const tabId = e.target.dataset.tab;
-                    tabNav.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
-                    tabContentContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    e.target.classList.add('active');
-                    document.getElementById(`tab-${tabId}`).classList.add('active');
-                }
-            });
-        });
-    </script>
-</body>
-</html>
