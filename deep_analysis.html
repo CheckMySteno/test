@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deep Mistake Analysis</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --surface-color: #ffffff;
+            --bg-color: #f8fafc;
+            --border-color: #e2e8f0;
+            --text-header: #1e293b;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --hl-additions: #fecdd3;     
+            --hl-omissions: #d9f99d;     
+            --hl-spelling: #fde68a;      
+            --hl-capitalization: #bae6fd; 
+            --hl-punctuation: #ddd6fe;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-body);
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--surface-color);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 20px -5px rgba(100, 116, 139, 0.1);
+            overflow: hidden;
+        }
+        header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-header);
+            margin: 0;
+        }
+        header p {
+            margin: 0.25rem 0 0 0;
+            color: var(--text-muted);
+        }
+        main {
+            padding: 2rem;
+        }
+        .analysis-section {
+            margin-bottom: 2.5rem;
+        }
+        .analysis-section h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-header);
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .mistake-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .mistake-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+        .mistake-item:last-child {
+            margin-bottom: 0;
+        }
+        .mistake-type-icon {
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        .mistake-details {
+            line-height: 1.5;
+        }
+        .original-word {
+            text-decoration: line-through;
+            color: #ef4444;
+        }
+        .typed-word {
+            font-weight: 600;
+            color: #166534;
+        }
+        .context-snippet {
+            font-size: 0.9em;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+            font-style: italic;
+        }
+        .no-data {
+            text-align: center;
+            padding: 3rem;
+        }
+        .highlight {
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+        .spelling { background: var(--hl-spelling); }
+        .omission { background: var(--hl-omissions); }
+        .extra { background: var(--hl-additions); }
+        .capitalization { background: var(--hl-capitalization); }
+        .punctuation { background: var(--hl-punctuation); }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1 id="passage-title">Loading Analysis...</h1>
+            <p id="test-date"></p>
+        </header>
+        <main>
+            <div id="analysis-content">
+                <!-- Data will be populated here by JavaScript -->
+            </div>
+            <div id="no-data-message" class="no-data" style="display: none;">
+                <h2>No Analysis Data Found</h2>
+                <p>Please generate a result and click "Deep Analysis" to see this page.</p>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1. Retrieve the data string from sessionStorage
+            const dataString = sessionStorage.getItem('deepAnalysisData');
+
+            if (!dataString) {
+                // If no data is found, show an error message
+                document.getElementById('analysis-content').style.display = 'none';
+                document.getElementById('no-data-message').style.display = 'block';
+                return;
+            }
+
+            // 2. Parse the string back into a JavaScript object
+            const data = JSON.parse(dataString);
+
+            // 3. Populate the header
+            document.getElementById('passage-title').textContent = data.passageTitle;
+            document.getElementById('test-date').textContent = `Analyzed on: ${data.testDate}`;
+            
+            // 4. Categorize mistakes
+            const mistakes = {
+                spelling: [],
+                omission: [],
+                extra: [],
+                capitalization: [],
+                punctuation: []
+            };
+
+            const allWords = data.originalText.split(/\s+/);
+
+            data.alignment.forEach((item, index) => {
+                let context = '';
+                // Create a small context snippet
+                const wordIndex = data.alignment.slice(0, index).filter(i => i.type !== 'ins').length;
+                const start = Math.max(0, wordIndex - 3);
+                const end = Math.min(allWords.length, wordIndex + 4);
+                context = `...${allWords.slice(start, end).join(' ')}...`;
+
+                if (item.mistakeType === 'spelling' || (item.type === 'sub' && !item.mistakeType)) {
+                    mistakes.spelling.push({ ...item, context });
+                } else if (item.type === 'del') {
+                    mistakes.omission.push({ ...item, context });
+                } else if (item.type === 'ins') {
+                    mistakes.extra.push({ ...item, context });
+                } else if (item.mistakeType === 'capitalization') {
+                    mistakes.capitalization.push({ ...item, context });
+                } else if (item.mistakeType === 'punctuation') {
+                    mistakes.punctuation.push({ ...item, context });
+                }
+            });
+
+            // 5. Build the HTML to display the mistakes
+            const contentDiv = document.getElementById('analysis-content');
+            let html = '';
+
+            const createSectionHTML = (title, icon, mistakeArray, typeClass) => {
+                if (mistakeArray.length === 0) return '';
+                
+                let sectionHTML = `<div class="analysis-section"><h2>${title} (${mistakeArray.length})</h2><ul class="mistake-list">`;
+                
+                mistakeArray.forEach(m => {
+                    sectionHTML += `<li class="mistake-item">`;
+                    sectionHTML += `<div class="mistake-type-icon">${icon}</div>`;
+                    sectionHTML += `<div class="mistake-details">`;
+
+                    if (typeClass === 'spelling') {
+                        sectionHTML += `You typed <b class="typed-word">${m.t}</b> instead of <b class="original-word">${m.o}</b>`;
+                    } else if (typeClass === 'omission') {
+                        sectionHTML += `You missed the word <b class="original-word">${m.o}</b>`;
+                    } else if (typeClass === 'extra') {
+                        sectionHTML += `You added an extra word <b class="typed-word">${m.t}</b>`;
+                    } else if (typeClass === 'capitalization') {
+                         sectionHTML += `Capitalization error: typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+                    } else if (typeClass === 'punctuation') {
+                         sectionHTML += `Punctuation error: typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+                    }
+                    
+                    sectionHTML += `<div class="context-snippet">${m.context.replace(m.o, `<span class="highlight ${typeClass}"><b>${m.o}</b></span>`)}</div>`;
+                    sectionHTML += `</div></li>`;
+                });
+
+                sectionHTML += `</ul></div>`;
+                return sectionHTML;
+            };
+
+            html += createSectionHTML('Spelling Mistakes', '✏️', mistakes.spelling, 'spelling');
+            html += createSectionHTML('Omitted Words', '➖', mistakes.omission, 'omission');
+            html += createSectionHTML('Extra Words', '➕', mistakes.extra, 'extra');
+            html += createSectionHTML('Capitalization Mistakes', '🔠', mistakes.capitalization, 'capitalization');
+            html += createSectionHTML('Punctuation Mistakes', '⁉️', mistakes.punctuation, 'punctuation');
+
+            if (html === '') {
+                html = '<div class="no-data"><p>Congratulations! No mistakes were found in this transcription.</p></div>';
+            }
+
+            contentDiv.innerHTML = html;
+        });
+    </script>
+</body>
+</html>
