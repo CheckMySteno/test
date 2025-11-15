@@ -23,9 +23,9 @@
             /* CORRECTED COLORS TO MATCH THE MAIN PAGE */
             --hl-additions: #fecdd3;     /* Reddish */
             --hl-omissions: #dcfce7;     /* Greenish */
-            --hl-spelling: #fef3c7;      /* Yellowish */
-            --hl-capitalization: #e0f2fe; 
-            --hl-punctuation: #ede9fe;
+            --hl-spelling: #fde68a;      /* Yellowish */
+            --hl-capitalization: #bae6fd; 
+            --hl-punctuation: #ddd6fe;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -358,7 +358,7 @@
                             mistakes.capitalization.length,
                             mistakes.punctuation.length
                         ],
-                        // CORRECTED COLOR MAPPING
+                        // ** BUG FIX: Correct color mapping **
                         backgroundColor: ['#fef3c7', '#dcfce7', '#fee2e2', '#e0f2fe', '#ede9fe'],
                         borderColor: ['#fde68a', '#bbf7d0', '#fecaca', '#bae6fd', '#ddd6fe'],
                         borderWidth: 1
@@ -389,7 +389,7 @@
             // Render Tabs
             const tabNav = document.getElementById('tab-nav');
             const tabContentContainer = document.getElementById('tab-content-container');
-            const allMistakes = Object.values(mistakes).flat().sort(() => Math.random() - 0.5); // Randomize for review
+            const allMistakes = Object.values(mistakes).flat();
             const tabData = [
                 { id: 'all', label: 'All Mistakes', icon: '📋', data: allMistakes, tip: "Reviewing all mistakes together helps you see the full picture of your performance. Look for patterns across different categories." },
                 { id: 'spelling', label: 'Spelling', icon: '✏️', data: mistakes.spelling, tip: "<b>Pro Tip:</b> Spelling errors often happen with similar-sounding words or fast typing. Create a personal error log of these words for focused practice." },
@@ -398,6 +398,9 @@
                 { id: 'capitalization', label: 'Capitalization', icon: '🔠', data: mistakes.capitalization, tip: "<b>Pro Tip:</b> These are half-mistakes. Pay close attention to proper nouns (names, places) and the first word of every sentence." },
                 { id: 'punctuation', label: 'Punctuation', icon: '⁉️', data: mistakes.punctuation, tip: "<b>Pro Tip:</b> Punctuation errors are half-mistakes. Listen carefully for pauses that indicate commas and changes in tone that indicate a full stop." }
             ];
+
+            // Helper function to escape regex characters
+            const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
             tabData.forEach((tab, index) => {
                 if (tab.data.length > 0 || tab.id === 'all') { // Only show tabs with mistakes, plus the "All" tab
@@ -416,22 +419,36 @@
                         tab.data.forEach(m => {
                             let detailHTML = '';
                             let highlightClass = m.type;
+                            if (highlightClass === 'sub') highlightClass = 'spelling'; // Normalize for CSS
+                            
+                            let wordToHighlight = m.o || '';
+                            let contextToDisplay = m.context;
 
                             if (m.type === 'spelling') detailHTML = `<span class="typed-word">${m.t}</span> instead of <span class="original-word">${m.o}</span>`;
                             else if (m.type === 'omission') detailHTML = `Missed word: <b class="original-word">${m.o}</b>`;
-                            else if (m.type === 'extra') detailHTML = `Added extra word: <b class="typed-word">${m.t}</b>`;
-                            else if (m.type === 'capitalization') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+                            else if (m.type === 'extra') {
+                                detailHTML = `Added extra word: <b class="typed-word">${m.t}</b>`;
+                                wordToHighlight = ''; // Cannot highlight an extra word in original context
+                            } else if (m.type === 'capitalization') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
                             else if (m.type === 'punctuation') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+
+                            // **BUG FIX: Dynamically highlight context**
+                            if (wordToHighlight) {
+                                const regex = new RegExp(`\\b${escapeRegExp(wordToHighlight)}\\b`, 'g');
+                                contextToDisplay = m.context.replace(regex, `<span class="highlight ${highlightClass}"><b>${wordToHighlight}</b></span>`);
+                            }
 
                             contentHTML += `
                                 <div class="mistake-card">
                                     <div class="mistake-card-header highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)} Error</div>
                                     <div class="mistake-card-body">${detailHTML}</div>
-                                    <div class="mistake-card-footer">${m.context}</div>
+                                    <div class="mistake-card-footer">${contextToDisplay}</div>
                                 </div>`;
                         });
-                    } else {
-                        contentHTML += `<div class="no-data"><p>Congratulations! No mistakes found in this transcription.</p></div>`;
+                    } else if (tab.id === 'all' && allMistakes.length === 0) {
+                        contentHTML += `<div class="no-data"><p>Congratulations! No mistakes were found in this transcription.</p></div>`;
+                    } else if (tab.id !== 'all') {
+                         contentHTML += `<div class="no-data"><p>No ${tab.label.toLowerCase()} mistakes found.</p></div>`;
                     }
                     contentHTML += '</ul>';
                     contentEl.innerHTML = contentHTML;
