@@ -238,15 +238,10 @@
         font-size: 0.9em; color: var(--text-muted); display:inline-flex;
         align-items:center; gap: 5px; margin-top: 0.75rem; cursor: pointer;
     }
-    #startTranscriptionBtn, .secondary-action-btn {
+    #startTranscriptionBtn {
         font-size: 1.1em; padding: 16px 24px; width: 100%; max-width: 280px;
         border-radius: 12px; font-weight: 600; transition: all 0.2s ease;
     }
-    .secondary-action-btn {
-        background-color: transparent; color: #374151;
-        border: 2px solid #e5e7eb;
-    }
-    .secondary-action-btn:hover { background-color: #f8fafc; border-color: #d1d5db; }
     #startTranscriptionBtn:disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; box-shadow: none; }
     #startTranscriptionBtn:not(:disabled) { background-color: #1f2937; color: white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
     #startTranscriptionBtn:not(:disabled):hover { background-color: #111827; transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
