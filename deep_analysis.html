@@ -141,7 +141,7 @@
             font-size: 0.8rem;
         }
         
-        /* SLEEK & MODERN MISTAKE LISTS & TABLES */
+        /* ADVANCED ANALYSIS TABLE & FILTERS */
         .analysis-container {
             background: var(--surface-color);
             border-radius: 12px;
@@ -151,48 +151,34 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
             padding: 1rem 1.5rem;
             border-bottom: 1px solid var(--border-color);
         }
-        .analysis-header h2 {
-            font-size: 1.25rem; margin: 0; color: var(--text-header);
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
         }
-        #view-toggle-btn {
+        .filter-btn {
             background-color: var(--bg-color);
             border: 1px solid var(--border-color);
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 8px;
             font-weight: 600;
             color: var(--text-body);
             cursor: pointer;
             transition: all 0.2s;
         }
-        #view-toggle-btn:hover { background-color: #f1f5f9; }
+        .filter-btn:hover { background-color: #f1f5f9; }
+        .filter-btn.active {
+            background-color: var(--accent-purple);
+            color: white;
+            border-color: var(--accent-purple);
+        }
 
-        .mistake-list-item {
-            display: grid;
-            grid-template-columns: 150px 1fr;
-            gap: 1.5rem;
-            padding: 1rem 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-            align-items: center;
-        }
-        .mistake-list-item:last-child { border-bottom: none; }
-        .mistake-type {
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 4px 8px;
-            border-radius: 6px;
-            text-align: center;
-        }
-        .mistake-context {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            margin-top: 0.25rem;
-        }
-        
         #table-view-container {
-            padding: 1.5rem;
             overflow-x: auto;
         }
         .mistake-table {
@@ -212,8 +198,20 @@
             text-transform: uppercase;
             font-size: 0.8rem;
         }
-        .mistake-table tbody tr:nth-child(even) {
-            background-color: var(--bg-color);
+        .mistake-table tbody tr {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .mistake-table tbody tr:hover {
+            background-color: #f5f3ff;
+        }
+        .mistake-type {
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-align: center;
+            white-space: nowrap;
         }
         
         .highlight { padding: 1px 3px; border-radius: 3px; font-weight: bold; }
@@ -223,6 +221,40 @@
         .capitalization { background: var(--hl-capitalization); color: #0c4a6e; }
         .punctuation { background: var(--hl-punctuation); color: #5b21b6; }
         .no-data { text-align: center; padding: 3rem; }
+        
+        /* FULL TRANSCRIPT MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(20, 20, 30, 0.8);
+            backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.visible { display: flex; opacity: 1; }
+        .modal-content {
+            background-color: var(--surface-color);
+            border-radius: 12px; width: 90%; max-width: 900px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; height: 90vh;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);
+        }
+        .modal-header h2 { font-size: 1.25rem; margin: 0; color: var(--text-header); }
+        .modal-close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+        .full-transcript-content {
+            padding: 2rem;
+            overflow-y: auto;
+            line-height: 2;
+            font-size: 1.1rem;
+        }
+        .full-transcript-content .active-highlight {
+            background-color: var(--accent-purple) !important;
+            color: white !important;
+            padding: 2px 5px;
+            border-radius: 4px;
+        }
 
         @media (max-width: 900px) {
             .visual-grid { grid-template-columns: 1fr; }
@@ -230,8 +262,6 @@
         @media (max-width: 768px) {
             body { padding: 1rem; }
             header h1 { font-size: 1.5rem; }
-            .mistake-list-item { grid-template-columns: 1fr; gap: 0.5rem; }
-            .mistake-type { width: fit-content; }
         }
     </style>
 </head>
@@ -292,21 +322,18 @@
 
                 <div class="analysis-container">
                     <div class="analysis-header">
-                        <h2>All Mistakes (<span id="mistake-count">0</span>)</h2>
-                        <button id="view-toggle-btn">Switch to Table View</button>
+                        <div id="filter-buttons" class="filter-buttons">
+                            <!-- Filter buttons will be rendered here -->
+                        </div>
                     </div>
 
-                    <div id="list-view-container">
-                        <!-- List View will be rendered here -->
-                    </div>
-
-                    <div id="table-view-container" style="display: none;">
+                    <div id="table-view-container">
                         <table class="mistake-table">
                             <thead>
                                 <tr>
                                     <th>Type</th>
-                                    <th>Error</th>
-                                    <th>Context</th>
+                                    <th>Error Details</th>
+                                    <th>Context in Passage</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body">
@@ -321,6 +348,19 @@
                 <p>Please generate a result and click "Deep Analysis" to see this page.</p>
             </div>
         </main>
+    </div>
+
+    <!-- Full Transcript Modal -->
+    <div id="full-transcript-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Full Transcription Context</h2>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
+            </div>
+            <div class="full-transcript-content" id="full-transcript-content">
+                <!-- Full text will be rendered here -->
+            </div>
+        </div>
     </div>
 
     <script>
@@ -348,14 +388,15 @@
             const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
             const allWords = data.originalText.split(/\s+/);
             const mistakePatterns = {};
+            let alignmentWithIndex = data.alignment.map((item, index) => ({...item, originalIndex: index}));
 
-            data.alignment.forEach((item, index) => {
+            alignmentWithIndex.forEach((item) => {
                 const isMistake = item.type !== 'match' || item.mistakeType;
                 if (!isMistake) return;
 
-                const wordIndex = data.alignment.slice(0, index).filter(i => i.type !== 'ins').length;
-                const start = Math.max(0, wordIndex - 3);
-                const end = Math.min(allWords.length, wordIndex + 4);
+                const wordIndex = alignmentWithIndex.slice(0, item.originalIndex).filter(i => i.type !== 'ins').length;
+                const start = Math.max(0, wordIndex - 4);
+                const end = Math.min(allWords.length, wordIndex + 5);
                 const context = `...${allWords.slice(start, end).join(' ')}...`;
 
                 let type = item.mistakeType;
@@ -377,8 +418,7 @@
             });
 
             // Render Chart
-            const ctx = document.getElementById('mistakeChart').getContext('2d');
-            new Chart(ctx, {
+            new Chart(document.getElementById('mistakeChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Spelling', 'Omissions', 'Extra Words', 'Capitalization', 'Punctuation'],
@@ -417,25 +457,45 @@
                 topErrorsList.innerHTML = '<li>No recurring spelling mistakes found. Well done!</li>';
             }
             
-            // RENDER BOTH LIST AND TABLE VIEWS
             const allMistakes = Object.values(mistakes).flat();
-            document.getElementById('mistake-count').textContent = allMistakes.length;
-            const listViewContainer = document.getElementById('list-view-container');
-            const tableBody = document.getElementById('table-body');
             
-            if (allMistakes.length === 0) {
-                listViewContainer.innerHTML = '<div class="no-data"><p>Congratulations! No mistakes were found.</p></div>';
-                tableBody.innerHTML = '<tr><td colspan="3" class="no-data"><p>Congratulations! No mistakes were found.</p></td></tr>';
-            } else {
-                let listHTML = '';
-                let tableHTML = '';
-                const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            // RENDER FILTER BUTTONS
+            const filterButtonsContainer = document.getElementById('filter-buttons');
+            const filters = [
+                { id: 'all', label: 'All', data: allMistakes },
+                { id: 'spelling', label: 'Spelling', data: mistakes.spelling },
+                { id: 'omission', label: 'Omissions', data: mistakes.omission },
+                { id: 'extra', label: 'Extra Words', data: mistakes.extra },
+                { id: 'capitalization', label: 'Capitalization', data: mistakes.capitalization },
+                { id: 'punctuation', label: 'Punctuation', data: mistakes.punctuation }
+            ];
 
-                allMistakes.forEach(m => {
+            filters.forEach((filter, index) => {
+                if(filter.data.length > 0 || filter.id === 'all') {
+                    const btn = document.createElement('button');
+                    btn.className = `filter-btn ${index === 0 ? 'active' : ''}`;
+                    btn.dataset.filter = filter.id;
+                    btn.innerHTML = `${filter.label} (${filter.data.length})`;
+                    filterButtonsContainer.appendChild(btn);
+                }
+            });
+
+            const tableBody = document.getElementById('table-body');
+            const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+            // RENDER TABLE FUNCTION
+            const renderTable = (mistakeArray) => {
+                if (mistakeArray.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="3" class="no-data"><p>No mistakes of this type found.</p></td></tr>';
+                    return;
+                }
+
+                let tableHTML = '';
+                mistakeArray.forEach(m => {
                     let detailHTML = '';
                     let highlightClass = m.type;
                     if (highlightClass === 'sub') highlightClass = 'substitution';
-
+                    
                     let wordToHighlight = m.o || m.t;
                     let contextToDisplay = m.context;
 
@@ -452,41 +512,69 @@
                         contextToDisplay = m.context.replace(regex, `<span class="highlight ${highlightClass}">$1</span>`);
                     }
 
-                    // Build List Item HTML
-                    listHTML += `
-                        <div class="mistake-list-item">
-                            <span class="mistake-type highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)}</span>
-                            <div>
-                                <div class="mistake-description">${detailHTML}</div>
-                                <div class="mistake-context">${contextToDisplay}</div>
-                            </div>
-                        </div>`;
+                    tableHTML += `<tr data-index="${m.originalIndex}">
+                        <td><span class="mistake-type highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)}</span></td>
+                        <td>${detailHTML}</td>
+                        <td>${contextToDisplay}</td>
+                    </tr>`;
+                });
+                tableBody.innerHTML = tableHTML;
+            };
 
-                    // Build Table Row HTML
-                    tableHTML += `
-                        <tr>
-                            <td><span class="mistake-type highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)}</span></td>
-                            <td>${detailHTML}</td>
-                            <td>${contextToDisplay}</td>
-                        </tr>`;
+            // Initial Render
+            renderTable(allMistakes);
+
+            // Filter Logic
+            filterButtonsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('filter-btn')) {
+                    const filterId = e.target.dataset.filter;
+                    filterButtonsContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    const dataToRender = filterId === 'all' ? allMistakes : mistakes[filterId];
+                    renderTable(dataToRender);
+                }
+            });
+
+            // MODAL LOGIC
+            const modal = document.getElementById('full-transcript-modal');
+            const modalContent = document.getElementById('full-transcript-content');
+            
+            tableBody.addEventListener('click', (e) => {
+                const row = e.target.closest('tr');
+                if (!row || !row.dataset.index) return;
+                
+                const mistakeIndex = parseInt(row.dataset.index, 10);
+                
+                let fullTextHTML = '';
+                data.alignment.forEach((item, index) => {
+                    let word = item.o || item.t;
+                    let highlightClass = '';
+                    
+                    if (item.type !== 'match' || item.mistakeType) {
+                         if (item.type === 'sub') highlightClass = 'substitution';
+                         else highlightClass = item.type;
+                    }
+                    
+                    if (index === mistakeIndex) {
+                        fullTextHTML += `<span class="highlight ${highlightClass} active-highlight">${word}</span> `;
+                    } else if (highlightClass) {
+                        fullTextHTML += `<span class="highlight ${highlightClass}">${word}</span> `;
+                    } else {
+                        fullTextHTML += `<span>${word}</span> `;
+                    }
                 });
 
-                listViewContainer.innerHTML = listHTML;
-                tableBody.innerHTML = tableHTML;
-            }
+                modalContent.innerHTML = fullTextHTML;
+                modal.classList.add('visible');
+            });
 
-            // Add View Toggle Functionality
-            const toggleBtn = document.getElementById('view-toggle-btn');
-            toggleBtn.addEventListener('click', () => {
-                const isListView = listViewContainer.style.display !== 'none';
-                if (isListView) {
-                    listViewContainer.style.display = 'none';
-                    document.getElementById('table-view-container').style.display = 'block';
-                    toggleBtn.textContent = 'Switch to List View';
-                } else {
-                    listViewContainer.style.display = 'block';
-                    document.getElementById('table-view-container').style.display = 'none';
-                    toggleBtn.textContent = 'Switch to Table View';
+            document.getElementById('modal-close-btn').addEventListener('click', () => {
+                modal.classList.remove('visible');
+            });
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('visible');
                 }
             });
         });
