@@ -39,7 +39,7 @@
             margin: 0 auto;
         }
         
-        /* ADVANCED HEADER */
+        /* NEW ADVANCED HEADER */
         header {
             background: var(--surface-color);
             border-radius: 16px;
@@ -47,51 +47,35 @@
             padding: 2rem;
             margin-bottom: 2.5rem;
             display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .header-main { flex-grow: 1; }
+        .header-main h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-header);
+            margin: 0 0 0.25rem 0;
+        }
+        .header-main p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        .header-dashboard {
+            display: flex;
             align-items: center;
             gap: 2rem;
-        }
-        .accuracy-ring-container {
-            width: 120px;
-            height: 120px;
-            position: relative;
             flex-shrink: 0;
         }
-        .accuracy-ring-text {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-        .accuracy-score {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--text-header);
-        }
-        .accuracy-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-        .header-details {
-            flex-grow: 1;
-        }
-        .header-details h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--text-header);
-            margin: 0;
-        }
-        .header-details p {
-            margin: 0.25rem 0 1.5rem 0;
-            color: var(--text-muted);
-            font-size: 1rem;
-        }
         .header-stats {
-            display: flex;
-            gap: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem 2rem;
         }
         .stat-item .value {
-            font-size: 1.5rem;
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--text-header);
         }
@@ -99,16 +83,22 @@
             font-size: 0.9rem;
             color: var(--text-muted);
         }
+        .stat-item .value.accuracy { color: var(--accent-green); }
+        .stat-item .value.mistakes { color: var(--accent-red); }
+        .mini-chart-container {
+            width: 100px;
+            height: 100px;
+        }
 
-        /* COLLAPSIBLE DASHBOARD */
-        .dashboard-section {
+        /* NEW ACCORDION-STYLE COLLAPSE */
+        .collapsible-section {
             border: 1px solid var(--border-color);
             border-radius: 12px;
             margin-bottom: 2.5rem;
             background-color: var(--surface-color);
             overflow: hidden;
         }
-        .dashboard-header {
+        .collapsible-header {
             padding: 1rem 1.5rem;
             cursor: pointer;
             display: flex;
@@ -116,8 +106,8 @@
             align-items: center;
             transition: background-color 0.2s ease;
         }
-        .dashboard-header:hover { background-color: #f8f9fa; }
-        .dashboard-header h2 {
+        .collapsible-header:hover { background-color: #f8f9fa; }
+        .collapsible-header h2 {
             font-size: 1.25rem;
             margin: 0;
             color: var(--text-header);
@@ -127,39 +117,16 @@
             font-size: 1.5rem;
             color: var(--text-muted);
         }
-        .dashboard-content {
+        .collapsible-content {
             display: none; /* Hidden by default */
             padding: 1.5rem;
             border-top: 1px solid var(--border-color);
         }
-        .dashboard-section.open .toggle-icon {
+        .collapsible-section.open .toggle-icon {
             transform: rotate(180deg);
         }
-        .dashboard-section.open .dashboard-content {
+        .collapsible-section.open .collapsible-content {
             display: block;
-        }
-
-        .visual-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-        .visual-card {
-            border-radius: 12px;
-            padding: 1.5rem;
-            background-color: var(--bg-color);
-            border: 1px solid var(--border-color);
-        }
-        .visual-card h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--text-header);
-            margin: 0 0 1.5rem 0;
-        }
-        #chart-container {
-            position: relative;
-            height: 250px;
-            width: 100%;
         }
         .top-errors-list { list-style: none; padding: 0; margin: 0; }
         .top-errors-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
@@ -281,7 +248,8 @@
         }
 
         @media (max-width: 900px) {
-            .visual-grid { grid-template-columns: 1fr; }
+            .header-dashboard { flex-direction: column-reverse; align-items: flex-end; }
+            .header-stats { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 768px) {
             body { padding: 1rem; }
@@ -293,17 +261,14 @@
 
     <div class="container">
         <header>
-             <div class="accuracy-ring-container">
-                <canvas id="accuracyRing"></canvas>
-                <div class="accuracy-ring-text">
-                    <div class="accuracy-score" id="accuracy-score">--%</div>
-                    <div class="accuracy-label">Accuracy</div>
-                </div>
-            </div>
-            <div class="header-details">
+            <div class="header-main">
                 <h1 id="passage-title">Loading Analysis...</h1>
                 <p id="test-date"></p>
-                <div class="header-stats">
+                 <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="label">Accuracy</div>
+                        <div class="value accuracy" id="accuracy-score">--%</div>
+                    </div>
                     <div class="stat-item">
                         <div class="label">Total Mistakes</div>
                         <div class="value mistakes" id="total-mistakes">--</div>
@@ -318,29 +283,23 @@
                     </div>
                 </div>
             </div>
+            <div class="header-dashboard">
+                <div class="mini-chart-container">
+                    <canvas id="miniMistakeChart"></canvas>
+                </div>
+            </div>
         </header>
         <main>
             <div id="analysis-content">
-                <div class="dashboard-section">
-                    <div class="dashboard-header">
-                        <h2>Show Performance Dashboard</h2>
+                <div class="collapsible-section">
+                    <div class="collapsible-header">
+                        <h2>Show Top Problem Words</h2>
                         <span class="toggle-icon">▼</span>
                     </div>
-                    <div class="dashboard-content">
-                        <div class="visual-grid">
-                            <div class="visual-card">
-                                <h3>Mistake Breakdown</h3>
-                                <div id="chart-container">
-                                    <canvas id="mistakeChart"></canvas>
-                                </div>
-                            </div>
-                            <div class="visual-card">
-                                <h3>Top Problem Words</h3>
-                                <ul id="top-errors-list" class="top-errors-list">
-                                    <!-- Populated by JS -->
-                                </ul>
-                            </div>
-                        </div>
+                    <div class="collapsible-content">
+                         <ul id="top-errors-list" class="top-errors-list">
+                            <!-- Populated by JS -->
+                        </ul>
                     </div>
                 </div>
 
@@ -408,20 +367,6 @@
             document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
             document.getElementById('accuracy-score').textContent = `${accuracy.toFixed(1)}%`;
 
-            // Render Accuracy Ring Chart
-            new Chart(document.getElementById('accuracyRing').getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [accuracy, 100 - accuracy],
-                        backgroundColor: ['#7c3aed', '#e2e8f0'],
-                        borderWidth: 0,
-                        borderRadius: 5,
-                    }]
-                },
-                options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-            });
-
             // Process and Categorize Mistakes
             const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
             const allWords = data.originalText.split(/\s+/);
@@ -455,8 +400,8 @@
                 }
             });
 
-            // Render Breakdown Chart with NEW VIBRANT COLORS
-            new Chart(document.getElementById('mistakeChart').getContext('2d'), {
+            // Render Mini Chart in Header
+            new Chart(document.getElementById('miniMistakeChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Spelling', 'Omissions', 'Extra Words', 'Capitalization', 'Punctuation'],
@@ -473,7 +418,7 @@
                         borderWidth: 4
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '70%' }
             });
 
             // Render Top Problem Words
