@@ -38,67 +38,117 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+        
+        /* ADVANCED HEADER */
         header {
-            margin-bottom: 2rem;
+            background: var(--surface-color);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
+            margin-bottom: 2.5rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
         }
-        header h1 {
-            font-size: 2.25rem;
+        .accuracy-ring-container {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .accuracy-ring-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .accuracy-score {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-header);
+        }
+        .accuracy-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .header-details {
+            flex-grow: 1;
+        }
+        .header-details h1 {
+            font-size: 2rem;
             font-weight: 800;
             color: var(--text-header);
             margin: 0;
         }
-        header p {
-            margin: 0.25rem 0 0 0;
+        .header-details p {
+            margin: 0.25rem 0 1.5rem 0;
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1rem;
         }
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-        .summary-card {
-            background: var(--surface-color);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            padding: 1.5rem;
+        .header-stats {
             display: flex;
-            align-items: center;
-            gap: 1rem;
+            gap: 2rem;
         }
-        .summary-card .icon {
+        .stat-item .value {
             font-size: 1.5rem;
-            padding: 0.75rem;
-            border-radius: 8px;
-            color: var(--accent-purple);
-            background-color: #f5f3ff;
-        }
-        .summary-card .value {
-            font-size: 2.5rem;
-            font-weight: 800;
+            font-weight: 700;
             color: var(--text-header);
-            line-height: 1;
         }
-        .summary-card .label {
+        .stat-item .label {
             font-size: 0.9rem;
-            font-weight: 600;
             color: var(--text-muted);
         }
+
+        /* COLLAPSIBLE DASHBOARD */
+        .dashboard-section {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 2.5rem;
+            background-color: var(--surface-color);
+        }
+        .dashboard-header {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .dashboard-header h2 {
+            font-size: 1.25rem;
+            margin: 0;
+            color: var(--text-header);
+        }
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+        .dashboard-content {
+            display: none; /* Hidden by default */
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .dashboard-section.open .toggle-icon {
+            transform: rotate(180deg);
+        }
+        .dashboard-section.open .dashboard-content {
+            display: block;
+        }
+
         .visual-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 1.5rem;
-            margin-bottom: 2.5rem;
         }
         .visual-card {
-            background: var(--surface-color);
             border-radius: 12px;
-            border: 1px solid var(--border-color);
             padding: 1.5rem;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
         }
-        .visual-card h2 {
-            font-size: 1.25rem;
+        .visual-card h3 {
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--text-header);
             margin: 0 0 1.5rem 0;
@@ -108,40 +158,15 @@
             height: 250px;
             width: 100%;
         }
-        .top-errors-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .top-errors-list li {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border-color);
-        }
+        .top-errors-list { list-style: none; padding: 0; margin: 0; }
+        .top-errors-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
         .top-errors-list li:last-child { border-bottom: none; }
-        .error-pair {
-            font-size: 0.95rem;
-        }
-        .original-word {
-            text-decoration: line-through;
-            color: var(--accent-red);
-        }
-        .typed-word {
-            font-weight: 600;
-            color: #166534;
-        }
-        .error-count {
-            font-weight: 700;
-            color: var(--text-header);
-            background: #f1f5f9;
-            padding: 4px 8px;
-            border-radius: 99px;
-            font-size: 0.8rem;
-        }
+        .error-pair { font-size: 0.95rem; }
+        .original-word { text-decoration: line-through; color: var(--accent-red); }
+        .typed-word { font-weight: 600; color: #166534; }
+        .error-count { font-weight: 700; color: var(--text-header); background: #f1f5f9; padding: 4px 8px; border-radius: 99px; font-size: 0.8rem; }
         
-        /* ADVANCED ANALYSIS TABLE & FILTERS */
+        /* SLEEK TABLE & FILTERS */
         .analysis-container {
             background: var(--surface-color);
             border-radius: 12px;
@@ -177,10 +202,7 @@
             color: white;
             border-color: var(--accent-purple);
         }
-
-        #table-view-container {
-            overflow-x: auto;
-        }
+        #table-view-container { overflow-x: auto; }
         .mistake-table {
             width: 100%;
             border-collapse: collapse;
@@ -202,9 +224,8 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .mistake-table tbody tr:hover {
-            background-color: #f5f3ff;
-        }
+        .mistake-table tbody tr:hover { background-color: #f5f3ff; }
+        .mistake-table tbody tr:last-child td { border-bottom: none; }
         .mistake-type {
             font-weight: 600;
             font-size: 0.85rem;
@@ -213,7 +234,6 @@
             text-align: center;
             white-space: nowrap;
         }
-        
         .highlight { padding: 1px 3px; border-radius: 3px; font-weight: bold; }
         .spelling { background: var(--hl-spelling); color: #92400e; }
         .omission { background: var(--hl-omissions); color: #166534; }
@@ -261,7 +281,7 @@
         }
         @media (max-width: 768px) {
             body { padding: 1rem; }
-            header h1 { font-size: 1.5rem; }
+            header { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -269,54 +289,54 @@
 
     <div class="container">
         <header>
-            <h1 id="passage-title">Loading Analysis...</h1>
-            <p id="test-date"></p>
+            <div class="accuracy-ring-container">
+                <canvas id="accuracyRing"></canvas>
+                <div class="accuracy-ring-text">
+                    <div class="accuracy-score" id="accuracy-score">--%</div>
+                    <div class="accuracy-label">Accuracy</div>
+                </div>
+            </div>
+            <div class="header-details">
+                <h1 id="passage-title">Loading Analysis...</h1>
+                <p id="test-date"></p>
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="value" id="total-mistakes">--</div>
+                        <div class="label">Total Mistakes</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="value" id="full-mistakes">--</div>
+                        <div class="label">Full Mistakes</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="value" id="half-mistakes">--</div>
+                        <div class="label">Half Mistakes</div>
+                    </div>
+                </div>
+            </div>
         </header>
         <main>
             <div id="analysis-content">
-                <div class="summary-grid">
-                    <div class="summary-card">
-                        <span class="icon">🎯</span>
-                        <div>
-                            <div class="value" id="accuracy">--%</div>
-                            <div class="label">Final Accuracy</div>
-                        </div>
+                <div class="dashboard-section">
+                    <div class="dashboard-header">
+                        <h2>Performance Dashboard</h2>
+                        <span class="toggle-icon">▼</span>
                     </div>
-                    <div class="summary-card">
-                        <span class="icon">❌</span>
-                        <div>
-                            <div class="value" id="total-mistakes">--</div>
-                            <div class="label">Total Mistakes</div>
+                    <div class="dashboard-content">
+                        <div class="visual-grid">
+                            <div class="visual-card">
+                                <h3>Mistake Breakdown</h3>
+                                <div id="chart-container">
+                                    <canvas id="mistakeChart"></canvas>
+                                </div>
+                            </div>
+                            <div class="visual-card">
+                                <h3>Top Problem Words</h3>
+                                <ul id="top-errors-list" class="top-errors-list">
+                                    <!-- Populated by JS -->
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-                    <div class="summary-card">
-                        <span class="icon">🔴</span>
-                        <div>
-                            <div class="value" id="full-mistakes">--</div>
-                            <div class="label">Full Mistakes</div>
-                        </div>
-                    </div>
-                    <div class="summary-card">
-                        <span class="icon">🟠</span>
-                        <div>
-                            <div class="value" id="half-mistakes">--</div>
-                            <div class="label">Half Mistakes</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="visual-grid">
-                    <div class="visual-card">
-                        <h2>Mistake Breakdown</h2>
-                        <div id="chart-container">
-                            <canvas id="mistakeChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="visual-card">
-                        <h2>Top Problem Words</h2>
-                        <ul id="top-errors-list" class="top-errors-list">
-                            <!-- Populated by JS -->
-                        </ul>
                     </div>
                 </div>
 
@@ -374,7 +394,7 @@
 
             const data = JSON.parse(dataString);
             const totalOriginalWords = data.originalText.split(/\s+/).filter(Boolean).length;
-            const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100).toFixed(2);
+            const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100);
             
             // Populate Header and Summary
             document.getElementById('passage-title').textContent = data.passageTitle;
@@ -382,7 +402,22 @@
             document.getElementById('total-mistakes').textContent = data.summary.fullMistakes + data.summary.halfMistakes;
             document.getElementById('full-mistakes').textContent = data.summary.fullMistakes;
             document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
-            document.getElementById('accuracy').textContent = `${accuracy}%`;
+            document.getElementById('accuracy-score').textContent = `${accuracy.toFixed(1)}%`;
+
+            // Render Accuracy Ring Chart
+            const ringCtx = document.getElementById('accuracyRing').getContext('2d');
+            new Chart(ringCtx, {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [accuracy, 100 - accuracy],
+                        backgroundColor: ['#7c3aed', '#e2e8f0'],
+                        borderWidth: 0,
+                        borderRadius: 5,
+                    }]
+                },
+                options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+            });
 
             // Process and Categorize Mistakes
             const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
@@ -417,7 +452,7 @@
                 }
             });
 
-            // Render Chart
+            // Render Breakdown Chart
             new Chart(document.getElementById('mistakeChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
@@ -549,24 +584,29 @@
                 let fullTextHTML = '';
                 data.alignment.forEach((item, index) => {
                     let word = item.o || item.t;
-                    let highlightClass = '';
+                    let spanId = `word-${index}`;
+                    let classList = [];
                     
                     if (item.type !== 'match' || item.mistakeType) {
-                         if (item.type === 'sub') highlightClass = 'substitution';
-                         else highlightClass = item.type;
+                         let mistakeClass = item.mistakeType || (item.type === 'sub' ? 'substitution' : item.type);
+                         classList.push('highlight', mistakeClass);
                     }
                     
                     if (index === mistakeIndex) {
-                        fullTextHTML += `<span class="highlight ${highlightClass} active-highlight">${word}</span> `;
-                    } else if (highlightClass) {
-                        fullTextHTML += `<span class="highlight ${highlightClass}">${word}</span> `;
-                    } else {
-                        fullTextHTML += `<span>${word}</span> `;
+                        classList.push('active-highlight');
                     }
+                    
+                    fullTextHTML += `<span id="${spanId}" class="${classList.join(' ')}">${word}</span> `;
                 });
 
                 modalContent.innerHTML = fullTextHTML;
                 modal.classList.add('visible');
+
+                // Auto-scroll to the highlighted word
+                const highlightedWord = modalContent.querySelector('.active-highlight');
+                if (highlightedWord) {
+                    highlightedWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             });
 
             document.getElementById('modal-close-btn').addEventListener('click', () => {
@@ -576,6 +616,12 @@
                 if (e.target === modal) {
                     modal.classList.remove('visible');
                 }
+            });
+
+            // COLLAPSIBLE DASHBOARD LOGIC
+            const dashboardHeader = document.querySelector('.dashboard-header');
+            dashboardHeader.addEventListener('click', () => {
+                dashboardHeader.parentElement.classList.toggle('open');
             });
         });
     </script>
