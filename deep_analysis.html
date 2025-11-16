@@ -16,11 +16,14 @@
             --text-header: #1e293b;
             --text-body: #334155;
             --text-muted: #64748b;
+            --accent-purple: #7c3aed;
             --accent-red: #ef4444;
             --accent-green: #22c55e;
-            --hl-spelling: #fef3c7;      
-            --hl-omission: #fee2e2;     
-            --hl-extra: #dcfce7;
+            
+            /* HIGHLIGHT COLORS */
+            --hl-additions: #fecdd3;     /* Reddish */
+            --hl-omissions: #dcfce7;     /* Greenish */
+            --hl-spelling: #fef3c7;      /* Yellowish */
             --hl-capitalization: #e0f2fe; 
             --hl-punctuation: #ede9fe;
         }
@@ -32,7 +35,7 @@
             padding: 2rem;
         }
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
         }
         header {
@@ -60,17 +63,27 @@
             border-radius: 12px;
             border: 1px solid var(--border-color);
             padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
-        .summary-card .label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            margin-bottom: 0.5rem;
+        .summary-card .icon {
+            font-size: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: var(--accent-purple);
+            background-color: #f5f3ff;
         }
         .summary-card .value {
             font-size: 2.5rem;
             font-weight: 800;
             color: var(--text-header);
+            line-height: 1;
+        }
+        .summary-card .label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
         }
         .visual-grid {
             display: grid;
@@ -127,60 +140,98 @@
             border-radius: 99px;
             font-size: 0.8rem;
         }
-        .tabs-container {
+        
+        /* SLEEK & MODERN MISTAKE LISTS & TABLES */
+        .analysis-container {
             background: var(--surface-color);
             border-radius: 12px;
             border: 1px solid var(--border-color);
         }
-        .tab-nav {
+        .analysis-header {
             display: flex;
-            border-bottom: 1px solid var(--border-color);
-            padding: 0 1rem;
-        }
-        .tab-link {
+            justify-content: space-between;
+            align-items: center;
             padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .analysis-header h2 {
+            font-size: 1.25rem; margin: 0; color: var(--text-header);
+        }
+        #view-toggle-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-body);
             cursor: pointer;
+            transition: all 0.2s;
+        }
+        #view-toggle-btn:hover { background-color: #f1f5f9; }
+
+        .mistake-list-item {
+            display: grid;
+            grid-template-columns: 150px 1fr;
+            gap: 1.5rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+        .mistake-list-item:last-child { border-bottom: none; }
+        .mistake-type {
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-align: center;
+        }
+        .mistake-context {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 0.25rem;
+        }
+        
+        #table-view-container {
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+        .mistake-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .mistake-table th, .mistake-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .mistake-table thead th {
+            background-color: var(--bg-color);
             font-weight: 600;
             color: var(--text-muted);
-            border-bottom: 3px solid transparent;
-            transition: all 0.2s ease;
+            text-transform: uppercase;
+            font-size: 0.8rem;
         }
-        .tab-link.active {
-            color: var(--accent-purple);
-            border-bottom-color: var(--accent-purple);
+        .mistake-table tbody tr:nth-child(even) {
+            background-color: var(--bg-color);
         }
-        .tab-content {
-            display: none;
-            padding: 2rem;
-        }
-        .tab-content.active { display: block; }
-        .mistake-list {
-            list-style: none; padding: 0; margin: 0;
-        }
-        .mistake-item {
-            display: grid;
-            grid-template-columns: 2rem 1fr;
-            align-items: start;
-            gap: 1rem;
-            padding: 1rem;
-            border-radius: 8px;
-            margin-bottom: 0.75rem;
-            background: #f8fafc;
-        }
-        .mistake-type-icon { font-size: 1.5rem; }
-        .context-snippet { font-size: 0.9em; color: var(--text-muted); margin-top: 0.25rem; font-style: italic; }
-        .highlight { padding: 1px 3px; border-radius: 3px; }
-        .spelling { background: var(--hl-spelling); }
-        .omission { background: var(--hl-omission); }
-        .extra { background: var(--hl-extra); }
-        .capitalization { background: var(--hl-capitalization); }
-        .punctuation { background: var(--hl-punctuation); }
+        
+        .highlight { padding: 1px 3px; border-radius: 3px; font-weight: bold; }
+        .spelling { background: var(--hl-spelling); color: #92400e; }
+        .omission { background: var(--hl-omissions); color: #166534; }
+        .extra, .substitution { background: var(--hl-additions); color: #991b1b; }
+        .capitalization { background: var(--hl-capitalization); color: #0c4a6e; }
+        .punctuation { background: var(--hl-punctuation); color: #5b21b6; }
         .no-data { text-align: center; padding: 3rem; }
+
+        @media (max-width: 900px) {
+            .visual-grid { grid-template-columns: 1fr; }
+        }
         @media (max-width: 768px) {
             body { padding: 1rem; }
             header h1 { font-size: 1.5rem; }
-            .visual-grid { grid-template-columns: 1fr; }
-            .tab-nav { overflow-x: auto; }
+            .mistake-list-item { grid-template-columns: 1fr; gap: 0.5rem; }
+            .mistake-type { width: fit-content; }
         }
     </style>
 </head>
@@ -195,20 +246,32 @@
             <div id="analysis-content">
                 <div class="summary-grid">
                     <div class="summary-card">
-                        <div class="label">Total Mistakes</div>
-                        <div class="value" id="total-mistakes">--</div>
+                        <span class="icon">🎯</span>
+                        <div>
+                            <div class="value" id="accuracy">--%</div>
+                            <div class="label">Final Accuracy</div>
+                        </div>
                     </div>
                     <div class="summary-card">
-                        <div class="label">Full Mistakes</div>
-                        <div class="value" id="full-mistakes">--</div>
+                        <span class="icon">❌</span>
+                        <div>
+                            <div class="value" id="total-mistakes">--</div>
+                            <div class="label">Total Mistakes</div>
+                        </div>
                     </div>
                     <div class="summary-card">
-                        <div class="label">Half Mistakes</div>
-                        <div class="value" id="half-mistakes">--</div>
+                        <span class="icon">🔴</span>
+                        <div>
+                            <div class="value" id="full-mistakes">--</div>
+                            <div class="label">Full Mistakes</div>
+                        </div>
                     </div>
                     <div class="summary-card">
-                        <div class="label">Final Accuracy</div>
-                        <div class="value" id="accuracy">--%</div>
+                        <span class="icon">🟠</span>
+                        <div>
+                            <div class="value" id="half-mistakes">--</div>
+                            <div class="label">Half Mistakes</div>
+                        </div>
                     </div>
                 </div>
 
@@ -227,12 +290,29 @@
                     </div>
                 </div>
 
-                <div class="tabs-container">
-                    <nav class="tab-nav" id="tab-nav">
-                        <!-- Tabs will be generated here -->
-                    </nav>
-                    <div id="tab-content-container">
-                        <!-- Tab content will be generated here -->
+                <div class="analysis-container">
+                    <div class="analysis-header">
+                        <h2>All Mistakes (<span id="mistake-count">0</span>)</h2>
+                        <button id="view-toggle-btn">Switch to Table View</button>
+                    </div>
+
+                    <div id="list-view-container">
+                        <!-- List View will be rendered here -->
+                    </div>
+
+                    <div id="table-view-container" style="display: none;">
+                        <table class="mistake-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Error</th>
+                                    <th>Context</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Table rows will be rendered here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -253,7 +333,8 @@
             }
 
             const data = JSON.parse(dataString);
-            const accuracy = ((data.originalText.split(/\s+/).filter(Boolean).length - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / data.originalText.split(/\s+/).filter(Boolean).length * 100).toFixed(2);
+            const totalOriginalWords = data.originalText.split(/\s+/).filter(Boolean).length;
+            const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100).toFixed(2);
             
             // Populate Header and Summary
             document.getElementById('passage-title').textContent = data.passageTitle;
@@ -309,8 +390,8 @@
                             mistakes.capitalization.length,
                             mistakes.punctuation.length
                         ],
-                        backgroundColor: ['#fef3c7', '#fee2e2', '#dcfce7', '#e0f2fe', '#ede9fe'],
-                        borderColor: ['#fde68a', '#fecaca', '#bbf7d0', '#bae6fd', '#ddd6fe'],
+                        backgroundColor: ['#fef3c7', '#dcfce7', '#fee2e2', '#e0f2fe', '#ede9fe'],
+                        borderColor: ['#fde68a', '#bbf7d0', '#fecaca', '#bae6fd', '#ddd6fe'],
                         borderWidth: 1
                     }]
                 },
@@ -321,6 +402,7 @@
             const topErrorsList = document.getElementById('top-errors-list');
             const sortedErrors = Object.values(mistakePatterns).sort((a, b) => b.count - a.count);
             if (sortedErrors.length > 0) {
+                topErrorsList.innerHTML = '';
                 sortedErrors.slice(0, 3).forEach(error => {
                     const li = document.createElement('li');
                     li.innerHTML = `
@@ -332,68 +414,79 @@
                     topErrorsList.appendChild(li);
                 });
             } else {
-                topErrorsList.innerHTML = '<li>No recurring spelling mistakes found.</li>';
+                topErrorsList.innerHTML = '<li>No recurring spelling mistakes found. Well done!</li>';
             }
             
-            // Render Tabs
-            const tabNav = document.getElementById('tab-nav');
-            const tabContentContainer = document.getElementById('tab-content-container');
+            // RENDER BOTH LIST AND TABLE VIEWS
             const allMistakes = Object.values(mistakes).flat();
-            const tabData = [
-                { id: 'all', label: 'All', icon: '📋', data: allMistakes },
-                { id: 'spelling', label: 'Spelling', icon: '✏️', data: mistakes.spelling },
-                { id: 'omission', label: 'Omissions', icon: '➖', data: mistakes.omission },
-                { id: 'extra', label: 'Extra Words', icon: '➕', data: mistakes.extra },
-                { id: 'capitalization', label: 'Capitalization', icon: '🔠', data: mistakes.capitalization },
-                { id: 'punctuation', label: 'Punctuation', icon: '⁉️', data: mistakes.punctuation }
-            ];
-
-            tabData.forEach((tab, index) => {
-                const navLink = document.createElement('div');
-                navLink.className = `tab-link ${index === 0 ? 'active' : ''}`;
-                navLink.dataset.tab = tab.id;
-                navLink.textContent = `${tab.label} (${tab.data.length})`;
-                tabNav.appendChild(navLink);
-
-                const contentEl = document.createElement('div');
-                contentEl.id = `tab-${tab.id}`;
-                contentEl.className = `tab-content ${index === 0 ? 'active' : ''}`;
-                
-                let contentHTML = '<ul class="mistake-list">';
-                if (tab.data.length > 0) {
-                    tab.data.forEach(m => {
-                        let detailHTML = '';
-                        if (m.type === 'spelling') detailHTML = `You typed <b class="typed-word">${m.t}</b> instead of <b class="original-word">${m.o}</b>`;
-                        else if (m.type === 'omission') detailHTML = `You missed the word <b class="original-word">${m.o}</b>`;
-                        else if (m.type === 'extra') detailHTML = `You added an extra word <b class="typed-word">${m.t}</b>`;
-                        else if (m.type === 'capitalization') detailHTML = `Capitalization error: typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
-                        else if (m.type === 'punctuation') detailHTML = `Punctuation error: typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
-
-                        contentHTML += `
-                            <li class="mistake-item">
-                                <div class="mistake-type-icon">${tab.icon}</div>
-                                <div class="mistake-details">
-                                    <div>${detailHTML}</div>
-                                    <div class="context-snippet">${m.context.replace(m.o, `<span class="highlight ${m.type}"><b>${m.o || ''}</b></span>`)}</div>
-                                </div>
-                            </li>`;
-                    });
-                } else {
-                    contentHTML += `<div class="no-data"><p>No ${tab.label.toLowerCase()} mistakes found.</p></div>`;
-                }
-                contentHTML += '</ul>';
-                contentEl.innerHTML = contentHTML;
-                tabContentContainer.appendChild(contentEl);
-            });
+            document.getElementById('mistake-count').textContent = allMistakes.length;
+            const listViewContainer = document.getElementById('list-view-container');
+            const tableBody = document.getElementById('table-body');
             
-            // Add Tab Functionality
-            tabNav.addEventListener('click', (e) => {
-                if (e.target.classList.contains('tab-link')) {
-                    const tabId = e.target.dataset.tab;
-                    tabNav.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
-                    tabContentContainer.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                    e.target.classList.add('active');
-                    document.getElementById(`tab-${tabId}`).classList.add('active');
+            if (allMistakes.length === 0) {
+                listViewContainer.innerHTML = '<div class="no-data"><p>Congratulations! No mistakes were found.</p></div>';
+                tableBody.innerHTML = '<tr><td colspan="3" class="no-data"><p>Congratulations! No mistakes were found.</p></td></tr>';
+            } else {
+                let listHTML = '';
+                let tableHTML = '';
+                const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+                allMistakes.forEach(m => {
+                    let detailHTML = '';
+                    let highlightClass = m.type;
+                    if (highlightClass === 'sub') highlightClass = 'spelling';
+                    
+                    let wordToHighlight = m.o || m.t;
+                    let contextToDisplay = m.context;
+
+                    if (m.type === 'spelling') detailHTML = `<span class="typed-word">${m.t}</span> instead of <span class="original-word">${m.o}</span>`;
+                    else if (m.type === 'omission') detailHTML = `Missed word: <b class="original-word">${m.o}</b>`;
+                    else if (m.type === 'extra') {
+                        detailHTML = `Added extra word: <b class="typed-word">${m.t}</b>`;
+                        wordToHighlight = '';
+                    } else if (m.type === 'capitalization') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+                    else if (m.type === 'punctuation') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+
+                    if (wordToHighlight) {
+                        const regex = new RegExp(`(\\b${escapeRegExp(wordToHighlight)}\\b)`, 'gi');
+                        contextToDisplay = m.context.replace(regex, `<span class="highlight ${highlightClass}">$1</span>`);
+                    }
+
+                    // Build List Item HTML
+                    listHTML += `
+                        <div class="mistake-list-item">
+                            <span class="mistake-type highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)}</span>
+                            <div>
+                                <div class="mistake-description">${detailHTML}</div>
+                                <div class="mistake-context">${contextToDisplay}</div>
+                            </div>
+                        </div>`;
+
+                    // Build Table Row HTML
+                    tableHTML += `
+                        <tr>
+                            <td><span class="mistake-type highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)}</span></td>
+                            <td>${detailHTML}</td>
+                            <td>${contextToDisplay}</td>
+                        </tr>`;
+                });
+
+                listViewContainer.innerHTML = listHTML;
+                tableBody.innerHTML = tableHTML;
+            }
+
+            // Add View Toggle Functionality
+            const toggleBtn = document.getElementById('view-toggle-btn');
+            toggleBtn.addEventListener('click', () => {
+                const isListView = listViewContainer.style.display !== 'none';
+                if (isListView) {
+                    listViewContainer.style.display = 'none';
+                    document.getElementById('table-view-container').style.display = 'block';
+                    toggleBtn.textContent = 'Switch to List View';
+                } else {
+                    listViewContainer.style.display = 'block';
+                    document.getElementById('table-view-container').style.display = 'none';
+                    toggleBtn.textContent = 'Switch to Table View';
                 }
             });
         });
