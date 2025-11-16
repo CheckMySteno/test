@@ -39,50 +39,68 @@
             margin: 0 auto;
         }
         
-        /* NEW ADVANCED HEADER */
+        /* ADVANCED HEADER */
         header {
-            padding-bottom: 1.5rem;
+            background: var(--surface-color);
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            padding: 2rem;
             margin-bottom: 2.5rem;
-            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 2rem;
         }
-        header h1 {
-            font-size: 2.25rem;
+        .accuracy-ring-container {
+            width: 120px;
+            height: 120px;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .accuracy-ring-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+        .accuracy-score {
+            font-size: 2rem;
             font-weight: 800;
             color: var(--text-header);
-            margin: 0 0 0.25rem 0;
         }
-        header p {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-        .header-stats {
-            margin-top: 1.5rem;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 1rem;
-        }
-        .stat-item {
-            background-color: var(--surface-color);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 1rem 1.5rem;
-        }
-        .stat-item .label {
-            font-size: 0.9rem;
+        .accuracy-label {
+            font-size: 0.8rem;
             font-weight: 600;
             color: var(--text-muted);
-            margin-bottom: 0.5rem;
+        }
+        .header-details {
+            flex-grow: 1;
+        }
+        .header-details h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--text-header);
+            margin: 0;
+        }
+        .header-details p {
+            margin: 0.25rem 0 1.5rem 0;
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+        .header-stats {
+            display: flex;
+            gap: 2rem;
         }
         .stat-item .value {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 700;
             color: var(--text-header);
         }
-        .stat-item .value.accuracy { color: var(--accent-green); }
-        .stat-item .value.mistakes { color: var(--accent-red); }
+        .stat-item .label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
 
-        /* NEW ACCORDION-STYLE COLLAPSE */
+        /* COLLAPSIBLE DASHBOARD */
         .dashboard-section {
             border: 1px solid var(--border-color);
             border-radius: 12px;
@@ -114,9 +132,12 @@
             padding: 1.5rem;
             border-top: 1px solid var(--border-color);
         }
-        .dashboard-section.open .toggle-icon { transform: rotate(180deg); }
-        .dashboard-section.open .dashboard-content { display: block; }
-
+        .dashboard-section.open .toggle-icon {
+            transform: rotate(180deg);
+        }
+        .dashboard-section.open .dashboard-content {
+            display: block;
+        }
 
         .visual-grid {
             display: grid;
@@ -264,7 +285,7 @@
         }
         @media (max-width: 768px) {
             body { padding: 1rem; }
-            header h1 { font-size: 1.5rem; }
+            header { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -272,14 +293,17 @@
 
     <div class="container">
         <header>
+             <div class="accuracy-ring-container">
+                <canvas id="accuracyRing"></canvas>
+                <div class="accuracy-ring-text">
+                    <div class="accuracy-score" id="accuracy-score">--%</div>
+                    <div class="accuracy-label">Accuracy</div>
+                </div>
+            </div>
             <div class="header-details">
                 <h1 id="passage-title">Loading Analysis...</h1>
                 <p id="test-date"></p>
                 <div class="header-stats">
-                    <div class="stat-item">
-                        <div class="label">Accuracy</div>
-                        <div class="value accuracy" id="accuracy-score">--%</div>
-                    </div>
                     <div class="stat-item">
                         <div class="label">Total Mistakes</div>
                         <div class="value mistakes" id="total-mistakes">--</div>
@@ -383,6 +407,20 @@
             document.getElementById('full-mistakes').textContent = data.summary.fullMistakes;
             document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
             document.getElementById('accuracy-score').textContent = `${accuracy.toFixed(1)}%`;
+
+            // Render Accuracy Ring Chart
+            new Chart(document.getElementById('accuracyRing').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    datasets: [{
+                        data: [accuracy, 100 - accuracy],
+                        backgroundColor: ['#7c3aed', '#e2e8f0'],
+                        borderWidth: 0,
+                        borderRadius: 5,
+                    }]
+                },
+                options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
+            });
 
             // Process and Categorize Mistakes
             const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
