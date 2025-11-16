@@ -434,8 +434,8 @@
                 allMistakes.forEach(m => {
                     let detailHTML = '';
                     let highlightClass = m.type;
-                    if (highlightClass === 'sub') highlightClass = 'spelling';
-                    
+                    if (highlightClass === 'sub') highlightClass = 'substitution';
+
                     let wordToHighlight = m.o || m.t;
                     let contextToDisplay = m.context;
 
