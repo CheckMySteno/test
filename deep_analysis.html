@@ -39,73 +39,56 @@
             margin: 0 auto;
         }
         
-        /* ADVANCED HEADER */
+        /* NEW ADVANCED HEADER */
         header {
-            background: var(--surface-color);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            padding: 2rem;
+            padding-bottom: 1.5rem;
             margin-bottom: 2.5rem;
-            display: flex;
-            align-items: center;
-            gap: 2rem;
+            border-bottom: 1px solid var(--border-color);
         }
-        .accuracy-ring-container {
-            width: 120px;
-            height: 120px;
-            position: relative;
-            flex-shrink: 0;
-        }
-        .accuracy-ring-text {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-        }
-        .accuracy-score {
-            font-size: 2rem;
+        header h1 {
+            font-size: 2.25rem;
             font-weight: 800;
             color: var(--text-header);
+            margin: 0 0 0.25rem 0;
         }
-        .accuracy-label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-        .header-details {
-            flex-grow: 1;
-        }
-        .header-details h1 {
-            font-size: 2rem;
-            font-weight: 800;
-            color: var(--text-header);
+        header p {
             margin: 0;
-        }
-        .header-details p {
-            margin: 0.25rem 0 1.5rem 0;
             color: var(--text-muted);
-            font-size: 1rem;
+            font-size: 1.1rem;
         }
         .header-stats {
-            display: flex;
-            gap: 2rem;
+            margin-top: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
         }
-        .stat-item .value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text-header);
+        .stat-item {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem 1.5rem;
         }
         .stat-item .label {
             font-size: 0.9rem;
+            font-weight: 600;
             color: var(--text-muted);
+            margin-bottom: 0.5rem;
         }
+        .stat-item .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-header);
+        }
+        .stat-item .value.accuracy { color: var(--accent-green); }
+        .stat-item .value.mistakes { color: var(--accent-red); }
 
-        /* COLLAPSIBLE DASHBOARD */
+        /* NEW ACCORDION-STYLE COLLAPSE */
         .dashboard-section {
             border: 1px solid var(--border-color);
             border-radius: 12px;
             margin-bottom: 2.5rem;
             background-color: var(--surface-color);
+            overflow: hidden;
         }
         .dashboard-header {
             padding: 1rem 1.5rem;
@@ -113,7 +96,9 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: background-color 0.2s ease;
         }
+        .dashboard-header:hover { background-color: #f8f9fa; }
         .dashboard-header h2 {
             font-size: 1.25rem;
             margin: 0;
@@ -129,12 +114,9 @@
             padding: 1.5rem;
             border-top: 1px solid var(--border-color);
         }
-        .dashboard-section.open .toggle-icon {
-            transform: rotate(180deg);
-        }
-        .dashboard-section.open .dashboard-content {
-            display: block;
-        }
+        .dashboard-section.open .toggle-icon { transform: rotate(180deg); }
+        .dashboard-section.open .dashboard-content { display: block; }
+
 
         .visual-grid {
             display: grid;
@@ -234,6 +216,7 @@
             text-align: center;
             white-space: nowrap;
         }
+        
         .highlight { padding: 1px 3px; border-radius: 3px; font-weight: bold; }
         .spelling { background: var(--hl-spelling); color: #92400e; }
         .omission { background: var(--hl-omissions); color: #166534; }
@@ -281,7 +264,7 @@
         }
         @media (max-width: 768px) {
             body { padding: 1rem; }
-            header { flex-direction: column; align-items: flex-start; }
+            header h1 { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -289,28 +272,25 @@
 
     <div class="container">
         <header>
-            <div class="accuracy-ring-container">
-                <canvas id="accuracyRing"></canvas>
-                <div class="accuracy-ring-text">
-                    <div class="accuracy-score" id="accuracy-score">--%</div>
-                    <div class="accuracy-label">Accuracy</div>
-                </div>
-            </div>
             <div class="header-details">
                 <h1 id="passage-title">Loading Analysis...</h1>
                 <p id="test-date"></p>
                 <div class="header-stats">
                     <div class="stat-item">
-                        <div class="value" id="total-mistakes">--</div>
+                        <div class="label">Accuracy</div>
+                        <div class="value accuracy" id="accuracy-score">--%</div>
+                    </div>
+                    <div class="stat-item">
                         <div class="label">Total Mistakes</div>
+                        <div class="value mistakes" id="total-mistakes">--</div>
                     </div>
                     <div class="stat-item">
-                        <div class="value" id="full-mistakes">--</div>
                         <div class="label">Full Mistakes</div>
+                        <div class="value" id="full-mistakes">--</div>
                     </div>
                     <div class="stat-item">
-                        <div class="value" id="half-mistakes">--</div>
                         <div class="label">Half Mistakes</div>
+                        <div class="value" id="half-mistakes">--</div>
                     </div>
                 </div>
             </div>
@@ -319,7 +299,7 @@
             <div id="analysis-content">
                 <div class="dashboard-section">
                     <div class="dashboard-header">
-                        <h2>Performance Dashboard</h2>
+                        <h2>Show Performance Dashboard</h2>
                         <span class="toggle-icon">▼</span>
                     </div>
                     <div class="dashboard-content">
@@ -404,21 +384,6 @@
             document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
             document.getElementById('accuracy-score').textContent = `${accuracy.toFixed(1)}%`;
 
-            // Render Accuracy Ring Chart
-            const ringCtx = document.getElementById('accuracyRing').getContext('2d');
-            new Chart(ringCtx, {
-                type: 'doughnut',
-                data: {
-                    datasets: [{
-                        data: [accuracy, 100 - accuracy],
-                        backgroundColor: ['#7c3aed', '#e2e8f0'],
-                        borderWidth: 0,
-                        borderRadius: 5,
-                    }]
-                },
-                options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-            });
-
             // Process and Categorize Mistakes
             const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
             const allWords = data.originalText.split(/\s+/);
@@ -452,7 +417,7 @@
                 }
             });
 
-            // Render Breakdown Chart
+            // Render Breakdown Chart with NEW VIBRANT COLORS
             new Chart(document.getElementById('mistakeChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
@@ -465,9 +430,9 @@
                             mistakes.capitalization.length,
                             mistakes.punctuation.length
                         ],
-                        backgroundColor: ['#fef3c7', '#dcfce7', '#fee2e2', '#e0f2fe', '#ede9fe'],
-                        borderColor: ['#fde68a', '#bbf7d0', '#fecaca', '#bae6fd', '#ddd6fe'],
-                        borderWidth: 1
+                        backgroundColor: ['#facc15', '#4ade80', '#f87171', '#60a5fa', '#a78bfa'],
+                        borderColor: [var(--surface-color)],
+                        borderWidth: 4
                     }]
                 },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
@@ -620,8 +585,15 @@
 
             // COLLAPSIBLE DASHBOARD LOGIC
             const dashboardHeader = document.querySelector('.dashboard-header');
+            const dashboardTitle = dashboardHeader.querySelector('h2');
             dashboardHeader.addEventListener('click', () => {
-                dashboardHeader.parentElement.classList.toggle('open');
+                const section = dashboardHeader.parentElement;
+                section.classList.toggle('open');
+                if (section.classList.contains('open')) {
+                    dashboardTitle.textContent = 'Hide Performance Dashboard';
+                } else {
+                    dashboardTitle.textContent = 'Show Performance Dashboard';
+                }
             });
         });
     </script>
