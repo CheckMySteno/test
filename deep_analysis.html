@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -18,567 +19,596 @@
             --accent-purple: #7c3aed;
             --accent-red: #ef4444;
             --accent-green: #22c55e;
-code
-Code
-/* HIGHLIGHT COLORS */
-        --hl-additions: #fecdd3;     /* Reddish */
-        --hl-omissions: #dcfce7;     /* Greenish */
-        --hl-spelling: #fef3c7;      /* Yellowish */
-        --hl-capitalization: #e0f2fe; 
-        --hl-punctuation: #ede9fe;
-    }
-    body {
-        font-family: 'Inter', sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-body);
-        margin: 0;
-        padding: 2rem;
-    }
-    .container {
-        max-width: 1200px;
-        margin: 0 auto;
-    }
-    header {
-        margin-bottom: 2rem;
-    }
-    header h1 {
-        font-size: 2.25rem;
-        font-weight: 800;
-        color: var(--text-header);
-        margin: 0;
-    }
-    header p {
-        margin: 0.25rem 0 0 0;
-        color: var(--text-muted);
-        font-size: 1.1rem;
-    }
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2.5rem;
-    }
-    .summary-card {
-        background: var(--surface-color);
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        padding: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-    }
-    .summary-card .icon {
-        font-size: 1.5rem;
-        padding: 0.75rem;
-        border-radius: 8px;
-        color: var(--accent-purple);
-        background-color: #f5f3ff;
-    }
-    .summary-card .value {
-        font-size: 2.5rem;
-        font-weight: 800;
-        color: var(--text-header);
-        line-height: 1;
-    }
-    .summary-card .label {
-        font-size: 0.9rem;
-        font-weight: 600;
-        color: var(--text-muted);
-    }
-    .visual-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
-        margin-bottom: 2.5rem;
-    }
-    .visual-card {
-        background: var(--surface-color);
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-        padding: 1.5rem;
-    }
-    .visual-card h2 {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--text-header);
-        margin: 0 0 1.5rem 0;
-    }
-    #chart-container {
-        position: relative;
-        height: 250px;
-        width: 100%;
-    }
-    .top-errors-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-    }
-    .top-errors-list li {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        padding: 0.75rem 0;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .top-errors-list li:last-child { border-bottom: none; }
-    .error-pair {
-        font-size: 0.95rem;
-    }
-    .original-word {
-        text-decoration: line-through;
-        color: var(--accent-red);
-    }
-    .typed-word {
-        font-weight: 600;
-        color: #166534;
-    }
-    .error-count {
-        font-weight: 700;
-        color: var(--text-header);
-        background: #f1f5f9;
-        padding: 4px 8px;
-        border-radius: 99px;
-        font-size: 0.8rem;
-    }
-    
-    /* ADVANCED ANALYSIS TABLE & FILTERS */
-    .analysis-container {
-        background: var(--surface-color);
-        border-radius: 12px;
-        border: 1px solid var(--border-color);
-    }
-    .analysis-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-        padding: 1rem 1.5rem;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .filter-buttons {
-        display: flex;
-        gap: 0.5rem;
-        flex-wrap: wrap;
-    }
-    .filter-btn {
-        background-color: var(--bg-color);
-        border: 1px solid var(--border-color);
-        padding: 8px 14px;
-        border-radius: 8px;
-        font-weight: 600;
-        color: var(--text-body);
-        cursor: pointer;
-        transition: all 0.2s;
-    }
-    .filter-btn:hover { background-color: #f1f5f9; }
-    .filter-btn.active {
-        background-color: var(--accent-purple);
-        color: white;
-        border-color: var(--accent-purple);
-    }
+            
+            /* HIGHLIGHT COLORS */
+            --hl-additions: #fecdd3;     /* Reddish */
+            --hl-omissions: #dcfce7;     /* Greenish */
+            --hl-spelling: #fef3c7;      /* Yellowish */
+            --hl-capitalization: #e0f2fe; 
+            --hl-punctuation: #ede9fe;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-body);
+            margin: 0;
+            padding: 2rem;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        header {
+            margin-bottom: 2rem;
+        }
+        header h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-header);
+            margin: 0;
+        }
+        header p {
+            margin: 0.25rem 0 0 0;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .summary-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .summary-card .icon {
+            font-size: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: var(--accent-purple);
+            background-color: #f5f3ff;
+        }
+        .summary-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--text-header);
+            line-height: 1;
+        }
+        .summary-card .label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+        .visual-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .visual-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+        .visual-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-header);
+            margin: 0 0 1.5rem 0;
+        }
+        #chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+        .top-errors-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .top-errors-list li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .top-errors-list li:last-child { border-bottom: none; }
+        .error-pair {
+            font-size: 0.95rem;
+        }
+        .original-word {
+            text-decoration: line-through;
+            color: var(--accent-red);
+        }
+        .typed-word {
+            font-weight: 600;
+            color: #166534;
+        }
+        .error-count {
+            font-weight: 700;
+            color: var(--text-header);
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+        }
+        
+        /* ADVANCED ANALYSIS TABLE & FILTERS */
+        .analysis-container {
+            background: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+        }
+        .analysis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+        .filter-btn {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-body);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-btn:hover { background-color: #f1f5f9; }
+        .filter-btn.active {
+            background-color: var(--accent-purple);
+            color: white;
+            border-color: var(--accent-purple);
+        }
 
-    #table-view-container {
-        overflow-x: auto;
-    }
-    .mistake-table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 0.9rem;
-    }
-    .mistake-table th, .mistake-table td {
-        padding: 12px 15px;
-        text-align: left;
-        border-bottom: 1px solid var(--border-color);
-    }
-    .mistake-table thead th {
-        background-color: var(--bg-color);
-        font-weight: 600;
-        color: var(--text-muted);
-        text-transform: uppercase;
-        font-size: 0.8rem;
-    }
-    .mistake-table tbody tr {
-        cursor: pointer;
-        transition: background-color 0.2s;
-    }
-    .mistake-table tbody tr:hover {
-        background-color: #f5f3ff;
-    }
-    .mistake-type {
-        font-weight: 600;
-        font-size: 0.85rem;
-        padding: 4px 8px;
-        border-radius: 6px;
-        text-align: center;
-        white-space: nowrap;
-    }
-    
-    .highlight { padding: 1px 3px; border-radius: 3px; font-weight: bold; }
-    .spelling { background: var(--hl-spelling); color: #92400e; }
-    .omission { background: var(--hl-omissions); color: #166534; }
-    .extra, .substitution { background: var(--hl-additions); color: #991b1b; }
-    .capitalization { background: var(--hl-capitalization); color: #0c4a6e; }
-    .punctuation { background: var(--hl-punctuation); color: #5b21b6; }
-    .no-data { text-align: center; padding: 3rem; }
-    
-    /* FULL TRANSCRIPT MODAL */
-    .modal-overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(20, 20, 30, 0.8);
-        backdrop-filter: blur(5px);
-        display: none; justify-content: center; align-items: center;
-        z-index: 1000; opacity: 0; transition: opacity 0.3s ease;
-    }
-    .modal-overlay.visible { display: flex; opacity: 1; }
-    .modal-content {
-        background-color: var(--surface-color);
-        border-radius: 12px; width: 90%; max-width: 900px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        display: flex; flex-direction: column; height: 90vh;
-    }
-    .modal-header {
-        display: flex; justify-content: space-between; align-items: center;
-        padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);
-    }
-    .modal-header h2 { font-size: 1.25rem; margin: 0; color: var(--text-header); }
-    .modal-close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
-    .full-transcript-content {
-        padding: 2rem;
-        overflow-y: auto;
-        line-height: 2;
-        font-size: 1.1rem;
-    }
-    .full-transcript-content .active-highlight {
-        background-color: var(--accent-purple) !important;
-        color: white !important;
-        padding: 2px 5px;
-        border-radius: 4px;
-    }
+        #table-view-container {
+            overflow-x: auto;
+        }
+        .mistake-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .mistake-table th, .mistake-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .mistake-table thead th {
+            background-color: var(--bg-color);
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.8rem;
+        }
+        .mistake-table tbody tr {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .mistake-table tbody tr:hover {
+            background-color: #f5f3ff;
+        }
+        .mistake-type {
+            font-weight: 600;
+            font-size: 0.85rem;
+            padding: 4px 8px;
+            border-radius: 6px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        
+        .highlight { padding: 1px 3px; border-radius: 3px; font-weight: bold; }
+        .spelling { background: var(--hl-spelling); color: #92400e; }
+        .omission { background: var(--hl-omissions); color: #166534; }
+        .extra, .substitution { background: var(--hl-additions); color: #991b1b; }
+        .capitalization { background: var(--hl-capitalization); color: #0c4a6e; }
+        .punctuation { background: var(--hl-punctuation); color: #5b21b6; }
+        .no-data { text-align: center; padding: 3rem; }
+        
+        /* FULL TRANSCRIPT MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(20, 20, 30, 0.8);
+            backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.visible { display: flex; opacity: 1; }
+        .modal-content {
+            background-color: var(--surface-color);
+            border-radius: 12px; width: 90%; max-width: 900px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            display: flex; flex-direction: column; height: 90vh;
+        }
+        .modal-header {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color);
+        }
+        .modal-header h2 { font-size: 1.25rem; margin: 0; color: var(--text-header); }
+        .modal-close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+        .full-transcript-content {
+            padding: 2rem;
+            overflow-y: auto;
+            line-height: 2;
+            font-size: 1.1rem;
+        }
+        .full-transcript-content .active-highlight {
+            background-color: var(--accent-purple) !important;
+            color: white !important;
+            padding: 2px 5px;
+            border-radius: 4px;
+            position: relative;
+        }
+        .correction-bubble {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: var(--text-header);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
+        }
 
-    @media (max-width: 900px) {
-        .visual-grid { grid-template-columns: 1fr; }
-    }
-    @media (max-width: 768px) {
-        body { padding: 1rem; }
-        header h1 { font-size: 1.5rem; }
-    }
-</style>
+        @media (max-width: 900px) {
+            .visual-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            header h1 { font-size: 1.5rem; }
+        }
+    </style>
 </head>
 <body>
-code
-Code
-<div class="container">
-    <header>
-        <h1 id="passage-title">Loading Analysis...</h1>
-        <p id="test-date"></p>
-    </header>
-    <main>
-        <div id="analysis-content">
-            <div class="summary-grid">
-                <div class="summary-card">
-                    <span class="icon">🎯</span>
-                    <div>
-                        <div class="value" id="accuracy">--%</div>
-                        <div class="label">Final Accuracy</div>
+
+    <div class="container">
+        <header>
+            <h1 id="passage-title">Loading Analysis...</h1>
+            <p id="test-date"></p>
+        </header>
+        <main>
+            <div id="analysis-content">
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <span class="icon">🎯</span>
+                        <div>
+                            <div class="value" id="accuracy">--%</div>
+                            <div class="label">Final Accuracy</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="icon">❌</span>
+                        <div>
+                            <div class="value" id="total-mistakes">--</div>
+                            <div class="label">Total Mistakes</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="icon">🔴</span>
+                        <div>
+                            <div class="value" id="full-mistakes">--</div>
+                            <div class="label">Full Mistakes</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="icon">🟠</span>
+                        <div>
+                            <div class="value" id="half-mistakes">--</div>
+                            <div class="label">Half Mistakes</div>
+                        </div>
                     </div>
                 </div>
-                <div class="summary-card">
-                    <span class="icon">❌</span>
-                    <div>
-                        <div class="value" id="total-mistakes">--</div>
-                        <div class="label">Total Mistakes</div>
+
+                <div class="visual-grid">
+                    <div class="visual-card">
+                        <h2>Mistake Breakdown</h2>
+                        <div id="chart-container">
+                            <canvas id="mistakeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="visual-card">
+                        <h2>Top Problem Words</h2>
+                        <ul id="top-errors-list" class="top-errors-list">
+                            <!-- Populated by JS -->
+                        </ul>
                     </div>
                 </div>
-                <div class="summary-card">
-                    <span class="icon">🔴</span>
-                    <div>
-                        <div class="value" id="full-mistakes">--</div>
-                        <div class="label">Full Mistakes</div>
+
+                <div class="analysis-container">
+                    <div class="analysis-header">
+                        <div id="filter-buttons" class="filter-buttons">
+                            <!-- Filter buttons will be rendered here -->
+                        </div>
                     </div>
-                </div>
-                <div class="summary-card">
-                    <span class="icon">🟠</span>
-                    <div>
-                        <div class="value" id="half-mistakes">--</div>
-                        <div class="label">Half Mistakes</div>
+
+                    <div id="table-view-container">
+                        <table class="mistake-table">
+                            <thead>
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Error Details</th>
+                                    <th>Context in Passage</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                <!-- Table rows will be rendered here -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
-
-            <div class="visual-grid">
-                <div class="visual-card">
-                    <h2>Mistake Breakdown</h2>
-                    <div id="chart-container">
-                        <canvas id="mistakeChart"></canvas>
-                    </div>
-                </div>
-                <div class="visual-card">
-                    <h2>Top Problem Words</h2>
-                    <ul id="top-errors-list" class="top-errors-list">
-                        <!-- Populated by JS -->
-                    </ul>
-                </div>
+            <div id="no-data-message" class="no-data" style="display: none;">
+                <h2>No Analysis Data Found</h2>
+                <p>Please generate a result and click "Deep Analysis" to see this page.</p>
             </div>
+        </main>
+    </div>
 
-            <div class="analysis-container">
-                <div class="analysis-header">
-                    <div id="filter-buttons" class="filter-buttons">
-                        <!-- Filter buttons will be rendered here -->
-                    </div>
-                </div>
-
-                <div id="table-view-container">
-                    <table class="mistake-table">
-                        <thead>
-                            <tr>
-                                <th>Type</th>
-                                <th>Error Details</th>
-                                <th>Context in Passage</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                            <!-- Table rows will be rendered here -->
-                        </tbody>
-                    </table>
-                </div>
+    <!-- Full Transcript Modal -->
+    <div id="full-transcript-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Full Transcription Context</h2>
+                <button class="modal-close-btn" id="modal-close-btn">&times;</button>
             </div>
-        </div>
-        <div id="no-data-message" class="no-data" style="display: none;">
-            <h2>No Analysis Data Found</h2>
-            <p>Please generate a result and click "Deep Analysis" to see this page.</p>
-        </div>
-    </main>
-</div>
-
-<!-- Full Transcript Modal -->
-<div id="full-transcript-modal" class="modal-overlay">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Full Transcription Context</h2>
-            <button class="modal-close-btn" id="modal-close-btn">&times;</button>
-        </div>
-        <div class="full-transcript-content" id="full-transcript-content">
-            <!-- Full text will be rendered here -->
+            <div class="full-transcript-content" id="full-transcript-content">
+                <!-- Full text will be rendered here -->
+            </div>
         </div>
     </div>
-</div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const dataString = sessionStorage.getItem('deepAnalysisData');
-        if (!dataString) {
-            document.getElementById('analysis-content').style.display = 'none';
-            document.getElementById('no-data-message').style.display = 'block';
-            return;
-        }
-
-        const data = JSON.parse(dataString);
-        const totalOriginalWords = data.originalText.split(/\s+/).filter(Boolean).length;
-        const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100).toFixed(2);
-        
-        // Populate Header and Summary
-        document.getElementById('passage-title').textContent = data.passageTitle;
-        document.getElementById('test-date').textContent = `Analyzed on: ${data.testDate}`;
-        document.getElementById('total-mistakes').textContent = data.summary.fullMistakes + data.summary.halfMistakes;
-        document.getElementById('full-mistakes').textContent = data.summary.fullMistakes;
-        document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
-        document.getElementById('accuracy').textContent = `${accuracy}%`;
-
-        // Process and Categorize Mistakes
-        const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
-        const allWords = data.originalText.split(/\s+/);
-        const mistakePatterns = {};
-        let alignmentWithIndex = data.alignment.map((item, index) => ({...item, originalIndex: index}));
-
-        alignmentWithIndex.forEach((item) => {
-            const isMistake = item.type !== 'match' || item.mistakeType;
-            if (!isMistake) return;
-
-            const wordIndex = alignmentWithIndex.slice(0, item.originalIndex).filter(i => i.type !== 'ins').length;
-            const start = Math.max(0, wordIndex - 4);
-            const end = Math.min(allWords.length, wordIndex + 5);
-            const context = `...${allWords.slice(start, end).join(' ')}...`;
-
-            let type = item.mistakeType;
-            if (item.type === 'sub' && !type) type = 'spelling';
-            if (item.type === 'del') type = 'omission';
-            if (item.type === 'ins') type = 'extra';
-
-            if (mistakes[type]) {
-                mistakes[type].push({ ...item, context, type });
-            }
-
-            if (type === 'spelling') {
-                const key = `${item.o}|${item.t}`;
-                if (!mistakePatterns[key]) {
-                    mistakePatterns[key] = { original: item.o, typed: item.t, count: 0 };
-                }
-                mistakePatterns[key].count++;
-            }
-        });
-
-        // Render Chart
-        new Chart(document.getElementById('mistakeChart').getContext('2d'), {
-            type: 'doughnut',
-            data: {
-                labels: ['Spelling', 'Omissions', 'Extra Words', 'Capitalization', 'Punctuation'],
-                datasets: [{
-                    data: [
-                        mistakes.spelling.length,
-                        mistakes.omission.length,
-                        mistakes.extra.length,
-                        mistakes.capitalization.length,
-                        mistakes.punctuation.length
-                    ],
-                    backgroundColor: ['#fef3c7', '#dcfce7', '#fee2e2', '#e0f2fe', '#ede9fe'],
-                    borderColor: ['#fde68a', '#bbf7d0', '#fecaca', '#bae6fd', '#ddd6fe'],
-                    borderWidth: 1
-                }]
-            },
-            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
-        });
-
-        // Render Top Problem Words
-        const topErrorsList = document.getElementById('top-errors-list');
-        const sortedErrors = Object.values(mistakePatterns).sort((a, b) => b.count - a.count);
-        if (sortedErrors.length > 0) {
-            topErrorsList.innerHTML = '';
-            sortedErrors.slice(0, 3).forEach(error => {
-                const li = document.createElement('li');
-                li.innerHTML = `
-                    <span class="error-pair">
-                        <span class="original-word">${error.original}</span> → <span class="typed-word">${error.typed}</span>
-                    </span>
-                    <span class="error-count">${error.count} time(s)</span>
-                `;
-                topErrorsList.appendChild(li);
-            });
-        } else {
-            topErrorsList.innerHTML = '<li>No recurring spelling mistakes found. Well done!</li>';
-        }
-        
-        const allMistakes = Object.values(mistakes).flat();
-        
-        // RENDER FILTER BUTTONS
-        const filterButtonsContainer = document.getElementById('filter-buttons');
-        const filters = [
-            { id: 'all', label: 'All', data: allMistakes },
-            { id: 'spelling', label: 'Spelling', data: mistakes.spelling },
-            { id: 'omission', label: 'Omissions', data: mistakes.omission },
-            { id: 'extra', label: 'Extra Words', data: mistakes.extra },
-            { id: 'capitalization', label: 'Capitalization', data: mistakes.capitalization },
-            { id: 'punctuation', label: 'Punctuation', data: mistakes.punctuation }
-        ];
-
-        filters.forEach((filter, index) => {
-            if(filter.data.length > 0 || filter.id === 'all') {
-                const btn = document.createElement('button');
-                btn.className = `filter-btn ${index === 0 ? 'active' : ''}`;
-                btn.dataset.filter = filter.id;
-                btn.innerHTML = `${filter.label} (${filter.data.length})`;
-                filterButtonsContainer.appendChild(btn);
-            }
-        });
-
-        const tableBody = document.getElementById('table-body');
-        const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-        // RENDER TABLE FUNCTION
-        const renderTable = (mistakeArray) => {
-            if (mistakeArray.length === 0) {
-                tableBody.innerHTML = '<tr><td colspan="3" class="no-data"><p>No mistakes of this type found.</p></td></tr>';
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const dataString = sessionStorage.getItem('deepAnalysisData');
+            if (!dataString) {
+                document.getElementById('analysis-content').style.display = 'none';
+                document.getElementById('no-data-message').style.display = 'block';
                 return;
             }
 
-            let tableHTML = '';
-            mistakeArray.forEach(m => {
-                let detailHTML = '';
-                let highlightClass = m.type;
-                if (highlightClass === 'sub') highlightClass = 'substitution';
-                
-                let wordToHighlight = m.o || m.t;
-                let contextToDisplay = m.context;
+            const data = JSON.parse(dataString);
+            const totalOriginalWords = data.originalText.split(/\s+/).filter(Boolean).length;
+            const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100).toFixed(2);
+            
+            // Populate Header and Summary
+            document.getElementById('passage-title').textContent = data.passageTitle;
+            document.getElementById('test-date').textContent = `Analyzed on: ${data.testDate}`;
+            document.getElementById('total-mistakes').textContent = data.summary.fullMistakes + data.summary.halfMistakes;
+            document.getElementById('full-mistakes').textContent = data.summary.fullMistakes;
+            document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
 
-                if (m.type === 'spelling') detailHTML = `<span class="typed-word">${m.t}</span> instead of <span class="original-word">${m.o}</span>`;
-                else if (m.type === 'omission') detailHTML = `Missed word: <b class="original-word">${m.o}</b>`;
-                else if (m.type === 'extra') {
-                    detailHTML = `Added extra word: <b class="typed-word">${m.t}</b>`;
-                    wordToHighlight = '';
-                } else if (m.type === 'capitalization') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
-                else if (m.type === 'punctuation') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+            // Process and Categorize Mistakes
+            const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
+            const allWords = data.originalText.split(/\s+/);
+            const mistakePatterns = {};
+            let alignmentWithIndex = data.alignment.map((item, index) => ({...item, originalIndex: index}));
 
-                if (wordToHighlight) {
-                    const regex = new RegExp(`(\\b${escapeRegExp(wordToHighlight)}\\b)`, 'gi');
-                    contextToDisplay = m.context.replace(regex, `<span class="highlight ${highlightClass}">$1</span>`);
+            alignmentWithIndex.forEach((item) => {
+                const isMistake = item.type !== 'match' || item.mistakeType;
+                if (!isMistake) return;
+
+                const wordIndex = alignmentWithIndex.slice(0, item.originalIndex).filter(i => i.type !== 'ins').length;
+                const start = Math.max(0, wordIndex - 4);
+                const end = Math.min(allWords.length, wordIndex + 5);
+                const context = `...${allWords.slice(start, end).join(' ')}...`;
+
+                let type = item.mistakeType;
+                if (item.type === 'sub' && !type) type = 'spelling';
+                if (item.type === 'del') type = 'omission';
+                if (item.type === 'ins') type = 'extra';
+
+                if (mistakes[type]) {
+                    mistakes[type].push({ ...item, context, type });
                 }
 
-                tableHTML += `<tr data-index="${m.originalIndex}">
-                    <td><span class="mistake-type highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)}</span></td>
-                    <td>${detailHTML}</td>
-                    <td>${contextToDisplay}</td>
-                </tr>`;
+                if (type === 'spelling') {
+                    const key = `${item.o}|${item.t}`;
+                    if (!mistakePatterns[key]) {
+                        mistakePatterns[key] = { original: item.o, typed: item.t, count: 0 };
+                    }
+                    mistakePatterns[key].count++;
+                }
             });
-            tableBody.innerHTML = tableHTML;
-        };
 
-        // Initial Render
-        renderTable(allMistakes);
+            // Render Chart
+            new Chart(document.getElementById('mistakeChart').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Spelling', 'Omissions', 'Extra Words', 'Capitalization', 'Punctuation'],
+                    datasets: [{
+                        data: [
+                            mistakes.spelling.length,
+                            mistakes.omission.length,
+                            mistakes.extra.length,
+                            mistakes.capitalization.length,
+                            mistakes.punctuation.length
+                        ],
+                        backgroundColor: ['#fef3c7', '#dcfce7', '#fee2e2', '#e0f2fe', '#ede9fe'],
+                        borderColor: ['#fde68a', '#bbf7d0', '#fecaca', '#bae6fd', '#ddd6fe'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+            });
 
-        // Filter Logic
-        filterButtonsContainer.addEventListener('click', (e) => {
-            if (e.target.classList.contains('filter-btn')) {
-                const filterId = e.target.dataset.filter;
-                filterButtonsContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-                e.target.classList.add('active');
-                
-                const dataToRender = filterId === 'all' ? allMistakes : mistakes[filterId];
-                renderTable(dataToRender);
+            // Render Top Problem Words
+            const topErrorsList = document.getElementById('top-errors-list');
+            const sortedErrors = Object.values(mistakePatterns).sort((a, b) => b.count - a.count);
+            if (sortedErrors.length > 0) {
+                topErrorsList.innerHTML = '';
+                sortedErrors.slice(0, 3).forEach(error => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span class="error-pair">
+                            <span class="original-word">${error.original}</span> → <span class="typed-word">${error.typed}</span>
+                        </span>
+                        <span class="error-count">${error.count} time(s)</span>
+                    `;
+                    topErrorsList.appendChild(li);
+                });
+            } else {
+                topErrorsList.innerHTML = '<li>No recurring spelling mistakes found. Well done!</li>';
             }
-        });
+            
+            const allMistakes = Object.values(mistakes).flat();
+            
+            // RENDER FILTER BUTTONS
+            const filterButtonsContainer = document.getElementById('filter-buttons');
+            const filters = [
+                { id: 'all', label: 'All', data: allMistakes },
+                { id: 'spelling', label: 'Spelling', data: mistakes.spelling },
+                { id: 'omission', label: 'Omissions', data: mistakes.omission },
+                { id: 'extra', label: 'Extra Words', data: mistakes.extra },
+                { id: 'capitalization', label: 'Capitalization', data: mistakes.capitalization },
+                { id: 'punctuation', label: 'Punctuation', data: mistakes.punctuation }
+            ];
 
-        // MODAL LOGIC
-        const modal = document.getElementById('full-transcript-modal');
-        const modalContent = document.getElementById('full-transcript-content');
-        
-        tableBody.addEventListener('click', (e) => {
-            const row = e.target.closest('tr');
-            if (!row || !row.dataset.index) return;
-            
-            const mistakeIndex = parseInt(row.dataset.index, 10);
-            
-            let fullTextHTML = '';
-            data.alignment.forEach((item, index) => {
-                let word = item.o || item.t;
-                let highlightClass = '';
-                
-                if (item.type !== 'match' || item.mistakeType) {
-                     if (item.type === 'sub') highlightClass = 'substitution';
-                     else highlightClass = item.type;
-                }
-                
-                if (index === mistakeIndex) {
-                    fullTextHTML += `<span class="highlight ${highlightClass} active-highlight">${word}</span> `;
-                } else if (highlightClass) {
-                    fullTextHTML += `<span class="highlight ${highlightClass}">${word}</span> `;
-                } else {
-                    fullTextHTML += `<span>${word}</span> `;
+            filters.forEach((filter, index) => {
+                if(filter.data.length > 0 || filter.id === 'all') {
+                    const btn = document.createElement('button');
+                    btn.className = `filter-btn ${index === 0 ? 'active' : ''}`;
+                    btn.dataset.filter = filter.id;
+                    btn.innerHTML = `${filter.label} (${filter.data.length})`;
+                    filterButtonsContainer.appendChild(btn);
                 }
             });
 
-            modalContent.innerHTML = fullTextHTML;
-            modal.classList.add('visible');
-        });
+            const tableBody = document.getElementById('table-body');
+            const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-        document.getElementById('modal-close-btn').addEventListener('click', () => {
-            modal.classList.remove('visible');
-        });
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
+            // RENDER TABLE FUNCTION
+            const renderTable = (mistakeArray) => {
+                if (mistakeArray.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="3" class="no-data"><p>No mistakes of this type found.</p></td></tr>';
+                    return;
+                }
+
+                let tableHTML = '';
+                mistakeArray.forEach(m => {
+                    let detailHTML = '';
+                    let highlightClass = m.type;
+                    if (highlightClass === 'sub') highlightClass = 'substitution';
+                    
+                    let wordToHighlight = m.o || m.t;
+                    let contextToDisplay = m.context;
+
+                    if (m.type === 'spelling') detailHTML = `<span class="typed-word">${m.t}</span> instead of <span class="original-word">${m.o}</span>`;
+                    else if (m.type === 'omission') detailHTML = `Missed word: <b class="original-word">${m.o}</b>`;
+                    else if (m.type === 'extra') {
+                        detailHTML = `Added extra word: <b class="typed-word">${m.t}</b>`;
+                        wordToHighlight = '';
+                    } else if (m.type === 'capitalization') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+                    else if (m.type === 'punctuation') detailHTML = `Typed <b class="typed-word">${m.t}</b> for <b class="original-word">${m.o}</b>`;
+
+                    if (wordToHighlight) {
+                        const regex = new RegExp(`(\\b${escapeRegExp(wordToHighlight)}\\b)`, 'gi');
+                        contextToDisplay = m.context.replace(regex, `<span class="highlight ${highlightClass}">$1</span>`);
+                    }
+
+                    tableHTML += `<tr data-index="${m.originalIndex}">
+                        <td><span class="mistake-type highlight ${highlightClass}">${m.type.charAt(0).toUpperCase() + m.type.slice(1)}</span></td>
+                        <td>${detailHTML}</td>
+                        <td>${contextToDisplay}</td>
+                    </tr>`;
+                });
+                tableBody.innerHTML = tableHTML;
+            };
+
+            // Initial Render
+            renderTable(allMistakes);
+
+            // Filter Logic
+            filterButtonsContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('filter-btn')) {
+                    const filterId = e.target.dataset.filter;
+                    filterButtonsContainer.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+                    e.target.classList.add('active');
+                    
+                    const dataToRender = filterId === 'all' ? allMistakes : mistakes[filterId];
+                    renderTable(dataToRender);
+                }
+            });
+
+            // MODAL LOGIC
+            const modal = document.getElementById('full-transcript-modal');
+            const modalContent = document.getElementById('full-transcript-content');
+            
+            tableBody.addEventListener('click', (e) => {
+                const row = e.target.closest('tr');
+                if (!row || !row.dataset.index) return;
+                
+                const mistakeIndex = parseInt(row.dataset.index, 10);
+                
+                let fullTextHTML = '';
+                data.alignment.forEach((item, index) => {
+                    let word = item.t; // Default to showing the typed word
+                    let classList = [];
+
+                    // Determine the highlight class
+                    if (item.type !== 'match' || item.mistakeType) {
+                         let mistakeClass = item.mistakeType || (item.type === 'sub' ? 'substitution' : item.type);
+                         classList.push('highlight', mistakeClass);
+                    }
+                    
+                    // Logic for the clicked mistake
+                    if (index === mistakeIndex) {
+                        classList.push('active-highlight');
+                        if (item.type === 'spelling' || (item.type === 'sub' && !item.mistakeType)) {
+                            word += `<span class="correction-bubble">Correct: ${item.o}</span>`;
+                        }
+                    }
+
+                    // For omissions, we need to insert the missing word
+                    if (item.type === 'del') {
+                        word = `(<span class="highlight omission">${item.o}</span>)`;
+                        if (index === mistakeIndex) {
+                             word = `(<span class="highlight omission active-highlight">${item.o}</span>)`;
+                        }
+                    }
+                    
+                    fullTextHTML += `<span id="word-${index}" class="${classList.join(' ')}">${word}</span> `;
+                });
+
+                modalContent.innerHTML = fullTextHTML;
+                modal.classList.add('visible');
+
+                // Auto-scroll to the highlighted word
+                const highlightedWord = modalContent.querySelector('.active-highlight');
+                if (highlightedWord) {
+                    highlightedWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+
+            document.getElementById('modal-close-btn').addEventListener('click', () => {
                 modal.classList.remove('visible');
-            }
+            });
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('visible');
+                }
+            });
         });
-    });
-</script>
+    </script>
 </body>
 </html>
