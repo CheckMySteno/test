@@ -38,111 +38,110 @@
             max-width: 1200px;
             margin: 0 auto;
         }
-        
-        /* ADVANCED HEADER */
         header {
-            background: var(--surface-color);
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            padding: 2rem;
-            margin-bottom: 2.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
+            margin-bottom: 2rem;
         }
-        .header-main { flex-grow: 1; }
-        .header-main h1 {
+        header h1 {
             font-size: 2.25rem;
             font-weight: 800;
             color: var(--text-header);
-            margin: 0 0 0.25rem 0;
-        }
-        .header-main p {
             margin: 0;
+        }
+        header p {
+            margin: 0.25rem 0 0 0;
             color: var(--text-muted);
             font-size: 1.1rem;
         }
-        .header-dashboard {
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+        .summary-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
             display: flex;
             align-items: center;
-            gap: 2rem;
-            flex-shrink: 0;
+            gap: 1rem;
         }
-        .header-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem 2rem;
+        .summary-card .icon {
+            font-size: 1.5rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            color: var(--accent-purple);
+            background-color: #f5f3ff;
         }
-        .stat-item .value {
-            font-size: 1.75rem;
-            font-weight: 700;
+        .summary-card .value {
+            font-size: 2.5rem;
+            font-weight: 800;
             color: var(--text-header);
+            line-height: 1;
         }
-        .stat-item .label {
+        .summary-card .label {
             font-size: 0.9rem;
+            font-weight: 600;
             color: var(--text-muted);
         }
-        .stat-item .value.accuracy { color: var(--accent-green); }
-        .stat-item .value.mistakes { color: var(--accent-red); }
-        .mini-chart-container {
-            width: 100px;
-            height: 100px;
-        }
-
-        /* ACCORDION-STYLE COLLAPSE */
-        .collapsible-section {
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
+        .visual-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
             margin-bottom: 2.5rem;
-            background-color: var(--surface-color);
-            overflow: hidden;
         }
-        .collapsible-header {
-            padding: 1rem 1.5rem;
-            cursor: pointer;
+        .visual-card {
+            background: var(--surface-color);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+        .visual-card h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-header);
+            margin: 0 0 1.5rem 0;
+        }
+        #chart-container {
+            position: relative;
+            height: 250px;
+            width: 100%;
+        }
+        .top-errors-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .top-errors-list li {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: background-color 0.2s ease;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--border-color);
         }
-        .collapsible-header:hover { background-color: #f8f9fa; }
-        .collapsible-header h2 {
-            font-size: 1.25rem;
-            margin: 0;
-            color: var(--text-header);
-        }
-        .toggle-icon {
-            transition: transform 0.3s ease;
-            font-size: 1.5rem;
-            color: var(--text-muted);
-        }
-        .collapsible-content {
-            display: none; /* Hidden by default */
-            padding: 1.5rem;
-            border-top: 1px solid var(--border-color);
-        }
-        .collapsible-section.open .toggle-icon {
-            transform: rotate(180deg);
-        }
-        .collapsible-section.open .collapsible-content {
-            display: block;
-        }
-        .top-errors-list { list-style: none; padding: 0; margin: 0; }
-        .top-errors-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
         .top-errors-list li:last-child { border-bottom: none; }
-        .error-pair { font-size: 0.95rem; }
+        .error-pair {
+            font-size: 0.95rem;
+        }
         .original-word {
-            font-weight: 600;
-            color: #166534; /* Green for correct word */
+            text-decoration: line-through;
+            color: var(--accent-red);
         }
         .typed-word {
-            text-decoration: line-through;
-            color: var(--accent-red); /* Red for incorrect word */
+            font-weight: 600;
+            color: #166534;
         }
-        .error-count { font-weight: 700; color: var(--text-header); background: #f1f5f9; padding: 4px 8px; border-radius: 99px; font-size: 0.8rem; }
+        .error-count {
+            font-weight: 700;
+            color: var(--text-header);
+            background: #f1f5f9;
+            padding: 4px 8px;
+            border-radius: 99px;
+            font-size: 0.8rem;
+        }
         
-        /* SLEEK TABLE & FILTERS */
+        /* ADVANCED ANALYSIS TABLE & FILTERS */
         .analysis-container {
             background: var(--surface-color);
             border-radius: 12px;
@@ -178,7 +177,10 @@
             color: white;
             border-color: var(--accent-purple);
         }
-        #table-view-container { overflow-x: auto; }
+
+        #table-view-container {
+            overflow-x: auto;
+        }
         .mistake-table {
             width: 100%;
             border-collapse: collapse;
@@ -200,8 +202,9 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .mistake-table tbody tr:hover { background-color: #f5f3ff; }
-        .mistake-table tbody tr:last-child td { border-bottom: none; }
+        .mistake-table tbody tr:hover {
+            background-color: #f5f3ff;
+        }
         .mistake-type {
             font-weight: 600;
             font-size: 0.85rem;
@@ -272,7 +275,7 @@
         }
         @media (max-width: 768px) {
             body { padding: 1rem; }
-            header { flex-direction: column; align-items: flex-start; }
+            header h1 { font-size: 1.5rem; }
         }
     </style>
 </head>
@@ -280,43 +283,52 @@
 
     <div class="container">
         <header>
-            <div class="header-main">
-                <h1 id="passage-title">Loading Analysis...</h1>
-                <p id="test-date"></p>
-                 <div class="header-stats">
-                    <div class="stat-item">
-                        <div class="label">Accuracy</div>
-                        <div class="value accuracy" id="accuracy-score">--%</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="label">Total Mistakes</div>
-                        <div class="value mistakes" id="total-mistakes">--</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="label">Full Mistakes</div>
-                        <div class="value" id="full-mistakes">--</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="label">Half Mistakes</div>
-                        <div class="value" id="half-mistakes">--</div>
-                    </div>
-                </div>
-            </div>
-            <div class="header-dashboard">
-                <div class="mini-chart-container">
-                    <canvas id="miniMistakeChart"></canvas>
-                </div>
-            </div>
+            <h1 id="passage-title">Loading Analysis...</h1>
+            <p id="test-date"></p>
         </header>
         <main>
             <div id="analysis-content">
-                <div class="collapsible-section">
-                    <div class="collapsible-header">
-                        <h2>Show Top Problem Words</h2>
-                        <span class="toggle-icon">▼</span>
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <span class="icon">🎯</span>
+                        <div>
+                            <div class="value" id="accuracy">--%</div>
+                            <div class="label">Final Accuracy</div>
+                        </div>
                     </div>
-                    <div class="collapsible-content">
-                         <ul id="top-errors-list" class="top-errors-list">
+                    <div class="summary-card">
+                        <span class="icon">❌</span>
+                        <div>
+                            <div class="value" id="total-mistakes">--</div>
+                            <div class="label">Total Mistakes</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="icon">🔴</span>
+                        <div>
+                            <div class="value" id="full-mistakes">--</div>
+                            <div class="label">Full Mistakes</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <span class="icon">🟠</span>
+                        <div>
+                            <div class="value" id="half-mistakes">--</div>
+                            <div class="label">Half Mistakes</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visual-grid">
+                    <div class="visual-card">
+                        <h2>Mistake Breakdown</h2>
+                        <div id="chart-container">
+                            <canvas id="mistakeChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="visual-card">
+                        <h2>Top Problem Words</h2>
+                        <ul id="top-errors-list" class="top-errors-list">
                             <!-- Populated by JS -->
                         </ul>
                     </div>
@@ -376,7 +388,7 @@
 
             const data = JSON.parse(dataString);
             const totalOriginalWords = data.originalText.split(/\s+/).filter(Boolean).length;
-            const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100);
+            const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100).toFixed(2);
             
             // Populate Header and Summary
             document.getElementById('passage-title').textContent = data.passageTitle;
@@ -384,7 +396,7 @@
             document.getElementById('total-mistakes').textContent = data.summary.fullMistakes + data.summary.halfMistakes;
             document.getElementById('full-mistakes').textContent = data.summary.fullMistakes;
             document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
-            document.getElementById('accuracy-score').textContent = `${accuracy.toFixed(1)}%`;
+            document.getElementById('accuracy').textContent = `${accuracy}%`;
 
             // Process and Categorize Mistakes
             const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
@@ -419,8 +431,8 @@
                 }
             });
 
-            // Render Mini Chart in Header
-            new Chart(document.getElementById('miniMistakeChart').getContext('2d'), {
+            // Render Chart
+            new Chart(document.getElementById('mistakeChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Spelling', 'Omissions', 'Extra Words', 'Capitalization', 'Punctuation'],
@@ -432,12 +444,12 @@
                             mistakes.capitalization.length,
                             mistakes.punctuation.length
                         ],
-                        backgroundColor: ['#facc15', '#4ade80', '#f87171', '#60a5fa', '#a78bfa'],
-                        borderColor: [var(--surface-color)],
-                        borderWidth: 4
+                        backgroundColor: ['#fef3c7', '#dcfce7', '#fee2e2', '#e0f2fe', '#ede9fe'],
+                        borderColor: ['#fde68a', '#bbf7d0', '#fecaca', '#bae6fd', '#ddd6fe'],
+                        borderWidth: 1
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '70%' }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
             });
 
             // Render Top Problem Words
@@ -449,7 +461,7 @@
                     const li = document.createElement('li');
                     li.innerHTML = `
                         <span class="error-pair">
-                            <span class="typed-word">${error.typed}</span> → <span class="original-word">${error.original}</span>
+                            <span class="original-word">${error.original}</span> → <span class="typed-word">${error.typed}</span>
                         </span>
                         <span class="error-count">${error.count} time(s)</span>
                     `;
@@ -483,7 +495,7 @@
             });
 
             const tableBody = document.getElementById('table-body');
-            const escapeRegExp = (string) => string ? string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') : '';
+            const escapeRegExp = (string) => string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
             // RENDER TABLE FUNCTION
             const renderTable = (mistakeArray) => {
@@ -547,34 +559,35 @@
                 if (!row || !row.dataset.index) return;
                 
                 const mistakeIndex = parseInt(row.dataset.index, 10);
-                const mistakeItem = data.alignment[mistakeIndex];
-
+                
                 let fullTextHTML = '';
                 data.alignment.forEach((item, index) => {
-                    let wordHTML = '';
-                    const isTargetMistake = index === mistakeIndex;
+                    let word = item.t; // Default to showing the typed word
+                    let classList = [];
 
-                    if (item.type === 'match') {
-                        wordHTML = `<span>${item.o}</span>`;
-                    } else if (item.type === 'del') {
-                        if (isTargetMistake) {
-                            wordHTML = `<span class="active-highlight omission"><span class="correction-bubble">Missed: ${item.o}</span></span>`;
+                    // Determine the highlight class
+                    if (item.type !== 'match' || item.mistakeType) {
+                         let mistakeClass = item.mistakeType || (item.type === 'sub' ? 'substitution' : item.type);
+                         classList.push('highlight', mistakeClass);
+                    }
+                    
+                    // Logic for the clicked mistake
+                    if (index === mistakeIndex) {
+                        classList.push('active-highlight');
+                        if (item.type === 'spelling' || (item.type === 'sub' && !item.mistakeType)) {
+                            word += `<span class="correction-bubble">Correct: ${item.o}</span>`;
                         }
-                    } else if (item.type === 'ins') {
-                         if (isTargetMistake) {
-                            wordHTML = `<span class="active-highlight extra">${item.t}<span class="correction-bubble">Extra Word</span></span>`;
-                        } else {
-                            wordHTML = `<span class="highlight extra">${item.t}</span>`;
-                        }
-                    } else if (item.type === 'sub') {
-                        if (isTargetMistake) {
-                             wordHTML = `<span class="active-highlight spelling">${item.t}<span class="correction-bubble">Correct: ${item.o}</span></span>`;
-                        } else {
-                             wordHTML = `<span class="highlight spelling">${item.t}</span>`;
+                    }
+
+                    // For omissions, we need to insert the missing word
+                    if (item.type === 'del') {
+                        word = `(<span class="highlight omission">${item.o}</span>)`;
+                        if (index === mistakeIndex) {
+                             word = `(<span class="highlight omission active-highlight">${item.o}</span>)`;
                         }
                     }
                     
-                    fullTextHTML += wordHTML + ' ';
+                    fullTextHTML += `<span id="word-${index}" class="${classList.join(' ')}">${word}</span> `;
                 });
 
                 modalContent.innerHTML = fullTextHTML;
@@ -593,19 +606,6 @@
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.remove('visible');
-                }
-            });
-
-            // COLLAPSIBLE DASHBOARD LOGIC
-            const dashboardHeader = document.querySelector('.collapsible-header');
-            const dashboardTitle = dashboardHeader.querySelector('h2');
-            dashboardHeader.addEventListener('click', () => {
-                const section = dashboardHeader.parentElement;
-                section.classList.toggle('open');
-                if (section.classList.contains('open')) {
-                    dashboardTitle.textContent = 'Hide Top Problem Words';
-                } else {
-                    dashboardTitle.textContent = 'Show Top Problem Words';
                 }
             });
         });
