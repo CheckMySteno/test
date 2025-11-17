@@ -38,110 +38,105 @@
             max-width: 1200px;
             margin: 0 auto;
         }
+        
+        /* NEW ADVANCED HEADER */
         header {
-            margin-bottom: 2rem;
-        }
-        header h1 {
-            font-size: 2.25rem;
-            font-weight: 800;
-            color: var(--text-header);
-            margin: 0;
-        }
-        header p {
-            margin: 0.25rem 0 0 0;
-            color: var(--text-muted);
-            font-size: 1.1rem;
-        }
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2.5rem;
-        }
-        .summary-card {
             background: var(--surface-color);
-            border-radius: 12px;
+            border-radius: 16px;
             border: 1px solid var(--border-color);
-            padding: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-        .summary-card .icon {
-            font-size: 1.5rem;
-            padding: 0.75rem;
-            border-radius: 8px;
-            color: var(--accent-purple);
-            background-color: #f5f3ff;
-        }
-        .summary-card .value {
-            font-size: 2.5rem;
-            font-weight: 800;
-            color: var(--text-header);
-            line-height: 1;
-        }
-        .summary-card .label {
-            font-size: 0.9rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-        .visual-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
+            padding: 2rem;
             margin-bottom: 2.5rem;
-        }
-        .visual-card {
-            background: var(--surface-color);
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            padding: 1.5rem;
-        }
-        .visual-card h2 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-header);
-            margin: 0 0 1.5rem 0;
-        }
-        #chart-container {
-            position: relative;
-            height: 250px;
-            width: 100%;
-        }
-        .top-errors-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-        .top-errors-list li {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.75rem 0;
-            border-bottom: 1px solid var(--border-color);
+            flex-wrap: wrap;
         }
-        .top-errors-list li:last-child { border-bottom: none; }
-        .error-pair {
-            font-size: 0.95rem;
+        .header-main { flex-grow: 1; }
+        .header-main h1 {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-header);
+            margin: 0 0 0.25rem 0;
         }
-        .original-word {
-            text-decoration: line-through;
-            color: var(--accent-red);
+        .header-main p {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 1.1rem;
         }
-        .typed-word {
-            font-weight: 600;
-            color: #166534;
+        .header-dashboard {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            flex-shrink: 0;
         }
-        .error-count {
+        .header-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem 2rem;
+        }
+        .stat-item .value {
+            font-size: 1.75rem;
             font-weight: 700;
             color: var(--text-header);
-            background: #f1f5f9;
-            padding: 4px 8px;
-            border-radius: 99px;
-            font-size: 0.8rem;
         }
+        .stat-item .label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .stat-item .value.accuracy { color: var(--accent-green); }
+        .stat-item .value.mistakes { color: var(--accent-red); }
+        .mini-chart-container {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* NEW ACCORDION-STYLE COLLAPSE */
+        .collapsible-section {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 2.5rem;
+            background-color: var(--surface-color);
+            overflow: hidden;
+        }
+        .collapsible-header {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.2s ease;
+        }
+        .collapsible-header:hover { background-color: #f8f9fa; }
+        .collapsible-header h2 {
+            font-size: 1.25rem;
+            margin: 0;
+            color: var(--text-header);
+        }
+        .toggle-icon {
+            transition: transform 0.3s ease;
+            font-size: 1.5rem;
+            color: var(--text-muted);
+        }
+        .collapsible-content {
+            display: none; /* Hidden by default */
+            padding: 1.5rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .collapsible-section.open .toggle-icon {
+            transform: rotate(180deg);
+        }
+        .collapsible-section.open .collapsible-content {
+            display: block;
+        }
+        .top-errors-list { list-style: none; padding: 0; margin: 0; }
+        .top-errors-list li { display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 0; border-bottom: 1px solid var(--border-color); }
+        .top-errors-list li:last-child { border-bottom: none; }
+        .error-pair { font-size: 0.95rem; }
+        .original-word { text-decoration: line-through; color: var(--accent-red); }
+        .typed-word { font-weight: 600; color: #166534; }
+        .error-count { font-weight: 700; color: var(--text-header); background: #f1f5f9; padding: 4px 8px; border-radius: 99px; font-size: 0.8rem; }
         
-        /* ADVANCED ANALYSIS TABLE & FILTERS */
+        /* SLEEK TABLE & FILTERS */
         .analysis-container {
             background: var(--surface-color);
             border-radius: 12px;
@@ -177,10 +172,7 @@
             color: white;
             border-color: var(--accent-purple);
         }
-
-        #table-view-container {
-            overflow-x: auto;
-        }
+        #table-view-container { overflow-x: auto; }
         .mistake-table {
             width: 100%;
             border-collapse: collapse;
@@ -202,9 +194,8 @@
             cursor: pointer;
             transition: background-color 0.2s;
         }
-        .mistake-table tbody tr:hover {
-            background-color: #f5f3ff;
-        }
+        .mistake-table tbody tr:hover { background-color: #f5f3ff; }
+        .mistake-table tbody tr:last-child td { border-bottom: none; }
         .mistake-type {
             font-weight: 600;
             font-size: 0.85rem;
@@ -257,11 +248,12 @@
         }
 
         @media (max-width: 900px) {
-            .visual-grid { grid-template-columns: 1fr; }
+            .header-dashboard { flex-direction: column-reverse; align-items: flex-end; }
+            .header-stats { grid-template-columns: 1fr 1fr; }
         }
         @media (max-width: 768px) {
             body { padding: 1rem; }
-            header h1 { font-size: 1.5rem; }
+            header { flex-direction: column; align-items: flex-start; }
         }
     </style>
 </head>
@@ -269,52 +261,43 @@
 
     <div class="container">
         <header>
-            <h1 id="passage-title">Loading Analysis...</h1>
-            <p id="test-date"></p>
+            <div class="header-main">
+                <h1 id="passage-title">Loading Analysis...</h1>
+                <p id="test-date"></p>
+                 <div class="header-stats">
+                    <div class="stat-item">
+                        <div class="label">Accuracy</div>
+                        <div class="value accuracy" id="accuracy-score">--%</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">Total Mistakes</div>
+                        <div class="value mistakes" id="total-mistakes">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">Full Mistakes</div>
+                        <div class="value" id="full-mistakes">--</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="label">Half Mistakes</div>
+                        <div class="value" id="half-mistakes">--</div>
+                    </div>
+                </div>
+            </div>
+            <div class="header-dashboard">
+                <div class="mini-chart-container">
+                    <canvas id="miniMistakeChart"></canvas>
+                </div>
+            </div>
         </header>
         <main>
             <div id="analysis-content">
-                <div class="summary-grid">
-                    <div class="summary-card">
-                        <span class="icon">🎯</span>
-                        <div>
-                            <div class="value" id="accuracy">--%</div>
-                            <div class="label">Final Accuracy</div>
-                        </div>
+                <div class="collapsible-section">
+                    <div class="collapsible-header">
+                        <h2>Show Top Problem Words</h2>
+                        <span class="toggle-icon">▼</span>
                     </div>
-                    <div class="summary-card">
-                        <span class="icon">❌</span>
-                        <div>
-                            <div class="value" id="total-mistakes">--</div>
-                            <div class="label">Total Mistakes</div>
-                        </div>
-                    </div>
-                    <div class="summary-card">
-                        <span class="icon">🔴</span>
-                        <div>
-                            <div class="value" id="full-mistakes">--</div>
-                            <div class="label">Full Mistakes</div>
-                        </div>
-                    </div>
-                    <div class="summary-card">
-                        <span class="icon">🟠</span>
-                        <div>
-                            <div class="value" id="half-mistakes">--</div>
-                            <div class="label">Half Mistakes</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="visual-grid">
-                    <div class="visual-card">
-                        <h2>Mistake Breakdown</h2>
-                        <div id="chart-container">
-                            <canvas id="mistakeChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="visual-card">
-                        <h2>Top Problem Words</h2>
-                        <ul id="top-errors-list" class="top-errors-list">
+                    <div class="collapsible-content">
+                         <ul id="top-errors-list" class="top-errors-list">
                             <!-- Populated by JS -->
                         </ul>
                     </div>
@@ -374,7 +357,7 @@
 
             const data = JSON.parse(dataString);
             const totalOriginalWords = data.originalText.split(/\s+/).filter(Boolean).length;
-            const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100).toFixed(2);
+            const accuracy = ((totalOriginalWords - (data.summary.fullMistakes + data.summary.halfMistakes / 2)) / totalOriginalWords * 100);
             
             // Populate Header and Summary
             document.getElementById('passage-title').textContent = data.passageTitle;
@@ -382,7 +365,7 @@
             document.getElementById('total-mistakes').textContent = data.summary.fullMistakes + data.summary.halfMistakes;
             document.getElementById('full-mistakes').textContent = data.summary.fullMistakes;
             document.getElementById('half-mistakes').textContent = data.summary.halfMistakes;
-            document.getElementById('accuracy').textContent = `${accuracy}%`;
+            document.getElementById('accuracy-score').textContent = `${accuracy.toFixed(1)}%`;
 
             // Process and Categorize Mistakes
             const mistakes = { spelling: [], omission: [], extra: [], capitalization: [], punctuation: [] };
@@ -417,8 +400,8 @@
                 }
             });
 
-            // Render Chart
-            new Chart(document.getElementById('mistakeChart').getContext('2d'), {
+            // Render Mini Chart in Header
+            new Chart(document.getElementById('miniMistakeChart').getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Spelling', 'Omissions', 'Extra Words', 'Capitalization', 'Punctuation'],
@@ -430,12 +413,12 @@
                             mistakes.capitalization.length,
                             mistakes.punctuation.length
                         ],
-                        backgroundColor: ['#fef3c7', '#dcfce7', '#fee2e2', '#e0f2fe', '#ede9fe'],
-                        borderColor: ['#fde68a', '#bbf7d0', '#fecaca', '#bae6fd', '#ddd6fe'],
-                        borderWidth: 1
+                        backgroundColor: ['#facc15', '#4ade80', '#f87171', '#60a5fa', '#a78bfa'],
+                        borderColor: [var(--surface-color)],
+                        borderWidth: 4
                     }]
                 },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'right' } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } }, cutout: '70%' }
             });
 
             // Render Top Problem Words
@@ -549,24 +532,29 @@
                 let fullTextHTML = '';
                 data.alignment.forEach((item, index) => {
                     let word = item.o || item.t;
-                    let highlightClass = '';
+                    let spanId = `word-${index}`;
+                    let classList = [];
                     
                     if (item.type !== 'match' || item.mistakeType) {
-                         if (item.type === 'sub') highlightClass = 'substitution';
-                         else highlightClass = item.type;
+                         let mistakeClass = item.mistakeType || (item.type === 'sub' ? 'substitution' : item.type);
+                         classList.push('highlight', mistakeClass);
                     }
                     
                     if (index === mistakeIndex) {
-                        fullTextHTML += `<span class="highlight ${highlightClass} active-highlight">${word}</span> `;
-                    } else if (highlightClass) {
-                        fullTextHTML += `<span class="highlight ${highlightClass}">${word}</span> `;
-                    } else {
-                        fullTextHTML += `<span>${word}</span> `;
+                        classList.push('active-highlight');
                     }
+                    
+                    fullTextHTML += `<span id="${spanId}" class="${classList.join(' ')}">${word}</span> `;
                 });
 
                 modalContent.innerHTML = fullTextHTML;
                 modal.classList.add('visible');
+
+                // Auto-scroll to the highlighted word
+                const highlightedWord = modalContent.querySelector('.active-highlight');
+                if (highlightedWord) {
+                    highlightedWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
             });
 
             document.getElementById('modal-close-btn').addEventListener('click', () => {
@@ -575,6 +563,19 @@
             modal.addEventListener('click', (e) => {
                 if (e.target === modal) {
                     modal.classList.remove('visible');
+                }
+            });
+
+            // COLLAPSIBLE DASHBOARD LOGIC
+            const dashboardHeader = document.querySelector('.collapsible-header');
+            const dashboardTitle = dashboardHeader.querySelector('h2');
+            dashboardHeader.addEventListener('click', () => {
+                const section = dashboardHeader.parentElement;
+                section.classList.toggle('open');
+                if (section.classList.contains('open')) {
+                    dashboardTitle.textContent = 'Hide Performance Dashboard';
+                } else {
+                    dashboardTitle.textContent = 'Show Performance Dashboard';
                 }
             });
         });
