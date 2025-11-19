@@ -923,6 +923,7 @@
         document.querySelector('.app-container').style.display = 'block';
       }
       
+      // ** BUG FIX: State is NO LONGER cleared here. It's only cleared on explicit user action. **
       if (viewId === 'selection-view') {
           showSelectionHub();
           if(player && typeof player.stopVideo === 'function') player.stopVideo();
