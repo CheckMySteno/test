@@ -849,7 +849,6 @@
   });
 
   async function initializePractice() {
-    // Session check for player view
     const savedState = JSON.parse(localStorage.getItem('stenoState'));
     
     // ** BUG FIX is here: The logic for clearing state on refresh was removed from showView **
@@ -868,7 +867,7 @@
             document.getElementById('player-subtitle').textContent = `Words: ${wordCount}`;
             loadVideo(savedState.audioUrl, false);
         } else if (savedState.view === 'exam-view') {
-            // This part handles restoring an in-progress exam session, which you already had.
+            // This part handles restoring an in-progress exam session.
             showView('exam-view');
             document.documentElement.requestFullscreen().catch(err => {});
             document.getElementById('typingBox').value = savedState.typedText || '';
@@ -924,7 +923,6 @@
         document.querySelector('.app-container').style.display = 'block';
       }
       
-      // ** BUG FIX: State is NO LONGER cleared here. It's only cleared on explicit user action. **
       if (viewId === 'selection-view') {
           showSelectionHub();
           if(player && typeof player.stopVideo === 'function') player.stopVideo();
@@ -1563,11 +1561,10 @@ function initializeResultInteractivity() {
 
     // Smart "Try Another" button
     document.getElementById('tryAnotherBtn').addEventListener('click', () => {
-        const lastCategory = g_currentCategory || JSON.parse(localStorage.getItem('stenoState'))?.g_currentCategory;
+        const lastCategory = g_currentCategory;
         if (lastCategory) {
             clearState();
             showView('selection-view');
-            // Programmatically click the correct category to return
             const categoryButton = document.getElementById(`cat-${lastCategory.replace(/_/g, '-')}`);
             if (categoryButton) {
                 categoryButton.click();
