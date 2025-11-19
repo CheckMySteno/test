@@ -292,10 +292,10 @@
         --accent-red: #ef4444;
         --accent-amber: #f97316;
         --hl-additions: #fecdd3;
-        --hl-omissions: #d9f99d;
-        --hl-spelling: #fde68a;
-        --hl-capitalization: #bae6fd;
-        --hl-punctuation: #ddd6fe;
+        --hl-omissions: #dcfce7;
+        --hl-spelling: #fef3c7;
+        --hl-capitalization: #e0f2fe;
+        --hl-punctuation: #ede9fe;
 
         font-family: 'Inter', sans-serif;
         background-color: var(--surface-card);
@@ -652,7 +652,7 @@
         <div class="action-buttons">
             <button id="printReportBtn" class="primary-btn">Download Report</button>
             <button id="deepAnalysisBtn" class="primary-btn secondary-btn">📊 Deep Analysis</button>
-            <button onclick="goHome()" class="primary-btn">🏠 Try Another Dictation</button>
+            <button id="tryAnotherBtn" class="primary-btn">🏠 Try Another Dictation</button>
         </div>
     </div>
 </div>
@@ -833,7 +833,7 @@
 
   // --- Global State Variables ---
   let player;
-  let originalText = "", wordCount = 0, currentPassageTitle = "";
+  let originalText = "", wordCount = 0, currentPassageTitle = "", g_currentCategory = "";
   let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
   let g_collection = "", g_docId = "", candidateId, attemptsRef;
   let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
@@ -844,10 +844,31 @@
 
   // --- Initialization ---
   document.addEventListener("DOMContentLoaded", () => {
+    // UPDATED: Initialize with session persistence
     initializePractice();
   });
 
   async function initializePractice() {
+    // Session check for player view
+    const savedState = JSON.parse(localStorage.getItem('stenoState'));
+    if (savedState && savedState.view === 'player-view') {
+        g_collection = savedState.g_collection;
+        g_docId = savedState.g_docId;
+        originalText = savedState.originalText;
+        wordCount = savedState.wordCount;
+        currentPassageTitle = savedState.title;
+        g_currentCategory = savedState.g_currentCategory;
+        
+        showView('player-view');
+        document.querySelector('.player-title').textContent = currentPassageTitle;
+        document.getElementById('player-subtitle').textContent = `Words: ${wordCount}`;
+        
+        // Load the video but don't autoplay
+        loadVideo(savedState.audioUrl, false);
+    } else {
+        showView('selection-view');
+    }
+
     const accessCode = localStorage.getItem("currentAccessCode");
     if (!accessCode) {
         showErrorModal("Access Denied", "No access code found. Please log in first.");
@@ -857,14 +878,11 @@
     candidateId = accessCode;
     document.getElementById('candidate-name-display').textContent = candidateId.toUpperCase();
     attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
-
+    
     // Core setup functions
     setupProgressBar();
     setupExtraControls();
     setLogoSource();
-
-    // Initial view is always the selection hub
-    showView('selection-view');
     initializeEventListeners();
   }
 
@@ -914,6 +932,7 @@
   }
 
   function showDictationGrid(type) {
+      g_currentCategory = type; // Remember the current category
       document.getElementById('dictation-type-hub').style.display = 'none';
       document.querySelectorAll('.grid-container').forEach(c => c.style.display = 'none');
 
@@ -927,7 +946,9 @@
   }
 
   function clearStateAndGoBack() {
-      showView('selection-view');
+      // UPDATED: Forcibly clear state and go back to selection
+      clearState();
+      window.location.reload(); // Reload to ensure a clean state
   }
 
   // --- DATA LOADING AND GRID RENDERING ---
@@ -1191,7 +1212,17 @@
         wordCount = passageData.wordCount;
         currentPassageTitle = passageData.title;
 
-        saveState({ view: 'player-view', g_collection, g_docId, originalText, wordCount, audioUrl: passageData.audioUrl, title: currentPassageTitle });
+        // UPDATED: Save the state for persistence
+        saveState({
+            view: 'player-view',
+            g_collection,
+            g_docId,
+            originalText,
+            wordCount,
+            audioUrl: passageData.audioUrl,
+            title: currentPassageTitle,
+            g_currentCategory // Also save the current category
+        });
 
         showView('player-view');
         setPlayerLoading(true);
@@ -1210,26 +1241,7 @@
   // --- STATE MANAGEMENT ---
   function saveState(state) { localStorage.setItem('stenoState', JSON.stringify(state)); }
   function clearState() { localStorage.removeItem('stenoState'); }
-  function restoreSession() {
-      const savedState = JSON.parse(localStorage.getItem('stenoState'));
-      if (!savedState || savedState.view !== 'exam-view') {
-          showView('selection-view');
-          return;
-      }
-      g_collection = savedState.g_collection;
-      g_docId = savedState.g_docId;
-      originalText = savedState.originalText;
-      wordCount = savedState.wordCount;
-      currentPassageTitle = savedState.title;
-      showView('exam-view');
-      document.documentElement.requestFullscreen().catch(err => {});
-      document.getElementById('typingBox').value = savedState.typedText || '';
-      transcriptionTimerTotalTime = savedState.totalTime;
-      timeLeft = savedState.timeLeft;
-      timerStarted = true;
-      startTimer();
-  }
-
+  
   // --- PLAYER AND EXAM LOGIC ---
   function onYouTubeIframeAPIReady() {}
   function extractVideoID(url) { if (typeof url !== 'string') return null; const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/; return (url.match(regex) || [])[1] || null; }
@@ -1540,6 +1552,21 @@ function initializeResultInteractivity() {
         sessionStorage.setItem('deepAnalysisData', JSON.stringify(analysisData));
         window.open('deep_analysis.html', '_blank');
     });
+
+    // Smart "Try Another" button
+    document.getElementById('tryAnotherBtn').addEventListener('click', () => {
+        const lastCategory = g_currentCategory || JSON.parse(localStorage.getItem('stenoState'))?.g_currentCategory;
+        if (lastCategory) {
+            showView('selection-view');
+            // Programmatically click the correct category to return
+            const categoryButton = document.getElementById(`cat-${lastCategory.replace(/_/g, '-')}`);
+            if (categoryButton) {
+                categoryButton.click();
+            }
+        } else {
+            goHome(); // Fallback to main home
+        }
+    });
 }
 function getCleanTextFromAlignment(type = 'typed') {
     if (!g_alignment || g_alignment.length === 0) return "";
@@ -1609,7 +1636,7 @@ function toggleReevaluateMode() {
 
 async function submitTranscription() {
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
-    clearState();
+    clearState(); // Clear the player state, but g_currentCategory will remain
     if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
 
     document.getElementById('fullPageLoader').style.display = 'flex';
