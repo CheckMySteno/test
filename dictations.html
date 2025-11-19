@@ -851,20 +851,32 @@
   async function initializePractice() {
     // Session check for player view
     const savedState = JSON.parse(localStorage.getItem('stenoState'));
-    if (savedState && savedState.view === 'player-view') {
+    
+    // ** BUG FIX is here: The logic for clearing state on refresh was removed from showView **
+    if (savedState && (savedState.view === 'player-view' || savedState.view === 'exam-view')) {
+        // If there's a saved state for player or exam, restore it.
         g_collection = savedState.g_collection;
         g_docId = savedState.g_docId;
         originalText = savedState.originalText;
         wordCount = savedState.wordCount;
         currentPassageTitle = savedState.title;
         g_currentCategory = savedState.g_currentCategory;
-        
-        showView('player-view');
-        document.querySelector('.player-title').textContent = currentPassageTitle;
-        document.getElementById('player-subtitle').textContent = `Words: ${wordCount}`;
-        
-        // Load the video but don't autoplay
-        loadVideo(savedState.audioUrl, false);
+
+        if (savedState.view === 'player-view') {
+            showView('player-view');
+            document.querySelector('.player-title').textContent = currentPassageTitle;
+            document.getElementById('player-subtitle').textContent = `Words: ${wordCount}`;
+            loadVideo(savedState.audioUrl, false);
+        } else if (savedState.view === 'exam-view') {
+            // This part handles restoring an in-progress exam session, which you already had.
+            showView('exam-view');
+            document.documentElement.requestFullscreen().catch(err => {});
+            document.getElementById('typingBox').value = savedState.typedText || '';
+            transcriptionTimerTotalTime = savedState.totalTime;
+            timeLeft = savedState.timeLeft;
+            timerStarted = true;
+            startTimer();
+        }
     } else {
         showView('selection-view');
     }
@@ -887,19 +899,12 @@
   }
 
   function setLogoSource() {
-    // Paste your Base64 codes in the variables below.
-    const sscLogoBase64 = "";
+    const sscLogoBase64 = ""; 
     const candidatePhotoBase64 = "";
-
     const logoImg = document.getElementById('ssc-logo-img');
     const candidatePhotoImg = document.querySelector('.ssc-candidate-photo img');
-
-    if (logoImg && sscLogoBase64) {
-        logoImg.src = sscLogoBase64;
-    }
-    if (candidatePhotoImg && candidatePhotoBase64) {
-        candidatePhotoImg.src = candidatePhotoBase64;
-    }
+    if (logoImg && sscLogoBase64) logoImg.src = sscLogoBase64;
+    if (candidatePhotoImg && candidatePhotoBase64) candidatePhotoImg.src = candidatePhotoBase64;
   }
 
   // --- UI AND VIEW MANAGEMENT ---
@@ -918,10 +923,10 @@
       } else {
         document.querySelector('.app-container').style.display = 'block';
       }
-
+      
+      // ** BUG FIX: State is NO LONGER cleared here. It's only cleared on explicit user action. **
       if (viewId === 'selection-view') {
           showSelectionHub();
-          clearState();
           if(player && typeof player.stopVideo === 'function') player.stopVideo();
       }
   }
@@ -941,14 +946,14 @@
   }
 
   function goHome() {
+      clearState(); // Intentionally clear state when going home
       if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
       showView('selection-view');
   }
 
   function clearStateAndGoBack() {
-      // UPDATED: Forcibly clear state and go back to selection
-      clearState();
-      window.location.reload(); // Reload to ensure a clean state
+      clearState(); // Intentionally clear state
+      window.location.reload(); // Reload to ensure a clean slate
   }
 
   // --- DATA LOADING AND GRID RENDERING ---
@@ -1221,7 +1226,7 @@
             wordCount,
             audioUrl: passageData.audioUrl,
             title: currentPassageTitle,
-            g_currentCategory // Also save the current category
+            g_currentCategory
         });
 
         showView('player-view');
@@ -1376,19 +1381,20 @@
   function startTranscriptionTest() {
       document.getElementById('instructions-modal').classList.remove('visible');
       document.documentElement.requestFullscreen().catch(err => console.warn(`Fullscreen failed: ${err.message}.`));
-      showView('exam-view');
-      // UPDATED: Get timer from custom input, default to 50
+      
       const customMinutes = parseInt(document.getElementById('custom-timer-input').value, 10);
       transcriptionTimerTotalTime = (isNaN(customMinutes) || customMinutes < 1) ? 50 * 60 : customMinutes * 60;
-
+      
       timeLeft = transcriptionTimerTotalTime;
+      
+      const currentState = JSON.parse(localStorage.getItem('stenoState'));
+      saveState({ ...currentState, view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
+      
+      showView('exam-view');
       document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft);
       document.getElementById('typingBox').value = '';
       document.getElementById('typingBox').focus();
       document.getElementById('typingBox').addEventListener('keydown', handleFirstKeydown);
-
-      const currentState = JSON.parse(localStorage.getItem('stenoState'));
-      saveState({ ...currentState, view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
   }
   function handleFirstKeydown() { if (!timerStarted) { timerStarted = true; startTimer(); document.getElementById('typingBox').removeEventListener('keydown', handleFirstKeydown); } }
   function startTimer() {
@@ -1399,7 +1405,9 @@
           } else {
               document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft);
               const currentState = JSON.parse(localStorage.getItem('stenoState'));
-              if(currentState) saveState({ ...currentState, timeLeft, typedText: document.getElementById('typingBox').value });
+              if(currentState && currentState.view === 'exam-view') {
+                  saveState({ ...currentState, timeLeft, typedText: document.getElementById('typingBox').value });
+              }
           }
       }, 1000);
   }
@@ -1557,6 +1565,7 @@ function initializeResultInteractivity() {
     document.getElementById('tryAnotherBtn').addEventListener('click', () => {
         const lastCategory = g_currentCategory || JSON.parse(localStorage.getItem('stenoState'))?.g_currentCategory;
         if (lastCategory) {
+            clearState();
             showView('selection-view');
             // Programmatically click the correct category to return
             const categoryButton = document.getElementById(`cat-${lastCategory.replace(/_/g, '-')}`);
@@ -1636,7 +1645,7 @@ function toggleReevaluateMode() {
 
 async function submitTranscription() {
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
-    clearState(); // Clear the player state, but g_currentCategory will remain
+    
     if (document.fullscreenElement) document.exitFullscreen().catch(()=>{});
 
     document.getElementById('fullPageLoader').style.display = 'flex';
@@ -1647,6 +1656,9 @@ async function submitTranscription() {
         }
         const typedText = document.getElementById('typingBox').value;
         g_lastTypedText = typedText;
+
+        // Clear only the exam view part of the state before analysis
+        localStorage.removeItem('stenoState'); 
 
         if (typedText.trim().split(/\s+/).filter(Boolean).length < 10) {
             alert("Please type at least 10 words.");
@@ -1876,7 +1888,6 @@ function initializeEventListeners() {
     // --- Transcript Preview Modal Listeners ---
     const transcriptModal = document.getElementById('transcript-preview-modal');
     document.getElementById('transcript-close-btn').addEventListener('click', () => {
-        // BUG FIX: Check for and exit fullscreen before closing
         if (document.fullscreenElement) {
             document.exitFullscreen();
         }
