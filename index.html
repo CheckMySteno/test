@@ -2,90 +2,74 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Study Live</title>
+<title>Study Live | Mega Jugad Edition</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Firebase COMPAT SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <style>
-body{
-  margin:0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg,#667eea,#764ba2);
-  color:#fff;
-}
-.container{
-  max-width:420px;
-  margin:40px auto;
-  background:#1f1f2e;
-  border-radius:18px;
-  padding:25px;
-  box-shadow:0 20px 40px rgba(0,0,0,0.4);
-}
-h1{text-align:center;margin-bottom:5px}
-.sub{text-align:center;color:#bbb;font-size:14px;margin-bottom:25px}
+:root { --bg: #0f172a; --card: #1e293b; --accent: #6366f1; --success: #10b981; }
+body { margin: 0; font-family: sans-serif; background: var(--bg); color: #fff; display: flex; justify-content: center; padding: 20px; }
+.container { width: 100%; max-width: 450px; }
+.card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid #334155; margin-bottom: 20px; text-align: center; }
+.time { font-size: 3rem; font-weight: bold; margin: 15px 0; font-family: monospace; }
+.btn { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: bold; cursor: pointer; transition: 0.2s; font-size: 16px; margin-top: 10px; }
+.start { background: var(--success); color: white; }
+.stop { background: #ef4444; color: white; }
+.login { background: white; color: black; }
+.hide { display: none; }
 
-.btn{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:12px;
-  font-size:16px;
-  cursor:pointer;
-  margin-top:10px;
-}
-.login{background:#fff;color:#000;font-weight:600}
-.start{background:#00e676;color:#000}
-.stop{background:#ff5252;color:#fff}
-.logout{background:#444;color:#fff}
+/* Leaderboard */
+.user-row { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #334155; gap: 12px; }
+.pulse { width: 10px; height: 10px; background: var(--success); border-radius: 50%; box-shadow: 0 0 8px var(--success); animation: blink 1.5s infinite; }
+@keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+.avatar { width: 35px; height: 35px; border-radius: 50%; background: #334155; }
+.u-info { flex-grow: 1; text-align: left; }
+.u-name { font-size: 14px; font-weight: bold; }
+.u-time { font-size: 12px; color: #94a3b8; }
 
-.card{
-  background:#2a2a40;
-  padding:18px;
-  border-radius:14px;
-  margin-top:20px;
-  text-align:center;
-}
-
-.time{
-  font-size:36px;
-  font-weight:bold;
-  margin-top:10px;
-}
-.hide{display:none}
+/* Modal */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 100; }
 </style>
 </head>
-
 <body>
 
 <div class="container">
-  <h1>📚 Study Live</h1>
-  <div class="sub">Show you are studying — live</div>
-
-  <button class="btn login" id="loginBtn">Login with Google</button>
-
-  <div id="app" class="hide">
-    <div class="card">
-      <div>Welcome</div>
-      <h2 id="name"></h2>
+    <div id="loginPage" class="card">
+        <h1>📚 Study Live</h1>
+        <p>Join the 1-Read Community</p>
+        <button class="btn login" id="loginBtn">Login with Google</button>
     </div>
 
-    <div class="card">
-      <div>Today's Study Time</div>
-      <div class="time" id="time">00:00:00</div>
-      <button class="btn start" id="startBtn">▶ Start Study</button>
-      <button class="btn stop hide" id="stopBtn">⏸ Stop Study</button>
-    </div>
+    <div id="appPage" class="hide">
+        <div class="card">
+            <div id="status">Ready to Focus?</div>
+            <div class="time" id="mainTimer">00:00:00</div>
+            <button class="btn start" id="startBtn">▶ Start Session</button>
+            <button class="btn stop hide" id="stopBtn">⏹ Stop Session</button>
+        </div>
 
-    <button class="btn logout" id="logoutBtn">Logout</button>
-  </div>
+        <h3 style="margin-left: 10px;">Live Leaderboard</h3>
+        <div class="card" id="leaderboard" style="padding: 0;">
+            <div style="padding: 20px; color: #64748b;">Waiting for students...</div>
+        </div>
+        <button class="btn" onclick="firebase.auth().signOut()" style="background:none; color:#64748b;">Logout</button>
+    </div>
+</div>
+
+<!-- Activity Check Modal -->
+<div id="activityModal" class="modal hide">
+    <div class="card" style="max-width: 300px;">
+        <h3>Still Studying?</h3>
+        <p>Confirm within <span id="modalTimer" style="color:#ef4444; font-weight:bold;">120</span>s</p>
+        <button class="btn start" id="confirmBtn">Yes, I'm here!</button>
+    </div>
 </div>
 
 <script>
-/* 🔥 FIREBASE CONFIG (YOURS) */
+/* 🔥 CONFIG */
 firebase.initializeApp({
   apiKey: "AIzaSyAUnOQq5DvNnnacfzBLRlKaP5Oh2W7fQ1Y",
   authDomain: "study-live-cdc81.firebaseapp.com",
@@ -95,98 +79,179 @@ firebase.initializeApp({
   appId: "1:656676120180:web:7ea85f6e650b132e39d321"
 });
 
-const auth = firebase.auth();
 const db = firebase.firestore();
+const auth = firebase.auth();
 
-/* ELEMENTS */
-const loginBtn = document.getElementById("loginBtn");
-const appDiv = document.getElementById("app");
-const nameEl = document.getElementById("name");
-const timeEl = document.getElementById("time");
+/* STATE */
+let userBank = 0;
+let sessionStart = null;
+let isLive = false;
+let communityMap = {};
+let activityTimeout;
+
+/* DOM */
+const mainTimer = document.getElementById("mainTimer");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
-const logoutBtn = document.getElementById("logoutBtn");
+const leaderboard = document.getElementById("leaderboard");
 
-let timerInterval;
-let startTime = null;
-let todaySeconds = 0;
+/* AUTH */
+document.getElementById("loginBtn").onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
 
-/* LOGIN */
-loginBtn.onclick = () => {
-  const provider = new firebase.auth.GoogleAuthProvider();
-  auth.signInWithPopup(provider);
-};
-
-/* LOGOUT */
-logoutBtn.onclick = () => auth.signOut();
-
-/* AUTH STATE */
-auth.onAuthStateChanged(async user => {
-  if(user){
-    loginBtn.classList.add("hide");
-    appDiv.classList.remove("hide");
-    nameEl.innerText = user.displayName;
-
-    const today = new Date().toISOString().slice(0,10);
-    const ref = db.collection("study").doc(user.uid + "_" + today);
-    const doc = await ref.get();
-
-    if(doc.exists){
-      todaySeconds = doc.data().seconds || 0;
-      updateTime();
+auth.onAuthStateChanged(user => {
+    if(user) {
+        document.getElementById("loginPage").classList.add("hide");
+        document.getElementById("appPage").classList.remove("hide");
+        initLeaderboard();
+    } else {
+        location.reload();
     }
-  } else {
-    loginBtn.classList.remove("hide");
-    appDiv.classList.add("hide");
-    stopTimer();
-  }
 });
 
-/* START STUDY */
-startBtn.onclick = () => {
-  startTime = Date.now();
-  startBtn.classList.add("hide");
-  stopBtn.classList.remove("hide");
+/* THE JUGAD WRITE (Single Document Map Update) */
+async function syncToDb(status) {
+    const user = auth.currentUser;
+    const today = new Date().toISOString().slice(0,10);
+    const docRef = db.collection("daily_leaderboard").doc(today);
 
-  timerInterval = setInterval(() => {
-    const diff = Math.floor((Date.now() - startTime)/1000);
-    updateTime(todaySeconds + diff);
-  },1000);
-};
+    // Calculate current total
+    let currentTotal = userBank;
+    if (status === true && sessionStart) {
+        currentTotal += Math.floor((Date.now() - sessionStart) / 1000);
+    }
 
-/* STOP STUDY */
-stopBtn.onclick = async () => {
-  stopTimer();
-  const user = auth.currentUser;
-  if(!user) return;
+    // This is the magic: "users.UID" updates only YOUR key in the 500-user document
+    const payload = {};
+    payload[`users.${user.uid}`] = {
+        n: user.displayName.split(' ')[0],
+        p: user.photoURL,
+        s: currentTotal,
+        st: status ? firebase.firestore.FieldValue.serverTimestamp() : null,
+        live: status
+    };
 
-  const today = new Date().toISOString().slice(0,10);
-  const ref = db.collection("study").doc(user.uid + "_" + today);
-
-  todaySeconds += Math.floor((Date.now() - startTime)/1000);
-  await ref.set({
-    uid:user.uid,
-    name:user.displayName,
-    date:today,
-    seconds:todaySeconds,
-    updated:firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  updateTime();
-};
-
-/* HELPERS */
-function stopTimer(){
-  clearInterval(timerInterval);
-  startBtn.classList.remove("hide");
-  stopBtn.classList.add("hide");
+    try {
+        await docRef.update(payload);
+    } catch (e) {
+        // Auto-create document if it's the first study of the day
+        await docRef.set({ users: {} }, { merge: true });
+        await docRef.update(payload);
+    }
 }
 
-function updateTime(sec = todaySeconds){
-  const h = String(Math.floor(sec/3600)).padStart(2,"0");
-  const m = String(Math.floor((sec%3600)/60)).padStart(2,"0");
-  const s = String(sec%60).padStart(2,"0");
-  timeEl.innerText = `${h}:${m}:${s}`;
+/* START / STOP */
+startBtn.onclick = async () => {
+    isLive = true;
+    sessionStart = Date.now();
+    startBtn.classList.add("hide");
+    stopBtn.classList.remove("hide");
+    document.getElementById("status").innerText = "Focusing...";
+    
+    await syncToDb(true);
+    startActivityCheck();
+};
+
+stopBtn.onclick = async () => {
+    const sessionSec = Math.floor((Date.now() - sessionStart) / 1000);
+    userBank += sessionSec;
+    isLive = false;
+    
+    startBtn.classList.remove("hide");
+    stopBtn.classList.add("hide");
+    document.getElementById("status").innerText = "Session Saved";
+    
+    await syncToDb(false);
+    clearTimeout(activityTimeout);
+};
+
+/* LEADERBOARD (1 READ ONLY) */
+function initLeaderboard() {
+    const today = new Date().toISOString().slice(0,10);
+    
+    db.collection("daily_leaderboard").doc(today).onSnapshot(doc => {
+        if(!doc.exists) return;
+        communityMap = doc.data().users || {};
+        
+        // Sync my local bank with DB
+        const me = communityMap[auth.currentUser.uid];
+        if(me && !isLive) {
+            userBank = me.s;
+            mainTimer.innerText = formatTime(userBank);
+        }
+        renderUI();
+    });
+}
+
+// Live Ticker (Updates UI every second without database reads)
+setInterval(() => {
+    if(isLive) {
+        const total = userBank + Math.floor((Date.now() - sessionStart) / 1000);
+        mainTimer.innerText = formatTime(total);
+    }
+    renderUI(); 
+}, 1000);
+
+function renderUI() {
+    const users = Object.values(communityMap);
+    if(users.length === 0) return;
+
+    // Sort users by their current calculated time
+    users.sort((a,b) => {
+        const timeA = a.s + (a.live && a.st ? (Math.floor(Date.now()/1000) - a.st.seconds) : 0);
+        const timeB = b.s + (b.live && b.st ? (Math.floor(Date.now()/1000) - b.st.seconds) : 0);
+        return timeB - timeA;
+    });
+
+    leaderboard.innerHTML = users.map(u => {
+        let displaySec = u.s;
+        if(u.live && u.st) {
+            displaySec += (Math.floor(Date.now()/1000) - u.st.seconds);
+        }
+        return `
+            <div class="user-row">
+                <div class="${u.live ? 'pulse' : ''}" style="width:10px"></div>
+                <img class="avatar" src="${u.p}">
+                <div class="u-info">
+                    <div class="u-name">${u.n}</div>
+                    <div class="u-time">${formatTime(displaySec)}</div>
+                </div>
+                <div style="font-size:10px; color:${u.live ? '#10b981' : '#64748b'}">${u.live ? 'LIVE' : 'IDLE'}</div>
+            </div>
+        `;
+    }).join('');
+}
+
+/* ACTIVITY CHECK */
+function startActivityCheck() {
+    clearTimeout(activityTimeout);
+    activityTimeout = setTimeout(() => {
+        document.getElementById("activityModal").classList.remove("hide");
+        let left = 120;
+        const intv = setInterval(() => {
+            left--;
+            document.getElementById("modalTimer").innerText = left;
+            if(left <= 0) { 
+                clearInterval(intv); 
+                stopBtn.onclick(); 
+                document.getElementById("activityModal").classList.add("hide");
+            }
+        }, 1000);
+
+        document.getElementById("confirmBtn").onclick = () => {
+            clearInterval(intv);
+            document.getElementById("activityModal").classList.add("hide");
+            startActivityCheck(); // Reset for next hour
+        };
+    }, 3600000); // 1 Hour
+}
+
+/* HELPERS */
+function formatTime(s) {
+    if(s < 0) s = 0;
+    const h = Math.floor(s/3600);
+    const m = Math.floor((s%3600)/60);
+    const sc = s%60;
+    return [h,m,sc].map(v => String(v).padStart(2,'0')).join(':');
 }
 </script>
 
