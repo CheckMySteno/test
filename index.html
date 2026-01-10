@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Study Live | Mega Jugad Edition</title>
+<title>Study Live | Mega Jugad Fixed</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -19,7 +19,9 @@ body { margin: 0; font-family: sans-serif; background: var(--bg); color: #fff; d
 .start { background: var(--success); color: white; }
 .stop { background: #ef4444; color: white; }
 .login { background: white; color: black; }
-.hide { display: none; }
+
+/* FIX: This makes sure hidden elements stay hidden */
+.hide { display: none !important; }
 
 /* Leaderboard */
 .user-row { display: flex; align-items: center; padding: 12px; border-bottom: 1px solid #334155; gap: 12px; }
@@ -31,18 +33,20 @@ body { margin: 0; font-family: sans-serif; background: var(--bg); color: #fff; d
 .u-time { font-size: 12px; color: #94a3b8; }
 
 /* Modal */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 100; }
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.9); display: flex; align-items: center; justify-content: center; z-index: 1000; }
 </style>
 </head>
 <body>
 
 <div class="container">
+    <!-- Login Page -->
     <div id="loginPage" class="card">
         <h1>📚 Study Live</h1>
         <p>Join the 1-Read Community</p>
         <button class="btn login" id="loginBtn">Login with Google</button>
     </div>
 
+    <!-- App Page -->
     <div id="appPage" class="hide">
         <div class="card">
             <div id="status">Ready to Focus?</div>
@@ -52,14 +56,14 @@ body { margin: 0; font-family: sans-serif; background: var(--bg); color: #fff; d
         </div>
 
         <h3 style="margin-left: 10px;">Live Leaderboard</h3>
-        <div class="card" id="leaderboard" style="padding: 0;">
+        <div class="card" id="leaderboard" style="padding: 0; min-height: 100px;">
             <div style="padding: 20px; color: #64748b;">Waiting for students...</div>
         </div>
-        <button class="btn" onclick="firebase.auth().signOut()" style="background:none; color:#64748b;">Logout</button>
+        <button class="btn" id="logoutBtn" style="background:none; color:#64748b;">Logout</button>
     </div>
 </div>
 
-<!-- Activity Check Modal -->
+<!-- Activity Check Modal (Hidden by default) -->
 <div id="activityModal" class="modal hide">
     <div class="card" style="max-width: 300px;">
         <h3>Still Studying?</h3>
@@ -88,15 +92,18 @@ let sessionStart = null;
 let isLive = false;
 let communityMap = {};
 let activityTimeout;
+let checkInterval;
 
-/* DOM */
+/* DOM ELEMENTS */
 const mainTimer = document.getElementById("mainTimer");
 const startBtn = document.getElementById("startBtn");
 const stopBtn = document.getElementById("stopBtn");
 const leaderboard = document.getElementById("leaderboard");
+const activityModal = document.getElementById("activityModal");
 
-/* AUTH */
+/* AUTH LOGIC */
 document.getElementById("loginBtn").onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+document.getElementById("logoutBtn").onclick = () => auth.signOut();
 
 auth.onAuthStateChanged(user => {
     if(user) {
@@ -104,27 +111,32 @@ auth.onAuthStateChanged(user => {
         document.getElementById("appPage").classList.remove("hide");
         initLeaderboard();
     } else {
-        location.reload();
+        document.getElementById("loginPage").classList.remove("hide");
+        document.getElementById("appPage").classList.add("hide");
+        // Clear all timers on logout
+        isLive = false;
+        clearInterval(checkInterval);
+        clearTimeout(activityTimeout);
     }
 });
 
-/* THE JUGAD WRITE (Single Document Map Update) */
+/* SYNC FUNCTION */
 async function syncToDb(status) {
     const user = auth.currentUser;
+    if(!user) return;
+    
     const today = new Date().toISOString().slice(0,10);
     const docRef = db.collection("daily_leaderboard").doc(today);
 
-    // Calculate current total
     let currentTotal = userBank;
     if (status === true && sessionStart) {
         currentTotal += Math.floor((Date.now() - sessionStart) / 1000);
     }
 
-    // This is the magic: "users.UID" updates only YOUR key in the 500-user document
     const payload = {};
     payload[`users.${user.uid}`] = {
         n: user.displayName.split(' ')[0],
-        p: user.photoURL,
+        p: user.photoURL || "",
         s: currentTotal,
         st: status ? firebase.firestore.FieldValue.serverTimestamp() : null,
         live: status
@@ -133,25 +145,24 @@ async function syncToDb(status) {
     try {
         await docRef.update(payload);
     } catch (e) {
-        // Auto-create document if it's the first study of the day
         await docRef.set({ users: {} }, { merge: true });
         await docRef.update(payload);
     }
 }
 
-/* START / STOP */
+/* BUTTONS */
 startBtn.onclick = async () => {
     isLive = true;
     sessionStart = Date.now();
     startBtn.classList.add("hide");
     stopBtn.classList.remove("hide");
     document.getElementById("status").innerText = "Focusing...";
-    
     await syncToDb(true);
     startActivityCheck();
 };
 
 stopBtn.onclick = async () => {
+    if(!isLive) return;
     const sessionSec = Math.floor((Date.now() - sessionStart) / 1000);
     userBank += sessionSec;
     isLive = false;
@@ -160,42 +171,38 @@ stopBtn.onclick = async () => {
     stopBtn.classList.add("hide");
     document.getElementById("status").innerText = "Session Saved";
     
-    await syncToDb(false);
+    clearInterval(checkInterval);
     clearTimeout(activityTimeout);
+    activityModal.classList.add("hide");
+    
+    await syncToDb(false);
 };
 
-/* LEADERBOARD (1 READ ONLY) */
+/* LEADERBOARD */
 function initLeaderboard() {
     const today = new Date().toISOString().slice(0,10);
-    
     db.collection("daily_leaderboard").doc(today).onSnapshot(doc => {
         if(!doc.exists) return;
         communityMap = doc.data().users || {};
         
-        // Sync my local bank with DB
         const me = communityMap[auth.currentUser.uid];
         if(me && !isLive) {
             userBank = me.s;
             mainTimer.innerText = formatTime(userBank);
         }
-        renderUI();
     });
 }
 
-// Live Ticker (Updates UI every second without database reads)
+// Local ticking and rendering
 setInterval(() => {
     if(isLive) {
         const total = userBank + Math.floor((Date.now() - sessionStart) / 1000);
         mainTimer.innerText = formatTime(total);
     }
-    renderUI(); 
-}, 1000);
-
-function renderUI() {
+    
     const users = Object.values(communityMap);
     if(users.length === 0) return;
 
-    // Sort users by their current calculated time
     users.sort((a,b) => {
         const timeA = a.s + (a.live && a.st ? (Math.floor(Date.now()/1000) - a.st.seconds) : 0);
         const timeB = b.s + (b.live && b.st ? (Math.floor(Date.now()/1000) - b.st.seconds) : 0);
@@ -204,13 +211,11 @@ function renderUI() {
 
     leaderboard.innerHTML = users.map(u => {
         let displaySec = u.s;
-        if(u.live && u.st) {
-            displaySec += (Math.floor(Date.now()/1000) - u.st.seconds);
-        }
+        if(u.live && u.st) displaySec += (Math.floor(Date.now()/1000) - u.st.seconds);
         return `
             <div class="user-row">
-                <div class="${u.live ? 'pulse' : ''}" style="width:10px"></div>
-                <img class="avatar" src="${u.p}">
+                <div style="width:10px">${u.live ? '<div class="pulse"></div>' : ''}</div>
+                <img class="avatar" src="${u.p || ''}">
                 <div class="u-info">
                     <div class="u-name">${u.n}</div>
                     <div class="u-time">${formatTime(displaySec)}</div>
@@ -219,33 +224,34 @@ function renderUI() {
             </div>
         `;
     }).join('');
-}
+}, 1000);
 
-/* ACTIVITY CHECK */
+/* ACTIVITY CHECK FIX */
 function startActivityCheck() {
     clearTimeout(activityTimeout);
+    // Ask every 1 hour (3600000ms). Change to 10000 for a 10-sec test.
     activityTimeout = setTimeout(() => {
-        document.getElementById("activityModal").classList.remove("hide");
+        if(!isLive) return;
+        activityModal.classList.remove("hide");
         let left = 120;
-        const intv = setInterval(() => {
+        
+        clearInterval(checkInterval);
+        checkInterval = setInterval(() => {
             left--;
             document.getElementById("modalTimer").innerText = left;
-            if(left <= 0) { 
-                clearInterval(intv); 
-                stopBtn.onclick(); 
-                document.getElementById("activityModal").classList.add("hide");
+            if(left <= 0) {
+                stopBtn.onclick();
             }
         }, 1000);
 
         document.getElementById("confirmBtn").onclick = () => {
-            clearInterval(intv);
-            document.getElementById("activityModal").classList.add("hide");
-            startActivityCheck(); // Reset for next hour
+            activityModal.classList.add("hide");
+            clearInterval(checkInterval);
+            startActivityCheck();
         };
-    }, 3600000); // 1 Hour
+    }, 3600000); 
 }
 
-/* HELPERS */
 function formatTime(s) {
     if(s < 0) s = 0;
     const h = Math.floor(s/3600);
