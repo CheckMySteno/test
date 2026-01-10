@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Study Live | Digital Classroom</title>
+<title>Study Live | Digital Library</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -21,110 +21,119 @@ body { margin: 0; font-family: 'Inter', sans-serif; background: var(--bg); color
 
 /* Sidebar */
 .sidebar { background: var(--sidebar); border-right: 1px solid #334155; display: flex; flex-direction: column; padding: 24px; }
-.my-card { background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 24px; border-radius: 20px; margin-bottom: 25px; text-align: center; box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3); }
-.my-card .label { font-size: 11px; font-weight: 800; opacity: 0.8; text-transform: uppercase; letter-spacing: 1.5px; }
-.my-card .big-timer { font-size: 2.8rem; font-weight: 800; margin: 10px 0; font-variant-numeric: tabular-nums; }
+.my-card { background: linear-gradient(135deg, #4f46e5, #7c3aed); padding: 24px; border-radius: 20px; margin-bottom: 25px; text-align: center; position: relative; box-shadow: 0 10px 30px rgba(79, 70, 229, 0.3); }
+.my-card .big-timer { font-size: 2.5rem; font-weight: 800; margin: 5px 0; font-variant-numeric: tabular-nums; }
 
-.sidebar-list { flex: 1; overflow-y: auto; padding-right: 5px; }
-.leader-row { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; margin-bottom: 5px; background: rgba(255,255,255,0.02); }
-.rank { font-size: 12px; font-weight: 800; color: #475569; width: 22px; }
-.leader-img { width: 32px; height: 32px; border-radius: 50%; border: 1px solid #334155; }
+/* Emoji Mood Bar */
+.emoji-picker { display: flex; justify-content: center; gap: 8px; margin-top: 15px; background: rgba(0,0,0,0.2); padding: 8px; border-radius: 12px; }
+.emoji-btn { cursor: pointer; font-size: 18px; filter: grayscale(1); opacity: 0.5; }
+.emoji-btn.active { filter: grayscale(0); opacity: 1; transform: scale(1.2); }
 
-/* Main Classroom Area */
+/* Classroom Grid */
 .main-view { padding: 40px; overflow-y: auto; background-image: radial-gradient(#1e293b 0.5px, transparent 0.5px); background-size: 20px 20px; }
-.classroom-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; border-bottom: 1px solid #1e293b; padding-bottom: 15px; }
-.classroom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
+.classroom-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 25px; }
 
-/* Station Card (The Desk) */
-.station { background: var(--card); border: 1px solid #334155; border-radius: 24px; padding: 24px; text-align: center; position: relative; }
+/* Station / Desk Card */
+.station { background: var(--card); border: 1px solid #334155; border-radius: 28px; padding: 24px; text-align: center; position: relative; }
 .station.active { border-color: var(--success); box-shadow: 0 0 25px rgba(16, 185, 129, 0.1); transform: translateY(-4px); }
-.station .avatar { width: 64px; height: 64px; border-radius: 50%; border: 4px solid var(--bg); margin-bottom: 12px; }
-.station .name { font-weight: 700; font-size: 15px; margin-bottom: 2px; }
-.station .exam-tag { font-size: 10px; font-weight: 800; color: #6366f1; text-transform: uppercase; letter-spacing: 0.5px; background: rgba(99, 102, 241, 0.1); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-bottom: 8px; }
-.station .time-display { font-family: monospace; font-size: 18px; color: var(--success); font-weight: 700; }
 
-.live-dot { position: absolute; top: 15px; right: 15px; width: 8px; height: 8px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
-@keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.2; transform: scale(1.3); } 100% { opacity: 1; transform: scale(1); } }
+/* Circular Progress Logic */
+.avatar-wrapper { position: relative; width: 80px; height: 80px; margin: 0 auto 12px; }
+.progress-ring { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+.progress-ring circle { stroke-dasharray: 226; stroke-dashoffset: 226; transition: stroke-dashoffset 0.5s ease; }
+.avatar-img { width: 64px; height: 64px; border-radius: 50%; position: absolute; top: 8px; left: 8px; object-fit: cover; }
+.status-emoji { position: absolute; bottom: 0; right: 0; background: #1e293b; border: 2px solid #334155; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; }
 
-/* Modals */
-.overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.95); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
+.name { font-weight: 700; font-size: 14px; margin-bottom: 2px; }
+.exam-tag { font-size: 10px; font-weight: 800; color: #94a3b8; text-transform: uppercase; margin-bottom: 8px; }
+.goal-text { font-size: 10px; font-weight: bold; color: var(--accent); opacity: 0.8; }
+
+/* Modals & Overlays */
+.overlay { position: fixed; inset: 0; background: rgba(2, 6, 23, 0.98); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; }
 .modal-box { background: var(--card); padding: 40px; border-radius: 30px; text-align: center; width: 100%; max-width: 400px; border: 1px solid #334155; }
-.input-group { text-align: left; margin-top: 20px; }
-label { font-size: 11px; font-weight: 800; color: #94a3b8; display: block; margin-bottom: 8px; padding-left: 5px; }
-input { width: 100%; padding: 14px; background: #020617; border: 1px solid #334155; border-radius: 12px; color: #fff; margin-bottom: 15px; font-size: 15px; }
+input, select { width: 100%; padding: 14px; background: #020617; border: 1px solid #334155; border-radius: 12px; color: #fff; margin-bottom: 15px; font-size: 15px; outline: none; }
 
-/* Buttons */
-.btn { width: 100%; padding: 15px; border-radius: 14px; border: none; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 15px; }
+.btn { width: 100%; padding: 15px; border-radius: 14px; border: none; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; }
 .btn-white { background: #fff; color: #000; }
 .btn-accent { background: var(--accent); color: #fff; }
-.btn-danger { background: var(--danger); color: #fff; }
 
-@media (max-width: 800px) {
-    .app-container { grid-template-columns: 1fr; overflow-y: auto; }
-    .sidebar { border-right: none; border-bottom: 1px solid #334155; }
-}
+@media (max-width: 800px) { .app-container { grid-template-columns: 1fr; } .sidebar { border-right: none; height: auto; } .main-view { padding: 20px; } }
 </style>
 </head>
 <body>
 
-<!-- Setup/Onboarding Modal -->
+<!-- Onboarding Modal -->
 <div id="onboarding" class="overlay hide">
     <div class="modal-box">
-        <h2 style="margin:0; font-weight:800;">Set up your desk</h2>
-        <p style="color:#94a3b8; font-size:14px;">How should we represent you today?</p>
-        <div class="input-group">
-            <label>YOUR NAME</label>
-            <input type="text" id="setupName" placeholder="Enter display name">
-            <label>TARGET EXAM / GOAL</label>
+        <h2 style="font-weight:800; margin-bottom:5px;">Setup your Desk</h2>
+        <p style="color:#94a3b8; font-size:14px; margin-bottom:25px;">Ready to join the classroom?</p>
+        <div style="text-align:left;">
+            <label style="font-size:11px; font-weight:800; color:#6366f1; margin-left:5px;">DISPLAY NAME</label>
+            <input type="text" id="setupName">
+            <label style="font-size:11px; font-weight:800; color:#6366f1; margin-left:5px;">WHAT ARE YOU STUDYING?</label>
             <input type="text" id="setupExam" placeholder="e.g. UPSC, JEE, SAT, Finals">
-            <button class="btn btn-accent" id="completeSetup">Join the Classroom</button>
+            <label style="font-size:11px; font-weight:800; color:#6366f1; margin-left:5px;">DAILY GOAL (HOURS)</label>
+            <select id="setupGoal">
+                <option value="1">1 Hour</option><option value="2" selected>2 Hours</option>
+                <option value="4">4 Hours</option><option value="6">6 Hours</option>
+                <option value="8">8 Hours</option><option value="12">12 Hours</option>
+            </select>
+            <button class="btn btn-accent" id="completeSetup">Start Focusing</button>
         </div>
     </div>
 </div>
 
-<!-- Activity Prompt -->
-<div id="activityModal" class="overlay hide">
-    <div class="modal-box" style="max-width: 320px;">
-        <h3 style="margin:0">Still focused?</h3>
-        <p style="color:#94a3b8; font-size:14px">Your session auto-saves in <span id="modalCountdown" style="color:var(--danger); font-weight:bold;">120</span>s</p>
-        <button class="btn btn-white" id="confirmActivity">Yes, I'm here!</button>
-    </div>
+<!-- Login Screen -->
+<div id="loginScreen" style="height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding: 20px;">
+    <div style="font-size:4rem; margin-bottom:10px;">📚</div>
+    <h1 style="font-size:3.5rem; font-weight:800; margin:0; letter-spacing:-2px;">Study Live.</h1>
+    <p style="color:#64748b; margin-bottom:30px;">The Digital Classroom for Serious Students.</p>
+    <button class="btn btn-white" id="loginBtn" style="width:260px;">Sign in with Google</button>
 </div>
 
-<!-- Login Landing -->
-<div id="loginScreen" style="height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center;">
-    <div style="font-size: 4rem; margin-bottom: 10px;">📚</div>
-    <h1 style="font-size: 3rem; font-weight: 800; letter-spacing: -2px; margin: 0;">Study Live.</h1>
-    <p style="color: #64748b; margin-bottom: 30px;">The world's largest focused library.</p>
-    <button class="btn btn-white" id="loginBtn" style="max-width: 280px;">Sign in with Google</button>
-</div>
-
-<!-- Main App UI -->
+<!-- Main UI -->
 <div id="app" class="app-container hide">
     <aside class="sidebar">
         <div class="my-card">
-            <div class="label">Daily Focus</div>
+            <div id="myProgressLabel" style="font-size:11px; font-weight:800; opacity:0.8;">GOAL: 0%</div>
             <div class="big-timer" id="mainClock">00:00:00</div>
-            <button class="btn btn-white" id="startBtn">▶ START STUDYING</button>
-            <button class="btn btn-danger hide" id="stopBtn">⏹ STOP SESSION</button>
+            <button class="btn btn-white" id="startBtn">▶ START SESSION</button>
+            <button class="btn" id="stopBtn" style="background:var(--danger); color:white; display:none;">⏹ STOP SESSION</button>
+            
+            <div class="emoji-picker" id="emojiPicker">
+                <span class="emoji-btn active" data-e="🔥">🔥</span>
+                <span class="emoji-btn" data-e="📚">📚</span>
+                <span class="emoji-btn" data-e="☕">☕</span>
+                <span class="emoji-btn" data-e="📝">📝</span>
+                <span class="emoji-btn" data-e="😴">😴</span>
+            </div>
         </div>
 
-        <div style="font-size: 11px; font-weight: 800; color: #475569; letter-spacing: 1px; margin-bottom: 15px;">TOP STUDENTS</div>
-        <div class="sidebar-list" id="sidebarList"></div>
+        <div style="font-size: 11px; font-weight: 800; color: #475569; letter-spacing: 1px; margin-bottom: 15px;">GLOBAL LEADERBOARD</div>
+        <div id="sidebarList" style="flex:1; overflow-y:auto; padding-right:5px;"></div>
         
-        <button onclick="firebase.auth().signOut()" style="margin-top:20px; background:none; border:none; color:#475569; font-size:11px; font-weight:bold; cursor:pointer;">SIGN OUT</button>
+        <div style="margin-top:20px; border-top: 1px solid #1e293b; padding-top:15px; display:flex; flex-direction:column; gap:10px;">
+            <button id="resetDataBtn" style="background:none; border:none; color:var(--danger); font-size:11px; font-weight:800; cursor:pointer; text-align:left;">🗑️ RESET TODAY'S DATA</button>
+            <button onclick="firebase.auth().signOut()" style="background:none; border:none; color:#475569; font-size:11px; font-weight:800; cursor:pointer; text-align:left;">LOGOUT</button>
+        </div>
     </aside>
 
     <main class="main-view">
-        <header class="classroom-header">
-            <div>
-                <h1 style="margin:0; font-weight:800; font-size: 1.5rem;">Digital Classroom</h1>
-                <div style="font-size: 12px; color: #64748b; margin-top: 5px;">Showing top performers for today</div>
-            </div>
-            <div style="font-size: 14px; font-weight: 600;"><span style="color:var(--success)">●</span> <span id="liveCounter">0</span> Active</div>
-        </header>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <h1 style="margin:0; font-weight:800;">Digital Library</h1>
+            <div id="liveCount" style="font-size:14px; font-weight:600;"><span style="color:var(--success)">●</span> 0 Studying</div>
+        </div>
         <div class="classroom-grid" id="classroomGrid"></div>
     </main>
+</div>
+
+<!-- Activity Modal -->
+<div id="activityModal" class="overlay hide">
+    <div class="modal-box" style="max-width: 320px;">
+        <h3>Still Focusing?</h3>
+        <p style="color:#94a3b8; font-size:14px;">Confirm your presence in <span id="modalCountdown" style="color:var(--danger); font-weight:bold;">120</span>s</p>
+        <button class="btn btn-white" id="confirmActivity">Yes, I'm here!</button>
+    </div>
 </div>
 
 <script>
@@ -137,98 +146,98 @@ firebase.initializeApp({
   messagingSenderId: "656676120180",
   appId: "1:656676120180:web:7ea85f6e650b132e39d321"
 });
-
-const db = firebase.firestore();
-const auth = firebase.auth();
+const db = firebase.firestore(); const auth = firebase.auth();
 
 /* APP STATE */
-let userBank = 0;
-let sessionStart = null;
-let isLive = false;
-let communityMap = {};
-let myProfile = { n: "", e: "" };
+let userBank = 0, sessionStart = null, isLive = false;
+let communityMap = {}, myProf = { n:"", e:"", g:2, m:"🔥" };
 let activityTimer, countdownInterval;
 
-/* LOGIN FLOW */
+/* LOGIN */
 document.getElementById("loginBtn").onclick = () => auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
 
 auth.onAuthStateChanged(user => {
     if(user) {
         document.getElementById("loginScreen").classList.add("hide");
-        checkUserProfile(user);
+        const today = new Date().toISOString().slice(0,10);
+        db.collection("daily_leaderboard").doc(today).get().then(doc => {
+            const users = doc.data()?.users || {};
+            if(users[user.uid]) { myProf = users[user.uid]; launchApp(); }
+            else { 
+                document.getElementById("onboarding").classList.remove("hide"); 
+                document.getElementById("setupName").value = user.displayName; 
+            }
+        });
     } else {
-        location.reload(); // Hard reset on logout
+        document.getElementById("loginScreen").classList.remove("hide");
+        document.getElementById("app").classList.add("hide");
     }
 });
 
-function checkUserProfile(user) {
-    const today = new Date().toISOString().slice(0,10);
-    db.collection("daily_leaderboard").doc(today).get().then(doc => {
-        const users = doc.data()?.users || {};
-        if (users[user.uid]) {
-            myProfile = { n: users[user.uid].n, e: users[user.uid].e };
-            launchApp();
-        } else {
-            // Show onboarding
-            document.getElementById("onboarding").classList.remove("hide");
-            document.getElementById("setupName").value = user.displayName;
-        }
-    });
-}
-
 document.getElementById("completeSetup").onclick = () => {
-    const name = document.getElementById("setupName").value;
-    const exam = document.getElementById("setupExam").value;
-    if (!name || !exam) return alert("Please provide both details!");
-    myProfile = { n: name, e: exam };
+    myProf.n = document.getElementById("setupName").value;
+    myProf.e = document.getElementById("setupExam").value;
+    myProf.g = parseInt(document.getElementById("setupGoal").value);
+    if(!myProf.n || !myProf.e) return alert("Enter all details!");
     document.getElementById("onboarding").classList.add("hide");
     launchApp();
 };
 
-/* DATABASE SYNC */
-async function sync(status) {
+/* MOOD PICKER */
+document.querySelectorAll(".emoji-btn").forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll(".emoji-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+        myProf.m = btn.dataset.e;
+        if(isLive) syncDb(true);
+    }
+});
+
+/* SYNC LOGIC */
+async function syncDb(status) {
     const user = auth.currentUser;
     const today = new Date().toISOString().slice(0,10);
     const docRef = db.collection("daily_leaderboard").doc(today);
-
-    let total = userBank;
-    if(status && sessionStart) total += Math.floor((Date.now() - sessionStart) / 1000);
-
-    const payload = {};
-    payload[`users.${user.uid}`] = {
-        n: myProfile.n,
-        e: myProfile.e,
-        p: user.photoURL,
-        s: total,
-        st: status ? firebase.firestore.FieldValue.serverTimestamp() : null,
-        live: status
-    };
-
-    try { await docRef.update(payload); } 
-    catch(e) { await docRef.set({ users: {} }, { merge: true }); await docRef.update(payload); }
+    let total = userBank + (status && sessionStart ? Math.floor((Date.now()-sessionStart)/1000) : 0);
+    const data = {};
+    data[`users.${user.uid}`] = { n:myProf.n, e:myProf.e, g:myProf.g, m:myProf.m, p:user.photoURL, s:total, st:status ? firebase.firestore.FieldValue.serverTimestamp() : null, live:status };
+    try { await docRef.update(data); } catch(e) { await docRef.set({users:{}},{merge:true}); await docRef.update(data); }
 }
 
-/* SESSION LOGIC */
+/* SESSION HANDLERS */
 document.getElementById("startBtn").onclick = async () => {
     isLive = true; sessionStart = Date.now();
-    document.getElementById("startBtn").classList.add("hide");
-    document.getElementById("stopBtn").classList.remove("hide");
-    await sync(true);
-    startActivityCheck();
+    document.getElementById("startBtn").style.display = "none";
+    document.getElementById("stopBtn").style.display = "flex";
+    await syncDb(true);
+    triggerActivityCheck();
 };
 
 document.getElementById("stopBtn").onclick = async () => {
-    if(!isLive) return;
-    userBank += Math.floor((Date.now() - sessionStart) / 1000);
-    isLive = false;
-    document.getElementById("startBtn").classList.remove("hide");
-    document.getElementById("stopBtn").classList.add("hide");
+    userBank += Math.floor((Date.now()-sessionStart)/1000); isLive = false;
+    document.getElementById("startBtn").style.display = "flex";
+    document.getElementById("stopBtn").style.display = "none";
     clearTimeout(activityTimer);
     document.getElementById("activityModal").classList.add("hide");
-    await sync(false);
+    await syncDb(false);
 };
 
-/* APP BOOTUP */
+/* RESET DATA BUTTON */
+document.getElementById("resetDataBtn").onclick = async () => {
+    if(!confirm("Reset your study data for today? This cannot be undone.")) return;
+    const user = auth.currentUser;
+    const today = new Date().toISOString().slice(0,10);
+    const docRef = db.collection("daily_leaderboard").doc(today);
+    try {
+        if(isLive) await document.getElementById("stopBtn").onclick();
+        const payload = {};
+        payload[`users.${user.uid}`] = firebase.firestore.FieldValue.delete();
+        await docRef.update(payload);
+        location.reload();
+    } catch(e) { alert("Nothing to reset yet!"); }
+}
+
+/* APP LAUNCH */
 function launchApp() {
     document.getElementById("app").classList.remove("hide");
     const today = new Date().toISOString().slice(0,10);
@@ -236,17 +245,20 @@ function launchApp() {
         if(!doc.exists) return;
         communityMap = doc.data().users || {};
         const me = communityMap[auth.currentUser.uid];
-        if(me && !isLive) {
-            userBank = me.s;
-            document.getElementById("mainClock").innerText = formatTime(userBank);
-        }
+        if(me && !isLive) { userBank = me.s; document.getElementById("mainClock").innerText = formatTime(userBank); }
     });
 }
 
-/* REAL-TIME UI UPDATER */
+/* TICKER & RENDER */
 setInterval(() => {
-    const now = Math.floor(Date.now() / 1000);
-    if(isLive) document.getElementById("mainClock").innerText = formatTime(userBank + (now - Math.floor(sessionStart/1000)));
+    const now = Math.floor(Date.now()/1000);
+    let myTotal = userBank;
+    if(isLive) {
+        myTotal = userBank + (now - Math.floor(sessionStart/1000));
+        document.getElementById("mainClock").innerText = formatTime(myTotal);
+    }
+    const myP = Math.min(100, Math.floor((myTotal/(myProf.g*3600))*100));
+    document.getElementById("myProgressLabel").innerText = `GOAL: ${myP}%`;
 
     const users = Object.values(communityMap);
     if(!users.length) return;
@@ -257,36 +269,42 @@ setInterval(() => {
         return tB - tA;
     });
 
-    let gridHTML = "", sidebarHTML = "", activeCount = 0;
+    let gridH = "", sideH = "", activeCount = 0;
     users.forEach((u, i) => {
         const time = u.s + (u.live && u.st ? (now - u.st.seconds) : 0);
         if(u.live) activeCount++;
-        
-        gridHTML += `
+        const p = Math.min(100, Math.floor((time / (u.g * 3600)) * 100));
+        const offset = 226 - (226 * p) / 100;
+
+        gridH += `
             <div class="station ${u.live ? 'active' : ''}">
-                ${u.live ? '<div class="live-dot"></div>' : ''}
-                <img src="${u.p}" class="avatar">
+                <div class="avatar-wrapper">
+                    <svg class="progress-ring" width="80" height="80">
+                        <circle stroke="#334155" stroke-width="4" fill="transparent" r="36" cx="40" cy="40"/>
+                        <circle stroke="${u.live ? '#10b981' : '#6366f1'}" stroke-width="4" fill="transparent" r="36" cx="40" cy="40" style="stroke-dashoffset: ${offset}"/>
+                    </svg>
+                    <img src="${u.p}" class="avatar-img">
+                    <div class="status-emoji">${u.m || '🔥'}</div>
+                </div>
                 <div class="name">${u.n}</div>
-                <div class="exam-tag">Studying for ${u.e}</div>
-                <div class="time-display">${formatTime(time)}</div>
+                <div class="exam-tag">${u.e}</div>
+                <div class="time-display" style="color:${u.live ? '#10b981' : '#94a3b8'}">${formatTime(time)}</div>
+                <div class="goal-text">${p}% of ${u.g}h Goal</div>
             </div>`;
-
-        sidebarHTML += `
-            <div class="leader-row">
-                <span class="rank">${i+1}</span>
-                <img src="${u.p}" class="leader-img">
-                <div style="flex:1; font-size:12px; font-weight:700;">${u.n.split(' ')[0]}</div>
-                <div style="font-size:11px; font-family:monospace; color:var(--accent); font-weight:800">${formatTime(time)}</div>
-            </div>`;
+        sideH += `<div style="display:flex; align-items:center; gap:10px; margin-bottom:12px; font-size:12px;">
+            <span style="color:#475569; font-weight:800; width:15px;">${i+1}</span>
+            <img src="${u.p}" style="width:24px; border-radius:50%;">
+            <div style="flex:1; font-weight:700;">${u.n.split(' ')[0]}</div>
+            <div style="font-family:monospace; color:var(--accent);">${formatTime(time)}</div>
+        </div>`;
     });
-
-    document.getElementById("classroomGrid").innerHTML = gridHTML;
-    document.getElementById("sidebarList").innerHTML = sidebarHTML;
-    document.getElementById("liveCounter").innerText = activeCount;
+    document.getElementById("classroomGrid").innerHTML = gridH;
+    document.getElementById("sidebarList").innerHTML = sideH;
+    document.getElementById("liveCount").innerHTML = `<span style="color:var(--success)">●</span> ${activeCount} Active`;
 }, 1000);
 
 /* ACTIVITY MONITOR */
-function startActivityCheck() {
+function triggerActivityCheck() {
     clearTimeout(activityTimer);
     activityTimer = setTimeout(() => {
         if(!isLive) return;
@@ -298,20 +316,17 @@ function startActivityCheck() {
             document.getElementById("modalCountdown").innerText = left;
             if(left <= 0) document.getElementById("stopBtn").onclick();
         }, 1000);
-    }, 3600000); // Trigger every hour
+    }, 3600000); 
 }
-
 document.getElementById("confirmActivity").onclick = () => {
     document.getElementById("activityModal").classList.add("hide");
     clearInterval(countdownInterval);
-    startActivityCheck();
+    triggerActivityCheck();
 };
 
 function formatTime(s) {
     if(s < 0) s = 0;
-    const h = Math.floor(s/3600);
-    const m = Math.floor((s%3600)/60);
-    const sc = s%60;
+    const h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sc = s%60;
     return [h,m,sc].map(v => String(v).padStart(2,'0')).join(':');
 }
 </script>
