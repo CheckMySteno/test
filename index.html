@@ -1,792 +1,194 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Check My Steno</title>
-  <meta name="google-site-verification" content="v5mi-j_OwV6XOree_PN-xt_UIPcR7FiUTQaEGpq2Bmg" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore-compat.js"></script>
-  <style>
-    /* --- THEME DEFINITIONS --- */
-    :root, body[data-theme="default"] {
-        --primary-bg: #f3f4f6; --text-color: #1e293b; --secondary-text-color: #6b7280;
-        --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e2e8f0;
-        --button-gradient-start: #6366f1; --button-gradient-end: #ec4899;
-        --error-color: #ef4444; --gold-start: #fde047; --gold-end: #eab308;
-        --success-color: #22c55e; --warning-color: #f59e0b;
-    }
-    body[data-theme="galaxy"] {
-        --primary-bg: #0f172a; --text-color: #f8fafc; --secondary-text-color: #94a3b8;
-        --card-bg: #1e293b; --card-shadow: rgba(0, 0, 0, 0.25); --card-border: #334155;
-        --button-gradient-start: #22d3ee; --button-gradient-end: #a78bfa;
-    }
-    body[data-theme="sunset"] { --primary-bg: #fff1f2; --text-color: #4c1d24; --secondary-text-color: #8c2d42; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #fecdd3; --button-gradient-start: #fb923c; --button-gradient-end: #f472b6; }
-    body[data-theme="oceanic"] { --primary-bg: #f0f9ff; --text-color: #082f49; --secondary-text-color: #075985; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e0f2fe; --button-gradient-start: #22d3ee; --button-gradient-end: #0ea5e9; }
+<meta charset="UTF-8">
+<title>Study Live</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    /* --- GLOBAL STYLES --- */
-    html { scroll-behavior: smooth; }
-    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
-    body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; position: relative; }
-    body.modal-open, html.modal-open { overflow: hidden; }
+<!-- Firebase COMPAT SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-    /* --- UI UPDATE: IMMERSIVE BACKGROUND --- */
-    @keyframes slow-pan { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    body[data-theme="galaxy"]::before {
-        content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-        background: linear-gradient(250deg, #0f172a, #1e293b, #0f172a);
-        background-size: 400% 400%;
-        animation: slow-pan 40s ease infinite;
-    }
-    body[data-theme="oceanic"]::before {
-        content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
-        background: linear-gradient(135deg, #e0f7fa, #b2ebf2, #80deea);
-        background-size: 400% 400%;
-        animation: slow-pan 30s ease infinite;
-    }
+<style>
+body{
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg,#667eea,#764ba2);
+  color:#fff;
+}
+.container{
+  max-width:420px;
+  margin:40px auto;
+  background:#1f1f2e;
+  border-radius:18px;
+  padding:25px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.4);
+}
+h1{text-align:center;margin-bottom:5px}
+.sub{text-align:center;color:#bbb;font-size:14px;margin-bottom:25px}
 
-    /* --- LAYOUT & HEADER --- */
-    main { position: relative; padding-bottom: 120px; z-index: 1; display: block; }
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s, transform 0.4s ease-out; }
-    .main-header.hidden { transform: translateY(-110%); }
-    .logo { font-size: 1.8rem; font-weight: 800; }
-    .header-actions { display: flex; align-items: center; gap: 1rem; }
-    .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; }
-    .cta-button:hover { transform: scale(1.05); }
-    .demo-button { background: none; border: 2px solid var(--button-gradient-start); color: var(--button-gradient-start); }
-    
-    /* --- IMMERSIVE HORIZONTAL SLIDER INTRODUCTION --- */
-    #immersive-intro {
-        height: 100vh;
-        width: 100%;
-        overflow: hidden;
-        position: relative;
-        cursor: pointer; 
-    }
-    .intro-track {
-        display: flex;
-        height: 100%;
-        width: 500%; 
-        transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1);
-    }
-    .intro-slide {
-        width: 100vw;
-        height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 3%;
-        padding: 2rem 4% 120px; /* MODIFICATION: Added 120px bottom padding to create space for the dock */
-        box-sizing: border-box;
-        opacity: 0;
-        animation: fadeIn 1s forwards;
-    }
-    @keyframes fadeIn { to { opacity: 1; } }
+.btn{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+  margin-top:10px;
+}
+.login{background:#fff;color:#000;font-weight:600}
+.start{background:#00e676;color:#000}
+.stop{background:#ff5252;color:#fff}
+.logout{background:#444;color:#fff}
 
-    .intro-slide--welcome {
-        flex-direction: column;
-        text-align: center;
-    }
-    .welcome-content {
-        max-width: 850px;
-    }
-    .welcome-content h1 {
-        font-size: 5rem;
-        font-weight: 900;
-        margin: 0 0 1rem 0;
-        line-height: 1.2;
-    }
-    .welcome-content p {
-        font-size: 1.3rem;
-        color: var(--secondary-text-color);
-        margin-bottom: 2.5rem;
-    }
-    .welcome-content .cta-button {
-        padding: 1rem 3rem;
-        font-size: 1.2rem;
-        border-radius: 12px;
-    }
+.card{
+  background:#2a2a40;
+  padding:18px;
+  border-radius:14px;
+  margin-top:20px;
+  text-align:center;
+}
 
-    .intro-slide .text-content {
-        flex: 1;
-        max-width: 500px;
-    }
-    .intro-slide .visual-content {
-        flex: 1.5;
-        max-width: 900px;
-    }
-    .intro-slide h2 {
-        font-size: 3.5rem;
-        font-weight: 900;
-        margin: 0 0 1.2rem 0;
-    }
-    .intro-slide p {
-        font-size: 1.2rem;
-        line-height: 1.7;
-        color: var(--secondary-text-color);
-    }
-
-    .intro-navigation {
-        display: none;
-    }
-
-    .scroll-down-prompt {
-        position: absolute;
-        bottom: 15vh; /* MODIFICATION: Moved up significantly to be above the dock */
-        left: 50%; transform: translateX(-50%);
-        font-weight: 600; color: var(--secondary-text-color);
-        opacity: 0; transition: opacity 0.5s;
-        animation: bounce 2s infinite;
-        z-index: 5;
-    }
-    .scroll-down-prompt.visible { opacity: 1; }
-    @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); } 40% { transform: translate(-50%, -15px); } 60% { transform: translate(-50%, -5px); } }
-
-    /* --- Interactive analyzer styles --- */
-    .interactive-analyzer {
-        background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px;
-        box-shadow: 0 20px 40px var(--card-shadow); text-align: left; position: relative;
-        overflow: hidden; transition: box-shadow 0.3s;
-        transform: scale(1.05);
-    }
-    .analyzer-toolbar { display: flex; align-items: center; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--card-border); background: var(--primary-bg); }
-    .toolbar-dots { display: flex; gap: 0.5rem; }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot.red { background: #ff5f56; } .dot.yellow { background: #ffbd2e; } .dot.green { background: #27c93f; }
-    .toolbar-title { color: var(--secondary-text-color); font-weight: 600; margin: 0 auto; }
-    .analyzer-body { padding: 1.5rem 2rem; font-family: 'Courier New', Courier, monospace; font-size: 1.1rem; line-height: 1.8; position: relative; min-height: 150px; }
-    .analyzer-body pre { margin: 0; white-space: pre-wrap; }
-    
-    .typing-cursor { display: inline-block; width: 10px; height: 1.2rem; background-color: var(--text-color); margin-left: 2px; animation: blink 1s step-end infinite; }
-    @keyframes blink { 50% { opacity: 0; } }
-    
-    .highlight { transition: background-color 0.5s ease; border-radius: 4px; position: relative; }
-    .highlight-ssc { background-color: rgba(239, 68, 68, 0.2); animation: pulse-red 1.5s ease-out; }
-    .highlight-match { background-color: rgba(245, 158, 11, 0.2); animation: pulse-yellow 1.5s ease-out; }
-    .highlight-re-eval { background-color: rgba(34, 197, 94, 0.2); animation: pulse-green 1.5s ease-out; }
-    @keyframes pulse-red { 0% { background-color: rgba(239, 68, 68, 0.2); } 50% { background-color: rgba(239, 68, 68, 0.5); } 100% { background-color: rgba(239, 68, 68, 0.2); } }
-    @keyframes pulse-yellow { 0% { background-color: rgba(245, 158, 11, 0.2); } 50% { background-color: rgba(245, 158, 11, 0.5); } 100% { background-color: rgba(245, 158, 11, 0.2); } }
-    @keyframes pulse-green { 0% { background-color: rgba(34, 197, 94, 0.2); } 50% { background-color: rgba(34, 197, 94, 0.5); } 100% { background-color: rgba(34, 197, 94, 0.2); } }
-
-    .feature-callout {
-        position: absolute; background: var(--text-color); color: var(--card-bg); padding: 0.5rem 1rem;
-        border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
-        opacity: 0; transform: scale(0.95) translateY(10px); pointer-events: none; white-space: nowrap; z-index: 10;
-        transition: opacity 0.4s ease, transform 0.4s ease;
-    }
-    .feature-callout.is-active { opacity: 1; transform: scale(1) translateY(0); }
-    .feature-callout::after { content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: var(--text-color); }
-    #callout-1 { top: -40px; left: 180px; }
-    #callout-2 { top: -40px; right: 80px; }
-    #callout-3 { top: 90px; left: 350px; }
-    #callout-4 { top: 50%; left: 50%; transform: translate(-50%,-50%); }
-    .analyzer-footer { padding: 1rem; border-top: 1px solid var(--card-border); background: var(--primary-bg); font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.1rem; }
-    .score-text { opacity: 0; transition: opacity 0.5s ease; } .score-text.is-active { opacity: 1; }
-
-
-    /* --- STANDARD PAGE SECTION STYLES --- */
-    .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); background-color: transparent; }
-    .page-section:last-of-type { border-bottom: none; }
-    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; }
-    .section-content .text-content, .section-content .graphic-content { flex: 1; }
-    .section-content .graphic-content { text-align: center; position: relative; }
-    .section-content .graphic-content i { font-size: 12rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.7; }
-    .page-section h2 { font-size: 3rem; font-weight: 900; margin: 0 0 1rem 0; }
-    .page-section p { font-size: 1.1rem; line-height: 1.7; color: var(--secondary-text-color); margin-bottom: 2rem; }
-    
-    @keyframes icon-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
-    @keyframes icon-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
-    #practice .graphic-content i { animation: icon-bob 4s ease-in-out infinite; }
-    #analysis .graphic-content i { animation: icon-pulse 3s ease-in-out infinite; }
-    #checker .graphic-content i { animation: icon-pulse 3.5s ease-in-out infinite 0.5s; }
-
-    .launch-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; color: var(--primary-bg); background: var(--text-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
-    .launch-button:hover:not(.locked) { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 25px var(--button-gradient-start); }
-    .launch-button.locked { background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; box-shadow: 0 5px 15px rgba(234, 179, 8, 0.4); }
-    .launch-button::before {
-        content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-        transition: left 0.4s ease;
-    }
-    .launch-button:hover:not(.locked)::before { left: 150%; }
-
-    .page-section:nth-child(even) .section-content { flex-direction: row-reverse; }
-    
-    /* --- FOOTER & DOCK --- */
-    .footer { position: absolute; bottom: 0; left: 0; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 5%; background-color: var(--card-bg); border-top: 1px solid var(--card-border); }
-    .footer-copyright { margin: 0; font-size: 0.9rem; color: var(--secondary-text-color); opacity: 0.8; }
-    .footer-links { display: flex; gap: 1.5rem; margin: 0; }
-    .footer-links button { background: none; border: none; color: var(--secondary-text-color); font-weight: 600; cursor: pointer; padding: 0; font-size: 0.9rem; transition: color 0.2s; } .footer-links button:hover { color: var(--text-color); }
-    .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; display: flex; align-items: flex-end; gap: 0.5rem; transition: background-color 0.3s; height: 68px; } body[data-theme="galaxy"] .dock { background: rgba(30, 41, 59, 0.6); }
-    
-    /* === START: SAFE CSS ANIMATION FOR DOCK === */
-    .dock-item { transition: transform 0.2s ease; }
-    .dock-item:hover { transform: scale(1.2) translateY(-10px); }
-    /* === END: SAFE CSS ANIMATION === */
-
-    .dock-item a, .dock-item button { display: block; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 1.8rem; color: var(--text-color); text-decoration: none; transition: color 0.3s; background: none; border: none; cursor: pointer; padding: 0; } .dock-item .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: var(--card-bg); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s; white-space: nowrap; } .dock-item:hover .tooltip { opacity: 1; visibility: visible; }
-    
-    /* --- THEME SWITCHER & MODALS --- */
-    #theme-switcher { position: relative; } #theme-btn { background: none; border: none; color: var(--secondary-text-color); font-size: 1.5rem; cursor: pointer; padding: 0.5rem; transition: color 0.3s; } #theme-menu { display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px var(--card-shadow); z-index: 1100; overflow: hidden; } #theme-menu.visible { display: block; } .theme-option { padding: 0.8rem 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; } .theme-option:hover { background-color: var(--primary-bg); } .theme-option .color-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--card-border); }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .modal-content h2 { font-size: 2rem; margin-bottom: 0.5rem; } .modal-content p { color: var(--secondary-text-color); margin-top: 0; margin-bottom: 2rem; } .modal-content input, .modal-content textarea, .modal-content select { width: calc(100% - 2.2rem); margin-bottom: 1.2rem; padding: 0.8rem 1rem; border: 1px solid var(--card-border); border-radius: 8px; font-size: 1rem; background-color: var(--primary-bg); color: var(--text-color); } .modal-content button.cta-button { width: 100%; padding: 1rem; font-size: 1.1rem; border-radius: 10px; margin-top: 1rem; } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; z-index: 10; }
-    .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-    .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; }
-    .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; }
-    .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); }
-    .tool-header h2 { font-size: 1.5rem; margin: 0; }
-    .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; }
-    .tool-content { flex-grow: 1; overflow-y: auto; position: relative; padding: 2rem 5%; }
-    .tool-content iframe { width: 100%; height: 100%; border: none; }
-    .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid var(--primary-bg); border-top: 6px solid var(--button-gradient-start); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; display: none; } @keyframes spin { 0% { transform: translate(-50%, -50%) rotate(0deg); } 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-    .choice-card { padding: 1.5rem; border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s ease; } .choice-card:hover { border-color: var(--button-gradient-start); box-shadow: 0 5px 15px var(--card-shadow); transform: translateY(-5px); } .choice-card i { font-size: 1.8rem; color: var(--button-gradient-start); margin-bottom: 0.5rem; } .choice-card h3 { margin: 0; }
-    #userInfo { font-weight: 600; } #logoutBtn { background: var(--secondary-text-color); }
-    .major-announcement-content { background: var(--card-bg); border-radius: 16px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative; padding: 0; overflow: hidden; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .major-announcement-content { transform: scale(1); } #majorAnnouncementImage { width: 100%; height: auto; display: block; max-height: 300px; object-fit: cover; } .major-announcement-text { padding: 1.5rem 2rem 2rem 2rem; text-align: center; } #majorAnnouncementTitle { font-size: 2rem; margin-top: 0; margin-bottom: 0.5rem; color: var(--text-color); } #majorAnnouncementBody { color: var(--secondary-text-color); font-size: 1.1rem; line-height: 1.6; margin-bottom: 0; }
-    .header-icon-btn { position: relative; background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; text-decoration: none; } 
-    .notification-badge { 
-        position: absolute; top: 0px; right: 0px; min-width: 18px; height: 18px;
-        background-color: var(--error-color); color: white;
-        border-radius: 9px; pointer-events: none;
-        font-size: 12px; font-weight: 700; line-height: 18px; text-align: center;
-        padding: 0 4px;
-    }
-    .notification-panel { display: none; position: fixed; top: 80px; right: 5%; width: 350px; max-width: 90%; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: 0 10px 30px var(--card-shadow); z-index: 1050; overflow: hidden; } .notification-panel.visible { display: block; } .notification-header { padding: 1rem; border-bottom: 1px solid var(--card-border); } .notification-header h3 { margin: 0; font-size: 1.1rem; } .notification-list { max-height: 400px; overflow-y: auto; } 
-    .notification-item { 
-        padding: 1rem; border-bottom: 1px solid var(--card-border); 
-        font-size: 0.9rem; line-height: 1.5; color: var(--text-color); 
-        font-weight: 600; /* Bolder text */
-        transition: background-color 0.2s; 
-    }
-    .notification-item a { text-decoration: none; color: inherit; display: block; } 
-    .notification-item:hover { background-color: var(--primary-bg); } 
-    .notification-item:last-child { border-bottom: none; } 
-    .notification-item small { 
-        display: block; margin-top: 0.5rem; font-weight: 600; 
-        color: var(--secondary-text-color); /* Keep date less prominent */
-    }
-    .poll-toast { position: fixed; bottom: 100px; right: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 5px 20px var(--card-shadow); padding: 1.5rem; z-index: 2050; width: 320px; max-width: 90%; opacity: 0; transform: translateY(20px); transition: opacity 0.3s, transform 0.3s; pointer-events: none; } .poll-toast.visible { opacity: 1; transform: translateY(0); pointer-events: auto; } .poll-toast h4 { margin: 0 0 1rem 0; font-size: 1.1rem; } .poll-options button { width: 100%; background: var(--primary-bg); color: var(--text-color); border: 1px solid var(--card-border); padding: 0.75rem; text-align: left; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer; } .poll-options button:hover { border-color: var(--button-gradient-start); }
-    .ticket-list-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; } .ticket-list-item:hover { border-color: var(--button-gradient-start); box-shadow: 0 3px 10px var(--card-shadow); } .ticket-status { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; } .status-open { background-color: #dcfce7; color: #166534; } .status-closed { background-color: #f3f4f6; color: #4b5563; } .status-Awaiting-Reply { background-color: #fef9c3; color: #854d0e; }
-    .message-bubble { padding: 0.75rem 1rem; border-radius: 12px; margin-bottom: 1rem; max-width: 80%; line-height: 1.5; } .message-user { background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; margin-left: auto; border-bottom-right-radius: 0; } .message-admin { background: var(--primary-bg); color: var(--text-color); margin-right: auto; border-bottom-left-radius: 0; border: 1px solid var(--card-border); }
-    .form-group { margin-bottom: 1.5rem; text-align: left; } .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; } .form-group input, .form-group textarea { width: 100%; padding: 0.8rem 1rem; border: 1px solid var(--card-border); border-radius: 8px; font-size: 1rem; background-color: var(--primary-bg); color: var(--text-color); box-sizing: border-box; }
-
-    /* --- RESPONSIVE STYLES --- */
-    @media only screen and (max-width: 1024px) {
-        .welcome-content h1 { font-size: 4rem; }
-        .intro-slide h2 { font-size: 2.8rem; }
-        .page-section h2 { font-size: 2.5rem; }
-    }
-
-    @media only screen and (max-width: 768px) {
-        /* --- General Layout & Text --- */
-        .main-header { padding: 1rem 3%; }
-        .logo { font-size: 1.5rem; }
-        .page-section { padding: 3rem 5%; min-height: auto; }
-        .section-content, .page-section:nth-child(even) .section-content { flex-direction: column; gap: 2rem; }
-        .section-content .graphic-content { margin-top: 2rem; }
-        .section-content .text-content, .section-content .graphic-content { flex: none; width: 100%; text-align: center; }
-        .page-section h2 { font-size: 2.2rem; }
-        .page-section p { font-size: 1rem; }
-
-        /* --- Immersive Intro Section --- */
-        .intro-slide { flex-direction: column; text-align: center; gap: 2%; padding: 2rem 5% 100px; }
-        .intro-slide .text-content, .intro-slide .visual-content { flex: none; width: 100%; max-width: 100%; }
-        .welcome-content h1 { font-size: 3rem; }
-        .welcome-content p { font-size: 1.1rem; }
-        .intro-slide h2 { font-size: 2rem; }
-        .intro-slide p { font-size: 1rem; }
-        .interactive-analyzer { transform: scale(1); }
-        #callout-1 { top: -40px; left: 10px; }
-        #callout-2 { top: -40px; right: 10px; }
-        #callout-3 { top: 90px; left: 50%; transform: translateX(-50%); }
-
-        /* --- Header & Footer/Dock --- */
-        #userInfo { display: none; }
-        .footer { flex-direction: column; gap: 1rem; text-align: center; }
-        .dock {
-            height: 60px;
-            gap: 0.2rem;
-            padding: 0.3rem;
-            border-radius: 1rem;
-        }
-        .dock-item a, .dock-item button { width: 50px; height: 50px; line-height: 50px; font-size: 1.5rem; }
-        .scroll-down-prompt { bottom: 12vh; font-size: 0.9rem; }
-
-        /* --- Modals --- */
-        .modal-content { width: 95%; padding: 2rem 1.5rem; }
-        .major-announcement-text { padding: 1rem 1.5rem 1.5rem 1.5rem; }
-        .notification-panel { width: 90%; right: 5%; top: 70px; }
-    }
-  </style>
+.time{
+  font-size:36px;
+  font-weight:bold;
+  margin-top:10px;
+}
+.hide{display:none}
+</style>
 </head>
+
 <body>
-    <header class="main-header" id="mainHeader">
-        <div class="logo">Check My Steno</div>
-        <div class="header-actions" id="headerActions"></div>
-    </header>
 
-    <main id="mainContent">
-       <!-- IMMERSIVE HORIZONTAL SLIDER INTRODUCTION -->
-       <section id="immersive-intro">
-            <div class="intro-track">
-                <!-- Slide 1 (Welcome) -->
-                <div class="intro-slide intro-slide--welcome">
-                    <div class="welcome-content">
-                        <h1>Precision Analysis for Stenographers</h1>
-                        <p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p>
-                        <button class="cta-button" id="discover-features-btn">Discover Features</button>
-                    </div>
-                </div>
+<div class="container">
+  <h1>📚 Study Live</h1>
+  <div class="sub">Show you are studying — live</div>
 
-                <!-- Slide 2 (Feature 1) -->
-                <div class="intro-slide" data-step="0">
-                    <div class="text-content">
-                        <h2>SSC Level Mistake Analysis</h2>
-                        <p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 3 (Feature 2) -->
-                <div class="intro-slide" data-step="1">
-                    <div class="text-content">
-                        <h2>One-Click Word Match</h2>
-                        <p>Never get lost in the text again. Instantly highlight and compare any word with the original source, making verification faster and more accurate than ever.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-2" class="feature-callout">Source Text Match</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 4 (Feature 3) -->
-                <div class="intro-slide" data-step="2">
-                    <div class="text-content">
-                        <h2>Re-evaluate Your Score</h2>
-                        <p>Don't wait to see how corrections affect your score. Our tool dynamically re-evaluates your accuracy in real-time, providing immediate feedback on your improvements.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-3" class="feature-callout">Real-time Score Update</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 5 (Feature 4) -->
-                 <div class="intro-slide" data-step="3">
-                     <div class="text-content">
-                         <h2>Performance Analytics</h2>
-                         <p>Track your growth over time. Our dashboard visualizes your accuracy, common errors, and speed, turning your practice data into a clear path for improvement.</p>
-                     </div>
-                     <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-4" class="feature-callout">View Progress Chart</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                 </div>
-            </div>
-            
-            <div class="intro-navigation">
-                <!-- The navigation controls are now hidden via CSS -->
-            </div>
-            <div class="scroll-down-prompt" id="scroll-prompt">
-                Scroll to Explore <i class="fas fa-chevron-down"></i>
-            </div>
-       </section>
+  <button class="btn login" id="loginBtn">Login with Google</button>
 
-       <!-- THE REST OF YOUR PAGE (UNCHANGED) -->
-       <section id="practice" class="page-section">
-           <div class="section-content anim-hidden">
-               <div class="text-content">
-                   <h2>Practice KC</h2>
-                   <p>Hone your muscle memory with our interactive keyboard drills. Designed to build both speed and accuracy, this is your personal training ground for stenographic excellence.</p>
-                   <button class="launch-button" data-tool="kc">Launch Practice Tool</button>
-               </div>
-               <div class="graphic-content"><i class="fas fa-keyboard"></i></div>
-           </div>
-       </section>
-
-       <!-- === START OF ADDED DICTATIONS SECTION === -->
-       <section id="dictations" class="page-section">
-            <div class="section-content anim-hidden">
-                <div class="text-content">
-                    <h2>Practice Dictations</h2>
-                    <p>Listen to professionally recorded audio passages and transcribe them in real-time. Our dictation tool is perfect for improving your listening skills and shorthand speed for exams.</p>
-                    <button class="launch-button" data-tool="dictations">Launch Dictations Tool</button>
-                </div>
-                <div class="graphic-content"><i class="fas fa-microphone-alt"></i></div>
-            </div>
-        </section>
-        <!-- === END OF ADDED DICTATIONS SECTION === -->
-
-       <section id="analysis" class="page-section">
-           <div class="section-content anim-hidden">
-               <div class="text-content">
-                   <h2>Test Analysis</h2>
-                   <p>Go beyond simple scores. Upload your tests to receive a detailed breakdown of your performance, identify common errors, and gain actionable insights to improve faster.</p>
-                   <button class="launch-button" data-tool="test-analysis">Launch Analysis Tool</button>
-               </div>
-               <div class="graphic-content"><i class="fas fa-chart-line"></i></div>
-           </div>
-       </section>
-       <section id="checker" class="page-section">
-           <div class="section-content anim-hidden">
-               <div class="text-content">
-                   <h2>Transcription Checker</h2>
-                   <p>Ensure flawless results. Our checker instantly verifies your transcriptions against the source audio or text, highlighting discrepancies with precision so you can deliver perfect work, every time.</p>
-                   <button class="launch-button" data-tool="transcription-checker">Launch Checker Tool</button>
-               </div>
-               <div class="graphic-content"><i class="fas fa-check-double"></i></div>
-           </div>
-       </section>
-       <section id="about" class="page-section">
-           <div class="section-content anim-hidden">
-               <div class="text-content">
-                   <h2>About Check My Steno</h2>
-                   <p>Learn about our mission, the technology behind our tools, and how we're dedicated to helping stenographers at every stage of their career achieve their full potential.</p>
-                   <button class="launch-button" data-tool="about">Learn More</button>
-               </div>
-               <div class="graphic-content"><i class="fas fa-book-open"></i></div>
-           </div>
-       </section>
-       
-       <footer class="footer">
-            <p class="footer-copyright">&copy; 2025 Check My Steno. All Rights Reserved.</p>
-            <div class="footer-links">
-                <button onclick="showFeedbackModal()">Feedback</button>
-                <button onclick="launchTool('status')">Platform Status</button>
-                <button onclick="launchTool('contact')">Contact</button>
-            </div>
-       </footer>
-    </main>
-
-    <nav class="dock">
-        <div class="dock-item"><a href="#immersive-intro"><i class="fas fa-home"></i></a><span class="tooltip">Home</span></div>
-        <div class="dock-item"><a href="#practice"><i class="fas fa-keyboard"></i></a><span class="tooltip">Practice KC</span></div>
-        <!-- === START OF ADDED DOCK ITEM === -->
-        <div class="dock-item"><a href="#dictations"><i class="fas fa-microphone-alt"></i></a><span class="tooltip">Dictations</span></div>
-        <!-- === END OF ADDED DOCK ITEM === -->
-        <div class="dock-item"><a href="#analysis"><i class="fas fa-chart-line"></i></a><span class="tooltip">Test Analysis</span></div>
-        <div class="dock-item"><a href="#checker"><i class="fas fa-check-double"></i></a><span class="tooltip">Transcription Checker</span></div>
-        <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
-    </nav>
-    
-    <!-- ===== ALL MODALS AND OVERLAYS (UNCHANGED) ===== -->
-    <div class="modal-overlay" id="choiceModal"><div class="modal-content"><button class="close-button" onclick="hideChoiceModal()">&times;</button><h2>Unlock Premium Features</h2><p>How would you like to get access?</p><div class="choice-container"><div class="choice-card" onclick="openLoginFromChoice()"><i class="fas fa-key"></i><h3>I have an Access Code</h3><p>Already subscribed? Enter your code to log in.</p></div><div class="choice-card" onclick="window.location.href='plans.html'"><i class="fas fa-gem"></i><h3>Subscribe Now</h3><p>Choose a plan to get your new access code.</p></div></div></div></div>
-    <div class="modal-overlay" id="loginModal"><div class="modal-content"><button class="close-button" onclick="hideLoginModal()">&times;</button><h2>Access Your Account</h2><input type="text" id="userName" placeholder="Enter Your Name" required /><input type="email" id="userEmail" placeholder="Enter Your Email" required /><input type="text" id="accessCode" placeholder="Enter Access Code" required /><button class="cta-button" onclick="validateAccessCode()">Unlock Tools</button><p id="loginError"></p></div></div>
-    <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button">&times;</button><img id="majorAnnouncementImage" src="" alt="Announcement" /><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
-    <div id="notificationPanel" class="notification-panel"><div class="notification-header"><h3>Notifications</h3></div><div id="notificationList" class="notification-list"></div></div>
-    <div class="modal-overlay" id="messageOfTheDayModal"><div class="modal-content"><button class="close-button" onclick="this.parentElement.parentElement.classList.remove('visible'); setScrollLock(false);">&times;</button><h2>A Message for You</h2><p id="motdBody"></p></div></div>
-    <div class="modal-overlay" id="feedbackModal"><div class="modal-content"><button class="close-button" onclick="hideFeedbackModal()">&times;</button><h2>Submit Feedback</h2><p>We'd love to hear your thoughts!</p><select id="feedbackType"><option>Suggestion</option><option>Bug Report</option><option>Other</option></select><textarea id="feedbackMessage" rows="5" placeholder="Your message..."></textarea><button class="cta-button" onclick="submitFeedback()">Send Feedback</button><p id="feedbackStatus" style="min-height: 1em; margin-top:1rem;"></p></div></div>
-    
-    <div id="toolOverlays">
-        <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-keyboard"></i> Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding:0; overflow:hidden;"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
-        <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-chart-line"></i> Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding:0; overflow:hidden;"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
-        <div id="transcription-checkerTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-check-double"></i> Transcription Checker</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding:0; overflow:hidden;"><div class="loader"></div><iframe id="transcription-checkerFrame" src="about:blank"></iframe></div></div>
-        <div id="aboutTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-book-open"></i> About</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding:0; overflow:hidden;"><div class="loader"></div><iframe id="aboutFrame" src="about:blank"></iframe></div></div>
-        <div id="supportTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-headset"></i> My Support Tickets</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="supportContent" class="tool-content"></div></div>
-        <div id="statusTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-server"></i> Platform Status</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="statusContent" class="tool-content"></div></div>
-        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-envelope"></i> Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="contactContent" class="tool-content"></div></div>
-        <!-- === START OF ADDED TOOL OVERLAY === -->
-        <div id="dictationsTool" class="tool-overlay">
-            <header class="tool-header">
-                <h2><i class="fas fa-microphone-alt"></i> Dictations</h2>
-                <button class="close-tool-btn" onclick="closeAllTools()">Close</button>
-            </header>
-            <div class="tool-content" style="padding:0; overflow:hidden;">
-                <div class="loader"></div>
-                <iframe id="dictationsFrame" src="about:blank"></iframe>
-            </div>
-        </div>
-        <!-- === END OF ADDED TOOL OVERLAY === -->
+  <div id="app" class="hide">
+    <div class="card">
+      <div>Welcome</div>
+      <h2 id="name"></h2>
     </div>
-    
-    <div id="pollToast" class="poll-toast">
-        <button class="close-button" style="top: 10px; right: 10px;" onclick="this.parentElement.classList.remove('visible')">&times;</button>
-        <h4 id="pollQuestion"></h4>
-        <div id="pollOptions" class="poll-options"></div>
+
+    <div class="card">
+      <div>Today's Study Time</div>
+      <div class="time" id="time">00:00:00</div>
+      <button class="btn start" id="startBtn">▶ Start Study</button>
+      <button class="btn stop hide" id="stopBtn">⏸ Stop Study</button>
     </div>
-    
+
+    <button class="btn logout" id="logoutBtn">Logout</button>
+  </div>
+</div>
+
 <script>
-    // --- SCRIPT FOR IMMERSIVE SLIDER INTRODUCTION ---
-    document.addEventListener('DOMContentLoaded', () => {
-        const intro = document.getElementById('immersive-intro');
-        if (!intro) return;
+/* 🔥 FIREBASE CONFIG (YOURS) */
+firebase.initializeApp({
+  apiKey: "AIzaSyAUnOQq5DvNnnacfzBLRlKaP5Oh2W7fQ1Y",
+  authDomain: "study-live-cdc81.firebaseapp.com",
+  projectId: "study-live-cdc81",
+  storageBucket: "study-live-cdc81.firebasestorage.app",
+  messagingSenderId: "656676120180",
+  appId: "1:656676120180:web:7ea85f6e650b132e39d321"
+});
 
-        const track = intro.querySelector('.intro-track');
-        const slides = Array.from(intro.querySelectorAll('.intro-slide'));
-        const scrollPrompt = intro.querySelector('#scroll-prompt');
-        const discoverBtn = intro.querySelector('#discover-features-btn');
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-        const slideCount = slides.length;
-        let currentIndex = 0;
-        const slideDuration = 5000;
-        let autoplayInterval = null;
-        let typewriterTimeout = null;
-        
-        // Data for the 4 FEATURE slides.
-        const stepsData = [
-            { text: `The quick brown fox <span class="highlight highlight-ssc">jumps</span> over the lazy dog. This is a test...`, score: { start: 98.0, end: 98.0, prefix: `<strong>Initial Score:</strong> `, suffix: `% Accuracy`}, activeCallout: 0 },
-            { text: `The quick brown fox jumps over the lazy dog. This is a... <span class="highlight highlight-match">showcase</span> its features.`, score: `<strong>Word Match:</strong> "showcase" vs "show case"`, activeCallout: 1 },
-            { text: `The quick brown fox <span class="highlight highlight-re-eval">jumped</span> over the lazy dog. This is a test...`, score: { start: 98.0, end: 99.0, prefix: `<strong>New Score:</strong> `, suffix: `% <span style="color:var(--success-color);">(+1.0%)</span>`}, activeCallout: 2 },
-            { text: `<i class="fas fa-chart-line" style="font-size: 8rem; opacity: 0.5; display: block; text-align: center;"></i>`, score: `<strong>Track Your Growth Over Time</strong>`, activeCallout: 3, isHTML: true }
-        ];
-        
-        function runTypewriter(data, textElement) {
-            clearTimeout(typewriterTimeout);
-            textElement.innerHTML = '';
-            if (data.isHTML) { textElement.innerHTML = data.text; return; }
-            const wordsAndTags = data.text.match(/<[^>]+>|[^<>\s]+|\s+/g) || [];
-            let displayedHTML = ''; let i = 0;
-            function typeWord() {
-                if (i < wordsAndTags.length) {
-                    displayedHTML += wordsAndTags[i];
-                    textElement.innerHTML = displayedHTML;
-                    i++;
-                    const delay = wordsAndTags[i-1].startsWith('<') ? 0 : 70;
-                    typewriterTimeout = setTimeout(typeWord, delay);
-                }
-            }
-            typeWord();
-        }
+/* ELEMENTS */
+const loginBtn = document.getElementById("loginBtn");
+const appDiv = document.getElementById("app");
+const nameEl = document.getElementById("name");
+const timeEl = document.getElementById("time");
+const startBtn = document.getElementById("startBtn");
+const stopBtn = document.getElementById("stopBtn");
+const logoutBtn = document.getElementById("logoutBtn");
 
-        function animateValue(obj, start, end, duration, data) {
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const currentValue = progress * (end - start) + start;
-                if (typeof data.score === 'object') {
-                    obj.innerHTML = `${data.score.prefix}${currentValue.toFixed(1)}${data.score.suffix}`;
-                }
-                if (progress < 1) { window.requestAnimationFrame(step); }
-            };
-            window.requestAnimationFrame(step);
-        }
+let timerInterval;
+let startTime = null;
+let todaySeconds = 0;
 
-        function updateVisuals(featureIndex) {
-            const currentSlide = slides[featureIndex + 1];
-            const data = stepsData[featureIndex];
-            const analyzerTextEl = currentSlide.querySelector('.analyzer-text-content');
-            const scoreTextEl = currentSlide.querySelector('.score-text');
-            runTypewriter(data, analyzerTextEl);
-            const scoreData = data.score;
-            if (typeof scoreData === 'object') {
-                animateValue(scoreTextEl, scoreData.start, scoreData.end, 500, data);
-            } else {
-                scoreTextEl.innerHTML = scoreData;
-            }
-            scoreTextEl.classList.add('is-active');
-            document.querySelectorAll('.feature-callout').forEach(c => c.classList.remove('is-active'));
-            const activeCallout = document.getElementById(`callout-${data.activeCallout + 1}`);
-            if (activeCallout) { activeCallout.classList.add('is-active'); }
-        }
+/* LOGIN */
+loginBtn.onclick = () => {
+  const provider = new firebase.auth.GoogleAuthProvider();
+  auth.signInWithPopup(provider);
+};
 
-        function moveToSlide(targetIndex) {
-            track.style.transform = `translateX(-${targetIndex * 100}vw)`;
-            currentIndex = targetIndex;
-            scrollPrompt.classList.toggle('visible', targetIndex === slideCount - 1);
-            if (targetIndex > 0) {
-                updateVisuals(targetIndex - 1);
-            }
-            resetAutoplay();
-        }
-        
-        function resetAutoplay() {
-            clearInterval(autoplayInterval);
-            autoplayInterval = setInterval(() => {
-                const nextIndex = (currentIndex + 1) % slideCount;
-                moveToSlide(nextIndex);
-            }, slideDuration);
-        }
+/* LOGOUT */
+logoutBtn.onclick = () => auth.signOut();
 
-        discoverBtn.addEventListener('click', () => {
-             moveToSlide(1);
-        });
-        
-        intro.addEventListener('mouseenter', () => clearInterval(autoplayInterval));
-        intro.addEventListener('mouseleave', resetAutoplay);
-        
-        moveToSlide(0);
-    });
+/* AUTH STATE */
+auth.onAuthStateChanged(async user => {
+  if(user){
+    loginBtn.classList.add("hide");
+    appDiv.classList.remove("hide");
+    nameEl.innerText = user.displayName;
 
-// --- PART 1: CONFIG & GLOBAL STATE ---
-    const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
-    firebase.initializeApp(FBCONFIG);
-    const DB = firebase.firestore();
-    const GID = id => document.getElementById(id);
-    let accessCodeUnsubscribe = null, currentUser = null;
+    const today = new Date().toISOString().slice(0,10);
+    const ref = db.collection("study").doc(user.uid + "_" + today);
+    const doc = await ref.get();
 
-// --- PART 2: CORE FUNCTIONS ---
-    function setScrollLock(locked) { const action = locked ? 'add' : 'remove'; document.body.classList[action]('modal-open'); document.documentElement.classList[action]('modal-open'); }
-    function launchTool(toolName) {
-        const toolOverlay = GID(`${toolName}Tool`);
-        if (!toolOverlay) return;
-        if (toolName === 'support') renderSupportTickets();
-        if (toolName === 'status') renderPlatformStatus();
-        if (toolName === 'contact') renderContactInfo();
-        const iframe = toolOverlay.querySelector('iframe');
-        if(iframe) {
-            const loader = toolOverlay.querySelector('.loader');
-            loader.style.display = 'block';
-            iframe.src = 'about:blank';
-            iframe.style.opacity = '0';
-            iframe.onload = () => { loader.style.display = 'none'; iframe.style.opacity = '1'; };
-            iframe.src = `${toolName}.html`;
-        }
-        toolOverlay.classList.add('visible'); setScrollLock(true);
+    if(doc.exists){
+      todaySeconds = doc.data().seconds || 0;
+      updateTime();
     }
-    function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(overlay => { const iframe = overlay.querySelector('iframe'); if (iframe) iframe.src = 'about:blank'; overlay.classList.remove('visible'); }); setScrollLock(false); }
-    function logout() { if (accessCodeUnsubscribe) accessCodeUnsubscribe(); localStorage.removeItem("checkMyStenoUser"); localStorage.removeItem("currentAccessCode"); currentUser = null; updateUserUI(false); closeAllTools(); window.location.hash = '#home'; }
-    function hideChoiceModal() { GID('choiceModal').classList.remove('visible'); setScrollLock(false); }
-    function hideLoginModal() { GID('loginModal').classList.remove('visible'); setScrollLock(false); }
-    function openLoginFromChoice() { hideChoiceModal(); setTimeout(() => GID('loginModal').classList.add('visible'), 300); }
-    function startAccessCodeListener(code) { if (accessCodeUnsubscribe) accessCodeUnsubscribe(); accessCodeUnsubscribe = DB.collection("accessCodes").doc(code).onSnapshot(doc => { if (!doc.exists || !doc.data().valid) { alert("Your session has expired or the access code is no longer valid."); logout(); } }); }
-    function applyTheme(themeName) { document.body.dataset.theme = themeName; localStorage.setItem('selectedTheme', themeName); }
-    function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const [key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
-    
-    function updateUserUI(isLoggedIn, userName = '') {
-        const headerActions = GID('headerActions');
-        const allLaunchButtons = document.querySelectorAll('.launch-button');
-        const premiumTools = ['kc', 'test-analysis', 'transcription-checker', 'dictations'];
+  } else {
+    loginBtn.classList.remove("hide");
+    appDiv.classList.add("hide");
+    stopTimer();
+  }
+});
 
-        if (isLoggedIn) {
-            headerActions.innerHTML = `
-                <div id="theme-switcher"><button id="theme-btn" title="Change Theme"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
-                <a href="features.html" class="header-icon-btn" title="Features"><i class="fas fa-star"></i></a>
-                <button id="notificationBtn" class="header-icon-btn" title="Notifications"><i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span></button>
-                <button class="header-icon-btn" title="My Support Tickets" onclick="launchTool('support')"><i class="fas fa-headset"></i></button>
-                <a href="demo.html" class="cta-button demo-button">Try Demo</a>
-                <span id="userInfo">Welcome, ${userName}!</span>
-                <button id="logoutBtn" class="cta-button" onclick="logout()">Logout</button>
-            `;
-            allLaunchButtons.forEach(btn => {
-                btn.classList.remove('locked');
-                btn.innerHTML = btn.dataset.originalText;
-                btn.onclick = () => launchTool(btn.dataset.tool);
-            });
-        } else {
-            headerActions.innerHTML = `
-                <div id="theme-switcher"><button id="theme-btn" title="Change Theme"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
-                <a href="features.html" class="header-icon-btn" title="Features"><i class="fas fa-star"></i></a>
-                <button id="notificationBtn" class="header-icon-btn" title="Notifications"><i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span></button>
-                <a href="demo.html" class="cta-button demo-button">Try Demo</a>
-                <button id="loginBtn" class="cta-button" onclick="GID('choiceModal').classList.add('visible'); setScrollLock(true);">Unlock Full Access</button>
-            `;
-            allLaunchButtons.forEach(btn => {
-                const tool = btn.dataset.tool;
-                if (premiumTools.includes(tool)) {
-                    btn.classList.add('locked');
-                    btn.onclick = () => { GID('choiceModal').classList.add('visible'); setScrollLock(true); };
-                    btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
-                } else {
-                    btn.onclick = () => launchTool(btn.dataset.tool);
-                }
-            });
-        }
-        attachThemeSwitcherListeners();
-        setTimeout(handleNotifications, 100);
-    }
+/* START STUDY */
+startBtn.onclick = () => {
+  startTime = Date.now();
+  startBtn.classList.add("hide");
+  stopBtn.classList.remove("hide");
 
-    function validateAccessCode() { const name = GID("userName").value.trim(), email = GID("userEmail").value.trim(), code = GID("accessCode").value.trim(), loginError = GID("loginError"); if (!name || !email || !code) { loginError.textContent = "All fields are required."; return; } loginError.textContent = "Validating..."; DB.collection("accessCodes").doc(code).get().then(doc => { if (doc.exists && doc.data().valid) { const userData = { ...doc.data(), name, email }; currentUser = userData; localStorage.setItem("checkMyStenoUser", JSON.stringify(userData)); localStorage.setItem("currentAccessCode", code); hideLoginModal(); hideChoiceModal(); updateUserUI(true, name); startAccessCodeListener(code); checkForMessageOfTheDay(); DB.collection("userLogins").add({ name, email, usedAccessCode: code, loginTimestamp: firebase.firestore.FieldValue.serverTimestamp() }); } else { loginError.textContent = "Invalid or expired Access Code."; } }).catch(err => { loginError.textContent = "Error connecting."; console.error(err); }); }
-    
-// --- PART 3: NEW FEATURE FUNCTIONS ---
-    const feedbackModal = GID('feedbackModal');
-    function showFeedbackModal() { if(feedbackModal) { feedbackModal.classList.add('visible'); setScrollLock(true); } }
-    function hideFeedbackModal() { if(feedbackModal) { feedbackModal.classList.remove('visible'); setScrollLock(false); GID('feedbackMessage').value = ''; GID('feedbackStatus').textContent = ''; } }
-    async function submitFeedback() { const type = GID('feedbackType').value, message = GID('feedbackMessage').value.trim(), statusEl = GID('feedbackStatus'); if (!message) { statusEl.textContent = "Message cannot be empty."; return; } statusEl.textContent = "Sending..."; const feedbackData = { type, message, timestamp: firebase.firestore.FieldValue.serverTimestamp(), status: 'New' }; if (currentUser) { feedbackData.userEmail = currentUser.email; feedbackData.userName = currentUser.name; } try { await DB.collection('feedback').add(feedbackData); statusEl.textContent = "Thank you! Your feedback has been sent."; setTimeout(hideFeedbackModal, 2000); } catch (e) { statusEl.textContent = "Could not send feedback. Please try again."; } }
-    function checkForMessageOfTheDay() { const motdRef = DB.collection('siteConfig').doc('messageOfTheDay'); motdRef.get().then(doc => { if (doc.exists && doc.data().isActive) { const data = doc.data(); const seenKey = `seenMessage_${data.id}`; if (!localStorage.getItem(seenKey)) { GID('motdBody').textContent = data.message; GID('messageOfTheDayModal').classList.add('visible'); setScrollLock(true); localStorage.setItem(seenKey, 'true'); } } }); }
-    function renderPlatformStatus() { const content = GID('statusContent'); content.innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; DB.collection('platformStatus').orderBy('timestamp', 'desc').limit(10).get().then(snapshot => { let html = '<h1>Platform Status</h1>'; if (snapshot.empty) { html += '<p>No recent status updates. All systems are operational.</p>'; } else { snapshot.forEach(doc => { const item = doc.data(); const date = item.timestamp.toDate().toLocaleString(); const statusClass = item.status === 'Resolved' ? 'status-open' : item.status === 'Investigating' ? 'status-Awaiting-Reply' : 'status-closed'; html += `<div class="card" style="margin-bottom:1.5rem;"><div class="card-body"><h3>${item.title} <span class="ticket-status ${statusClass}">${item.status}</span></h3><p>${item.details}</p><small style="opacity:0.7;">${date}</small></div></div>`; }); } content.innerHTML = html; }).catch(err => { content.innerHTML = '<h1>Error</h1><p>Could not load platform status.</p>'; }); }
-    function renderContactInfo() { const content = GID('contactContent'); content.innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; DB.collection('siteConfig').doc('contactInfo').get().then(doc => { if (doc.exists) { const { name, email, phone } = doc.data(); content.innerHTML = `<h1>Contact Us</h1><div class="card"><div class="card-body" style="text-align:center;"><p style="font-size: 1.2rem;">For any inquiries, please reach out to us:</p><h3 style="font-size: 2rem; margin:1rem 0;">${name}</h3><p><strong>Email:</strong> <a href="mailto:${email}">${email}</a></p><p><strong>Phone:</strong> ${phone}</p></div></div>`; } else { content.innerHTML = '<h1>Contact information is not available.</h1>'; } }).catch(err => { content.innerHTML = '<h1>Error</h1><p>Could not load contact information.</p>'; }); }
-    async function renderSupportTickets() { const content = GID('supportContent'); content.innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; if (!currentUser) { content.innerHTML = '<h1>Support</h1><p>You must be logged in to create or view support tickets.</p>'; return; } content.innerHTML = `<h1>My Tickets</h1><button class="cta-button" style="margin-bottom: 2rem;" onclick="checkAndShowNewTicketForm()">Create New Ticket</button><div id="ticketListContainer"></div>`; renderTicketList(); }
-    async function renderTicketList() { const listContainer = GID('ticketListContainer'); listContainer.innerHTML = '<div class="loader" style="display:block; position:relative;"></div>'; try { const snapshot = await DB.collection('tickets').where('userEmail', '==', currentUser.email).orderBy('lastReplyAt', 'desc').get(); if (snapshot.empty) { listContainer.innerHTML = '<p>You have not created any support tickets yet.</p>'; } else { let html = ''; snapshot.forEach(doc => { const ticket = doc.data(); const statusClean = ticket.status.replace(/\s+/g, '-'); html += `<div class="ticket-list-item" onclick="showTicketDetails('${doc.id}')"><div><p style="font-weight:600; margin:0;">${ticket.subject}</p><small>${new Date(ticket.lastReplyAt.toMillis()).toLocaleString()}</small></div><span class="ticket-status status-${statusClean}">${ticket.status}</span></div>`; }); listContainer.innerHTML = html; } } catch (e) { listContainer.innerHTML = '<p>Error loading tickets. Please ensure you have created the required index in Firestore.</p>'; } }
-    async function checkAndShowNewTicketForm() { GID('supportContent').innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000); try { const recentTickets = await DB.collection('tickets').where('userEmail', '==', currentUser.email).where('createdAt', '>', twentyFourHoursAgo).limit(1).get(); if (!recentTickets.empty) { GID('supportContent').innerHTML = `<h1>Create New Ticket</h1><button class="cta-button demo-button" style="margin-bottom:1rem;" onclick="renderSupportTickets()">&larr; Back to Ticket List</button><div class="card"><div class="card-body" style="text-align:center;"><p>You can only submit one support ticket every 24 hours.</p><p>Please wait before creating a new one, or reply to an existing ticket.</p></div></div>`; } else { showNewTicketForm(); } } catch (e) { GID('supportContent').innerHTML = '<h1>Error</h1><p>Could not check for recent tickets. Please try again.</p>'; } }
-    function showNewTicketForm() { GID('supportContent').innerHTML = `<h1>New Support Ticket</h1><button class="cta-button demo-button" style="margin-bottom:1rem;" onclick="renderSupportTickets()">&larr; Back to Ticket List</button><div class="card"><div class="card-body"><p>Please describe your issue below.</p><div class="form-group"><label for="newTicketSubject">Subject</label><input type="text" id="newTicketSubject" placeholder="e.g., Problem with Test Analysis"></div><div class="form-group"><label for="newTicketMessage">Details</label><textarea id="newTicketMessage" rows="5" placeholder="Please provide as much detail as possible..."></textarea></div><button class="cta-button" onclick="submitNewTicket()">Submit Ticket</button></div></div>`; }
-    async function submitNewTicket() { const subject = GID('newTicketSubject').value.trim(); const message = GID('newTicketMessage').value.trim(); if (!subject || !message) { alert('Subject and message are required.'); return; } const now = firebase.firestore.FieldValue.serverTimestamp(); const ticketData = { userEmail: currentUser.email, userName: currentUser.name, subject, status: 'Open', createdAt: now, lastReplyAt: now }; try { const ticketRef = await DB.collection('tickets').add(ticketData); await DB.collection('tickets').doc(ticketRef.id).collection('messages').add({ text: message, sender: 'user', timestamp: now }); renderSupportTickets(); } catch (e) { alert('Error creating ticket. Please try again.'); } }
-    async function showTicketDetails(ticketId) { const content = GID('supportContent'); content.innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; try { const ticketSnap = await DB.collection('tickets').doc(ticketId).get(); const messagesSnap = await DB.collection('tickets').doc(ticketId).collection('messages').orderBy('timestamp', 'asc').get(); if (!ticketSnap.exists) { throw new Error('Ticket not found.'); } const ticket = ticketSnap.data(); let messagesHtml = ''; messagesSnap.forEach(doc => { const msg = doc.data(); messagesHtml += `<div class="message-bubble message-${msg.sender}">${msg.text}</div>`; }); content.innerHTML = `<h1>${ticket.subject}</h1><button class="cta-button demo-button" onclick="renderSupportTickets()">&larr; Back to Ticket List</button><div class="card" style="margin-top:2rem;"><div class="card-body" style="max-height: 40vh; overflow-y: auto;">${messagesHtml}</div></div><div class="card"><div class="card-body"><textarea id="replyMessage" rows="4" placeholder="Type your reply..."></textarea><button class="cta-button" style="margin-top:1rem;" onclick="submitTicketReply('${ticketId}')">Send Reply</button></div></div>`; } catch (e) { content.innerHTML = `<p>Error loading ticket details.</p><button onclick="renderSupportTickets()">Back to list</button>`; } }
-    async function submitTicketReply(ticketId) { const message = GID('replyMessage').value.trim(); if (!message) return; const now = firebase.firestore.FieldValue.serverTimestamp(); try { await DB.collection('tickets').doc(ticketId).collection('messages').add({ text: message, sender: 'user', timestamp: now }); await DB.collection('tickets').doc(ticketId).update({ status: 'Awaiting Reply', lastReplyAt: now }); showTicketDetails(ticketId); } catch (e) { alert('Failed to send reply.'); } }
-    function checkForPoll() { const pollRef = DB.collection('siteConfig').doc('activePoll'); pollRef.get().then(doc => { if (doc.exists && doc.data().isActive) { const poll = doc.data(); const seenKey = `votedPoll_${poll.id}`; if (!localStorage.getItem(seenKey)) { GID('pollQuestion').textContent = poll.question; const optionsContainer = GID('pollOptions'); optionsContainer.innerHTML = ''; poll.options.forEach(option => { optionsContainer.innerHTML += `<button onclick="submitPollVote('${poll.id}', '${option}')">${option}</button>`; }); GID('pollToast').classList.add('visible'); } } }); }
-    async function submitPollVote(pollId, option) { GID('pollToast').classList.remove('visible'); const resultsRef = DB.collection('pollResults').doc(pollId); const increment = firebase.firestore.FieldValue.increment(1); try { await resultsRef.set({ results: { [option]: increment } }, { merge: true }); localStorage.setItem(`votedPoll_${pollId}`, 'true'); } catch (e) { console.error("Error submitting vote:", e); } }
-    
-    function handleNotifications() {
-        const btn = GID('notificationBtn');
-        if (!btn) return;
-        const badge = GID('notificationBadge'), panel = GID('notificationPanel'), list = GID('notificationList');
-        DB.collection('notifications').orderBy('timestamp', 'desc').limit(20).get().then(snapshot => {
-            if (snapshot.empty) {
-                list.innerHTML = '<p style="text-align:center;color:var(--secondary-text-color);padding:1.5rem;">No new notifications.</p>';
-                return;
-            }
-            const lastSeen = localStorage.getItem('lastSeenNotificationTimestamp') || 0;
-            const latestTimestamp = snapshot.docs[0].data().timestamp.toMillis();
-            let unreadCount = 0;
-            let html = '';
+  timerInterval = setInterval(() => {
+    const diff = Math.floor((Date.now() - startTime)/1000);
+    updateTime(todaySeconds + diff);
+  },1000);
+};
 
-            snapshot.forEach(doc => {
-                const n = doc.data();
-                if (n.timestamp.toMillis() > lastSeen) {
-                    unreadCount++;
-                }
-                const date = n.timestamp.toDate().toLocaleDateString();
-                let itemHtml = `<div class="notification-item">${n.message}<small>${date}</small></div>`;
-                html += n.link ? `<a href="${n.link}" target="_blank" rel="noopener noreferrer">${itemHtml}</a>` : `<div style="cursor:default;">${itemHtml}</div>`;
-            });
+/* STOP STUDY */
+stopBtn.onclick = async () => {
+  stopTimer();
+  const user = auth.currentUser;
+  if(!user) return;
 
-            list.innerHTML = html;
+  const today = new Date().toISOString().slice(0,10);
+  const ref = db.collection("study").doc(user.uid + "_" + today);
 
-            if (unreadCount > 0) {
-                badge.textContent = unreadCount;
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
+  todaySeconds += Math.floor((Date.now() - startTime)/1000);
+  await ref.set({
+    uid:user.uid,
+    name:user.displayName,
+    date:today,
+    seconds:todaySeconds,
+    updated:firebase.firestore.FieldValue.serverTimestamp()
+  });
 
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                panel.classList.toggle('visible');
-                badge.style.display = 'none'; // Hide immediately on click
-                localStorage.setItem('lastSeenNotificationTimestamp', latestTimestamp);
-            };
-        }).catch(err => console.error("Error handling notifications:", err));
-    }
+  updateTime();
+};
 
-    function showMajorAnnouncement() { const modal = GID('majorAnnouncementModal'); const closeBtn = GID('closeMajorAnnouncement'); const imgEl = GID('majorAnnouncementImage'); const titleEl = GID('majorAnnouncementTitle'); const bodyEl = GID('majorAnnouncementBody'); const announcementRef = DB.collection('siteConfig').doc('majorAnnouncement'); announcementRef.get().then(doc => { if (doc.exists) { const data = doc.data(); if (data.isActive && data.id) { const announcementKey = `announcementClosed_${data.id}`; const hasBeenClosed = localStorage.getItem(announcementKey); if (!hasBeenClosed) { titleEl.textContent = data.title || ''; bodyEl.textContent = data.body || ''; if (data.imageUrl) { imgEl.src = data.imageUrl; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; } modal.classList.add('visible'); setScrollLock(true); closeBtn.onclick = () => { modal.classList.remove('visible'); setScrollLock(false); localStorage.setItem(announcementKey, 'true'); }; } } } }).catch(err => { console.error("Error fetching major announcement:", err); }); }
-    
-// --- PART 4: MAIN EXECUTION ---
-    window.onload = function() {
-        document.querySelectorAll('.launch-button').forEach(btn => { btn.dataset.originalText = btn.innerHTML; });
-        const userSession = localStorage.getItem("checkMyStenoUser");
-        const accessCode = localStorage.getItem("currentAccessCode");
-        if (userSession && accessCode) {
-            currentUser = JSON.parse(userSession);
-            updateUserUI(true, currentUser.name);
-            startAccessCodeListener(accessCode);
-        } else { updateUserUI(false); }
-        const savedTheme = localStorage.getItem('selectedTheme') || 'default';
-        applyTheme(savedTheme);
-        document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('anim-visible'); entry.target.classList.remove('anim-hidden'); } }); }, { threshold: 0.1 }).observe(el));
-        
-        // === START: FIX FOR OFFLINE ERRORS ===
-        if (navigator.onLine) {
-            showMajorAnnouncement();
-            checkForPoll();
-        }
-        // === END: FIX ===
-        
-        let lastScrollY = window.scrollY; const mainHeader = GID('mainHeader'); window.addEventListener('scroll', () => { if (window.scrollY > lastScrollY && window.scrollY > 100) { mainHeader.classList.add('hidden'); } else { mainHeader.classList.remove('hidden'); } lastScrollY = window.scrollY; });
-    };
-    document.addEventListener('click', (e) => { if(!e.target.closest('#theme-switcher')) {const m = GID('theme-menu'); if(m) m.classList.remove('visible');} if(!e.target.closest('#notificationBtn') && !e.target.closest('#notificationPanel')) {const p = GID('notificationPanel'); if(p) p.classList.remove('visible');} });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeAllTools(); GID('choiceModal').classList.remove('visible'); GID('loginModal').classList.remove('visible'); const majorModal = GID('majorAnnouncementModal'); if(majorModal && majorModal.classList.contains('visible')) { majorModal.querySelector('.close-button').click(); } } });
-</script>    
+/* HELPERS */
+function stopTimer(){
+  clearInterval(timerInterval);
+  startBtn.classList.remove("hide");
+  stopBtn.classList.add("hide");
+}
+
+function updateTime(sec = todaySeconds){
+  const h = String(Math.floor(sec/3600)).padStart(2,"0");
+  const m = String(Math.floor((sec%3600)/60)).padStart(2,"0");
+  const s = String(sec%60).padStart(2,"0");
+  timeEl.innerText = `${h}:${m}:${s}`;
+}
+</script>
+
 </body>
 </html>
