@@ -1,0 +1,34 @@
+/* --- EXTRACTED PLAYER STYLES --- */
+#player-view { max-width: 980px; margin: 40px auto; padding: 0 1rem; }
+.practice-station { border: 1px solid var(--border-color); border-radius: 24px; box-shadow: 0 10px 30px -5px rgba(100, 116, 139, 0.1); background: var(--surface-color); overflow: hidden; }
+.player-card { padding: 1.5rem 2.5rem; text-align: center; position: relative; }
+.player-header { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-bottom: 0.25rem; }
+.player-title { margin: 0; font-size: 1.6rem; font-weight: 700; color: #374151; text-align: left; }
+.player-subtitle { font-size: 1rem; color: var(--text-muted); margin-bottom: 1.5rem; text-align: left; }
+.controls { display: flex; justify-content: center; align-items: center; gap: 1.25rem; margin-bottom: 1.5rem; }
+.btn-p { background: #f3f4f8; color: #4b5563; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1rem; transition: all 0.2s ease; border:none; cursor: pointer; }
+.btn-p:hover { transform: scale(1.1); background-color: #e5e7eb; }
+.btn-p:disabled { opacity: 0.5; cursor: not-allowed; transform: none; background-color: #f3f4f8; }
+.btn-main-p { width: 72px; height: 72px; font-size: 1.8rem; background: linear-gradient(135deg, #818cf8, #6366f1); box-shadow: 0 5px 15px -3px rgba(109, 115, 234, 0.5); color: white; }
+.btn-main-p svg { width: 30px; height: 30px; }
+.progress-bar-wrapper { position: relative; width: 100%; background-color: #e0e7ff; height: 8px; border-radius: 4px; cursor: pointer; }
+#progress-fill { height: 100%; width: 0%; background-color: #6366f1; border-radius: 4px; transition: width 0.1s linear; }
+.time-display { display: flex; justify-content: space-between; font-size: 0.875rem; color: var(--text-muted); font-weight: 500; margin-top: 0.5rem; }
+.extra-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; padding: 0.75rem 1rem; background-color: #f8fafc; border-radius: 12px; border: 1px solid #f1f5f9; }
+.speed-control-group { display: flex; align-items: center; gap: 0.5rem; }
+.speed-control-group .btn-p { width: 36px; height: 36px; background-color: white; border: 1px solid var(--border-color); }
+#wpmSpeed { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: white; color: #4b5563; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.4rem 2rem 0.4rem 0.8rem; font-family: 'Manrope', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+.volume-control-group { display: flex; align-items: center; gap: 10px; }
+#volume-slider { -webkit-appearance: none; appearance: none; width: 120px; height: 5px; background: #e5e7eb; border-radius: 5px; cursor: pointer; transition: all 0.2s ease; }
+#volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 15px; height: 15px; background: #6366f1; border-radius: 50%; cursor: pointer; }
+.test-setup { background-color: #f9fafb; padding: 2rem 2.5rem; border-top: 1px solid var(--border-color); }
+.test-setup-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; gap: 1.5rem; }
+.setup-col-center { text-align: center; }
+.setup-col-right { text-align: right; }
+.timer-input-group { display: flex; flex-direction: column; align-items: center; gap: 0.5rem; }
+.timer-input-group label { font-weight: 600; font-size: 0.9em; color: var(--text-muted); }
+#custom-timer-input { width: 90px; padding: 12px; border-radius: 10px; border: 1px solid var(--border-color); text-align: center; font-size: 1.1em; font-weight: 700; }
+.comma-checkbox-label { font-size: 0.9em; color: var(--text-muted); display:inline-flex; align-items:center; gap: 5px; margin-top: 0.75rem; cursor: pointer; }
+#startTranscriptionBtn { font-size: 1.1em; padding: 16px 24px; width: 100%; max-width: 280px; border-radius: 12px; font-weight: 600; transition: all 0.2s ease; border: none; cursor: pointer; }
+#startTranscriptionBtn:disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; }
+#startTranscriptionBtn:not(:disabled) { background-color: #1f2937; color: white; box-shadow: 0 4px 14px rgba(0,0,0,0.1); }
