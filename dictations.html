@@ -329,14 +329,15 @@
     .stat-pill.red { background-color: var(--accent-red); box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.2); }
     .stat-pill.amber { background-color: var(--accent-amber); box-shadow: 0 4px 10px -2px rgba(249, 115, 22, 0.2); }
     .stat-pill img, .stat-pill svg { width: 18px; height: 18px; }
+    
+    .filter-hint { font-size: 0.85em; color: var(--text-muted); font-weight: 600; margin-bottom: 8px; }
     .legend-container { display: flex; flex-wrap: wrap; gap: 20px 30px; padding: 25px 0; margin-bottom: 25px; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
-    .legend-item { display: flex; align-items: center; font-size: 0.9em; font-weight: 500; }
+    .legend-item { display: flex; align-items: center; font-size: 0.9em; font-weight: 500; cursor: pointer; transition: opacity 0.2s; padding: 4px 8px; border-radius: 6px; }
+    .legend-item:hover { background-color: var(--bg-main); opacity: 0.8; }
     .legend-color-box { width: 16px; height: 16px; border-radius: 4px; margin-right: 8px; }
+    
     .result-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-    .filter-section { display: flex; align-items: center; gap: 10px; }
     .action-section { display: flex; align-items: center; gap: 10px; }
-    .filter-section label { font-weight: 600; color: var(--text-body); }
-    .filter-section select { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-weight: 500; color: var(--text-color); }
     .view-switch-btn { background-color: var(--bg-main); border: 1px solid var(--border-subtle); padding: 8px 16px; border-radius: 8px; font-weight: 600; color: var(--text-body); cursor: pointer; transition: all 0.2s; }
     .view-switch-btn:hover { background-color: #e2e8f0; }
     .reevaluate-wrapper { position: relative; display: inline-flex; align-items: center; gap: 8px; }
@@ -344,9 +345,11 @@
     .tooltip-icon { background-color: #9ca3af; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: bold; cursor: help; position: relative; }
     .tooltip-icon:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background-color: #1f2937; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.9em; white-space: nowrap; z-index: 10; opacity: 1; visibility: visible; transition: opacity 0.2s; }
     .tooltip-icon::after { content: attr(data-tooltip); opacity: 0; visibility: hidden; }
+    
     .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
     .columns.view-top-bottom { grid-template-columns: 1fr; }
+    
     .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; }
     .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; }
     .col p { margin: 0; }
@@ -1509,22 +1512,22 @@ function renderResultSheet(data, originalTextForDisplay) {
             <div id="reevaluated-accuracy-container"></div>
             <div class="stats-row"><div class="stat-pill">Test Date: ${escapeHtml(data.testDate)}</div></div>
         </div>
+        
+        <div class="filter-hint">Click on legend items below to filter mistakes:</div>
         <div class="legend-container">
-            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions / Substitutions</div>
-            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span> Omissions</div>
-            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span> Spelling Mistakes</div>
-            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span> Capitalization Mistakes</div>
-            <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span> Punctuation Mistakes</div>
+            <div class="legend-item" onclick="filterMistakes('extra')"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions / Substitutions</div>
+            <div class="legend-item" onclick="filterMistakes('omission')"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span> Omissions</div>
+            <div class="legend-item" onclick="filterMistakes('spelling')"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span> Spelling Mistakes</div>
+            <div class="legend-item" onclick="filterMistakes('capitalization')"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span> Capitalization Mistakes</div>
+            <div class="legend-item" onclick="filterMistakes('punctuation')"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span> Punctuation Mistakes</div>
+            <div class="legend-item" onclick="filterMistakes('all')" style="font-weight: 700; color: var(--accent-purple); border: 1px dashed var(--accent-purple);">Show All</div>
         </div>
+
         <div class="result-controls">
-            <div class="filter-section">
-                <label for="mistakeFilter">Filter Mistakes:</label>
-                <select id="mistakeFilter" onchange="filterMistakes(this.value)"><option value="all">Show All Mistakes</option><option value="omission">Omissions Only</option><option value="extra">Additions Only</option><option value="spelling">Spelling Only</option><option value="capitalization">Capitalization Only</option><option value="punctuation">Punctuation Only</option></select>
-            </div>
             <div class="action-section"><div class="reevaluate-wrapper"><button id="toggleReevaluateBtn" class="view-switch-btn">Enter Re-evaluate Mode</button><span class="tooltip-icon" data-tooltip="Enter a special mode to edit BOTH your text and the original text, then recalculate your score to see the difference.">?</span></div><button id="reportErrorBtn" class="view-switch-btn" style="background-color: #f97316; color: white;">Report Error</button></div>
-            <button id="viewSwitchBtn" class="view-switch-btn">Switch to Top/Bottom View</button>
+            <button id="viewSwitchBtn" class="view-switch-btn">Switch to Side-by-Side View</button>
         </div>
-        <div id="comparisonColumns" class="columns view-side-by-side">
+        <div id="comparisonColumns" class="columns view-top-bottom">
             <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText" contenteditable="false">${data.highlightedHtml}</p></div>
             <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div>
         </div>
