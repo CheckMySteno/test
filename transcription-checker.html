@@ -4,266 +4,84 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="robots" content="noindex">
-  <title>Modern Steno Transcription Checker</title>
+  <title>Modern Transcription Checker & Dictation Tool</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
   <style>
-    /* --- 1. Global & Base Styles --- */
-    :root {
-      --bg-main: #f8fafc;
-      --surface-card: #ffffff;
-      --border-subtle: #e2e8f0;
-      --text-header: #1e293b;
-      --text-body: #334155;
-      --text-muted: #64748b;
-      --primary-accent: #00796b;
-      --accent-red: #ef4444;
-      --accent-amber: #f97316;
-      --hl-additions: #fecdd3;     
-      --hl-omissions: #d9f99d;     
-      --hl-spelling: #fde68a;      
-      --hl-capitalization: #bae6fd; 
-      --hl-punctuation: #ddd6fe;   
-    }
-
-    body {
-      font-family: 'Inter', sans-serif;
-      background: var(--bg-main);
-      color: var(--text-body);
-      padding: 20px;
-      line-height: 1.6;
-    }
-
-    .hidden { display: none !important; }
-
-    /* --- 2. Input Section Styles --- */
-    #inputSection {
-      max-width: 900px;
-      margin: 0 auto 30px auto;
-      background: var(--surface-card);
-      padding: 30px;
-      border-radius: 16px;
-      border: 1px solid var(--border-subtle);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    #mainTitle {
-      font-size: 2.5em;
-      font-weight: 800;
-      color: var(--text-header);
-      text-align: center;
-      margin-bottom: 25px;
-    }
-    textarea {
-      width: 100%;
-      height: 150px;
-      margin-bottom: 15px;
-      padding: 12px;
-      border-radius: 8px;
-      border: 1px solid var(--border-subtle);
-      font-size: 16px;
-      font-family: 'Inter', sans-serif;
-      resize: vertical;
-    }
-    textarea:focus {
-        outline: none;
-        border-color: var(--primary-accent);
-        box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
-    }
-    label {
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: block;
-    }
-    #submitButton {
-      background-color: var(--primary-accent);
-      color: white;
-      padding: 12px 25px;
-      font-size: 1.1em;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      display: block;
-      width: 100%;
-      margin-top: 15px;
-      transition: all 0.2s ease;
-    }
-    #submitButton:hover {
-        background-color: #004d40;
-        transform: translateY(-2px);
-    }
-    #submitButton:disabled {
-        background-color: #a5d6a7;
-        cursor: not-allowed;
-        transform: none;
-    }
-    .loader {
-        border: 4px solid #f3f3f3;
-        border-radius: 50%;
-        border-top: 4px solid var(--primary-accent);
-        width: 20px;
-        height: 20px;
-        animation: spin 1s linear infinite;
-        display: inline-block;
-        margin-right: 10px;
-        vertical-align: middle;
-    }
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
-    /* --- Mode Switcher & Audio Player Styles --- */
-    .mode-switcher {
-        display: flex;
-        border-bottom: 1px solid var(--border-subtle);
-        margin-bottom: 25px;
-    }
-    .mode-tab {
-        padding: 10px 20px;
-        cursor: pointer;
-        border: none;
-        background: none;
-        font-size: 1.1em;
-        font-weight: 600;
-        color: var(--text-muted);
-        border-bottom: 3px solid transparent;
-        margin-bottom: -1px;
-    }
-    .mode-tab.active {
-        color: var(--primary-accent);
-        border-bottom-color: var(--primary-accent);
-    }
-    .input-group {
-        margin-bottom: 20px;
-    }
-    .input-group input[type="file"], .input-group input[type="number"] {
-        width: 100%;
-        padding: 10px;
-        border-radius: 8px;
-        border: 1px solid var(--border-subtle);
-        font-size: 1em;
-    }
-    #audioPlayerContainer {
-        padding: 20px;
-        background-color: var(--bg-main);
-        border-radius: 12px;
-        border: 1px solid var(--border-subtle);
-    }
-    #audioPlayerControls {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 10px;
-    }
-    #playPauseBtn {
-        background-color: var(--primary-accent);
-        color: white;
-        border: none;
-        border-radius: 50%;
-        width: 40px;
-        height: 40px;
-        cursor: pointer;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    #playPauseBtn:disabled {
-        background-color: #a5d6a7;
-        cursor: not-allowed;
-    }
-    #wpmSelector {
-        padding: 8px 12px;
-        border-radius: 8px;
-        border: 1px solid var(--border-subtle);
-        font-weight: 500;
-    }
-    #timeDisplay {
-        font-weight: 600;
-        font-size: 0.9em;
-        color: var(--text-header);
-        min-width: 100px;
-    }
-    #originalWpmDisplay {
-        font-size: 0.9em;
-        color: var(--text-muted);
-        margin-top: 5px;
-        text-align: center;
-    }
-
-    /* --- 3. Modern Result Sheet Styles --- */
-    #modern-results-view {
-      max-width: 1200px;
-      margin: 30px auto;
-    }
-    .result-sheet-container {
-        background-color: var(--surface-card);
-        border: 1px solid var(--border-subtle);
-        border-radius: 16px;
-        padding: 35px 45px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    }
-    .result-sheet-container h1 { font-size: 2.25em; font-weight: 800; margin: 0 0 25px 0; color: var(--text-header); }
-    .stale-results .stat-pill { filter: blur(4px); transition: filter 0.3s ease; pointer-events: none; }
-    .stale-results-message { display: none; text-align: center; padding: 10px; background-color: var(--hl-spelling); color: var(--text-header); font-weight: 600; border-radius: 8px; margin-bottom: 20px; }
-    .stats-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
-    .stats-row { display: flex; flex-wrap: wrap; gap: 12px; }
-    .stat-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95em; color: white; background-color: var(--primary-accent); box-shadow: 0 4px 10px -2px rgba(0, 121, 107, 0.25); }
-    .stat-pill.full-width { flex-grow: 1; font-size: 1.1em; }
-    .stat-pill.red { background-color: var(--accent-red); box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.2); }
-    .stat-pill.amber { background-color: var(--accent-amber); box-shadow: 0 4px 10px -2px rgba(249, 115, 22, 0.2); }
-    .stat-pill svg { width: 18px; height: 18px; }
-    .legend-container { display: flex; flex-wrap: wrap; gap: 20px 30px; padding: 25px 0; margin-bottom: 25px; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
-    .legend-item { display: flex; align-items: center; font-size: 0.9em; font-weight: 500; }
-    .legend-color-box { width: 16px; height: 16px; border-radius: 4px; margin-right: 8px; }
-    .result-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-    .filter-section, .action-section { display: flex; align-items: center; gap: 10px; }
-    .filter-section label { font-weight: 600; color: var(--text-body); margin: 0;}
-    .filter-section select, .view-switch-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-weight: 500; color: var(--text-body); cursor: pointer; }
-    .view-switch-btn { transition: all 0.2s; }
-    .view-switch-btn:hover { background-color: #e2e8f0; }
-    .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
-    .columns.view-top-bottom { grid-template-columns: 1fr; }
-    .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; }
-    .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; }
-    .col p { margin: 0; }
-    .word-wrapper { cursor: pointer; display: inline; transition: background-color 0.2s ease, transform 0.2s ease; position: relative; }
-    .active-highlight { background-color: #4B0082 !important; color: white !important; border-radius: 3px; }
-    .highlight { position: relative; padding: 2px 5px; border-radius: 4px; margin: 0 1px; font-weight: 500; display: inline; transition: transform 0.2s ease-out; }
-    .highlight:hover { transform: scale(1.15); z-index: 5; }
-    .highlight:hover::after { content: attr(data-tooltip-text); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; padding: 8px 12px; background-color: #111827; color: white; font-size: 0.8em; font-weight: 500; border-radius: 6px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .extra { background: var(--hl-additions); }
-    .omission { background: var(--hl-omissions); }
-    .spelling b { font-weight: 700; color: #166534; }
-    .spelling { background: var(--hl-spelling); }
-    .capitalization { background: var(--hl-capitalization); }
-    .punctuation { background: var(--hl-punctuation); }
-    .hidden-mistake { background: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; font-weight: normal !important; }
-    .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
-    .action-buttons { text-align: center; padding-top: 30px; display: flex; gap: 15px; justify-content: center; }
-    .action-buttons .primary-btn { background-color: var(--primary-accent); color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
-    /* --- 4. Modals & Print Styles (omitted for brevity, same as before) --- */
+    :root{--bg-main:#f8fafc;--surface-card:#fff;--border-subtle:#e2e8f0;--text-header:#1e293b;--text-body:#334155;--text-muted:#64748b;--primary-accent:#00796b;--accent-red:#ef4444;--accent-amber:#f97316;--hl-additions:#fecdd3;--hl-omissions:#d9f99d;--hl-spelling:#fde68a;--hl-capitalization:#bae6fd;--hl-punctuation:#ddd6fe}
+    body{font-family:'Inter',sans-serif;background:var(--bg-main);color:var(--text-body);padding:20px;line-height:1.6}
+    .hidden{display:none!important}
+    #inputSection{max-width:900px;margin:0 auto 30px;background:var(--surface-card);padding:30px;border-radius:16px;border:1px solid var(--border-subtle);box-shadow:0 4px 12px rgba(0,0,0,.05)}
+    #mainTitle{font-size:2.5em;font-weight:800;color:var(--text-header);text-align:center;margin-bottom:25px}
+    textarea{width:100%;height:150px;margin-bottom:15px;padding:12px;border-radius:8px;border:1px solid var(--border-subtle);font-size:16px;font-family:'Inter',sans-serif;resize:vertical}
+    textarea:focus{outline:none;border-color:var(--primary-accent);box-shadow:0 0 0 3px rgba(0,121,107,.1)}
+    label{font-weight:600;margin-bottom:8px;display:block}
+    #submitButton{background-color:var(--primary-accent);color:#fff;padding:12px 25px;font-size:1.1em;font-weight:600;border:none;border-radius:8px;cursor:pointer;display:block;width:100%;margin-top:15px;transition:all .2s ease}
+    #submitButton:hover{background-color:#004d40;transform:translateY(-2px)}
+    #submitButton:disabled{background-color:#a5d6a7;cursor:not-allowed;transform:none}
+    .loader{border:4px solid #f3f3f3;border-radius:50%;border-top:4px solid var(--primary-accent);width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;margin-right:10px;vertical-align:middle}
+    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+    .mode-switcher{display:flex;border-bottom:1px solid var(--border-subtle);margin-bottom:25px}
+    .mode-tab{padding:10px 20px;cursor:pointer;border:none;background:none;font-size:1.1em;font-weight:600;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-1px}
+    .mode-tab.active{color:var(--primary-accent);border-bottom-color:var(--primary-accent)}
+    .input-group{margin-bottom:20px}
+    .input-group input[type=file],.input-group input[type=number]{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-subtle);font-size:1em}
+    #audioPlayerContainer{padding:20px;background-color:var(--bg-main);border-radius:12px;border:1px solid var(--border-subtle)}
+    #audioPlayerControls{display:flex;align-items:center;gap:15px;margin-bottom:10px}
+    #playPauseBtn{background-color:var(--primary-accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+    #playPauseBtn:disabled{background-color:#a5d6a7;cursor:not-allowed}
+    #wpmSelector{padding:8px 12px;border-radius:8px;border:1px solid var(--border-subtle);font-weight:500}
+    #timeDisplay{font-weight:600;font-size:.9em;color:var(--text-header);min-width:100px}
+    #originalWpmDisplay{font-size:.9em;color:var(--text-muted);margin-top:5px;text-align:center}
+    #modern-results-view{max-width:1200px;margin:30px auto}
+    .result-sheet-container{background-color:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;padding:35px 45px;box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -2px rgba(0,0,0,.05)}
+    .result-sheet-container h1{font-size:2.25em;font-weight:800;margin:0 0 25px;color:var(--text-header)}
+    .stale-results .stat-pill{filter:blur(4px);transition:filter .3s ease;pointer-events:none}
+    .stale-results-message{display:none;text-align:center;padding:10px;background-color:var(--hl-spelling);color:var(--text-header);font-weight:600;border-radius:8px;margin-bottom:20px}
+    .stats-container{display:flex;flex-direction:column;gap:12px;margin-bottom:30px}
+    .stats-row{display:flex;flex-wrap:wrap;gap:12px}
+    .stat-pill{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-weight:600;font-size:.95em;color:#fff;background-color:var(--primary-accent);box-shadow:0 4px 10px -2px rgba(0,121,107,.25)}
+    .stat-pill.red{background-color:var(--accent-red);box-shadow:0 4px 10px -2px rgba(239,68,68,.2)}
+    .stat-pill.amber{background-color:var(--accent-amber);box-shadow:0 4px 10px -2px rgba(249,115,22,.2)}
+    .stat-pill svg{width:18px;height:18px}
+    .legend-container{display:flex;flex-wrap:wrap;gap:20px 30px;padding:25px 0;margin-bottom:25px;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)}
+    .legend-item{display:flex;align-items:center;font-size:.9em;font-weight:500}
+    .legend-color-box{width:16px;height:16px;border-radius:4px;margin-right:8px}
+    .result-controls{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;margin-bottom:20px}
+    .filter-section,.action-section{display:flex;align-items:center;gap:10px}
+    .filter-section label{font-weight:600;color:var(--text-body);margin:0}
+    .filter-section select,.view-switch-btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border-subtle);background-color:var(--bg-main);font-weight:500;color:var(--text-body);cursor:pointer}
+    .columns{display:grid;grid-template-columns:1fr;gap:16px}
+    @media (min-width:900px){.columns.view-side-by-side{grid-template-columns:1fr 1fr}}
+    .col{background:var(--bg-main);border-radius:12px;padding:25px;border:1px solid var(--border-subtle);line-height:1.7;font-size:1.1em;word-wrap:break-word}
+    .col strong{display:block;margin-bottom:12px;color:var(--text-header);font-weight:700}
+    .col p{margin:0}
+    .highlight{position:relative;padding:2px 5px;border-radius:4px;margin:0 1px;font-weight:500;display:inline}
+    .extra{background:var(--hl-additions)}
+    .omission{background:var(--hl-omissions)}
+    .spelling b{font-weight:700;color:#166534}
+    .spelling{background:var(--hl-spelling)}
+    .capitalization{background:var(--hl-capitalization)}
+    .punctuation{background:var(--hl-punctuation)}
+    .action-buttons{text-align:center;padding-top:30px;display:flex;gap:15px;justify-content:center}
+    .action-buttons .primary-btn{background-color:var(--primary-accent);color:#fff;padding:12px 25px;border-radius:8px;font-weight:600;cursor:pointer;border:none}
   </style>
 </head>
 <body>
 
   <div id="inputSection">
     <h1 id="mainTitle">Modern Transcription Checker</h1>
-    
     <div class="mode-switcher">
         <button id="textModeTab" class="mode-tab active">Text Passage</button>
         <button id="audioModeTab" class="mode-tab">Audio Dictation</button>
     </div>
-
     <div id="textInputSection">
         <label for="original">Original Passage:</label>
         <textarea id="original" placeholder="Paste the original text here..."></textarea>
     </div>
-
     <div id="audioInputSection" class="hidden">
         <div class="input-group">
             <label for="audioFile">1. Upload Audio File (.mp3, .wav, .m4a):</label>
@@ -286,13 +104,9 @@
             <div id="originalWpmDisplay"></div>
         </div>
     </div>
-    
     <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 25px 0;">
-
     <label for="typed">Your Transcription:</label>
     <textarea id="typed" placeholder="Your transcription will go here..."></textarea>
-    <div id="wordCountDisplay" style="text-align: right; color: var(--text-muted); margin-bottom: 15px;"></div>
-    
     <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px;">
         <input type="checkbox" id="includeComma"> Count comma (,) mistakes
     </label>
@@ -300,21 +114,18 @@
   </div>
 
   <div id="modern-results-view" class="hidden">
-    <div id="resultSheetContainer"></div>
-    <div class="action-buttons">
-      <button id="printReportBtn" class="primary-btn">Download Report</button>
-      <button id="tryAnotherBtn" class="primary-btn">Start New Comparison</button>
-    </div>
+    <!-- This div is a container for the results, which will be injected by JavaScript -->
   </div>
 
 <script>
-    // --- Global State ---
+    // --- GLOBAL STATE & CONFIG ---
     let g_lastTypedText = "";
-    let g_current_alignment = [];
     let g_currentMode = 'text';
     let g_originalAudioWPM = 0;
+    const playIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>`;
+    const pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z" /></svg>`;
 
-    // --- Worker Setup ---
+    // --- WEB WORKER SETUP ---
     let analysisWorker;
     if (window.Worker) {
         analysisWorker = new Worker('worker.js');
@@ -323,26 +134,27 @@
     } else {
         alert("Your browser does not support Web Workers. The page may become unresponsive during analysis.");
     }
-    
+
+    // --- UTILITY FUNCTIONS ---
     function escapeHtml(s = "") {
         return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
+    function formatTime(s) {
+        const m = Math.floor(s / 60);
+        const sc = Math.floor(s % 60).toString().padStart(2, '0');
+        return `${m}:${sc}`;
+    }
 
-    // --- Main Submission & Worker Logic ---
+    // --- CORE APPLICATION LOGIC ---
     function submitTranscription() {
         const typedText = document.getElementById("typed").value.trim();
-        let originalText = "";
+        let originalText = (g_currentMode === 'text') ? document.getElementById("original").value.trim() : "[Audio transcript pending...]";
 
-        if (g_currentMode === 'text') {
-            originalText = document.getElementById("original").value.trim();
-            if (!originalText || !typedText) {
-                return alert("Please fill in both the original and transcription text boxes.");
-            }
-        } else { // Audio mode
-            if (!typedText) {
-                return alert("Please type your transcription before checking accuracy.");
-            }
-            originalText = "[Audio transcript pending...]";
+        if (g_currentMode === 'text' && (!originalText || !typedText)) {
+            return alert("Please fill in both the original and transcription text boxes.");
+        }
+        if (g_currentMode === 'audio' && !typedText) {
+            return alert("Please type your transcription before checking accuracy.");
         }
         
         if (!analysisWorker) return;
@@ -358,15 +170,13 @@
 
     function handleWorkerResult(event) {
         const results = event.data;
-        g_current_alignment = results.alignment;
-        renderResultSheet(results);
+        renderResultSheet(results); // This now includes attaching event listeners
         
         document.getElementById("inputSection").classList.add("hidden");
         document.getElementById("modern-results-view").classList.remove("hidden");
         
-        const submitBtn = document.getElementById('submitButton');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = 'Check Accuracy';
+        document.getElementById('submitButton').disabled = false;
+        document.getElementById('submitButton').innerHTML = 'Check Accuracy';
     }
 
     function handleWorkerError(error) {
@@ -377,45 +187,23 @@
         submitBtn.innerHTML = 'Check Accuracy';
     }
 
-    // --- Result Sheet Rendering ---
-    function buildResultHtmlFromAlignment(alignment) {
-        let resultHtmlContent = "";
-        for (let k = 0; k < alignment.length; k++) {
-            const entry = alignment[k];
-            let wordHtml = '', tooltipText = '', highlightClass = '', innerHtml = '';
-            const mistakeType = entry.mistakeType || (entry.type === 'match' ? 'correct' : '');
-            
-            switch (mistakeType) {
-                case 'correct': innerHtml = escapeHtml(entry.t || ''); tooltipText = "Correct"; break;
-                case 'omission': highlightClass = 'omission'; tooltipText = `Omitted: "${escapeHtml(entry.o)}"`; innerHtml = `(${escapeHtml(entry.o)})`; break;
-                case 'extra': highlightClass = 'extra'; tooltipText = `Extra Word: "${escapeHtml(entry.t)}"`; innerHtml = escapeHtml(entry.t); break;
-                case 'spelling': highlightClass = 'spelling'; tooltipText = `Spelling: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = `${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)`; break;
-                case 'capitalization': highlightClass = 'capitalization'; tooltipText = `Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = escapeHtml(entry.t); break;
-                case 'punctuation': highlightClass = 'punctuation'; tooltipText = `Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = escapeHtml(entry.t); break;
-                default: innerHtml = escapeHtml(entry.t || '');
-            }
-            if (highlightClass) { wordHtml = `<span class='highlight ${highlightClass}' data-mistake-type='${mistakeType}' data-tooltip-text='${tooltipText}'>${innerHtml}</span>`; } 
-            else { wordHtml = `<span>${innerHtml}</span>`; }
-            resultHtmlContent += `<span class="word-wrapper" data-index="${k}">${wordHtml}</span> `;
-        }
-        return resultHtmlContent;
-    }
-
+    // --- DYNAMIC HTML RENDERING ---
     function renderResultSheet(data) {
-        const container = document.getElementById('resultSheetContainer');
+        const resultsContainer = document.getElementById('modern-results-view');
         const isAudioPending = data.originalText === "[Audio transcript pending...]";
 
-        let originalTextHtml = isAudioPending ? '' : g_current_alignment.map((entry, index) => 
+        let originalTextHtml = isAudioPending ? '' : data.alignment.map((entry, index) => 
             (entry.type === 'ins') ? '' : `<span class="word-wrapper" data-index="${index}">${escapeHtml(entry.o || '')}</span>`
         ).join(' ');
 
-        let highlightedHtml = buildResultHtmlFromAlignment(g_current_alignment);
+        let highlightedHtml = buildResultHtmlFromAlignment(data.alignment);
         const originalTitle = isAudioPending 
             ? '<strong>ACTION REQUIRED: Paste the full original transcript below and click "Re-evaluate Score"</strong>' 
             : '<strong>Original Text (Click to edit):</strong>';
-
-        container.innerHTML = `
-            <div class="result-sheet-container">
+        
+        // This is the complete and corrected results template
+        resultsContainer.innerHTML = `
+            <div id="resultSheetContainer" class="result-sheet-container">
                 <h1>Result Sheet:</h1>
                 <div id="staleMessage" class="stale-results-message">Original text edited. Click "Re-evaluate Score" to update.</div>
                 <div class="stats-container ${isAudioPending ? 'stale-results' : ''}">
@@ -439,7 +227,14 @@
                 <div class="result-controls">
                     <div class="filter-section">
                         <label for="mistakeFilter">Filter:</label>
-                        <select id="mistakeFilter"><option value="all">Show All</option><option value="omission">Omissions Only</option><option value="extra">Additions Only</option><option value="spelling">Spelling Only</option><option value="capitalization">Capitalization Only</option><option value="punctuation">Punctuation Only</option></select>
+                        <select id="mistakeFilter">
+                            <option value="all">Show All</option>
+                            <option value="omission">Omissions Only</option>
+                            <option value="extra">Additions Only</option>
+                            <option value="spelling">Spelling Only</option>
+                            <option value="capitalization">Capitalization Only</option>
+                            <option value="punctuation">Punctuation Only</option>
+                        </select>
                     </div>
                     <div class="action-section"><button id="reevaluateBtn" class="view-switch-btn">Re-evaluate Score</button></div>
                 </div>
@@ -447,14 +242,54 @@
                     <div class="col" id="typedCol"><strong>Your Transcription:</strong><p>${highlightedHtml}</p></div>
                     <div class="col" id="originalCol">${originalTitle}<p id="editableOriginalText" contenteditable="true" style="min-height: 50px; border: 1px dashed var(--border-subtle); padding: 10px;">${originalTextHtml}</p></div>
                 </div>
-            </div>`;
+            </div>
+            <div class="action-buttons">
+              <button id="printReportBtn" class="primary-btn">Download Report</button>
+              <button id="tryAnotherBtn" class="primary-btn">Start New Comparison</button>
+            </div>
+        `;
+        
+        // CRITICAL FIX: Attach event listeners AFTER the HTML has been created
         initializeResultInteractivity();
     }
+
+    function buildResultHtmlFromAlignment(alignment) {
+        return alignment.map((entry, k) => {
+            let wordHtml = '', tooltipText = '', highlightClass = '', innerHtml = '';
+            const mistakeType = entry.mistakeType || (entry.type === 'match' ? 'correct' : '');
+            switch (mistakeType) {
+                case 'correct': innerHtml = escapeHtml(entry.t || ''); tooltipText = "Correct"; break;
+                case 'omission': highlightClass = 'omission'; tooltipText = `Omitted: "${escapeHtml(entry.o)}"`; innerHtml = `(${escapeHtml(entry.o)})`; break;
+                case 'extra': highlightClass = 'extra'; tooltipText = `Extra Word: "${escapeHtml(entry.t)}"`; innerHtml = escapeHtml(entry.t); break;
+                case 'spelling': highlightClass = 'spelling'; tooltipText = `Spelling: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = `${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)`; break;
+                case 'capitalization': highlightClass = 'capitalization'; tooltipText = `Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = escapeHtml(entry.t); break;
+                case 'punctuation': highlightClass = 'punctuation'; tooltipText = `Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = escapeHtml(entry.t); break;
+                default: innerHtml = escapeHtml(entry.t || '');
+            }
+            if (highlightClass) { wordHtml = `<span class='highlight ${highlightClass}' data-mistake-type='${mistakeType}' data-tooltip-text='${tooltipText}'>${innerHtml}</span>`; }
+            else { wordHtml = `<span>${innerHtml}</span>`; }
+            return `<span class="word-wrapper" data-index="${k}">${wordHtml}</span> `;
+        }).join('');
+    }
     
-    // --- Interactivity & Event Handlers ---
+    // --- EVENT LISTENER INITIALIZATION ---
     function initializeResultInteractivity() {
-        document.getElementById('mistakeFilter').addEventListener('change', (e) => filterMistakes(e.target.value));
-        document.getElementById('reevaluateBtn').addEventListener('click', reevaluateScore);
+        document.getElementById('mistakeFilter').addEventListener('change', (e) => {
+            document.querySelectorAll('#typedCol .highlight').forEach(span => {
+                const mistakeType = span.getAttribute('data-mistake-type');
+                if (e.target.value === "all") span.classList.remove('hidden-mistake');
+                else span.classList.toggle('hidden-mistake', mistakeType !== e.target.value);
+            });
+        });
+        
+        document.getElementById('reevaluateBtn').addEventListener('click', () => {
+            const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
+            if (!correctedOriginalText || !g_lastTypedText) return alert("Could not find text to re-evaluate.");
+            document.getElementById('reevaluateBtn').innerHTML = '<span class="loader"></span>';
+            const options = { countCommaMistakes: document.getElementById("includeComma").checked };
+            analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds: 0, options });
+        });
+        
         const editableOriginal = document.getElementById('editableOriginalText');
         const statsContainer = document.querySelector('.stats-container');
         const staleMessage = document.getElementById('staleMessage');
@@ -462,25 +297,12 @@
             statsContainer.classList.add('stale-results');
             staleMessage.style.display = 'block';
         });
-        // ... word highlighting logic ...
-    }
 
-    function reevaluateScore() {
-        const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
-        if (!correctedOriginalText || !g_lastTypedText) return alert("Could not find text to re-evaluate.");
-        
-        const submitBtn = document.getElementById('submitButton');
-        submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span class="loader"></span>Re-evaluating...';
-        
-        const options = { countCommaMistakes: document.getElementById("includeComma").checked };
-        analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds: 0, options });
+        document.getElementById('tryAnotherBtn').addEventListener('click', goHome);
+        document.getElementById('printReportBtn').addEventListener('click', () => window.print());
     }
-
-    function filterMistakes(type) { /* ... same as before ... */ }
 
     function goHome() {
-        // Reset UI state completely
         document.getElementById("inputSection").classList.remove("hidden");
         document.getElementById("modern-results-view").classList.add("hidden");
         document.getElementById("original").value = "";
@@ -490,15 +312,22 @@
         document.getElementById('audioPlayerContainer').classList.add('hidden');
         document.getElementById('audioPlayer').src = '';
         g_originalAudioWPM = 0;
-        switchMode('text'); // Default to text mode
+        document.getElementById('modern-results-view').innerHTML = ''; // Clear old results
+        switchMode('text');
     }
 
-    // --- DOMContentLoaded: Main Entry Point ---
+    function switchMode(mode) {
+        g_currentMode = mode;
+        document.getElementById('textModeTab').classList.toggle('active', mode === 'text');
+        document.getElementById('audioModeTab').classList.toggle('active', mode === 'audio');
+        document.getElementById('textInputSection').classList.toggle('hidden', mode !== 'text');
+        document.getElementById('audioInputSection').classList.toggle('hidden', mode === 'text');
+    }
+
+    // --- MAIN SCRIPT EXECUTION ---
     document.addEventListener("DOMContentLoaded", () => {
         const textModeTab = document.getElementById('textModeTab');
         const audioModeTab = document.getElementById('audioModeTab');
-        const textInputSection = document.getElementById('textInputSection');
-        const audioInputSection = document.getElementById('audioInputSection');
         const audioFile = document.getElementById('audioFile');
         const wordCountInput = document.getElementById('wordCount');
         const audioPlayerContainer = document.getElementById('audioPlayerContainer');
@@ -508,28 +337,27 @@
         const wpmSelector = document.getElementById('wpmSelector');
         const originalWpmDisplay = document.getElementById('originalWpmDisplay');
 
-        // Mode Switching
+        // Setup initial page listeners
         textModeTab.addEventListener('click', () => switchMode('text'));
         audioModeTab.addEventListener('click', () => switchMode('audio'));
-        window.switchMode = function(mode) { // Make it globally accessible for goHome
-            g_currentMode = mode;
-            textModeTab.classList.toggle('active', mode === 'text');
-            audioModeTab.classList.toggle('active', mode === 'audio');
-            textInputSection.classList.toggle('hidden', mode !== 'text');
-            audioInputSection.classList.toggle('hidden', mode === 'text');
-        }
+        document.getElementById('submitButton').addEventListener('click', submitTranscription);
+        audioFile.addEventListener('change', handleAudioFile);
+        wordCountInput.addEventListener('input', calculateAndSetSpeed);
+        audioPlayer.addEventListener('loadedmetadata', calculateAndSetSpeed);
+        wpmSelector.addEventListener('change', setPlaybackRate);
+        playPauseBtn.addEventListener('click', () => { audioPlayer.paused ? audioPlayer.play() : audioPlayer.pause(); });
+        audioPlayer.addEventListener('play', () => playPauseBtn.innerHTML = pauseIcon);
+        audioPlayer.addEventListener('pause', () => playPauseBtn.innerHTML = playIcon);
+        audioPlayer.addEventListener('timeupdate', () => { timeDisplay.textContent = `${formatTime(audioPlayer.currentTime)} / ${formatTime(audioPlayer.duration || 0)}`; });
 
-        // Audio Handling
-        audioFile.addEventListener('change', (e) => {
-            const file = e.target.files[0];
+        function handleAudioFile(event) {
+            const file = event.target.files[0];
             if (file) {
                 const objectURL = URL.createObjectURL(file);
                 audioPlayer.src = objectURL;
                 audioPlayerContainer.classList.remove('hidden');
             }
-        });
-        wordCountInput.addEventListener('input', calculateAndSetSpeed);
-        audioPlayer.addEventListener('loadedmetadata', calculateAndSetSpeed);
+        }
 
         function calculateAndSetSpeed() {
             const duration = audioPlayer.duration;
@@ -541,45 +369,26 @@
                 playPauseBtn.disabled = false;
                 wpmSelector.disabled = false;
             } else {
-                originalWpmDisplay.textContent = g_originalAudioWPM > 0 ? `Original Speed: ~${g_originalAudioWPM} WPM` : 'Enter word count to enable speed control.';
+                originalWpmDisplay.textContent = 'Enter word count to enable speed control.';
+                playPauseBtn.disabled = true;
+                wpmSelector.disabled = true;
             }
-            updateTimeDisplay();
         }
 
         function populateWpmSelector() {
             wpmSelector.innerHTML = '';
             for (let wpm = 60; wpm <= 160; wpm += 5) {
-                const option = document.createElement('option');
-                option.value = wpm;
-                option.textContent = `${wpm} WPM`;
-                wpmSelector.appendChild(option);
+                wpmSelector.add(new Option(`${wpm} WPM`, wpm));
             }
             wpmSelector.value = [...wpmSelector.options].reduce((p, c) => Math.abs(c.value - g_originalAudioWPM) < Math.abs(p.value - g_originalAudioWPM) ? c : p).value;
             setPlaybackRate();
         }
 
-        wpmSelector.addEventListener('change', setPlaybackRate);
         function setPlaybackRate() {
             if (g_originalAudioWPM > 0) {
                 audioPlayer.playbackRate = parseInt(wpmSelector.value, 10) / g_originalAudioWPM;
             }
         }
-
-        // Player Controls
-        const playIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>`;
-        const pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z" /></svg>`;
-        playPauseBtn.addEventListener('click', () => { audioPlayer.paused ? audioPlayer.play() : audioPlayer.pause(); });
-        audioPlayer.addEventListener('play', () => playPauseBtn.innerHTML = pauseIcon);
-        audioPlayer.addEventListener('pause', () => playPauseBtn.innerHTML = playIcon);
-        audioPlayer.addEventListener('timeupdate', updateTimeDisplay);
-
-        function formatTime(s) { const m=Math.floor(s/60); const sc=Math.floor(s%60).toString().padStart(2,'0'); return `${m}:${sc}`; }
-        function updateTimeDisplay() { timeDisplay.textContent = `${formatTime(audioPlayer.currentTime)} / ${formatTime(audioPlayer.duration || 0)}`; }
-
-        // General Buttons
-        document.getElementById('submitButton').addEventListener('click', submitTranscription);
-        document.getElementById('tryAnotherBtn').addEventListener('click', goHome);
-        document.getElementById('printReportBtn').addEventListener('click', () => window.print());
     });
 </script>
 </body>
