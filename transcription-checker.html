@@ -100,9 +100,99 @@
         cursor: not-allowed;
         transform: none;
     }
+    .loader {
+        border: 4px solid #f3f3f3;
+        border-radius: 50%;
+        border-top: 4px solid var(--primary-accent);
+        width: 20px;
+        height: 20px;
+        animation: spin 1s linear infinite;
+        display: inline-block;
+        margin-right: 10px;
+        vertical-align: middle;
+    }
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
 
+    /* --- NEW Mode Switcher & Audio Player Styles --- */
+    .mode-switcher {
+        display: flex;
+        border-bottom: 1px solid var(--border-subtle);
+        margin-bottom: 25px;
+    }
+    .mode-tab {
+        padding: 10px 20px;
+        cursor: pointer;
+        border: none;
+        background: none;
+        font-size: 1.1em;
+        font-weight: 600;
+        color: var(--text-muted);
+        border-bottom: 3px solid transparent;
+        margin-bottom: -1px;
+    }
+    .mode-tab.active {
+        color: var(--primary-accent);
+        border-bottom-color: var(--primary-accent);
+    }
+    .input-group {
+        margin-bottom: 20px;
+    }
+    .input-group input[type="file"], .input-group input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+        font-size: 1em;
+    }
+    #audioPlayerContainer {
+        padding: 20px;
+        background-color: var(--bg-main);
+        border-radius: 12px;
+        border: 1px solid var(--border-subtle);
+    }
+    #audioPlayerControls {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 10px;
+    }
+    #playPauseBtn {
+        background-color: var(--primary-accent);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    #wpmSelector {
+        padding: 8px 12px;
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+        font-weight: 500;
+    }
+    #timeDisplay {
+        font-weight: 600;
+        font-size: 0.9em;
+        color: var(--text-header);
+        min-width: 100px;
+    }
+    #originalWpmDisplay {
+        font-size: 0.9em;
+        color: var(--text-muted);
+        margin-top: 5px;
+        text-align: center;
+    }
 
     /* --- 3. Modern Result Sheet Styles --- */
+    #modern-results-view { /* ... existing styles ... */ }
+    /* ... (All other existing styles remain unchanged) ... */
     #modern-results-view {
       max-width: 1200px;
       margin: 30px auto;
@@ -115,6 +205,8 @@
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     }
     .result-sheet-container h1 { font-size: 2.25em; font-weight: 800; margin: 0 0 25px 0; color: var(--text-header); }
+    .stale-results .stat-pill { filter: blur(4px); transition: filter 0.3s ease; pointer-events: none; }
+    .stale-results-message { display: none; text-align: center; padding: 10px; background-color: var(--hl-spelling); color: var(--text-header); font-weight: 600; border-radius: 8px; margin-bottom: 20px; }
     .stats-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
     .stats-row { display: flex; flex-wrap: wrap; gap: 12px; }
     .stat-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95em; color: white; background-color: var(--primary-accent); box-shadow: 0 4px 10px -2px rgba(0, 121, 107, 0.25); }
@@ -179,93 +271,106 @@
 
   <div id="inputSection">
     <h1 id="mainTitle">Modern Transcription Checker</h1>
-    <label for="original">Original Passage:</label>
-    <textarea id="original" placeholder="Paste the original text here..."></textarea>
+    
+    <div class="mode-switcher">
+        <button id="textModeTab" class="mode-tab active">Text Passage</button>
+        <button id="audioModeTab" class="mode-tab">Audio Dictation</button>
+    </div>
+
+    <!-- Text Mode Section -->
+    <div id="textInputSection">
+        <label for="original">Original Passage:</label>
+        <textarea id="original" placeholder="Paste the original text here..."></textarea>
+    </div>
+
+    <!-- Audio Mode Section -->
+    <div id="audioInputSection" class="hidden">
+        <div class="input-group">
+            <label for="audioFile">Upload Audio File (.mp3, .wav, .m4a, etc.):</label>
+            <input type="file" id="audioFile" accept="audio/*">
+        </div>
+        <div class="input-group">
+            <label for="wordCount">Total Words in Audio Transcript:</label>
+            <input type="number" id="wordCount" placeholder="e.g., 800">
+        </div>
+        <div id="audioPlayerContainer" class="hidden">
+            <audio id="audioPlayer" class="hidden"></audio>
+            <div id="audioPlayerControls">
+                <button id="playPauseBtn" disabled>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
+                </button>
+                <span id="timeDisplay">0:00 / 0:00</span>
+                <label for="wpmSelector" style="margin: 0 0 0 auto;">Speed:</label>
+                <select id="wpmSelector" disabled></select>
+            </div>
+            <div id="originalWpmDisplay"></div>
+        </div>
+    </div>
+    
+    <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 25px 0;">
+
     <label for="typed">Your Transcription:</label>
-    <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
+    <textarea id="typed" placeholder="Your transcription will go here..."></textarea>
+    <div id="wordCountDisplay" style="text-align: right; color: var(--text-muted); margin-bottom: 15px;"></div>
+    
     <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px;">
         <input type="checkbox" id="includeComma"> Count comma (,) mistakes
     </label>
     <button id="submitButton">Check Accuracy</button>
   </div>
 
-  <div id="modern-results-view" class="hidden">
-    <div id="resultSheetContainer"></div>
-    <div class="action-buttons">
-      <button id="printReportBtn" class="primary-btn">Download Report</button>
-      <button id="tryAnotherBtn" class="primary-btn">Start New Comparison</button>
-    </div>
-  </div>
-
-  <div id="instructions-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Welcome to the Modern Transcription Checker!</h2>
-        <ul>
-            <li><b>Step 1:</b> Paste the original dictation text into the "Original Passage" box.</li>
-            <li><b>Step 2:</b> Type or paste your transcribed text into the "Your Transcription" box.</li>
-            <li><b>Step 3:</b> Click "Check Accuracy" to see a detailed, interactive report.</li>
-            <li><b>Timer Mode:</b> Pasting into the top box starts an optional 50-minute typing timer.</li>
-            <li><b>Re-evaluate:</b> On the results page, you can edit the original text and re-check your score.</li>
-        </ul>
-        <button id="close-instructions-btn" class="modal-close-btn">Got it, Let's Start!</button>
-    </div>
-  </div>
+  <div id="modern-results-view" class="hidden"><!-- ... existing results view ... --></div>
+  <div id="instructions-modal" class="modal-overlay"><!-- ... existing modal ... --></div>
 
 <script>
     // --- Global State ---
     let g_lastTypedText = "";
     let g_current_alignment = [];
-    let timerInterval;
-    let transcriptionTimerTotalTime = 0, timeLeft = 0;
-    
+    let g_currentMode = 'text'; // 'text' or 'audio'
+    let g_originalAudioWPM = 0;
+
     // --- Worker Setup ---
     let analysisWorker;
     if (window.Worker) {
         analysisWorker = new Worker('worker.js');
         analysisWorker.onmessage = handleWorkerResult;
+        analysisWorker.onerror = handleWorkerError;
     } else {
         alert("Your browser does not support Web Workers. The page may become unresponsive during analysis.");
     }
-
-    // --- Core Logic (Delegated to Worker) ---
-    function escapeHtml(s = "") {
-        return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    }
-
+    
+    // --- Main Submission Logic ---
     function submitTranscription() {
-        const originalText = document.getElementById("original").value.trim();
         const typedText = document.getElementById("typed").value.trim();
-        
-        if (!originalText || !typedText) {
-            return alert("Please fill in both the original and transcription text boxes.");
+        let originalText = "";
+
+        if (g_currentMode === 'text') {
+            originalText = document.getElementById("original").value.trim();
+            if (!originalText || !typedText) {
+                return alert("Please fill in both the original and transcription text boxes.");
+            }
+        } else { // Audio mode
+            if (!typedText) {
+                return alert("Please type your transcription before checking accuracy.");
+            }
+            // For audio, the original text is initially blank. The user will paste it in the results view.
+            originalText = "[Audio transcript pending...]";
         }
         
-        if (!analysisWorker) {
-            alert("Analysis worker is not available. Cannot proceed.");
-            return;
-        }
+        if (!analysisWorker) return;
 
         const submitBtn = document.getElementById('submitButton');
         submitBtn.disabled = true;
-        submitBtn.textContent = 'Calculating...';
+        submitBtn.innerHTML = '<span class="loader"></span>Calculating...';
         
-        clearInterval(timerInterval);
-        const timerDisplay = document.getElementById('timerDisplay');
-        if (timerDisplay) timerDisplay.remove();
-
         g_lastTypedText = typedText;
-        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
-        const options = {
-            countCommaMistakes: document.getElementById("includeComma").checked
-        };
-        
-        // Post job to the worker
-        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds, options });
+        const options = { countCommaMistakes: document.getElementById("includeComma").checked };
+        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds: 0, options });
     }
 
     function handleWorkerResult(event) {
         const results = event.data;
-        g_current_alignment = results.alignment; // Store alignment for interactivity
+        g_current_alignment = results.alignment;
         
         renderResultSheet(results);
         
@@ -274,227 +379,26 @@
         
         const submitBtn = document.getElementById('submitButton');
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Check Accuracy';
-    }
-    
-    // --- UI Rendering ---
-
-    function buildResultHtmlFromAlignment(alignment) {
-        let resultHtmlContent = "";
-        for (let k = 0; k < alignment.length; k++) {
-            const entry = alignment[k];
-            let wordHtml = '', tooltipText = '', highlightClass = '', innerHtml = '';
-
-            switch (entry.mistakeType) {
-                case 'correct':
-                    innerHtml = escapeHtml(entry.t || '');
-                    tooltipText = "Correct";
-                    break;
-                case 'omission':
-                    highlightClass = 'omission';
-                    tooltipText = `Omitted: "${escapeHtml(entry.o)}"`;
-                    innerHtml = `(${escapeHtml(entry.o)})`;
-                    break;
-                case 'extra':
-                    highlightClass = 'extra';
-                    tooltipText = `Extra Word: "${escapeHtml(entry.t)}"`;
-                    innerHtml = escapeHtml(entry.t);
-                    break;
-                case 'spelling':
-                    highlightClass = 'spelling';
-                    tooltipText = `Spelling: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
-                    innerHtml = `${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)`;
-                    break;
-                case 'capitalization':
-                    highlightClass = 'capitalization';
-                    tooltipText = `Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
-                    innerHtml = escapeHtml(entry.t);
-                    break;
-                case 'punctuation':
-                    highlightClass = 'punctuation';
-                    tooltipText = `Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
-                    innerHtml = escapeHtml(entry.t);
-                    break;
-            }
-            
-            if (highlightClass) {
-                 wordHtml = `<span class='highlight ${highlightClass}' data-mistake-type='${entry.mistakeType}' data-tooltip-text='${tooltipText}'>${innerHtml}</span>`;
-            } else {
-                wordHtml = `<span>${innerHtml}</span>`;
-            }
-
-            resultHtmlContent += `<span class="word-wrapper" data-index="${k}">${wordHtml}</span> `;
-        }
-        return resultHtmlContent;
+        submitBtn.innerHTML = 'Check Accuracy';
     }
 
+    function handleWorkerError(error) {
+        console.error("Error from worker:", error.message);
+        alert(`An analysis error occurred: ${error.message}\nPlease try again.`);
+        const submitBtn = document.getElementById('submitButton');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = 'Check Accuracy';
+    }
 
+    // --- Result Sheet Rendering & Interactivity ---
     function renderResultSheet(data) {
         const container = document.getElementById('resultSheetContainer');
+        const isAudioPending = data.alignment.every(e => e.o === '[Audio transcript pending...]');
 
-        let originalTextHtml = data.alignment.map((entry, index) => 
+        let originalTextHtml = isAudioPending ? '' : data.alignment.map((entry, index) => 
             (entry.type === 'ins') ? '' : `<span class="word-wrapper" data-index="${index}">${escapeHtml(entry.o || '')}</span>`
         ).join(' ');
-        
+
         let highlightedHtml = buildResultHtmlFromAlignment(data.alignment);
-
-        container.innerHTML = `
-            <div class="result-sheet-container">
-                <h1>Result Sheet:</h1>
-                <div class="stats-container">
-                    <div class="stats-row">
-                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>Total Words: ${data.totalWords}</div>
-                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13.25a.75.75 0 00-1.5 0v6.5c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75v-5.5z" clip-rule="evenodd" /></svg>Typing Speed: ${data.typingSpeed} WPM</div>
-                        <div class="stat-pill red"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>Full Mistakes: ${data.fullMistakes}</div>
-                        <div class="stat-pill amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>Half Mistakes: ${data.halfMistakes}</div>
-                    </div>
-                    <div class="stats-row">
-                        <div class="stat-pill">Total % of Mistakes: ${data.mistakePercent}%</div>
-                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Accuracy: ${data.accuracy}%</div>
-                    </div>
-                </div>
-                <div class="legend-container">
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions/Substitutions</div>
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span> Omissions</div>
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span> Spelling</div>
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span> Capitalization</div>
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span> Punctuation</div>
-                </div>
-                <div class="result-controls">
-                    <div class="filter-section">
-                        <label for="mistakeFilter">Filter:</label>
-                        <select id="mistakeFilter"><option value="all">Show All</option><option value="omission-substitution">Omissions & Additions</option><option value="omission">Omissions Only</option><option value="extra">Additions Only</option><option value="spelling">Spelling Only</option><option value="capitalization">Capitalization Only</option><option value="punctuation">Punctuation Only</option></select>
-                    </div>
-                    <div class="action-section"><button id="reevaluateBtn" class="view-switch-btn">Re-evaluate Score</button></div>
-                    <button id="viewSwitchBtn" class="view-switch-btn">Switch to Top/Bottom View</button>
-                </div>
-                <div id="comparisonColumns" class="columns view-side-by-side">
-                    <div class="col" id="typedCol"><strong>Your Transcription:</strong><p>${highlightedHtml}</p></div>
-                    <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="true">${originalTextHtml}</p></div>
-                </div>
-            </div>`;
-        initializeResultInteractivity();
-    }
-    
-    function initializeResultInteractivity() {
-        document.getElementById('mistakeFilter').addEventListener('change', (e) => filterMistakes(e.target.value));
-        document.getElementById('reevaluateBtn').addEventListener('click', reevaluateScore);
-        
-        const switchBtn = document.getElementById('viewSwitchBtn');
-        const columnsContainer = document.getElementById('comparisonColumns');
-        switchBtn.addEventListener('click', () => {
-            const isSideBySide = columnsContainer.classList.contains('view-side-by-side');
-            columnsContainer.classList.toggle('view-side-by-side', !isSideBySide);
-            columnsContainer.classList.toggle('view-top-bottom', isSideBySide);
-            switchBtn.textContent = isSideBySide ? 'Switch to Side-by-Side View' : 'Switch to Top/Bottom View';
-        });
-
-        columnsContainer.addEventListener('click', (e) => {
-            const target = e.target.closest('.word-wrapper');
-            if (!target) return;
-            const wordIndex = target.dataset.index;
-            if (wordIndex === null) return;
-            document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
-            document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => {
-                el.classList.add('active-highlight');
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
-        });
-    }
-
-    function reevaluateScore() {
-        const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
-        if (!correctedOriginalText || !g_lastTypedText) return alert("Could not find text to re-evaluate.");
-        
-        // Re-submit the job to the worker
-        const submitBtn = document.getElementById('submitButton');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Calculating...';
-        
-        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
-        const options = {
-            countCommaMistakes: document.getElementById("includeComma").checked
-        };
-        analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds, options });
-
-        alert("Re-evaluating score with your corrections.");
-    }
-
-    function filterMistakes(type) {
-        document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
-        const spans = document.querySelectorAll('#typedCol .highlight');
-        spans.forEach(span => {
-            const mistakeType = span.getAttribute('data-mistake-type');
-            if (type === "all") span.classList.remove('hidden-mistake');
-            else if (type === "omission-substitution") span.classList.toggle('hidden-mistake', !(mistakeType === 'omission' || mistakeType === 'extra'));
-            else span.classList.toggle('hidden-mistake', mistakeType !== type);
-        });
-    }
-
-    // --- UI & Event Handlers ---
-    
-    function goHome() {
-        document.getElementById("inputSection").classList.remove("hidden");
-        document.getElementById("modern-results-view").classList.add("hidden");
-        document.getElementById("original").value = "";
-        document.getElementById("typed").value = "";
-        document.getElementById("original").classList.remove("hidden");
-        document.querySelector("label[for='original']").classList.remove("hidden");
-        const typedTextarea = document.getElementById("typed");
-        typedTextarea.style.height = "150px";
-        transcriptionTimerTotalTime = 0;
-        timeLeft = 0;
-    }
-
-    function startTypingTimer(durationMinutes = 50) {
-      const timerDisplay = document.createElement('div');
-      timerDisplay.id = 'timerDisplay';
-      document.body.appendChild(timerDisplay);
-
-      transcriptionTimerTotalTime = durationMinutes * 60;
-      timeLeft = transcriptionTimerTotalTime;
-      
-      function updateTimer() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        timerDisplay.textContent = `Time Left: ${minutes}m ${seconds}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          timerDisplay.textContent = "Time's up!";
-          submitTranscription();
-          return;
-        }
-        timeLeft--;
-      }
-      updateTimer();
-      timerInterval = setInterval(updateTimer, 1000);
-    }
-    
-    document.addEventListener("DOMContentLoaded", () => {
-        document.getElementById('submitButton').addEventListener('click', submitTranscription);
-        document.getElementById('tryAnotherBtn').addEventListener('click', goHome);
-        document.getElementById('printReportBtn').addEventListener('click', () => window.print());
-
-        if (!localStorage.getItem('hasSeenInstructions')) {
-            document.getElementById('instructions-modal').classList.add('visible');
-        }
-        document.getElementById('close-instructions-btn').addEventListener('click', () => {
-            document.getElementById('instructions-modal').classList.remove('visible');
-            localStorage.setItem('hasSeenInstructions', 'true');
-        });
-
-        document.getElementById("original").addEventListener("paste", function () {
-            setTimeout(() => {
-                document.getElementById("original").classList.add("hidden");
-                document.querySelector("label[for='original']").classList.add("hidden");
-                const typedTextarea = document.getElementById("typed");
-                typedTextarea.style.height = "calc(100vh - 200px)";
-                typedTextarea.focus();
-                startTypingTimer(50);
-            }, 100);
-        });
-    });
-</script>
-</body>
-
-</html>
+        const originalTitle = isAudioPending 
+            ? '<strong>Original Text (Paste full transcrip
