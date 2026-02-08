@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="robots" content="noindex">
-  <title>Modern Steno Transcription Checker</title>
+  <title>Modern Transcription Checker</title>
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,19 +15,12 @@
     :root {
       --bg-main: #f8fafc;
       --surface-card: #ffffff;
+      --surface-light: #f1f5f9;
       --border-subtle: #e2e8f0;
-      --text-header: #1e293b;
+      --text-header: #1e293b; 
       --text-body: #334155;
       --text-muted: #64748b;
-      --primary-accent: #00796b;
-      --primary-accent-light: #e0f2f1;
-      --accent-red: #ef4444;
-      --accent-amber: #f97316;
-      --hl-additions: #fecdd3;     
-      --hl-omissions: #d9f99d;     
-      --hl-spelling: #fde68a;      
-      --hl-capitalization: #bae6fd; 
-      --hl-punctuation: #ddd6fe;   
+      --primary-accent: #00796b; /* Teal Accent */
     }
 
     body {
@@ -36,54 +29,76 @@
       color: var(--text-body);
       padding: 20px;
       line-height: 1.6;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
     }
 
     .hidden { display: none !important; }
 
-    /* --- 2. Choice Section --- */
-    #choiceSection {
-        max-width: 600px;
-        margin: 50px auto;
-        text-align: center;
-    }
-    .choice-btn {
-        background-color: var(--primary-accent);
-        color: white;
-        padding: 20px 40px;
-        font-size: 1.2em;
-        font-weight: 600;
-        border: none;
-        border-radius: 12px;
-        cursor: pointer;
-        margin: 10px;
-        transition: all 0.2s ease;
-    }
-    .choice-btn:hover {
-        background-color: #004d40;
-        transform: translateY(-3px);
-    }
-    
-    /* --- 3. Input Section Styles --- */
-    #inputSection {
+    .main-container {
+      width: 100%;
       max-width: 900px;
-      margin: 0 auto 30px auto;
+      margin: 30px auto;
       background: var(--surface-card);
-      padding: 30px;
+      padding: 40px;
       border-radius: 16px;
       border: 1px solid var(--border-subtle);
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
+    
     #mainTitle {
       font-size: 2.5em;
       font-weight: 800;
       color: var(--text-header);
       text-align: center;
-      margin-bottom: 25px;
+      margin-bottom: 35px;
     }
-    textarea {
+    
+    /* --- 2. Choice Section --- */
+    #choiceSection {
+        text-align: center;
+    }
+    .choice-btn-group {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    .primary-btn, .secondary-btn {
+        padding: 15px 25px;
+        font-size: 1.1em;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+    }
+    .primary-btn {
+        background-color: var(--primary-accent);
+        color: white;
+    }
+    .primary-btn:hover {
+        background-color: #004d40;
+        transform: translateY(-2px);
+    }
+    .secondary-btn {
+        background-color: transparent;
+        color: var(--primary-accent);
+        border-color: var(--primary-accent);
+    }
+    .secondary-btn:hover {
+        background-color: #e0f2f1; /* Light teal */
+    }
+
+    /* --- 3. Player & Transcription Sections --- */
+    .form-group {
+        margin-bottom: 25px;
+    }
+    textarea, input[type="number"] {
       width: 100%;
-      height: 150px;
-      margin-bottom: 15px;
+      margin-top: 8px;
       padding: 12px;
       border-radius: 8px;
       border: 1px solid var(--border-subtle);
@@ -91,60 +106,41 @@
       font-family: 'Inter', sans-serif;
       resize: vertical;
     }
-    textarea:focus {
+     textarea:focus, input[type="number"]:focus {
         outline: none;
         border-color: var(--primary-accent);
-        box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
+        box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.2);
     }
     label {
       font-weight: 600;
-      margin-bottom: 8px;
+      font-size: 1.05em;
+      color: var(--text-header);
       display: block;
     }
-    #submitButton {
-      background-color: var(--primary-accent);
-      color: white;
-      padding: 12px 25px;
-      font-size: 1.1em;
-      font-weight: 600;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      display: block;
-      width: 100%;
-      margin-top: 15px;
-      transition: all 0.2s ease;
+    
+    .file-upload-wrapper {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 8px;
     }
-    #submitButton:hover {
-        background-color: #004d40;
-        transform: translateY(-2px);
-    }
-    #submitButton:disabled {
-        background-color: #a5d6a7;
-        cursor: not-allowed;
-        transform: none;
+    #fileName {
+        color: var(--text-muted);
+        font-size: 0.9em;
     }
 
-    /* --- 4. Modern Audio Player Styles --- */
-    #audioContainer {
-        border: 1px solid var(--border-subtle);
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 25px;
+    .navigation-buttons {
+        display: flex;
+        gap: 15px;
+        margin-top: 30px;
     }
-    .file-upload-area { margin-bottom: 15px; }
-    .wpm-controls { margin-top: 15px; }
-    #wordCount {
-        width: 100%;
-        padding: 8px;
-        border-radius: 8px;
-        border: 1px solid var(--border-subtle);
-        margin-top: 5px;
-    }
+
+
+    /* --- 4. Modern Audio Player --- */
     .modern-player {
-        background: var(--bg-main);
-        border-radius: 10px;
-        padding: 15px;
+        background: var(--surface-light);
+        border-radius: 12px;
+        padding: 15px 20px;
         display: flex;
         align-items: center;
         gap: 15px;
@@ -154,402 +150,168 @@
         background: var(--primary-accent);
         border: none;
         border-radius: 50%;
-        width: 45px;
-        height: 45px;
+        width: 48px;
+        height: 48px;
+        flex-shrink: 0;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
         color: white;
+        transition: transform 0.2s;
     }
+    .play-pause-btn:hover { transform: scale(1.1); }
     .play-pause-btn svg { width: 24px; height: 24px; }
+
     .time-display {
-        font-weight: 600;
-        color: var(--text-muted);
-        font-size: 0.9em;
+        font-weight: 500;
+        color: var(--text-body);
+        font-size: 0.95em;
         min-width: 90px;
         text-align: center;
     }
     .seek-slider { flex-grow: 1; }
-    .volume-controls { display: flex; align-items: center; gap: 8px; }
-    .volume-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); padding: 5px; }
-    .volume-btn svg { width: 20px; height: 20px; }
+    
+    .volume-controls { 
+        display: flex; 
+        align-items: center; 
+        gap: 8px;
+    }
+    .volume-controls svg {
+        color: var(--text-muted);
+        width: 22px;
+        height: 22px;
+    }
+    .volume-slider { width: 80px; }
 
     /* Custom Range Slider Styles */
     input[type="range"] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 100%;
-        cursor: pointer;
-        outline: none;
-        height: 6px;
-        background: var(--border-subtle);
-        border-radius: 8px;
+        -webkit-appearance: none; appearance: none;
+        width: 100%; cursor: pointer; outline: none;
+        height: 6px; background: var(--border-subtle); border-radius: 8px;
+        margin-top: 10px;
     }
     input[type="range"]::-webkit-slider-thumb {
-        -webkit-appearance: none;
-        appearance: none;
-        height: 18px;
-        width: 18px;
+        -webkit-appearance: none; appearance: none;
+        height: 20px; width: 20px;
         background-color: var(--primary-accent);
-        border-radius: 50%;
-        border: none;
-        transition: background-color 0.2s ease-in-out;
+        border-radius: 50%; border: none;
     }
     input[type="range"]::-moz-range-thumb {
-        height: 18px;
-        width: 18px;
+        height: 20px; width: 20px;
         background-color: var(--primary-accent);
-        border-radius: 50%;
-        border: none;
-        transition: background-color 0.2s ease-in-out;
+        border-radius: 50%; border: none;
     }
-
-
-    /* --- 5. Modern Result Sheet Styles --- */
-    #modern-results-view {
-      max-width: 1200px;
-      margin: 30px auto;
-    }
-    .result-sheet-container {
-        background-color: var(--surface-card);
-        border: 1px solid var(--border-subtle);
-        border-radius: 16px;
-        padding: 35px 45px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
-    }
-    .result-sheet-container h1 { font-size: 2.25em; font-weight: 800; margin: 0 0 25px 0; color: var(--text-header); }
-    .stats-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
-    .stats-row { display: flex; flex-wrap: wrap; gap: 12px; }
-    .stat-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95em; color: white; background-color: var(--primary-accent); box-shadow: 0 4px 10px -2px rgba(0, 121, 107, 0.25); }
-    .stat-pill.full-width { flex-grow: 1; font-size: 1.1em; }
-    .stat-pill.red { background-color: var(--accent-red); box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.2); }
-    .stat-pill.amber { background-color: var(--accent-amber); box-shadow: 0 4px 10px -2px rgba(249, 115, 22, 0.2); }
-    .stat-pill svg { width: 18px; height: 18px; }
-    .legend-container { display: flex; flex-wrap: wrap; gap: 20px 30px; padding: 25px 0; margin-bottom: 25px; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
-    .legend-item { display: flex; align-items: center; font-size: 0.9em; font-weight: 500; }
-    .legend-color-box { width: 16px; height: 16px; border-radius: 4px; margin-right: 8px; }
-    .result-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-    .filter-section, .action-section { display: flex; align-items: center; gap: 10px; }
-    .filter-section label { font-weight: 600; color: var(--text-body); margin: 0;}
-    .filter-section select, .view-switch-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-weight: 500; color: var(--text-color); cursor: pointer; }
-    .view-switch-btn { transition: all 0.2s; }
-    .view-switch-btn:hover { background-color: #e2e8f0; }
-    .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
-    .columns.view-top-bottom { grid-template-columns: 1fr; }
-    .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; }
-    .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; }
-    .col p { margin: 0; }
-    .word-wrapper { cursor: pointer; display: inline; transition: background-color 0.2s ease, transform 0.2s ease; position: relative; }
-    .active-highlight { background-color: #4B0082 !important; color: white !important; border-radius: 3px; }
-    .highlight { position: relative; padding: 2px 5px; border-radius: 4px; margin: 0 1px; font-weight: 500; display: inline; transition: transform 0.2s ease-out; }
-    .highlight:hover { transform: scale(1.15); z-index: 5; }
-    .highlight:hover::after { content: attr(data-tooltip-text); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; padding: 8px 12px; background-color: #111827; color: white; font-size: 0.8em; font-weight: 500; border-radius: 6px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .extra { background: var(--hl-additions); }
-    .omission { background: var(--hl-omissions); }
-    .spelling b { font-weight: 700; color: #166534; }
-    .spelling { background: var(--hl-spelling); }
-    .capitalization { background: var(--hl-capitalization); }
-    .punctuation { background: var(--hl-punctuation); }
-    .hidden-mistake { background: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; font-weight: normal !important; }
-    .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
     
-    .action-buttons { text-align: center; padding-top: 30px; display: flex; gap: 15px; justify-content: center; }
-    .action-buttons .primary-btn { background-color: var(--primary-accent); color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
-    
-    /* --- 6. Modals & Timer --- */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
-    .modal-overlay.visible { opacity: 1; pointer-events: auto; }
-    .modal-content { background-color: var(--surface-card); color: var(--text-color); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
-    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header);}
-    .modal-content ul { text-align: left; list-style-position: inside; padding: 0; margin: 0 0 30px 0; line-height: 2.2; color: var(--text-body); }
-    .modal-content ul li::marker { color: var(--primary-accent); }
-    .modal-close-btn { background-color: var(--primary-accent); color: white; padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; cursor: pointer; border: none; }
-    #timerDisplay { position: fixed; top: 20px; right: 20px; font-size: 20px; background: var(--primary-accent); color: white; padding: 10px 15px; border-radius: 8px; z-index: 100; }
-
-    /* --- Print Styles --- */
-    @media print {
-      body, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
-      .action-buttons, .result-controls, .legend-container, #inputSection { display: none !important; }
-      .result-sheet-container { padding: 0; max-width: 100%; }
-      .col { border: 1px solid #ccc; max-height: none; overflow-y: visible; }
-      .columns { grid-template-columns: 1fr !important; }
-      #modern-results-view { display: block !important; }
-    }
+    /* --- 5. Result View --- */
+    #modern-results-view h1 { font-size: 2.25em; font-weight: 800; margin-bottom: 25px; }
   </style>
 </head>
 <body>
-
-  <div id="choiceSection">
-    <h1 id="mainTitle">Modern Transcription Checker</h1>
-    <button id="useAudioBtn" class="choice-btn">Use Audio Dictation</button>
-    <button id="useTextBtn" class="choice-btn">Use Text Passage</button>
-  </div>
-
-  <div id="inputSection" class="hidden">
-    <div id="audioContainer" class="hidden">
-        <div class="file-upload-area">
-            <label for="audioUpload">Upload Audio Dictation:</label>
-            <input type="file" id="audioUpload" accept="audio/*">
+    
+  <audio id="audioPlayer" class="hidden"></audio> <!-- Global Hidden Audio Engine -->
+    
+  <div id="appContainer" class="main-container">
+    
+    <!-- VIEW 1: Initial Choice -->
+    <div id="choiceSection">
+        <h1 id="mainTitle">Modern Transcription Checker</h1>
+        <p>How would you like to start?</p>
+        <div class="choice-btn-group">
+            <button id="useAudioBtn" class="primary-btn">Use Audio Dictation</button>
+            <button id="useTextBtn" class="secondary-btn">Use Text Passage</button>
         </div>
-        <audio id="audioPlayer"></audio> <!-- This is the actual audio engine, kept hidden -->
-        <div class="modern-player">
-            <button class="play-pause-btn" id="playPauseBtn">
-                <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
-                <svg id="pauseIcon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M5.75 4.5a.75.75 0 00-.75.75v10.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-1.5zm6.5 0a.75.75 0 00-.75.75v10.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-1.5z" /></svg>
-            </button>
-            <div class="time-display"><span id="currentTime">0:00</span> / <span id="totalDuration">0:00</span></div>
-            <input type="range" class="seek-slider" id="seekSlider" value="0" step="1">
-            <div class="volume-controls">
-                <button class="volume-btn" id="volumeBtn">
-                    <svg id="volumeHighIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 2.75a.75.75 0 00-1.5 0v14.5a.75.75 0 001.5 0V2.75zM4 8.25a.75.75 0 00-1.5 0v3.5a.75.75 0 001.5 0v-3.5zM16 5.75a.75.75 0 00-1.5 0v8.5a.75.75 0 001.5 0v-8.5z" /></svg>
-                    <svg id="volumeMuteIcon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>
+    </div>
+
+    <!-- VIEW 2: Audio Player Setup -->
+    <div id="audioPlayerSection" class="hidden">
+        <h1 id="mainTitle">Audio Setup</h1>
+        <div class="form-group">
+            <label for="audioUpload">1. Upload Audio Dictation:</label>
+            <div class="file-upload-wrapper">
+                <input type="file" id="audioUpload" accept="audio/*">
+                <span id="fileName">No file chosen</span>
+            </div>
+            <div class="modern-player">
+                <button class="play-pause-btn" id="playPauseBtn">
+                    <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
+                    <svg id="pauseIcon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M5.75 4.5a.75.75 0 00-.75.75v10.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-1.5zm6.5 0a.75.75 0 00-.75.75v10.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-1.5z" /></svg>
                 </button>
-                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+                <div class="time-display"><span id="currentTime">0:00</span> / <span id="totalDuration">0:00</span></div>
+                <input type="range" class="seek-slider" id="seekSlider" value="0" step="1">
+                <div class="volume-controls">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.34-1.61-2.26-2.79-1.59L5.15 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.15l5.56 3.53c1.18.67 2.79-.25 2.79-1.59v-12Zm-2.19 12.72-4.1-2.61A.99.99 0 0 0 6.5 14H5V9.92h1.5c.34 0 .67-.17.86-.45l4.1-2.6V16.78Z M19 12a5 5 0 0 0-3.54 8.54l-1.41-1.41A3 3 0 0 1 16 12a3 3 0 0 1-1.95-5.13l1.41-1.41A5 5 0 0 0 19 12Z" /></svg>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+                </div>
             </div>
         </div>
-        <div class="wpm-controls">
-            <label for="wordCount">Number of Words in Dictation:</label>
-            <input type="number" id="wordCount" placeholder="e.g., 500">
-            <label for="speedControl">Playback Speed: <span id="speedValue">100</span> WPM</label>
+        <div class="form-group">
+            <label for="wordCount">2. Number of Words in Dictation:</label>
+            <input type="number" id="wordCount" placeholder="e.g., 1000">
+        </div>
+        <div class="form-group">
+            <label for="speedControl">3. Set Desired Playback Speed:</label>
+            <label for="speedControl" style="font-weight: normal; font-size: 1em; text-align: center; margin-top: 10px;">Speed: <span id="speedValue">100</span> WPM</label>
             <input type="range" id="speedControl" min="60" max="160" value="100" step="5">
+        </div>
+        <div class="navigation-buttons">
+            <button id="backToChoiceBtn" class="secondary-btn">Go Back</button>
+            <button id="startTranscriptionBtn" class="primary-btn">Start Transcription</button>
         </div>
     </div>
 
-    <div id="textContainer" class="hidden">
-      <label for="original">Original Passage:</label>
-      <textarea id="original" placeholder="Paste the original text here..."></textarea>
+    <!-- VIEW 3: Transcription Input -->
+    <div id="transcriptionSection" class="hidden">
+        <h1 id="mainTitle">Transcription</h1>
+        <div id="originalPassageContainer" class="form-group">
+            <label for="original">Original Passage:</label>
+            <textarea id="original" rows="6" placeholder="Paste the original text here..."></textarea>
+        </div>
+        <div class="form-group">
+            <label for="typed">Your Transcription:</label>
+            <textarea id="typed" rows="10" placeholder="Listen to the audio and type here..."></textarea>
+        </div>
+        <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="includeComma"> Count comma (,) mistakes
+        </label>
+        <button id="submitButton" class="primary-btn" style="margin-top:20px;">Check Accuracy</button>
     </div>
 
-    <label for="typed">Your Transcription:</label>
-    <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
-    <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px;">
-        <input type="checkbox" id="includeComma"> Count comma (,) mistakes
-    </label>
-    <button id="submitButton">Check Accuracy</button>
-  </div>
-
-  <div id="modern-results-view" class="hidden">
-    <div id="resultSheetContainer"></div>
-    <div class="action-buttons">
-      <button id="printReportBtn" class="primary-btn">Download Report</button>
-      <button id="tryAnotherBtn" class="primary-btn">Start New Comparison</button>
-    </div>
-  </div>
-
-  <div id="instructions-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Welcome to the Modern Transcription Checker!</h2>
-        <ul>
-            <li><b>Step 1:</b> Paste the original dictation text into the "Original Passage" box.</li>
-            <li><b>Step 2:</b> Type or paste your transcribed text into the "Your Transcription" box.</li>
-            <li><b>Step 3:</b> Click "Check Accuracy" to see a detailed, interactive report.</li>
-            <li><b>Timer Mode:</b> Pasting into the top box starts an optional 50-minute typing timer.</li>
-            <li><b>Re-evaluate:</b> On the results page, you can edit the original text and re-check your score.</li>
-        </ul>
-        <button id="close-instructions-btn" class="modal-close-btn">Got it, Let's Start!</button>
+    <!-- VIEW 4: Results -->
+    <div id="modern-results-view" class="hidden">
+        <!-- Results will be rendered here by JavaScript -->
     </div>
   </div>
 
 <script>
-    // --- Global State ---
-    let g_lastTypedText = "";
-    let g_current_alignment = [];
-    let timerInterval;
-    let transcriptionTimerTotalTime = 0, timeLeft = 0;
-    
-    // --- Worker Setup ---
+    // --- Global State & Worker Setup ---
     let analysisWorker;
     if (window.Worker) {
-        analysisWorker = new Worker('worker.js');
+        analysisWorker = new Worker('worker.js'); // Assuming worker.js is correct
         analysisWorker.onmessage = handleWorkerResult;
     } else {
-        alert("Your browser does not support Web Workers. The page may become unresponsive during analysis.");
+        alert("Your browser does not support Web Workers.");
     }
 
-    // --- Core Logic (Delegated to Worker) ---
-    function escapeHtml(s = "") {
-        return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    }
-
+    // --- Core Transcription Logic ---
     function submitTranscription() {
         const originalText = document.getElementById("original").value.trim();
         const typedText = document.getElementById("typed").value.trim();
-        
-        if (!originalText || !typedText) {
+        if (!originalText && !typedText) {
             return alert("Please fill in both the original and transcription text boxes.");
         }
-        
-        if (!analysisWorker) {
-            alert("Analysis worker is not available. Cannot proceed.");
-            return;
-        }
-
-        const submitBtn = document.getElementById('submitButton');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Calculating...';
-        
-        clearInterval(timerInterval);
-        const timerDisplay = document.getElementById('timerDisplay');
-        if (timerDisplay) timerDisplay.remove();
-
-        g_lastTypedText = typedText;
-        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
-        const options = {
-            countCommaMistakes: document.getElementById("includeComma").checked
-        };
-        
-        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds, options });
+        document.getElementById('submitButton').disabled = true;
+        document.getElementById('submitButton').textContent = 'Calculating...';
+        const options = { countCommaMistakes: document.getElementById("includeComma").checked };
+        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds: 0, options });
     }
 
     function handleWorkerResult(event) {
-        const results = event.data;
-        g_current_alignment = results.alignment;
-        renderResultSheet(results);
-        document.getElementById("inputSection").classList.add("hidden");
+        renderResultSheet(event.data);
+        document.getElementById("transcriptionSection").classList.add("hidden");
         document.getElementById("modern-results-view").classList.remove("hidden");
-        const submitBtn = document.getElementById('submitButton');
-        submitBtn.disabled = false;
-        submitBtn.textContent = 'Check Accuracy';
-    }
-    
-    // --- UI Rendering ---
-    function buildResultHtmlFromAlignment(alignment) {
-        let resultHtmlContent = "";
-        for (let k = 0; k < alignment.length; k++) {
-            const entry = alignment[k];
-            let wordHtml = '', tooltipText = '', highlightClass = '', innerHtml = '';
-            switch (entry.mistakeType) {
-                case 'correct':
-                    innerHtml = escapeHtml(entry.t || '');
-                    tooltipText = "Correct";
-                    break;
-                case 'omission':
-                    highlightClass = 'omission';
-                    tooltipText = `Omitted: "${escapeHtml(entry.o)}"`;
-                    innerHtml = `(${escapeHtml(entry.o)})`;
-                    break;
-                case 'extra':
-                    highlightClass = 'extra';
-                    tooltipText = `Extra Word: "${escapeHtml(entry.t)}"`;
-                    innerHtml = escapeHtml(entry.t);
-                    break;
-                case 'spelling':
-                    highlightClass = 'spelling';
-                    tooltipText = `Spelling: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
-                    innerHtml = `${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)`;
-                    break;
-                case 'capitalization':
-                    highlightClass = 'capitalization';
-                    tooltipText = `Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
-                    innerHtml = escapeHtml(entry.t);
-                    break;
-                case 'punctuation':
-                    highlightClass = 'punctuation';
-                    tooltipText = `Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
-                    innerHtml = escapeHtml(entry.t);
-                    break;
-            }
-            if (highlightClass) {
-                 wordHtml = `<span class='highlight ${highlightClass}' data-mistake-type='${entry.mistakeType}' data-tooltip-text='${tooltipText}'>${innerHtml}</span>`;
-            } else {
-                wordHtml = `<span>${innerHtml}</span>`;
-            }
-            resultHtmlContent += `<span class="word-wrapper" data-index="${k}">${wordHtml}</span> `;
-        }
-        return resultHtmlContent;
-    }
-
-    function renderResultSheet(data) {
-        const container = document.getElementById('resultSheetContainer');
-        let originalTextHtml = data.alignment.map((entry, index) => 
-            (entry.type === 'ins') ? '' : `<span class="word-wrapper" data-index="${index}">${escapeHtml(entry.o || '')}</span>`
-        ).join(' ');
-        let highlightedHtml = buildResultHtmlFromAlignment(data.alignment);
-        container.innerHTML = `
-            <div class="result-sheet-container">
-                <h1>Result Sheet:</h1>
-                <div class="stats-container">
-                     <div class="stats-row">
-                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>Total Words: ${data.totalWords}</div>
-                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13.25a.75.75 0 00-1.5 0v6.5c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75v-5.5z" clip-rule="evenodd" /></svg>Typing Speed: ${data.typingSpeed} WPM</div>
-                        <div class="stat-pill red"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>Full Mistakes: ${data.fullMistakes}</div>
-                        <div class="stat-pill amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>Half Mistakes: ${data.halfMistakes}</div>
-                    </div>
-                    <div class="stats-row">
-                        <div class="stat-pill">Total % of Mistakes: ${data.mistakePercent}%</div>
-                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Accuracy: ${data.accuracy}%</div>
-                    </div>
-                </div>
-                <div class="legend-container">
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions/Substitutions</div>
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span> Omissions</div>
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span> Spelling</div>
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span> Capitalization</div>
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span> Punctuation</div>
-                </div>
-                <div class="result-controls">
-                    <div class="filter-section">
-                        <label for="mistakeFilter">Filter:</label>
-                        <select id="mistakeFilter"><option value="all">Show All</option><option value="omission-substitution">Omissions & Additions</option><option value="omission">Omissions Only</option><option value="extra">Additions Only</option><option value="spelling">Spelling Only</option><option value="capitalization">Capitalization Only</option><option value="punctuation">Punctuation Only</option></select>
-                    </div>
-                    <div class="action-section"><button id="reevaluateBtn" class="view-switch-btn">Re-evaluate Score</button></div>
-                    <button id="viewSwitchBtn" class="view-switch-btn">Switch to Top/Bottom View</button>
-                </div>
-                <div id="comparisonColumns" class="columns view-side-by-side">
-                    <div class="col" id="typedCol"><strong>Your Transcription:</strong><p>${highlightedHtml}</p></div>
-                    <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="true">${originalTextHtml}</p></div>
-                </div>
-            </div>`;
-        initializeResultInteractivity();
-    }
-    
-    function initializeResultInteractivity() {
-        document.getElementById('mistakeFilter').addEventListener('change', (e) => filterMistakes(e.target.value));
-        document.getElementById('reevaluateBtn').addEventListener('click', reevaluateScore);
-        const switchBtn = document.getElementById('viewSwitchBtn');
-        const columnsContainer = document.getElementById('comparisonColumns');
-        switchBtn.addEventListener('click', () => {
-            const isSideBySide = columnsContainer.classList.contains('view-side-by-side');
-            columnsContainer.classList.toggle('view-side-by-side', !isSideBySide);
-            columnsContainer.classList.toggle('view-top-bottom', isSideBySide);
-            switchBtn.textContent = isSideBySide ? 'Switch to Side-by-Side View' : 'Switch to Top/Bottom View';
-        });
-        columnsContainer.addEventListener('click', (e) => {
-            const target = e.target.closest('.word-wrapper');
-            if (!target) return;
-            const wordIndex = target.dataset.index;
-            if (wordIndex === null) return;
-            document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
-            document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => {
-                el.classList.add('active-highlight');
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            });
-        });
-    }
-
-    function reevaluateScore() {
-        const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
-        if (!correctedOriginalText || !g_lastTypedText) return alert("Could not find text to re-evaluate.");
-        const submitBtn = document.getElementById('submitButton');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Calculating...';
-        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
-        const options = { countCommaMistakes: document.getElementById("includeComma").checked };
-        analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds, options });
-        alert("Re-evaluating score with your corrections.");
-    }
-
-    function filterMistakes(type) {
-        document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
-        const spans = document.querySelectorAll('#typedCol .highlight');
-        spans.forEach(span => {
-            const mistakeType = span.getAttribute('data-mistake-type');
-            if (type === "all") span.classList.remove('hidden-mistake');
-            else if (type === "omission-substitution") span.classList.toggle('hidden-mistake', !(mistakeType === 'omission' || mistakeType === 'extra'));
-            else span.classList.toggle('hidden-mistake', mistakeType !== type);
-        });
+        document.getElementById('submitButton').disabled = false;
+        document.getElementById('submitButton').textContent = 'Check Accuracy';
     }
 
     // --- Audio Player Logic ---
@@ -560,191 +322,128 @@
     }
 
     function updateTimeDisplay() {
-        const audioPlayer = document.getElementById('audioPlayer');
-        if (isNaN(audioPlayer.duration)) return;
-
-        const rate = audioPlayer.playbackRate || 1;
-        const scaledDuration = audioPlayer.duration / rate;
-        const scaledCurrentTime = audioPlayer.currentTime / rate;
-
-        document.getElementById('totalDuration').textContent = formatTime(scaledDuration);
-        document.getElementById('currentTime').textContent = formatTime(scaledCurrentTime);
-        document.getElementById('seekSlider').value = audioPlayer.currentTime;
+        const audio = document.getElementById('audioPlayer');
+        if (isNaN(audio.duration)) return;
+        document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
+        document.getElementById('seekSlider').value = audio.currentTime;
     }
     
     function adjustPlaybackSpeed() {
-        const audioPlayer = document.getElementById('audioPlayer');
-        const wordCountInput = document.getElementById('wordCount');
-        const speedControl = document.getElementById('speedControl');
-        const speedValue = document.getElementById('speedValue');
-
-        const wordCount = parseInt(wordCountInput.value);
-        const targetWPM = parseInt(speedControl.value);
-        speedValue.textContent = targetWPM;
-
-        if (isNaN(wordCount) || wordCount <= 0 || isNaN(audioPlayer.duration) || audioPlayer.duration === 0) {
-            audioPlayer.playbackRate = 1;
-        } else {
-            const originalWPM = wordCount / (audioPlayer.duration / 60);
+        const audio = document.getElementById('audioPlayer');
+        const wordCount = parseInt(document.getElementById('wordCount').value);
+        const targetWPM = parseInt(document.getElementById('speedControl').value);
+        document.getElementById('speedValue').textContent = targetWPM;
+        if (!isNaN(wordCount) && wordCount > 0 && !isNaN(audio.duration) && audio.duration > 0) {
+            const originalWPM = wordCount / (audio.duration / 60);
             const playbackRate = targetWPM / originalWPM;
-            audioPlayer.playbackRate = isFinite(playbackRate) ? playbackRate : 1;
+            audio.playbackRate = isFinite(playbackRate) ? playbackRate : 1;
+        } else {
+            audio.playbackRate = 1;
         }
-        updateTimeDisplay();
     }
 
     // --- UI & Event Handlers ---
-    function goHome() {
-        document.getElementById("inputSection").classList.add("hidden");
-        document.getElementById("modern-results-view").classList.add("hidden");
-        document.getElementById("choiceSection").classList.remove("hidden");
+    function resetState() {
+        // Hide all sections except the choice section
+        document.getElementById('audioPlayerSection').classList.add('hidden');
+        document.getElementById('transcriptionSection').classList.add('hidden');
+        document.getElementById('modern-results-view').classList.add('hidden');
+        document.getElementById('choiceSection').classList.remove('hidden');
+
+        // Reset inputs
         document.getElementById("original").value = "";
         document.getElementById("typed").value = "";
-        transcriptionTimerTotalTime = 0;
-        timeLeft = 0;
-        const audioPlayer = document.getElementById('audioPlayer');
-        audioPlayer.pause();
-        audioPlayer.src = "";
-    }
+        document.getElementById("wordCount").value = "";
+        document.getElementById("audioUpload").value = "";
+        document.getElementById("fileName").textContent = "No file chosen";
+        
+        // Reset audio player
+        const audio = document.getElementById('audioPlayer');
+        audio.pause();
+        audio.removeAttribute('src');
+        audio.load(); // Important to clear the old source
+        document.getElementById('currentTime').textContent = "0:00";
+        document.getElementById('totalDuration').textContent = "0:00";
+        document.getElementById('seekSlider').value = 0;
+        document.getElementById('playIcon').classList.remove('hidden');
+        document.getElementById('pauseIcon').classList.add('hidden');
 
-    function startTypingTimer(durationMinutes = 50) {
-      const timerDisplay = document.createElement('div');
-      timerDisplay.id = 'timerDisplay';
-      document.body.appendChild(timerDisplay);
-      transcriptionTimerTotalTime = durationMinutes * 60;
-      timeLeft = transcriptionTimerTotalTime;
-      
-      function updateTimer() {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
-        timerDisplay.textContent = `Time Left: ${minutes}m ${seconds}s`;
-        if (timeLeft <= 0) {
-          clearInterval(timerInterval);
-          timerDisplay.textContent = "Time's up!";
-          submitTranscription();
-          return;
-        }
-        timeLeft--;
-      }
-      updateTimer();
-      timerInterval = setInterval(updateTimer, 1000);
+        // Reset speed slider
+        document.getElementById("speedControl").value = 100;
+        document.getElementById("speedValue").textContent = 100;
     }
     
     document.addEventListener("DOMContentLoaded", () => {
         // --- Page Navigation ---
         document.getElementById('useAudioBtn').addEventListener('click', () => {
             document.getElementById('choiceSection').classList.add('hidden');
-            document.getElementById('inputSection').classList.remove('hidden');
-            document.getElementById('audioContainer').classList.remove('hidden');
-            document.getElementById('textContainer').classList.add('hidden');
+            document.getElementById('audioPlayerSection').classList.remove('hidden');
         });
+        
         document.getElementById('useTextBtn').addEventListener('click', () => {
             document.getElementById('choiceSection').classList.add('hidden');
-            document.getElementById('inputSection').classList.remove('hidden');
-            document.getElementById('audioContainer').classList.add('hidden');
-            document.getElementById('textContainer').classList.remove('hidden');
+            document.getElementById('originalPassageContainer').classList.remove('hidden');
+            document.getElementById('typed').placeholder = "Type your transcription here...";
+            document.getElementById('transcriptionSection').classList.remove('hidden');
+        });
+
+        document.getElementById('backToChoiceBtn').addEventListener('click', resetState);
+
+        document.getElementById('startTranscriptionBtn').addEventListener('click', () => {
+            document.getElementById('audioPlayerSection').classList.add('hidden');
+            document.getElementById('originalPassageContainer').classList.add('hidden'); // Hide original text box for audio transcription
+            document.getElementById('typed').placeholder = "Listen to the audio and type here...";
+            document.getElementById('transcriptionSection').classList.remove('hidden');
         });
 
         // --- Core Buttons ---
         document.getElementById('submitButton').addEventListener('click', submitTranscription);
-        document.getElementById('tryAnotherBtn').addEventListener('click', goHome);
-        document.getElementById('printReportBtn').addEventListener('click', () => window.print());
-
-        // --- Modal ---
-        if (!localStorage.getItem('hasSeenInstructions')) {
-            document.getElementById('instructions-modal').classList.add('visible');
-        }
-        document.getElementById('close-instructions-btn').addEventListener('click', () => {
-            document.getElementById('instructions-modal').classList.remove('visible');
-            localStorage.setItem('hasSeenInstructions', 'true');
-        });
-
-        // --- Timer ---
-        document.getElementById("original").addEventListener("paste", function () {
-            setTimeout(() => {
-                document.getElementById("original").classList.add("hidden");
-                document.querySelector("label[for='original']").classList.add("hidden");
-                const typedTextarea = document.getElementById("typed");
-                typedTextarea.style.height = "calc(100vh - 200px)";
-                typedTextarea.focus();
-                startTypingTimer(50);
-            }, 100);
-        });
-
-        // --- Audio Player Elements ---
-        const audioUpload = document.getElementById('audioUpload');
-        const audioPlayer = document.getElementById('audioPlayer');
-        const wordCountInput = document.getElementById('wordCount');
-        const speedControl = document.getElementById('speedControl');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const playIcon = document.getElementById('playIcon');
-        const pauseIcon = document.getElementById('pauseIcon');
-        const seekSlider = document.getElementById('seekSlider');
-        const volumeBtn = document.getElementById('volumeBtn');
-        const volumeHighIcon = document.getElementById('volumeHighIcon');
-        const volumeMuteIcon = document.getElementById('volumeMuteIcon');
-        const volumeSlider = document.getElementById('volumeSlider');
-
-        // --- Audio Player Event Listeners ---
-        audioUpload.addEventListener('change', function(event) {
+        
+        // --- Audio Player Listeners ---
+        const audio = document.getElementById('audioPlayer');
+        document.getElementById('audioUpload').addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                const fileURL = URL.createObjectURL(file);
-                audioPlayer.src = fileURL;
+                document.getElementById('fileName').textContent = file.name;
+                audio.src = URL.createObjectURL(file);
+                audio.load();
             }
         });
 
-        playPauseBtn.addEventListener('click', () => {
-            if (audioPlayer.paused) {
-                audioPlayer.play();
-            } else {
-                audioPlayer.pause();
-            }
+        document.getElementById('playPauseBtn').addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
+        audio.addEventListener('play', () => {
+            document.getElementById('playIcon').classList.add('hidden');
+            document.getElementById('pauseIcon').classList.remove('hidden');
         });
-
-        audioPlayer.addEventListener('play', () => {
-            playIcon.classList.add('hidden');
-            pauseIcon.classList.remove('hidden');
+        audio.addEventListener('pause', () => {
+            document.getElementById('playIcon').classList.remove('hidden');
+            document.getElementById('pauseIcon').classList.add('hidden');
         });
-
-        audioPlayer.addEventListener('pause', () => {
-            playIcon.classList.remove('hidden');
-            pauseIcon.classList.add('hidden');
-        });
-
-        audioPlayer.addEventListener('loadedmetadata', () => {
-            seekSlider.max = audioPlayer.duration;
+        audio.addEventListener('loadedmetadata', () => {
+            document.getElementById('seekSlider').max = audio.duration;
+            document.getElementById('totalDuration').textContent = formatTime(audio.duration);
             adjustPlaybackSpeed();
         });
-
-        audioPlayer.addEventListener('timeupdate', updateTimeDisplay);
-
-        seekSlider.addEventListener('input', () => {
-            audioPlayer.currentTime = seekSlider.value;
-        });
-
-        volumeBtn.addEventListener('click', () => {
-            audioPlayer.muted = !audioPlayer.muted;
-        });
-
-        audioPlayer.addEventListener('volumechange', () => {
-            volumeSlider.value = audioPlayer.volume;
-            if (audioPlayer.muted || audioPlayer.volume === 0) {
-                volumeHighIcon.classList.add('hidden');
-                volumeMuteIcon.classList.remove('hidden');
-            } else {
-                volumeHighIcon.classList.remove('hidden');
-                volumeMuteIcon.classList.add('hidden');
-            }
-        });
-        
-        volumeSlider.addEventListener('input', (e) => {
-            audioPlayer.volume = e.target.value;
-            audioPlayer.muted = e.target.value == 0;
-        });
-
-        wordCountInput.addEventListener('input', adjustPlaybackSpeed);
-        speedControl.addEventListener('input', adjustPlaybackSpeed);
+        audio.addEventListener('timeupdate', updateTimeDisplay);
+        document.getElementById('seekSlider').addEventListener('input', (e) => audio.currentTime = e.target.value);
+        document.getElementById('volumeSlider').addEventListener('input', (e) => audio.volume = e.target.value);
+        document.getElementById('wordCount').addEventListener('input', adjustPlaybackSpeed);
+        document.getElementById('speedControl').addEventListener('input', adjustPlaybackSpeed);
     });
+
+    // --- Result Sheet Rendering (Placeholder from previous version) ---
+    function renderResultSheet(data) {
+        const view = document.getElementById('modern-results-view');
+        // Basic result rendering for demonstration
+        view.innerHTML = `
+            <h1>Result Sheet</h1>
+            <p>Accuracy: ${data.accuracy}%</p>
+            <p>Total Words: ${data.totalWords}</p>
+            <p>Full Mistakes: ${data.fullMistakes}</p>
+            <p>Half Mistakes: ${data.halfMistakes}</p>
+            <button id="tryAnotherBtn" class="primary-btn">Start New Comparison</button>`;
+        document.getElementById('tryAnotherBtn').addEventListener('click', resetState);
+    }
 </script>
 </body>
 </html>
