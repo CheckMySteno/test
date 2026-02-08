@@ -4,101 +4,215 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <meta name="robots" content="noindex">
-  <title>Modern Transcription Checker & Dictation Tool</title>
+  <title>Modern Steno Transcription Checker</title>
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
-    :root{--bg-main:#f8fafc;--surface-card:#fff;--border-subtle:#e2e8f0;--text-header:#1e293b;--text-body:#334155;--text-muted:#64748b;--primary-accent:#00796b;--accent-red:#ef4444;--accent-amber:#f97316;--hl-additions:#fecdd3;--hl-omissions:#d9f99d;--hl-spelling:#fde68a;--hl-capitalization:#bae6fd;--hl-punctuation:#ddd6fe}
-    body{font-family:'Inter',sans-serif;background:var(--bg-main);color:var(--text-body);padding:20px;line-height:1.6;scroll-behavior:smooth;}
-    .hidden{display:none!important}
-    #inputSection{max-width:900px;margin:0 auto 30px;background:var(--surface-card);padding:30px;border-radius:16px;border:1px solid var(--border-subtle);box-shadow:0 4px 12px rgba(0,0,0,.05)}
-    #mainTitle{font-size:2.5em;font-weight:800;color:var(--text-header);text-align:center;margin-bottom:25px}
-    textarea{width:100%;height:150px;margin-bottom:15px;padding:12px;border-radius:8px;border:1px solid var(--border-subtle);font-size:16px;font-family:'Inter',sans-serif;resize:vertical}
-    textarea:focus{outline:none;border-color:var(--primary-accent);box-shadow:0 0 0 3px rgba(0,121,107,.1)}
-    label{font-weight:600;margin-bottom:8px;display:block}
-    .primary-btn, #submitButton{background-color:var(--primary-accent);color:#fff;padding:12px 25px;font-size:1.1em;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:all .2s ease}
-    .primary-btn:hover, #submitButton:hover{background-color:#004d40;transform:translateY(-2px)}
-    #submitButton{display:block;width:100%;margin-top:15px}
-    #submitButton:disabled{background-color:#a5d6a7;cursor:not-allowed;transform:none}
-    .loader{border:4px solid #f3f3f3;border-radius:50%;border-top:4px solid var(--primary-accent);width:20px;height:20px;animation:spin 1s linear infinite;display:inline-block;margin-right:10px;vertical-align:middle}
-    @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
-    .mode-switcher{display:flex;border-bottom:1px solid var(--border-subtle);margin-bottom:25px}
-    .mode-tab{padding:10px 20px;cursor:pointer;border:none;background:none;font-size:1.1em;font-weight:600;color:var(--text-muted);border-bottom:3px solid transparent;margin-bottom:-1px}
-    .mode-tab.active{color:var(--primary-accent);border-bottom-color:var(--primary-accent)}
-    .input-group{margin-bottom:20px}
-    .input-group input[type=file],.input-group input[type=number]{width:100%;padding:10px;border-radius:8px;border:1px solid var(--border-subtle);font-size:1em}
-    #audioPlayerContainer{padding:20px;background-color:var(--bg-main);border-radius:12px;border:1px solid var(--border-subtle)}
-    #audioPlayerControls{display:flex;align-items:center;gap:15px;margin-bottom:10px}
-    #playPauseBtn{background-color:var(--primary-accent);color:#fff;border:none;border-radius:50%;width:40px;height:40px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-    #playPauseBtn:disabled{background-color:#a5d6a7;cursor:not-allowed}
-    #wpmSelector{padding:8px 12px;border-radius:8px;border:1px solid var(--border-subtle);font-weight:500}
-    #timeDisplay{font-weight:600;font-size:.9em;color:var(--text-header);min-width:100px}
-    #originalWpmDisplay{font-size:.9em;color:var(--text-muted);margin-top:5px;text-align:center}
-    #modern-results-view{max-width:1200px;margin:30px auto}
-    .result-sheet-container{background-color:var(--surface-card);border:1px solid var(--border-subtle);border-radius:16px;padding:35px 45px;box-shadow:0 4px 6px -1px rgba(0,0,0,.05),0 2px 4px -2px rgba(0,0,0,.05)}
-    .result-sheet-container h1{font-size:2.25em;font-weight:800;margin:0 0 25px;color:var(--text-header)}
-    .stale-results .stat-pill{filter:blur(4px);transition:filter .3s ease;pointer-events:none}
-    .stale-results-message{display:none;text-align:center;padding:10px;background-color:var(--hl-spelling);color:var(--text-header);font-weight:600;border-radius:8px;margin-bottom:20px}
-    .stats-container{display:flex;flex-direction:column;gap:12px;margin-bottom:30px}
-    .stats-row{display:flex;flex-wrap:wrap;gap:12px}
-    .stat-pill{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:10px;font-weight:600;font-size:.95em;color:#fff;background-color:var(--primary-accent);box-shadow:0 4px 10px -2px rgba(0,121,107,.25)}
-    .stat-pill.red{background-color:var(--accent-red);box-shadow:0 4px 10px -2px rgba(239,68,68,.2)}
-    .stat-pill.amber{background-color:var(--accent-amber);box-shadow:0 4px 10px -2px rgba(249,115,22,.2)}
-    .legend-container{display:flex;flex-wrap:wrap;gap:20px 30px;padding:25px 0;margin-bottom:25px;border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)}
-    .legend-item{display:flex;align-items:center;font-size:.9em;font-weight:500}
-    .legend-color-box{width:16px;height:16px;border-radius:4px;margin-right:8px}
-    .result-controls{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;margin-bottom:20px}
-    .filter-section label{font-weight:600;color:var(--text-body);margin:0}
-    .filter-section select,.view-switch-btn{padding:8px 12px;border-radius:8px;border:1px solid var(--border-subtle);background-color:var(--bg-main);font-weight:500;color:var(--text-body);cursor:pointer}
-    .columns{display:grid;grid-template-columns:1fr;gap:16px}
-    @media (min-width:900px){.columns.view-side-by-side{grid-template-columns:1fr 1fr}}
-    .col{background:var(--bg-main);border-radius:12px;padding:25px;border:1px solid var(--border-subtle);line-height:1.7;font-size:1.1em;word-wrap:break-word}
-    .col strong{display:block;margin-bottom:12px;color:var(--text-header);font-weight:700}
-    .col p{margin:0}
-    .highlight{position:relative;padding:2px 5px;border-radius:4px;margin:0 1px;font-weight:500;display:inline}
-    .extra{background:var(--hl-additions)} .omission{background:var(--hl-omissions)} .spelling{background:var(--hl-spelling)} .capitalization{background:var(--hl-capitalization)} .punctuation{background:var(--hl-punctuation)}
-    .spelling b{font-weight:700;color:#166534}
-    .action-buttons{text-align:center;padding-top:30px;display:flex;gap:15px;justify-content:center}
+    /* --- 1. Global & Base Styles --- */
+    :root {
+      --bg-main: #f8fafc;
+      --surface-card: #ffffff;
+      --border-subtle: #e2e8f0;
+      --text-header: #1e293b;
+      --text-body: #334155;
+      --text-muted: #64748b;
+      --primary-accent: #00796b;
+      --accent-red: #ef4444;
+      --accent-amber: #f97316;
+      --hl-additions: #fecdd3;     
+      --hl-omissions: #d9f99d;     
+      --hl-spelling: #fde68a;      
+      --hl-capitalization: #bae6fd; 
+      --hl-punctuation: #ddd6fe;   
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-main);
+      color: var(--text-body);
+      padding: 20px;
+      line-height: 1.6;
+    }
+
+    .hidden { display: none !important; }
+
+    /* --- 2. Input Section Styles --- */
+    #inputSection {
+      max-width: 900px;
+      margin: 0 auto 30px auto;
+      background: var(--surface-card);
+      padding: 30px;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    #mainTitle {
+      font-size: 2.5em;
+      font-weight: 800;
+      color: var(--text-header);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+    }
+    textarea:focus {
+        outline: none;
+        border-color: var(--primary-accent);
+        box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+    #submitButton {
+      background-color: var(--primary-accent);
+      color: white;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      margin-top: 15px;
+      transition: all 0.2s ease;
+    }
+    #submitButton:hover {
+        background-color: #004d40;
+        transform: translateY(-2px);
+    }
+    #submitButton:disabled {
+        background-color: #a5d6a7;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    /* --- Audio Player Styles --- */
+    #audioSection {
+        margin-bottom: 20px;
+    }
+    #audioPlayer {
+        width: 100%;
+        margin-top: 10px;
+    }
+    #speedControl {
+        width: 100%;
+        margin-top: 5px;
+    }
+    #wordCount {
+        width: 100%;
+        padding: 8px;
+        border-radius: 8px;
+        border: 1px solid var(--border-subtle);
+    }
+
+
+    /* --- 3. Modern Result Sheet Styles --- */
+    #modern-results-view {
+      max-width: 1200px;
+      margin: 30px auto;
+    }
+    .result-sheet-container {
+        background-color: var(--surface-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 35px 45px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    }
+    .result-sheet-container h1 { font-size: 2.25em; font-weight: 800; margin: 0 0 25px 0; color: var(--text-header); }
+    .stats-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+    .stats-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .stat-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95em; color: white; background-color: var(--primary-accent); box-shadow: 0 4px 10px -2px rgba(0, 121, 107, 0.25); }
+    .stat-pill.full-width { flex-grow: 1; font-size: 1.1em; }
+    .stat-pill.red { background-color: var(--accent-red); box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.2); }
+    .stat-pill.amber { background-color: var(--accent-amber); box-shadow: 0 4px 10px -2px rgba(249, 115, 22, 0.2); }
+    .stat-pill svg { width: 18px; height: 18px; }
+    .legend-container { display: flex; flex-wrap: wrap; gap: 20px 30px; padding: 25px 0; margin-bottom: 25px; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+    .legend-item { display: flex; align-items: center; font-size: 0.9em; font-weight: 500; }
+    .legend-color-box { width: 16px; height: 16px; border-radius: 4px; margin-right: 8px; }
+    .result-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
+    .filter-section, .action-section { display: flex; align-items: center; gap: 10px; }
+    .filter-section label { font-weight: 600; color: var(--text-body); margin: 0;}
+    .filter-section select, .view-switch-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-weight: 500; color: var(--text-color); cursor: pointer; }
+    .view-switch-btn { transition: all 0.2s; }
+    .view-switch-btn:hover { background-color: #e2e8f0; }
+    .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
+    .columns.view-top-bottom { grid-template-columns: 1fr; }
+    .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; }
+    .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; }
+    .col p { margin: 0; }
+    .word-wrapper { cursor: pointer; display: inline; transition: background-color 0.2s ease, transform 0.2s ease; position: relative; }
+    .active-highlight { background-color: #4B0082 !important; color: white !important; border-radius: 3px; }
+    .highlight { position: relative; padding: 2px 5px; border-radius: 4px; margin: 0 1px; font-weight: 500; display: inline; transition: transform 0.2s ease-out; }
+    .highlight:hover { transform: scale(1.15); z-index: 5; }
+    .highlight:hover::after { content: attr(data-tooltip-text); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; padding: 8px 12px; background-color: #111827; color: white; font-size: 0.8em; font-weight: 500; border-radius: 6px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .extra { background: var(--hl-additions); }
+    .omission { background: var(--hl-omissions); }
+    .spelling b { font-weight: 700; color: #166534; }
+    .spelling { background: var(--hl-spelling); }
+    .capitalization { background: var(--hl-capitalization); }
+    .punctuation { background: var(--hl-punctuation); }
+    .hidden-mistake { background: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; font-weight: normal !important; }
+    .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
+    
+    .action-buttons { text-align: center; padding-top: 30px; display: flex; gap: 15px; justify-content: center; }
+    .action-buttons .primary-btn { background-color: var(--primary-accent); color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
+    
+    /* --- 4. Modals & Timer --- */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
+    .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+    .modal-content { background-color: var(--surface-card); color: var(--text-color); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
+    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header);}
+    .modal-content ul { text-align: left; list-style-position: inside; padding: 0; margin: 0 0 30px 0; line-height: 2.2; color: var(--text-body); }
+    .modal-content ul li::marker { color: var(--primary-accent); }
+    .modal-close-btn { background-color: var(--primary-accent); color: white; padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; cursor: pointer; border: none; }
+    #timerDisplay { position: fixed; top: 20px; right: 20px; font-size: 20px; background: var(--primary-accent); color: white; padding: 10px 15px; border-radius: 8px; z-index: 100; }
+
+    /* --- Print Styles --- */
+    @media print {
+      body, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
+      .action-buttons, .result-controls, .legend-container, #inputSection { display: none !important; }
+      .result-sheet-container { padding: 0; max-width: 100%; }
+      .col { border: 1px solid #ccc; max-height: none; overflow-y: visible; }
+      .columns { grid-template-columns: 1fr !important; }
+      #modern-results-view { display: block !important; }
+    }
   </style>
 </head>
 <body>
 
   <div id="inputSection">
     <h1 id="mainTitle">Modern Transcription Checker</h1>
-    <div class="mode-switcher">
-        <button data-action="switch-mode" data-mode="text" class="mode-tab active">Text Passage</button>
-        <button data-action="switch-mode" data-mode="audio" class="mode-tab">Audio Dictation</button>
+
+    <div id="audioSection">
+        <label for="audioUpload">Upload Audio Dictation:</label>
+        <input type="file" id="audioUpload" accept="audio/*">
+        <audio id="audioPlayer" controls></audio>
+        <label for="wordCount">Number of Words in Dictation:</label>
+        <input type="number" id="wordCount" placeholder="e.g., 500">
+        <label for="speedControl">Playback Speed (WPM): <span id="speedValue">100</span> WPM</label>
+        <input type="range" id="speedControl" min="60" max="160" value="100" step="5">
     </div>
-    <div id="textInputSection">
-        <label for="original">Original Passage:</label>
-        <textarea id="original" placeholder="Paste the original text here..."></textarea>
-    </div>
-    <div id="audioInputSection" class="hidden">
-        <div class="input-group">
-            <label for="audioFile">1. Upload Audio File (.mp3, .wav, .m4a):</label>
-            <input type="file" id="audioFile" accept="audio/*">
-        </div>
-        <div class="input-group">
-            <label for="wordCount">2. Enter Total Words in Transcript:</label>
-            <input type="number" id="wordCount" placeholder="e.g., 800">
-        </div>
-        <div id="audioPlayerContainer" class="hidden">
-            <audio id="audioPlayer" class="hidden"></audio>
-            <div id="audioPlayerControls">
-                <button id="playPauseBtn" disabled>
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
-                </button>
-                <span id="timeDisplay">0:00 / 0:00</span>
-                <label for="wpmSelector" style="margin: 0 0 0 auto;">Speed:</label>
-                <select id="wpmSelector" disabled></select>
-            </div>
-            <div id="originalWpmDisplay"></div>
-        </div>
-    </div>
-    <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 25px 0;">
+
+    <label for="original">Original Passage:</label>
+    <textarea id="original" placeholder="Paste the original text here..."></textarea>
     <label for="typed">Your Transcription:</label>
-    <textarea id="typed" placeholder="Your transcription will go here..."></textarea>
+    <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
     <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px;">
         <input type="checkbox" id="includeComma"> Count comma (,) mistakes
     </label>
@@ -106,235 +220,349 @@
   </div>
 
   <div id="modern-results-view" class="hidden">
-    <!-- Results will be injected here by JavaScript -->
+    <div id="resultSheetContainer"></div>
+    <div class="action-buttons">
+      <button id="printReportBtn" class="primary-btn">Download Report</button>
+      <button id="tryAnotherBtn" class="primary-btn">Start New Comparison</button>
+    </div>
+  </div>
+
+  <div id="instructions-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Welcome to the Modern Transcription Checker!</h2>
+        <ul>
+            <li><b>Step 1:</b> Paste the original dictation text into the "Original Passage" box.</li>
+            <li><b>Step 2:</b> Type or paste your transcribed text into the "Your Transcription" box.</li>
+            <li><b>Step 3:</b> Click "Check Accuracy" to see a detailed, interactive report.</li>
+            <li><b>Timer Mode:</b> Pasting into the top box starts an optional 50-minute typing timer.</li>
+            <li><b>Re-evaluate:</b> On the results page, you can edit the original text and re-check your score.</li>
+        </ul>
+        <button id="close-instructions-btn" class="modal-close-btn">Got it, Let's Start!</button>
+    </div>
   </div>
 
 <script>
-document.addEventListener("DOMContentLoaded", () => {
-    // --- GLOBAL STATE & CACHED ELEMENTS ---
+    // --- Global State ---
     let g_lastTypedText = "";
-    let g_currentMode = 'text';
-    let g_originalAudioWPM = 0;
-    const playIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>`;
-    const pauseIcon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" width="24"><path d="M5.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75A.75.75 0 007.25 3h-1.5zM12.75 3a.75.75 0 00-.75.75v12.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V3.75a.75.75 0 00-.75-.75h-1.5z" /></svg>`;
+    let g_current_alignment = [];
+    let timerInterval;
+    let transcriptionTimerTotalTime = 0, timeLeft = 0;
     
-    const G_ELS = {
-        inputSection: document.getElementById('inputSection'),
-        resultsView: document.getElementById('modern-results-view'),
-        textModeTab: document.querySelector('[data-mode="text"]'),
-        audioModeTab: document.querySelector('[data-mode="audio"]'),
-        textInputSection: document.getElementById('textInputSection'),
-        audioInputSection: document.getElementById('audioInputSection'),
-        audioFile: document.getElementById('audioFile'),
-        wordCount: document.getElementById('wordCount'),
-        audioPlayerContainer: document.getElementById('audioPlayerContainer'),
-        audioPlayer: document.getElementById('audioPlayer'),
-        playPauseBtn: document.getElementById('playPauseBtn'),
-        timeDisplay: document.getElementById('timeDisplay'),
-        wpmSelector: document.getElementById('wpmSelector'),
-        originalWpmDisplay: document.getElementById('originalWpmDisplay'),
-        submitButton: document.getElementById('submitButton'),
-        originalText: document.getElementById('original'),
-        typedText: document.getElementById('typed'),
-        includeComma: document.getElementById('includeComma'),
-    };
-
-    // --- WEB WORKER SETUP ---
+    // --- Worker Setup ---
     let analysisWorker;
     if (window.Worker) {
         analysisWorker = new Worker('worker.js');
         analysisWorker.onmessage = handleWorkerResult;
-        analysisWorker.onerror = handleWorkerError;
     } else {
-        alert("Your browser does not support Web Workers.");
+        alert("Your browser does not support Web Workers. The page may become unresponsive during analysis.");
     }
 
-    // --- UTILITY FUNCTIONS ---
-    const escapeHtml = (s = "") => s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const formatTime = (s) => `${Math.floor(s/60)}:${Math.floor(s%60).toString().padStart(2,'0')}`;
-
-    // --- UI & APPLICATION FLOW ---
-    function switchMode(mode) {
-        g_currentMode = mode;
-        G_ELS.textModeTab.classList.toggle('active', mode === 'text');
-        G_ELS.audioModeTab.classList.toggle('active', mode === 'audio');
-        G_ELS.textInputSection.classList.toggle('hidden', mode !== 'text');
-        G_ELS.audioInputSection.classList.toggle('hidden', mode === 'text');
+    // --- Core Logic (Delegated to Worker) ---
+    function escapeHtml(s = "") {
+        return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
-    function goHome() {
-        G_ELS.inputSection.classList.remove("hidden");
-        G_ELS.resultsView.classList.add("hidden");
-        G_ELS.resultsView.innerHTML = ''; // Clear results to prevent stale elements
-        G_ELS.originalText.value = "";
-        G_ELS.typedText.value = "";
-        G_ELS.audioFile.value = "";
-        G_ELS.wordCount.value = "";
-        G_ELS.audioPlayerContainer.classList.add('hidden');
-        G_ELS.audioPlayer.src = '';
-        g_originalAudioWPM = 0;
-        switchMode('text');
-    }
-
-    // --- CORE TRANSCRIPTION LOGIC ---
     function submitTranscription() {
-        const typedText = G_ELS.typedText.value.trim();
-        let originalText = (g_currentMode === 'text') ? G_ELS.originalText.value.trim() : "[Audio transcript pending...]";
-
-        if ((g_currentMode === 'text' && (!originalText || !typedText)) || (g_currentMode === 'audio' && !typedText)) {
-            return alert("Please ensure all required text fields are filled.");
+        const originalText = document.getElementById("original").value.trim();
+        const typedText = document.getElementById("typed").value.trim();
+        
+        if (!originalText || !typedText) {
+            return alert("Please fill in both the original and transcription text boxes.");
         }
         
-        if (!analysisWorker) return;
+        if (!analysisWorker) {
+            alert("Analysis worker is not available. Cannot proceed.");
+            return;
+        }
 
-        G_ELS.submitButton.disabled = true;
-        G_ELS.submitButton.innerHTML = '<span class="loader"></span>Calculating...';
+        const submitBtn = document.getElementById('submitButton');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Calculating...';
         
+        clearInterval(timerInterval);
+        const timerDisplay = document.getElementById('timerDisplay');
+        if (timerDisplay) timerDisplay.remove();
+
         g_lastTypedText = typedText;
-        const options = { countCommaMistakes: G_ELS.includeComma.checked };
-        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds: 0, options });
+        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
+        const options = {
+            countCommaMistakes: document.getElementById("includeComma").checked
+        };
+        
+        // Post job to the worker
+        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds, options });
     }
 
     function handleWorkerResult(event) {
-        renderResultSheet(event.data);
-        G_ELS.inputSection.classList.add("hidden");
-        G_ELS.resultsView.classList.remove("hidden");
-        G_ELS.submitButton.disabled = false;
-        G_ELS.submitButton.innerHTML = 'Check Accuracy';
-        window.scrollTo(0, 0);
-    }
-
-    function handleWorkerError(error) {
-        console.error("Error from worker:", error.message);
-        alert(`An analysis error occurred: ${error.message}`);
-        G_ELS.submitButton.disabled = false;
-        G_ELS.submitButton.innerHTML = 'Check Accuracy';
-    }
-
-    // --- DYNAMIC HTML RENDERING & EVENT HANDLING ---
-    function renderResultSheet(data) {
-        const isAudioPending = data.originalText === "[Audio transcript pending...]";
-        let originalTextHtml = isAudioPending ? '' : data.alignment.map((e, i) => (e.type === 'ins') ? '' : `<span class="word-wrapper" data-index="${i}">${escapeHtml(e.o||'')}</span>`).join(' ');
-        let highlightedHtml = data.alignment.map((e, k) => {
-            let innerHtml = '', tooltipText = '', highlightClass = '';
-            const mistakeType = e.mistakeType || (e.type === 'match' ? 'correct' : '');
-            switch(mistakeType){
-                case 'correct': innerHtml = escapeHtml(e.t||''); break;
-                case 'omission': highlightClass='omission'; tooltipText=`Omitted: "${escapeHtml(e.o)}"`; innerHtml=`(${escapeHtml(e.o)})`; break;
-                case 'extra': highlightClass='extra'; tooltipText=`Extra Word: "${escapeHtml(e.t)}"`; innerHtml=escapeHtml(e.t); break;
-                case 'spelling': highlightClass='spelling'; tooltipText=`Spelling: Typed "${escapeHtml(e.t)}" (was "${escapeHtml(e.o)}")`; innerHtml=`${escapeHtml(e.t)} (<b>${escapeHtml(e.o)}</b>)`; break;
-                case 'capitalization': highlightClass='capitalization'; tooltipText=`Capitalization: Typed "${escapeHtml(e.t)}" (was "${escapeHtml(e.o)}")`; innerHtml=escapeHtml(e.t); break;
-                case 'punctuation': highlightClass='punctuation'; tooltipText=`Punctuation: Typed "${escapeHtml(e.t)}" (was "${escapeHtml(e.o)}")`; innerHtml=escapeHtml(e.t); break;
-                default: innerHtml=escapeHtml(e.t||'');
-            }
-            let wordHtml = highlightClass ? `<span class='highlight ${highlightClass}' data-mistake-type='${mistakeType}' data-tooltip-text='${tooltipText}'>${innerHtml}</span>` : `<span>${innerHtml}</span>`;
-            return `<span class="word-wrapper" data-index="${k}">${wordHtml}</span> `;
-        }).join('');
+        const results = event.data;
+        g_current_alignment = results.alignment; // Store alignment for interactivity
         
-        G_ELS.resultsView.innerHTML = `
+        renderResultSheet(results);
+        
+        document.getElementById("inputSection").classList.add("hidden");
+        document.getElementById("modern-results-view").classList.remove("hidden");
+        
+        const submitBtn = document.getElementById('submitButton');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Check Accuracy';
+    }
+    
+    // --- UI Rendering ---
+
+    function buildResultHtmlFromAlignment(alignment) {
+        let resultHtmlContent = "";
+        for (let k = 0; k < alignment.length; k++) {
+            const entry = alignment[k];
+            let wordHtml = '', tooltipText = '', highlightClass = '', innerHtml = '';
+
+            switch (entry.mistakeType) {
+                case 'correct':
+                    innerHtml = escapeHtml(entry.t || '');
+                    tooltipText = "Correct";
+                    break;
+                case 'omission':
+                    highlightClass = 'omission';
+                    tooltipText = `Omitted: "${escapeHtml(entry.o)}"`;
+                    innerHtml = `(${escapeHtml(entry.o)})`;
+                    break;
+                case 'extra':
+                    highlightClass = 'extra';
+                    tooltipText = `Extra Word: "${escapeHtml(entry.t)}"`;
+                    innerHtml = escapeHtml(entry.t);
+                    break;
+                case 'spelling':
+                    highlightClass = 'spelling';
+                    tooltipText = `Spelling: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+                    innerHtml = `${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)`;
+                    break;
+                case 'capitalization':
+                    highlightClass = 'capitalization';
+                    tooltipText = `Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+                    innerHtml = escapeHtml(entry.t);
+                    break;
+                case 'punctuation':
+                    highlightClass = 'punctuation';
+                    tooltipText = `Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+                    innerHtml = escapeHtml(entry.t);
+                    break;
+            }
+            
+            if (highlightClass) {
+                 wordHtml = `<span class='highlight ${highlightClass}' data-mistake-type='${entry.mistakeType}' data-tooltip-text='${tooltipText}'>${innerHtml}</span>`;
+            } else {
+                wordHtml = `<span>${innerHtml}</span>`;
+            }
+
+            resultHtmlContent += `<span class="word-wrapper" data-index="${k}">${wordHtml}</span> `;
+        }
+        return resultHtmlContent;
+    }
+
+
+    function renderResultSheet(data) {
+        const container = document.getElementById('resultSheetContainer');
+
+        let originalTextHtml = data.alignment.map((entry, index) => 
+            (entry.type === 'ins') ? '' : `<span class="word-wrapper" data-index="${index}">${escapeHtml(entry.o || '')}</span>`
+        ).join(' ');
+        
+        let highlightedHtml = buildResultHtmlFromAlignment(data.alignment);
+
+        container.innerHTML = `
             <div class="result-sheet-container">
                 <h1>Result Sheet:</h1>
-                <div id="staleMessage" class="stale-results-message">Original text edited. Click "Re-evaluate Score" to update.</div>
-                <div class="stats-container ${isAudioPending ? 'stale-results' : ''}">
-                    <div class="stats-row"><div class="stat-pill">Total Words: ${data.totalWords}</div><div class="stat-pill red">Full Mistakes: ${data.fullMistakes}</div><div class="stat-pill amber">Half Mistakes: ${data.halfMistakes}</div></div>
-                    <div class="stats-row"><div class="stat-pill">Mistake %: ${data.mistakePercent}%</div><div class="stat-pill">Accuracy: ${data.accuracy}%</div></div>
+                <div class="stats-container">
+                    <div class="stats-row">
+                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>Total Words: ${data.totalWords}</div>
+                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13.25a.75.75 0 00-1.5 0v6.5c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75v-5.5z" clip-rule="evenodd" /></svg>Typing Speed: ${data.typingSpeed} WPM</div>
+                        <div class="stat-pill red"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>Full Mistakes: ${data.fullMistakes}</div>
+                        <div class="stat-pill amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>Half Mistakes: ${data.halfMistakes}</div>
+                    </div>
+                    <div class="stats-row">
+                        <div class="stat-pill">Total % of Mistakes: ${data.mistakePercent}%</div>
+                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Accuracy: ${data.accuracy}%</div>
+                    </div>
                 </div>
                 <div class="legend-container">
-                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions</div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions/Substitutions</div>
                     <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span> Omissions</div>
                     <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span> Spelling</div>
                     <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span> Capitalization</div>
                     <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span> Punctuation</div>
                 </div>
                 <div class="result-controls">
-                    <div class="filter-section"><label for="mistakeFilter">Filter:</label><select id="mistakeFilter"><option value="all">Show All</option><option value="omission">Omissions</option><option value="extra">Additions</option><option value="spelling">Spelling</option><option value="capitalization">Capitalization</option><option value="punctuation">Punctuation</option></select></div>
-                    <div class="action-section"><button data-action="reevaluate" class="view-switch-btn">Re-evaluate Score</button></div>
+                    <div class="filter-section">
+                        <label for="mistakeFilter">Filter:</label>
+                        <select id="mistakeFilter"><option value="all">Show All</option><option value="omission-substitution">Omissions & Additions</option><option value="omission">Omissions Only</option><option value="extra">Additions Only</option><option value="spelling">Spelling Only</option><option value="capitalization">Capitalization Only</option><option value="punctuation">Punctuation Only</option></select>
+                    </div>
+                    <div class="action-section"><button id="reevaluateBtn" class="view-switch-btn">Re-evaluate Score</button></div>
+                    <button id="viewSwitchBtn" class="view-switch-btn">Switch to Top/Bottom View</button>
                 </div>
-                <div class="columns view-side-by-side">
-                    <div class="col"><strong>Your Transcription:</strong><p>${highlightedHtml}</p></div>
-                    <div class="col"><strong>${isAudioPending ? 'ACTION: Paste original transcript below & re-evaluate' : 'Original Text (Editable):'}</strong><p id="editableOriginalText" contenteditable="true" style="min-height:50px;border:1px dashed var(--border-subtle);padding:10px;">${originalTextHtml}</p></div>
+                <div id="comparisonColumns" class="columns view-side-by-side">
+                    <div class="col" id="typedCol"><strong>Your Transcription:</strong><p>${highlightedHtml}</p></div>
+                    <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="true">${originalTextHtml}</p></div>
                 </div>
-            </div>
-            <div class="action-buttons">
-              <button data-action="print" class="primary-btn">Download Report</button>
-              <button data-action="home" class="primary-btn">Start New Comparison</button>
             </div>`;
+        initializeResultInteractivity();
+    }
+    
+    function initializeResultInteractivity() {
+        document.getElementById('mistakeFilter').addEventListener('change', (e) => filterMistakes(e.target.value));
+        document.getElementById('reevaluateBtn').addEventListener('click', reevaluateScore);
+        
+        const switchBtn = document.getElementById('viewSwitchBtn');
+        const columnsContainer = document.getElementById('comparisonColumns');
+        switchBtn.addEventListener('click', () => {
+            const isSideBySide = columnsContainer.classList.contains('view-side-by-side');
+            columnsContainer.classList.toggle('view-side-by-side', !isSideBySide);
+            columnsContainer.classList.toggle('view-top-bottom', isSideBySide);
+            switchBtn.textContent = isSideBySide ? 'Switch to Side-by-Side View' : 'Switch to Top/Bottom View';
+        });
+
+        columnsContainer.addEventListener('click', (e) => {
+            const target = e.target.closest('.word-wrapper');
+            if (!target) return;
+            const wordIndex = target.dataset.index;
+            if (wordIndex === null) return;
+            document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
+            document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => {
+                el.classList.add('active-highlight');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+        });
     }
 
-    // --- AUDIO PLAYER LOGIC ---
-    function handleAudioFile(event) {
-        const file = event.target.files[0];
-        if (file) {
-            G_ELS.audioPlayer.src = URL.createObjectURL(file);
-            G_ELS.audioPlayerContainer.classList.remove('hidden');
+    function reevaluateScore() {
+        const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
+        if (!correctedOriginalText || !g_lastTypedText) return alert("Could not find text to re-evaluate.");
+        
+        // Re-submit the job to the worker
+        const submitBtn = document.getElementById('submitButton');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Calculating...';
+        
+        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
+        const options = {
+            countCommaMistakes: document.getElementById("includeComma").checked
+        };
+        analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds, options });
+
+        alert("Re-evaluating score with your corrections.");
+    }
+
+    function filterMistakes(type) {
+        document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
+        const spans = document.querySelectorAll('#typedCol .highlight');
+        spans.forEach(span => {
+            const mistakeType = span.getAttribute('data-mistake-type');
+            if (type === "all") span.classList.remove('hidden-mistake');
+            else if (type === "omission-substitution") span.classList.toggle('hidden-mistake', !(mistakeType === 'omission' || mistakeType === 'extra'));
+            else span.classList.toggle('hidden-mistake', mistakeType !== type);
+        });
+    }
+
+    // --- Audio Player Logic ---
+    function adjustPlaybackSpeed() {
+        const audioPlayer = document.getElementById('audioPlayer');
+        const wordCountInput = document.getElementById('wordCount');
+        const speedControl = document.getElementById('speedControl');
+        const speedValue = document.getElementById('speedValue');
+
+        const wordCount = parseInt(wordCountInput.value);
+        const targetWPM = parseInt(speedControl.value);
+        speedValue.textContent = targetWPM;
+
+        if (isNaN(wordCount) || wordCount <= 0 || isNaN(audioPlayer.duration)) {
+            return;
         }
+
+        const originalWPM = wordCount / (audioPlayer.duration / 60);
+        const playbackRate = targetWPM / originalWPM;
+        audioPlayer.playbackRate = playbackRate;
     }
 
-    function calculateAndSetSpeed() {
-        const duration = G_ELS.audioPlayer.duration;
-        const wordCount = parseInt(G_ELS.wordCount.value, 10);
-        if (duration && wordCount > 0) {
-            g_originalAudioWPM = Math.round((wordCount / duration) * 60);
-            G_ELS.originalWpmDisplay.textContent = `Original Speed: ~${g_originalAudioWPM} WPM`;
-            G_ELS.wpmSelector.innerHTML = '';
-            for (let wpm = 60; wpm <= 160; wpm += 5) {
-                G_ELS.wpmSelector.add(new Option(`${wpm} WPM`, wpm));
+
+    // --- UI & Event Handlers ---
+    
+    function goHome() {
+        document.getElementById("inputSection").classList.remove("hidden");
+        document.getElementById("modern-results-view").classList.add("hidden");
+        document.getElementById("original").value = "";
+        document.getElementById("typed").value = "";
+        document.getElementById("original").classList.remove("hidden");
+        document.querySelector("label[for='original']").classList.remove("hidden");
+        const typedTextarea = document.getElementById("typed");
+        typedTextarea.style.height = "150px";
+        transcriptionTimerTotalTime = 0;
+        timeLeft = 0;
+    }
+
+    function startTypingTimer(durationMinutes = 50) {
+      const timerDisplay = document.createElement('div');
+      timerDisplay.id = 'timerDisplay';
+      document.body.appendChild(timerDisplay);
+
+      transcriptionTimerTotalTime = durationMinutes * 60;
+      timeLeft = transcriptionTimerTotalTime;
+      
+      function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `Time Left: ${minutes}m ${seconds}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerDisplay.textContent = "Time's up!";
+          submitTranscription();
+          return;
+        }
+        timeLeft--;
+      }
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+    
+    document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById('submitButton').addEventListener('click', submitTranscription);
+        document.getElementById('tryAnotherBtn').addEventListener('click', goHome);
+        document.getElementById('printReportBtn').addEventListener('click', () => window.print());
+
+        if (!localStorage.getItem('hasSeenInstructions')) {
+            document.getElementById('instructions-modal').classList.add('visible');
+        }
+        document.getElementById('close-instructions-btn').addEventListener('click', () => {
+            document.getElementById('instructions-modal').classList.remove('visible');
+            localStorage.setItem('hasSeenInstructions', 'true');
+        });
+
+        document.getElementById("original").addEventListener("paste", function () {
+            setTimeout(() => {
+                document.getElementById("original").classList.add("hidden");
+                document.querySelector("label[for='original']").classList.add("hidden");
+                const typedTextarea = document.getElementById("typed");
+                typedTextarea.style.height = "calc(100vh - 200px)";
+                typedTextarea.focus();
+                startTypingTimer(50);
+            }, 100);
+        });
+
+        const audioUpload = document.getElementById('audioUpload');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const wordCountInput = document.getElementById('wordCount');
+        const speedControl = document.getElementById('speedControl');
+
+        audioUpload.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const fileURL = URL.createObjectURL(file);
+                audioPlayer.src = fileURL;
             }
-            G_ELS.wpmSelector.value = [...G_ELS.wpmSelector.options].reduce((p, c) => Math.abs(c.value - g_originalAudioWPM) < Math.abs(p.value - g_originalAudioWPM) ? c : p).value;
-            setPlaybackRate();
-            G_ELS.playPauseBtn.disabled = false;
-            G_ELS.wpmSelector.disabled = false;
-        } else {
-            G_ELS.originalWpmDisplay.textContent = 'Enter word count to enable speed control.';
-        }
-    }
+        });
 
-    function setPlaybackRate() {
-        if (g_originalAudioWPM > 0) {
-            G_ELS.audioPlayer.playbackRate = parseInt(G_ELS.wpmSelector.value, 10) / g_originalAudioWPM;
-        }
-    }
-
-    // --- GLOBAL EVENT LISTENERS (THE FIX) ---
-    // This single listener handles all clicks, even for buttons created later.
-    // This prevents the page from freezing.
-    document.body.addEventListener('click', (event) => {
-        const action = event.target.dataset.action;
-        if (!action) return;
-
-        switch (action) {
-            case 'switch-mode':
-                switchMode(event.target.dataset.mode);
-                break;
-            case 'home':
-                goHome();
-                break;
-            case 'print':
-                window.print();
-                break;
-            case 'reevaluate':
-                const reevaluateBtn = event.target;
-                const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
-                if (!correctedOriginalText || !g_lastTypedText) return alert("Text not found for re-evaluation.");
-                reevaluateBtn.innerHTML = '<span class="loader"></span>';
-                reevaluateBtn.disabled = true;
-                const options = { countCommaMistakes: G_ELS.includeComma.checked };
-                analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds: 0, options });
-                break;
-        }
+        audioPlayer.addEventListener('loadedmetadata', adjustPlaybackSpeed);
+        wordCountInput.addEventListener('input', adjustPlaybackSpeed);
+        speedControl.addEventListener('input', adjustPlaybackSpeed);
     });
-
-    // --- INITIAL PAGE SETUP ---
-    G_ELS.submitButton.addEventListener('click', submitTranscription);
-    G_ELS.audioFile.addEventListener('change', handleAudioFile);
-    G_ELS.wordCount.addEventListener('input', calculateAndSetSpeed);
-    G_ELS.audioPlayer.addEventListener('loadedmetadata', calculateAndSetSpeed);
-    G_ELS.wpmSelector.addEventListener('change', setPlaybackRate);
-    G_ELS.playPauseBtn.addEventListener('click', () => { G_ELS.audioPlayer.paused ? G_ELS.audioPlayer.play() : G_ELS.audioPlayer.pause(); });
-    G_ELS.audioPlayer.addEventListener('play', () => G_ELS.playPauseBtn.innerHTML = pauseIcon);
-    G_ELS.audioPlayer.addEventListener('pause', () => G_ELS.playPauseBtn.innerHTML = playIcon);
-    G_ELS.audioPlayer.addEventListener('timeupdate', () => { G_ELS.timeDisplay.textContent = `${formatTime(G_ELS.audioPlayer.currentTime)} / ${formatTime(G_ELS.audioPlayer.duration || 0)}`; });
-});
 </script>
 </body>
+
 </html>
