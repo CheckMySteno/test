@@ -50,7 +50,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     
-    #mainTitle {
+    .page-title { /* Renamed for clarity */
       font-size: 2.5em;
       font-weight: 800;
       color: var(--text-header);
@@ -74,9 +74,9 @@
     .primary-btn { background-color: var(--primary-accent); color: white; }
     .primary-btn:hover { background-color: #004d40; transform: translateY(-2px); }
     .secondary-btn { background-color: transparent; color: var(--primary-accent); border-color: var(--primary-accent); }
-    .secondary-btn:hover { background-color: #e0f2f1; } /* Light teal */
+    .secondary-btn:hover { background-color: #e0f2f1; }
     .form-group { margin-bottom: 25px; }
-    label { font-weight: 600; font-size: 1.05em; color: var(--text-header); display: block; }
+    #audioPlayerSection label { font-weight: 600; font-size: 1.05em; color: var(--text-header); display: block; }
     input[type="number"] {
         width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-subtle);
         font-size: 16px; font-family: 'Inter', sans-serif;
@@ -114,31 +114,66 @@
     /* --- 3. ORIGINAL Checker & Result Styles (UNCHANGED) --- */
     #inputSection {
       max-width: 900px;
-      margin: 0 auto;
-      padding: 0; /* No extra padding needed inside the container */
-      border: none;
-      box-shadow: none;
+      margin: 0 auto 30px auto;
+      background: var(--surface-card);
+      padding: 30px;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     textarea {
-      width: 100%; height: 150px; margin-bottom: 15px; padding: 12px;
-      border-radius: 8px; border: 1px solid var(--border-subtle);
-      font-size: 16px; font-family: 'Inter', sans-serif; resize: vertical;
+      width: 100%;
+      height: 150px;
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
     }
     textarea:focus {
-        outline: none; border-color: var(--primary-accent);
+        outline: none;
+        border-color: var(--primary-accent);
         box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
     }
-    #submitButton {
-      background-color: var(--primary-accent); color: white; padding: 12px 25px;
-      font-size: 1.1em; font-weight: 600; border: none; border-radius: 8px;
-      cursor: pointer; display: block; width: 100%; margin-top: 15px; transition: all 0.2s ease;
+    #inputSection label { /* Specific to your original layout */
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
     }
-    #submitButton:hover { background-color: #004d40; transform: translateY(-2px); }
-    #submitButton:disabled { background-color: #a5d6a7; cursor: not-allowed; transform: none; }
-    #modern-results-view { max-width: 1200px; margin: 30px auto; }
+    #submitButton {
+      background-color: var(--primary-accent);
+      color: white;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      margin-top: 15px;
+      transition: all 0.2s ease;
+    }
+    #submitButton:hover {
+        background-color: #004d40;
+        transform: translateY(-2px);
+    }
+    #submitButton:disabled {
+        background-color: #a5d6a7;
+        cursor: not-allowed;
+        transform: none;
+    }
+    #modern-results-view {
+      max-width: 1200px;
+      margin: 30px auto;
+    }
     .result-sheet-container {
-        background-color: var(--surface-card); border: 1px solid var(--border-subtle);
-        border-radius: 16px; padding: 35px 45px;
+        background-color: var(--surface-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 35px 45px;
         box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
     }
     .result-sheet-container h1 { font-size: 2.25em; font-weight: 800; margin: 0 0 25px 0; color: var(--text-header); }
@@ -154,7 +189,7 @@
     .result-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
     .filter-section, .action-section { display: flex; align-items: center; gap: 10px; }
     .filter-section label { font-weight: 600; color: var(--text-body); margin: 0;}
-    .filter-section select, .view-switch-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-weight: 500; color: var(--text-color); cursor: pointer; }
+    .filter-section select, .view-switch-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-weight: 500; cursor: pointer; }
     .view-switch-btn { transition: all 0.2s; }
     .view-switch-btn:hover { background-color: #e2e8f0; }
     .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
@@ -180,16 +215,16 @@
     .action-buttons .primary-btn { background-color: var(--primary-accent); color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
     .modal-overlay.visible { opacity: 1; pointer-events: auto; }
-    .modal-content { background-color: var(--surface-card); color: var(--text-color); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
+    .modal-content { background-color: var(--surface-card); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
   </style>
 </head>
 <body>
 
-  <audio id="audioPlayer" class="hidden"></audio> <!-- Global Hidden Audio Engine -->
-    
+  <audio id="audioPlayer" class="hidden"></audio>
+
   <!-- VIEW 1: Initial Choice -->
   <div id="choiceSection" class="main-container">
-    <h1 id="mainTitle">Modern Transcription Checker</h1>
+    <h1 class="page-title">Modern Transcription Checker</h1>
     <p>How would you like to start?</p>
     <div class="choice-btn-group">
         <button id="useAudioBtn" class="primary-btn">Use Audio Player</button>
@@ -199,7 +234,7 @@
 
   <!-- VIEW 2: Audio Player Setup -->
   <div id="audioPlayerSection" class="main-container hidden">
-      <h1 id="mainTitle">Audio Player</h1>
+      <h1 class="page-title">Audio Player</h1>
       <div class="form-group">
           <label for="audioUpload">1. Upload Audio Dictation:</label>
           <div class="file-upload-wrapper">
@@ -230,10 +265,9 @@
       </div>
       <button id="goToCheckerBtn" class="primary-btn">Go to Checker</button>
   </div>
-
-  <!-- VIEW 3: ORIGINAL TRANSCRIPTION CHECKER (Initially Hidden) -->
-  <div id="checkerSection" class="main-container hidden">
-    <!-- This is your original, unchanged input section -->
+  
+  <!-- VIEW 3: YOUR ORIGINAL CHECKER CODE (Initially Hidden) -->
+  <div id="checkerContainer" class="hidden">
     <div id="inputSection">
       <h1 id="mainTitle">Modern Transcription Checker</h1>
       <label for="original">Original Passage:</label>
@@ -246,7 +280,6 @@
       <button id="submitButton">Check Accuracy</button>
     </div>
 
-    <!-- This is your original, unchanged results view -->
     <div id="modern-results-view" class="hidden">
       <div id="resultSheetContainer"></div>
       <div class="action-buttons">
@@ -254,11 +287,20 @@
         <button id="tryAnotherBtn" class="primary-btn">Start New Comparison</button>
       </div>
     </div>
-  </div>
 
-  <!-- This is your original, unchanged modal -->
-  <div id="instructions-modal" class="modal-overlay">
-      <!-- ... modal content ... -->
+    <div id="instructions-modal" class="modal-overlay">
+      <div class="modal-content">
+          <h2>Welcome to the Modern Transcription Checker!</h2>
+          <ul>
+              <li><b>Step 1:</b> Paste the original dictation text into the "Original Passage" box.</li>
+              <li><b>Step 2:</b> Type or paste your transcribed text into the "Your Transcription" box.</li>
+              <li><b>Step 3:</b> Click "Check Accuracy" to see a detailed, interactive report.</li>
+              <li><b>Timer Mode:</b> Pasting into the top box starts an optional 50-minute typing timer.</li>
+              <li><b>Re-evaluate:</b> On the results page, you can edit the original text and re-check your score.</li>
+          </ul>
+          <button id="close-instructions-btn" class="modal-close-btn">Got it, Let's Start!</button>
+      </div>
+    </div>
   </div>
 
 <script>
@@ -281,27 +323,27 @@
     function showScreen(screenId) {
         document.getElementById('choiceSection').classList.add('hidden');
         document.getElementById('audioPlayerSection').classList.add('hidden');
-        document.getElementById('checkerSection').classList.add('hidden');
+        document.getElementById('checkerContainer').classList.add('hidden');
         document.getElementById(screenId).classList.remove('hidden');
     }
 
     function resetApp() {
-        // Reset inputs
+        // This function is the new "goHome" for the entire app
         document.getElementById("original").value = "";
         document.getElementById("typed").value = "";
-        document.getElementById("wordCount").value = "";
-        document.getElementById("audioUpload").value = "";
-        document.getElementById("fileName").textContent = "No file chosen";
-
-        // Reset audio player state
+        document.getElementById('inputSection').classList.remove('hidden');
+        document.getElementById('modern-results-view').classList.add('hidden');
+        
+        // Reset audio player specifics
         const audio = document.getElementById('audioPlayer');
         audio.pause();
         audio.removeAttribute('src');
         audio.load();
+        document.getElementById("audioUpload").value = "";
+        document.getElementById("fileName").textContent = "No file chosen";
+        document.getElementById("wordCount").value = "";
 
-        // Reset UI visibility to original state
-        document.getElementById('inputSection').classList.remove('hidden');
-        document.getElementById('modern-results-view').classList.add('hidden');
+        // Go back to the first screen
         showScreen('choiceSection');
     }
 
@@ -320,6 +362,8 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Calculating...';
         clearInterval(timerInterval);
+        const timerDisplay = document.getElementById('timerDisplay');
+        if (timerDisplay) timerDisplay.remove();
         g_lastTypedText = typedText;
         const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
         const options = { countCommaMistakes: document.getElementById("includeComma").checked };
@@ -329,7 +373,7 @@
     function handleWorkerResult(event) {
         const results = event.data;
         g_current_alignment = results.alignment;
-        renderResultSheet(results); // Calls your original, detailed renderer
+        renderResultSheet(results);
         document.getElementById("inputSection").classList.add("hidden");
         document.getElementById("modern-results-view").classList.remove("hidden");
         const submitBtn = document.getElementById('submitButton');
@@ -411,31 +455,40 @@
         const switchBtn = document.getElementById('viewSwitchBtn');
         const columnsContainer = document.getElementById('comparisonColumns');
         switchBtn.addEventListener('click', () => {
-            columnsContainer.classList.toggle('view-side-by-side');
-            columnsContainer.classList.toggle('view-top-bottom');
+            const isSideBySide = columnsContainer.classList.contains('view-side-by-side');
+            columnsContainer.classList.toggle('view-side-by-side', !isSideBySide);
+            columnsContainer.classList.toggle('view-top-bottom', isSideBySide);
+            switchBtn.textContent = isSideBySide ? 'Switch to Side-by-Side View' : 'Switch to Top/Bottom View';
         });
         columnsContainer.addEventListener('click', (e) => {
             const target = e.target.closest('.word-wrapper');
             if (!target) return;
             const wordIndex = target.dataset.index;
+            if (wordIndex === null) return;
             document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
-            document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => el.classList.add('active-highlight'));
+            document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => {
+                el.classList.add('active-highlight');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         });
     }
 
     function reevaluateScore() {
         const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
-        if (!correctedOriginalText || !g_lastTypedText) return;
+        if (!correctedOriginalText || !g_lastTypedText) return alert("Could not find text to re-evaluate.");
         const submitBtn = document.getElementById('submitButton');
         submitBtn.disabled = true;
         submitBtn.textContent = 'Calculating...';
         const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
         const options = { countCommaMistakes: document.getElementById("includeComma").checked };
         analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds, options });
+        alert("Re-evaluating score with your corrections.");
     }
 
     function filterMistakes(type) {
-        document.querySelectorAll('.highlight').forEach(span => {
+        document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
+        const spans = document.querySelectorAll('#typedCol .highlight');
+        spans.forEach(span => {
             const mistakeType = span.getAttribute('data-mistake-type');
             if (type === "all") span.classList.remove('hidden-mistake');
             else if (type === "omission-substitution") span.classList.toggle('hidden-mistake', !(mistakeType === 'omission' || mistakeType === 'extra'));
@@ -443,63 +496,109 @@
         });
     }
 
-    // --- ORIGINAL TIMER & EVENT HANDLERS (UNCHANGED but with `resetApp`) ---
-    // The goHome function is now replaced by the more comprehensive resetApp
-    function startTypingTimer(durationMinutes = 50) { /* ... original function ... */ }
+    // --- ORIGINAL TIMER AND EVENT HANDLERS (UNCHANGED) ---
+    function startTypingTimer(durationMinutes = 50) {
+      const timerDisplay = document.createElement('div');
+      timerDisplay.id = 'timerDisplay';
+      document.body.appendChild(timerDisplay);
+      transcriptionTimerTotalTime = durationMinutes * 60;
+      timeLeft = transcriptionTimerTotalTime;
+      function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `Time Left: ${minutes}m ${seconds}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerDisplay.textContent = "Time's up!";
+          submitTranscription();
+          return;
+        }
+        timeLeft--;
+      }
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
     
     document.addEventListener("DOMContentLoaded", () => {
         // --- NEW Navigation Listeners ---
         document.getElementById('useAudioBtn').addEventListener('click', () => showScreen('audioPlayerSection'));
-        document.getElementById('useTextBtn').addEventListener('click', () => showScreen('checkerSection'));
-        document.getElementById('goToCheckerBtn').addEventListener('click', () => showScreen('checkerSection'));
+        document.getElementById('useTextBtn').addEventListener('click', () => showScreen('checkerContainer'));
+        document.getElementById('goToCheckerBtn').addEventListener('click', () => showScreen('checkerContainer'));
 
         // --- ORIGINAL Event Listeners ---
         document.getElementById('submitButton').addEventListener('click', submitTranscription);
-        document.getElementById('tryAnotherBtn').addEventListener('click', resetApp); // MODIFIED to call resetApp
+        document.getElementById('tryAnotherBtn').addEventListener('click', resetApp); // MODIFIED to call the new reset function
         document.getElementById('printReportBtn').addEventListener('click', () => window.print());
-        // ... (original modal and paste-timer listeners) ...
-
+        document.getElementById('close-instructions-btn').addEventListener('click', () => {
+            document.getElementById('instructions-modal').classList.remove('visible');
+            localStorage.setItem('hasSeenInstructions', 'true');
+        });
+        if (!localStorage.getItem('hasSeenInstructions')) {
+            document.getElementById('instructions-modal').classList.add('visible');
+        }
+        document.getElementById("original").addEventListener("paste", function () {
+            setTimeout(() => {
+                document.getElementById("original").classList.add("hidden");
+                document.querySelector("label[for='original']").classList.add("hidden");
+                const typedTextarea = document.getElementById("typed");
+                typedTextarea.style.height = "calc(100vh - 200px)";
+                typedTextarea.focus();
+                startTypingTimer(50);
+            }, 100);
+        });
+        
         // --- NEW Audio Player Event Listeners ---
         const audio = document.getElementById('audioPlayer');
-        document.getElementById('audioUpload').addEventListener('change', (event) => {
+        const audioUpload = document.getElementById('audioUpload');
+        const fileNameDisplay = document.getElementById('fileName');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const seekSlider = document.getElementById('seekSlider');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const wordCountInput = document.getElementById('wordCount');
+        const speedControl = document.getElementById('speedControl');
+        const speedValue = document.getElementById('speedValue');
+
+        audioUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                document.getElementById('fileName').textContent = file.name;
+                fileNameDisplay.textContent = file.name;
                 audio.src = URL.createObjectURL(file);
                 audio.load();
             }
         });
-        document.getElementById('playPauseBtn').addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
-        audio.addEventListener('play', () => {
-            document.getElementById('playIcon').classList.add('hidden');
-            document.getElementById('pauseIcon').classList.remove('hidden');
-        });
-        audio.addEventListener('pause', () => {
-            document.getElementById('playIcon').classList.remove('hidden');
-            document.getElementById('pauseIcon').classList.add('hidden');
-        });
+        playPauseBtn.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
+        audio.addEventListener('play', () => { playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden'); });
+        audio.addEventListener('pause', () => { playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); });
         audio.addEventListener('loadedmetadata', () => {
-            document.getElementById('seekSlider').max = audio.duration;
+            seekSlider.max = audio.duration;
             document.getElementById('totalDuration').textContent = formatTime(audio.duration);
+            adjustPlaybackSpeed();
         });
         audio.addEventListener('timeupdate', () => {
             document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
-            document.getElementById('seekSlider').value = audio.currentTime;
+            seekSlider.value = audio.currentTime;
         });
-        document.getElementById('seekSlider').addEventListener('input', (e) => audio.currentTime = e.target.value);
-        document.getElementById('volumeSlider').addEventListener('input', (e) => audio.volume = e.target.value);
-        document.getElementById('wordCount').addEventListener('input', adjustPlaybackSpeed);
-        document.getElementById('speedControl').addEventListener('input', adjustPlaybackSpeed);
+        seekSlider.addEventListener('input', (e) => audio.currentTime = e.target.value);
+        volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
+        wordCountInput.addEventListener('input', adjustPlaybackSpeed);
+        speedControl.addEventListener('input', adjustPlaybackSpeed);
+        
         function adjustPlaybackSpeed() {
-            const wordCount = parseInt(document.getElementById('wordCount').value);
-            const targetWPM = parseInt(document.getElementById('speedControl').value);
-            document.getElementById('speedValue').textContent = targetWPM;
-            if (wordCount > 0 && audio.duration > 0) {
+            const wordCount = parseInt(wordCountInput.value);
+            const targetWPM = parseInt(speedControl.value);
+            speedValue.textContent = targetWPM;
+            if (wordCount > 0 && audio.duration > 0 && isFinite(audio.duration)) {
                 const originalWPM = wordCount / (audio.duration / 60);
-                audio.playbackRate = targetWPM / originalWPM;
+                const rate = targetWPM / originalWPM;
+                audio.playbackRate = isFinite(rate) ? rate : 1;
+            } else {
+                audio.playbackRate = 1;
             }
         }
         function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
             const min = Math.floor(seconds / 60);
             const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
             return `${min}:${sec}`;
