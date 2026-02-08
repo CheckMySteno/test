@@ -50,7 +50,7 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
     
-    .page-title { /* Renamed for clarity */
+    .page-title {
       font-size: 2.5em;
       font-weight: 800;
       color: var(--text-header);
@@ -58,7 +58,7 @@
       margin-bottom: 25px;
     }
 
-    /* --- 2. NEW: Choice & Player Sections --- */
+    /* --- 2. NEW: Choice & Player Section Styles --- */
     #choiceSection { text-align: center; }
     .choice-btn-group { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
     .primary-btn, .secondary-btn {
@@ -111,7 +111,7 @@
         border-radius: 50%; border: none;
     }
 
-    /* --- 3. ORIGINAL Checker & Result Styles (UNCHANGED) --- */
+    /* --- 3. YOUR ORIGINAL CHECKER & RESULT STYLES (UNCHANGED and PERFECTLY PRESERVED) --- */
     #inputSection {
       max-width: 900px;
       margin: 0 auto 30px auto;
@@ -120,6 +120,13 @@
       border-radius: 16px;
       border: 1px solid var(--border-subtle);
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+    #mainTitle { /* Title inside your checker */
+      font-size: 2.5em;
+      font-weight: 800;
+      color: var(--text-header);
+      text-align: center;
+      margin-bottom: 25px;
     }
     textarea {
       width: 100%;
@@ -216,6 +223,19 @@
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
     .modal-overlay.visible { opacity: 1; pointer-events: auto; }
     .modal-content { background-color: var(--surface-card); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header);}
+    .modal-content ul { text-align: left; list-style-position: inside; padding: 0; margin: 0 0 30px 0; line-height: 2.2; color: var(--text-body); }
+    .modal-content ul li::marker { color: var(--primary-accent); }
+    .modal-close-btn { background-color: var(--primary-accent); color: white; padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; cursor: pointer; border: none; }
+    #timerDisplay { position: fixed; top: 20px; right: 20px; font-size: 20px; background: var(--primary-accent); color: white; padding: 10px 15px; border-radius: 8px; z-index: 100; }
+    @media print {
+      body, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
+      .action-buttons, .result-controls, .legend-container, #inputSection { display: none !important; }
+      .result-sheet-container { padding: 0; max-width: 100%; }
+      .col { border: 1px solid #ccc; max-height: none; overflow-y: visible; }
+      .columns { grid-template-columns: 1fr !important; }
+      #modern-results-view { display: block !important; }
+    }
   </style>
 </head>
 <body>
@@ -313,7 +333,7 @@
     // --- Worker Setup ---
     let analysisWorker;
     if (window.Worker) {
-        analysisWorker = new Worker('worker.js'); // Assumes worker.js is correct
+        analysisWorker = new Worker('worker.js'); // Assumes worker.js is in the same directory
         analysisWorker.onmessage = handleWorkerResult;
     } else {
         alert("Your browser does not support Web Workers.");
@@ -328,13 +348,11 @@
     }
 
     function resetApp() {
-        // This function is the new "goHome" for the entire app
-        document.getElementById("original").value = "";
-        document.getElementById("typed").value = "";
-        document.getElementById('inputSection').classList.remove('hidden');
-        document.getElementById('modern-results-view').classList.add('hidden');
+        // This is the NEW "goHome" function for the whole app
+        // It calls your original goHome function to reset the checker's internal state
+        goHome(); 
         
-        // Reset audio player specifics
+        // And it also resets the audio player and navigates to the start
         const audio = document.getElementById('audioPlayer');
         audio.pause();
         audio.removeAttribute('src');
@@ -343,7 +361,6 @@
         document.getElementById("fileName").textContent = "No file chosen";
         document.getElementById("wordCount").value = "";
 
-        // Go back to the first screen
         showScreen('choiceSection');
     }
 
@@ -496,7 +513,20 @@
         });
     }
 
-    // --- ORIGINAL TIMER AND EVENT HANDLERS (UNCHANGED) ---
+    // --- ORIGINAL UI & EVENT HANDLERS (UNCHANGED) ---
+    function goHome() {
+        document.getElementById("inputSection").classList.remove("hidden");
+        document.getElementById("modern-results-view").classList.add("hidden");
+        document.getElementById("original").value = "";
+        document.getElementById("typed").value = "";
+        document.getElementById("original").classList.remove("hidden");
+        document.querySelector("label[for='original']").classList.remove("hidden");
+        const typedTextarea = document.getElementById("typed");
+        typedTextarea.style.height = "150px";
+        transcriptionTimerTotalTime = 0;
+        timeLeft = 0;
+    }
+
     function startTypingTimer(durationMinutes = 50) {
       const timerDisplay = document.createElement('div');
       timerDisplay.id = 'timerDisplay';
