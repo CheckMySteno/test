@@ -49,48 +49,140 @@
       border: 1px solid var(--border-subtle);
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
+    
+    .page-title {
+      font-size: 2.5em;
+      font-weight: 800;
+      color: var(--text-header);
+      text-align: center;
+      margin-bottom: 25px;
+    }
 
-    /* --- 2. NEW: Concise Audio Player Styles --- */
+    /* --- 2. NEW: Choice & Player Section Styles --- */
     #choiceSection { text-align: center; }
     .choice-btn-group { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
     .primary-btn, .secondary-btn {
-        padding: 15px 25px; font-size: 1.1em; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; border: 2px solid transparent; width: 100%;
+        padding: 15px 25px;
+        font-size: 1.1em;
+        font-weight: 600;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+        width: 100%;
     }
     .primary-btn { background-color: var(--primary-accent); color: white; }
+    .primary-btn:hover { background-color: #004d40; transform: translateY(-2px); }
     .secondary-btn { background-color: transparent; color: var(--primary-accent); border-color: var(--primary-accent); }
-    
-    .compact-player-card {
-        background: var(--surface-light); border-radius: 12px; padding: 20px; margin-top: 15px;
+    .secondary-btn:hover { background-color: #e0f2f1; }
+    .form-group { margin-bottom: 25px; }
+    #audioPlayerSection label { font-weight: 600; font-size: 1.05em; color: var(--text-header); display: block; }
+    input[type="number"] {
+        width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-subtle);
+        font-size: 16px; font-family: 'Inter', sans-serif;
     }
-    .player-row { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; }
+    .file-upload-wrapper { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+    #fileName { color: var(--text-muted); font-size: 0.9em; }
+    .modern-player {
+        background: var(--surface-light); border-radius: 12px; padding: 15px 20px;
+        display: flex; align-items: center; gap: 15px; margin-top: 15px;
+    }
     .play-pause-btn {
-        background: var(--primary-accent); border: none; border-radius: 50%; width: 42px; height: 42px; 
-        display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; flex-shrink: 0;
+        background: var(--primary-accent); border: none; border-radius: 50%; width: 48px; height: 48px; flex-shrink: 0;
+        display: flex; justify-content: center; align-items: center; cursor: pointer; color: white; transition: transform 0.2s;
     }
-    .time-display { font-variant-numeric: tabular-nums; font-weight: 600; color: var(--text-body); font-size: 0.9em; min-width: 85px; }
-    .seek-slider { flex-grow: 1; cursor: pointer; height: 6px; }
-    
-    .settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; align-items: end; }
-    .control-group { display: flex; flex-direction: column; gap: 5px; }
-    .control-group label { font-size: 0.85em; font-weight: 700; color: var(--text-header); }
-    .modern-select, .modern-input {
-        padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-subtle); background: white; font-family: inherit; font-size: 0.95em;
+    .play-pause-btn:hover { transform: scale(1.1); }
+    .play-pause-btn svg { width: 24px; height: 24px; }
+    .time-display { font-weight: 500; color: var(--text-body); font-size: 0.95em; min-width: 90px; text-align: center; }
+    .seek-slider { flex-grow: 1; }
+    .volume-controls { display: flex; align-items: center; gap: 8px; }
+    .volume-controls svg { color: var(--text-muted); width: 22px; height: 22px; }
+    .volume-slider { width: 80px; }
+    input[type="range"] {
+        -webkit-appearance: none; appearance: none; width: 100%; cursor: pointer; outline: none;
+        height: 6px; background: var(--border-subtle); border-radius: 8px; margin-top: 10px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none; appearance: none; height: 20px; width: 20px;
+        background-color: var(--primary-accent); border-radius: 50%; border: none;
+    }
+    input[type="range"]::-moz-range-thumb {
+        height: 20px; width: 20px; background-color: var(--primary-accent);
+        border-radius: 50%; border: none;
     }
 
-    /* --- 3. YOUR ORIGINAL CHECKER & RESULT STYLES (EXACT PHOTOCOPY) --- */
+    /* --- 3. YOUR ORIGINAL CHECKER & RESULT STYLES (UNCHANGED and PERFECTLY PRESERVED) --- */
     #inputSection {
-      max-width: 900px; margin: 0 auto 30px auto; background: var(--surface-card); padding: 30px;
-      border-radius: 16px; border: 1px solid var(--border-subtle); box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      max-width: 900px;
+      margin: 0 auto 30px auto;
+      background: var(--surface-card);
+      padding: 30px;
+      border-radius: 16px;
+      border: 1px solid var(--border-subtle);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
     }
-    #mainTitle { font-size: 2.5em; font-weight: 800; color: var(--text-header); text-align: center; margin-bottom: 25px; }
-    textarea { width: 100%; height: 150px; margin-bottom: 15px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-subtle); font-size: 16px; font-family: 'Inter', sans-serif; resize: vertical; }
-    textarea:focus { outline: none; border-color: var(--primary-accent); box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1); }
-    #inputSection label { font-weight: 600; margin-bottom: 8px; display: block; }
-    #submitButton { background-color: var(--primary-accent); color: white; padding: 12px 25px; font-size: 1.1em; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; display: block; width: 100%; margin-top: 15px; transition: all 0.2s ease; }
-    #submitButton:hover { background-color: #004d40; transform: translateY(-2px); }
-    #submitButton:disabled { background-color: #a5d6a7; cursor: not-allowed; transform: none; }
-    #modern-results-view { max-width: 1200px; margin: 30px auto; }
-    .result-sheet-container { background-color: var(--surface-card); border: 1px solid var(--border-subtle); border-radius: 16px; padding: 35px 45px; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05); }
+    #mainTitle { /* Title inside your checker */
+      font-size: 2.5em;
+      font-weight: 800;
+      color: var(--text-header);
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    textarea {
+      width: 100%;
+      height: 150px;
+      margin-bottom: 15px;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+      font-size: 16px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+    }
+    textarea:focus {
+        outline: none;
+        border-color: var(--primary-accent);
+        box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
+    }
+    #inputSection label { /* Specific to your original layout */
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: block;
+    }
+    #submitButton {
+      background-color: var(--primary-accent);
+      color: white;
+      padding: 12px 25px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: block;
+      width: 100%;
+      margin-top: 15px;
+      transition: all 0.2s ease;
+    }
+    #submitButton:hover {
+        background-color: #004d40;
+        transform: translateY(-2px);
+    }
+    #submitButton:disabled {
+        background-color: #a5d6a7;
+        cursor: not-allowed;
+        transform: none;
+    }
+    #modern-results-view {
+      max-width: 1200px;
+      margin: 30px auto;
+    }
+    .result-sheet-container {
+        background-color: var(--surface-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 35px 45px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+    }
     .result-sheet-container h1 { font-size: 2.25em; font-weight: 800; margin: 0 0 25px 0; color: var(--text-header); }
     .stats-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
     .stats-row { display: flex; flex-wrap: wrap; gap: 12px; }
@@ -105,27 +197,45 @@
     .filter-section, .action-section { display: flex; align-items: center; gap: 10px; }
     .filter-section label { font-weight: 600; color: var(--text-body); margin: 0;}
     .filter-section select, .view-switch-btn { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-weight: 500; cursor: pointer; }
+    .view-switch-btn { transition: all 0.2s; }
+    .view-switch-btn:hover { background-color: #e2e8f0; }
     .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
+    .columns.view-top-bottom { grid-template-columns: 1fr; }
     .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; }
     .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; }
-    .word-wrapper { cursor: pointer; display: inline; position: relative; }
+    .col p { margin: 0; }
+    .word-wrapper { cursor: pointer; display: inline; transition: background-color 0.2s ease, transform 0.2s ease; position: relative; }
     .active-highlight { background-color: #4B0082 !important; color: white !important; border-radius: 3px; }
-    .highlight { position: relative; padding: 2px 5px; border-radius: 4px; margin: 0 1px; font-weight: 500; display: inline; }
+    .highlight { position: relative; padding: 2px 5px; border-radius: 4px; margin: 0 1px; font-weight: 500; display: inline; transition: transform 0.2s ease-out; }
+    .highlight:hover { transform: scale(1.15); z-index: 5; }
+    .highlight:hover::after { content: attr(data-tooltip-text); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; padding: 8px 12px; background-color: #111827; color: white; font-size: 0.8em; font-weight: 500; border-radius: 6px; white-space: nowrap; z-index: 10; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     .extra { background: var(--hl-additions); }
     .omission { background: var(--hl-omissions); }
+    .spelling b { font-weight: 700; color: #166534; }
     .spelling { background: var(--hl-spelling); }
     .capitalization { background: var(--hl-capitalization); }
     .punctuation { background: var(--hl-punctuation); }
-    .hidden-mistake { background: none !important; color: inherit !important; padding: 0 !important; }
+    .hidden-mistake { background: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; font-weight: normal !important; }
+    .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
     .action-buttons { text-align: center; padding-top: 30px; display: flex; gap: 15px; justify-content: center; }
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; }
+    .action-buttons .primary-btn { background-color: var(--primary-accent); color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
     .modal-overlay.visible { opacity: 1; pointer-events: auto; }
     .modal-content { background-color: var(--surface-card); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header);}
+    .modal-content ul { text-align: left; list-style-position: inside; padding: 0; margin: 0 0 30px 0; line-height: 2.2; color: var(--text-body); }
+    .modal-content ul li::marker { color: var(--primary-accent); }
+    .modal-close-btn { background-color: var(--primary-accent); color: white; padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; cursor: pointer; border: none; }
     #timerDisplay { position: fixed; top: 20px; right: 20px; font-size: 20px; background: var(--primary-accent); color: white; padding: 10px 15px; border-radius: 8px; z-index: 100; }
-
-    /* Volume slider specifically for player */
-    .vol-slider { width: 60px; height: 4px; cursor: pointer; }
+    @media print {
+      body, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
+      .action-buttons, .result-controls, .legend-container, #inputSection { display: none !important; }
+      .result-sheet-container { padding: 0; max-width: 100%; }
+      .col { border: 1px solid #ccc; max-height: none; overflow-y: visible; }
+      .columns { grid-template-columns: 1fr !important; }
+      #modern-results-view { display: block !important; }
+    }
   </style>
 </head>
 <body>
@@ -134,60 +244,49 @@
 
   <!-- VIEW 1: Initial Choice -->
   <div id="choiceSection" class="main-container">
-    <h1 id="mainTitle">Modern Transcription Checker</h1>
-    <p style="text-align: center; margin-bottom: 20px; color: var(--text-muted);">Select your preferred mode to begin</p>
+    <h1 class="page-title">Modern Transcription Checker</h1>
+    <p>How would you like to start?</p>
     <div class="choice-btn-group">
-        <button id="useAudioBtn" class="primary-btn">Practice with Audio Player</button>
-        <button id="useTextBtn" class="secondary-btn">Direct Text Comparison</button>
+        <button id="useAudioBtn" class="primary-btn">Use Audio Player</button>
+        <button id="useTextBtn" class="secondary-btn">Go Directly to Text Checker</button>
     </div>
   </div>
 
-  <!-- VIEW 2: Concise Modern Audio Player -->
+  <!-- VIEW 2: Audio Player Setup -->
   <div id="audioPlayerSection" class="main-container hidden">
-      <h1 id="mainTitle">Dictation Player</h1>
-      
-      <div class="form-group" style="margin-bottom: 20px;">
-          <label style="font-weight: 700; color: var(--text-header); display: block; margin-bottom: 8px;">Audio Source</label>
+      <h1 class="page-title">Audio Player</h1>
+      <div class="form-group">
+          <label for="audioUpload">1. Upload Audio Dictation:</label>
           <div class="file-upload-wrapper">
-              <input type="file" id="audioUpload" accept="audio/*" style="font-size: 0.9em;">
-              <span id="fileName" style="display:none"></span>
+              <input type="file" id="audioUpload" accept="audio/*">
+              <span id="fileName">No file chosen</span>
+          </div>
+          <div class="modern-player">
+            <button class="play-pause-btn" id="playPauseBtn">
+                <svg id="playIcon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" /></svg>
+                <svg id="pauseIcon" class="hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M5.75 4.5a.75.75 0 00-.75.75v10.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-1.5zm6.5 0a.75.75 0 00-.75.75v10.5c0 .414.336.75.75.75h1.5a.75.75 0 00.75-.75V5.25a.75.75 0 00-.75-.75h-1.5z" /></svg>
+            </button>
+            <div class="time-display"><span id="currentTime">0:00</span> / <span id="totalDuration">0:00</span></div>
+            <input type="range" class="seek-slider" id="seekSlider" value="0" step="1">
+            <div class="volume-controls">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M13.5 4.06c0-1.34-1.61-2.26-2.79-1.59L5.15 6H3a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2.15l5.56 3.53c1.18.67 2.79-.25 2.79-1.59v-12Zm-2.19 12.72-4.1-2.61A.99.99 0 0 0 6.5 14H5V9.92h1.5c.34 0 .67-.17.86-.45l4.1-2.6V16.78Z M19 12a5 5 0 0 0-3.54 8.54l-1.41-1.41A3 3 0 0 1 16 12a3 3 0 0 1-1.95-5.13l1.41-1.41A5 5 0 0 0 19 12Z" /></svg>
+                <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+            </div>
           </div>
       </div>
-
-      <div class="compact-player-card">
-          <div class="player-row">
-              <button class="play-pause-btn" id="playPauseBtn">
-                  <svg id="playIcon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                  <svg id="pauseIcon" class="hidden" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
-              </button>
-              <div class="time-display">
-                  <span id="currentTime">0:00</span> / <span id="totalDuration">0:00</span>
-              </div>
-              <input type="range" class="seek-slider" id="seekSlider" value="0" step="0.1">
-              <div class="volume-controls" style="display: flex; align-items: center; gap: 8px;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="color: var(--text-muted);"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z"/></svg>
-                  <input type="range" class="vol-slider" id="volumeSlider" min="0" max="1" step="0.01" value="1">
-              </div>
-          </div>
-
-          <div class="settings-grid">
-              <div class="control-group">
-                  <label>Word Count</label>
-                  <input type="number" id="wordCount" class="modern-input" placeholder="Total words...">
-              </div>
-              <div class="control-group">
-                  <label>Target Speed (WPM)</label>
-                  <select id="speedDropdown" class="modern-select">
-                      <!-- Populated via JS -->
-                  </select>
-              </div>
-          </div>
+      <div class="form-group">
+          <label for="wordCount">2. Number of Words in Dictation:</label>
+          <input type="number" id="wordCount" placeholder="e.g., 1000">
       </div>
-
-      <button id="goToCheckerBtn" class="primary-btn" style="margin-top: 25px;">Proceed to Checker</button>
+      <div class="form-group">
+          <label for="speedControl" style="margin-top: 10px;">3. Set Playback Speed:</label>
+          <label style="font-weight: normal; font-size: 1em; text-align: center; margin-top: 10px;">Speed: <span id="speedValue">100</span> WPM</label>
+          <input type="range" id="speedControl" min="60" max="160" value="100" step="5">
+      </div>
+      <button id="goToCheckerBtn" class="primary-btn">Go to Checker</button>
   </div>
   
-  <!-- VIEW 3: YOUR ORIGINAL CHECKER CODE (EXACT PHOTOCOPY) -->
+  <!-- VIEW 3: YOUR ORIGINAL CHECKER CODE (Initially Hidden) -->
   <div id="checkerContainer" class="hidden">
     <div id="inputSection">
       <h1 id="mainTitle">Modern Transcription Checker</h1>
@@ -212,12 +311,14 @@
     <div id="instructions-modal" class="modal-overlay">
       <div class="modal-content">
           <h2>Welcome to the Modern Transcription Checker!</h2>
-          <ul style="text-align: left; margin: 20px 0; line-height: 1.8;">
+          <ul>
               <li><b>Step 1:</b> Paste the original dictation text into the "Original Passage" box.</li>
               <li><b>Step 2:</b> Type or paste your transcribed text into the "Your Transcription" box.</li>
               <li><b>Step 3:</b> Click "Check Accuracy" to see a detailed, interactive report.</li>
+              <li><b>Timer Mode:</b> Pasting into the top box starts an optional 50-minute typing timer.</li>
+              <li><b>Re-evaluate:</b> On the results page, you can edit the original text and re-check your score.</li>
           </ul>
-          <button id="close-instructions-btn" class="modal-close-btn" style="background: var(--primary-accent); color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">Got it, Let's Start!</button>
+          <button id="close-instructions-btn" class="modal-close-btn">Got it, Let's Start!</button>
       </div>
     </div>
   </div>
@@ -232,11 +333,13 @@
     // --- Worker Setup ---
     let analysisWorker;
     if (window.Worker) {
-        analysisWorker = new Worker('worker.js'); 
+        analysisWorker = new Worker('worker.js'); // Assumes worker.js is in the same directory
         analysisWorker.onmessage = handleWorkerResult;
+    } else {
+        alert("Your browser does not support Web Workers.");
     }
 
-    // --- Navigation Logic ---
+    // --- NEW: Navigation and State Management ---
     function showScreen(screenId) {
         document.getElementById('choiceSection').classList.add('hidden');
         document.getElementById('audioPlayerSection').classList.add('hidden');
@@ -245,175 +348,291 @@
     }
 
     function resetApp() {
+        // This is the NEW "goHome" function for the whole app
+        // It calls your original goHome function to reset the checker's internal state
         goHome(); 
+        
+        // And it also resets the audio player and navigates to the start
         const audio = document.getElementById('audioPlayer');
         audio.pause();
         audio.removeAttribute('src');
         audio.load();
         document.getElementById("audioUpload").value = "";
+        document.getElementById("fileName").textContent = "No file chosen";
         document.getElementById("wordCount").value = "";
+
         showScreen('choiceSection');
     }
 
-    // --- SYNCED PLAYER LOGIC ---
-    const audio = document.getElementById('audioPlayer');
-    const currentTimeEl = document.getElementById('currentTime');
-    const totalDurationEl = document.getElementById('totalDuration');
-    const seekSlider = document.getElementById('seekSlider');
-    const speedDropdown = document.getElementById('speedDropdown');
-    const wordCountInput = document.getElementById('wordCount');
-
-    // Populate Dropdown (60 to 160, step 5)
-    for (let wpm = 60; wpm <= 160; wpm += 5) {
-        const opt = document.createElement('option');
-        opt.value = wpm;
-        opt.textContent = `${wpm} WPM`;
-        if (wpm === 100) opt.selected = true;
-        speedDropdown.appendChild(opt);
+    // --- ORIGINAL CORE LOGIC (UNCHANGED) ---
+    function escapeHtml(s = "") {
+        return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
-
-    function formatScaledTime(seconds) {
-        const rate = audio.playbackRate || 1;
-        const scaledSeconds = seconds / rate;
-        const min = Math.floor(scaledSeconds / 60);
-        const sec = Math.floor(scaledSeconds % 60).toString().padStart(2, '0');
-        return `${min}:${sec}`;
-    }
-
-    function updatePlayerUI() {
-        if (!isNaN(audio.duration)) {
-            currentTimeEl.textContent = formatScaledTime(audio.currentTime);
-            totalDurationEl.textContent = formatScaledTime(audio.duration);
-            seekSlider.value = audio.currentTime;
-        }
-    }
-
-    function adjustPlaybackSpeed() {
-        const wordCount = parseInt(wordCountInput.value);
-        const targetWPM = parseInt(speedDropdown.value);
-        if (wordCount > 0 && audio.duration > 0 && isFinite(audio.duration)) {
-            const originalWPM = wordCount / (audio.duration / 60);
-            const rate = targetWPM / originalWPM;
-            audio.playbackRate = isFinite(rate) ? rate : 1;
-        } else {
-            audio.playbackRate = 1;
-        }
-        updatePlayerUI(); // Immediately update duration text when speed changes
-    }
-
-    // --- ORIGINAL CORE LOGIC (PHOTOCOPY) ---
-    function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
     function submitTranscription() {
         const originalText = document.getElementById("original").value.trim();
         const typedText = document.getElementById("typed").value.trim();
-        if (!originalText || !typedText) return alert("Please fill in both boxes.");
-        document.getElementById('submitButton').disabled = true;
+        if (!originalText || !typedText) {
+            return alert("Please fill in both the original and transcription text boxes.");
+        }
+        const submitBtn = document.getElementById('submitButton');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Calculating...';
+        clearInterval(timerInterval);
+        const timerDisplay = document.getElementById('timerDisplay');
+        if (timerDisplay) timerDisplay.remove();
         g_lastTypedText = typedText;
-        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds: 0, options: { countCommaMistakes: document.getElementById("includeComma").checked } });
+        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
+        const options = { countCommaMistakes: document.getElementById("includeComma").checked };
+        analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds, options });
     }
 
     function handleWorkerResult(event) {
-        renderResultSheet(event.data);
+        const results = event.data;
+        g_current_alignment = results.alignment;
+        renderResultSheet(results);
         document.getElementById("inputSection").classList.add("hidden");
         document.getElementById("modern-results-view").classList.remove("hidden");
-        document.getElementById('submitButton').disabled = false;
+        const submitBtn = document.getElementById('submitButton');
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Check Accuracy';
     }
-
+    
+    // --- ORIGINAL UI RENDERING (UNCHANGED) ---
     function buildResultHtmlFromAlignment(alignment) {
-        let res = "";
-        alignment.forEach((entry, k) => {
-            let cls = '', tooltip = '', inner = '';
+        let resultHtmlContent = "";
+        for (let k = 0; k < alignment.length; k++) {
+            const entry = alignment[k];
+            let wordHtml = '', tooltipText = '', highlightClass = '', innerHtml = '';
             switch (entry.mistakeType) {
-                case 'correct': inner = escapeHtml(entry.t || ''); break;
-                case 'omission': cls = 'omission'; inner = `(${escapeHtml(entry.o)})`; break;
-                case 'extra': cls = 'extra'; inner = escapeHtml(entry.t); break;
-                case 'spelling': cls = 'spelling'; inner = `${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)`; break;
-                case 'capitalization': cls = 'capitalization'; inner = escapeHtml(entry.t); break;
-                case 'punctuation': cls = 'punctuation'; inner = escapeHtml(entry.t); break;
+                case 'correct': innerHtml = escapeHtml(entry.t || ''); tooltipText = "Correct"; break;
+                case 'omission': highlightClass = 'omission'; tooltipText = `Omitted: "${escapeHtml(entry.o)}"`; innerHtml = `(${escapeHtml(entry.o)})`; break;
+                case 'extra': highlightClass = 'extra'; tooltipText = `Extra Word: "${escapeHtml(entry.t)}"`; innerHtml = escapeHtml(entry.t); break;
+                case 'spelling': highlightClass = 'spelling'; tooltipText = `Spelling: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = `${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)`; break;
+                case 'capitalization': highlightClass = 'capitalization'; tooltipText = `Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = escapeHtml(entry.t); break;
+                case 'punctuation': highlightClass = 'punctuation'; tooltipText = `Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`; innerHtml = escapeHtml(entry.t); break;
             }
-            res += `<span class="word-wrapper" data-index="${k}"><span class="highlight ${cls}">${inner}</span></span> `;
-        });
-        return res;
+            if (highlightClass) {
+                 wordHtml = `<span class='highlight ${highlightClass}' data-mistake-type='${entry.mistakeType}' data-tooltip-text='${tooltipText}'>${innerHtml}</span>`;
+            } else {
+                wordHtml = `<span>${innerHtml}</span>`;
+            }
+            resultHtmlContent += `<span class="word-wrapper" data-index="${k}">${wordHtml}</span> `;
+        }
+        return resultHtmlContent;
     }
 
     function renderResultSheet(data) {
         const container = document.getElementById('resultSheetContainer');
+        let originalTextHtml = data.alignment.map((entry, index) => 
+            (entry.type === 'ins') ? '' : `<span class="word-wrapper" data-index="${index}">${escapeHtml(entry.o || '')}</span>`
+        ).join(' ');
         let highlightedHtml = buildResultHtmlFromAlignment(data.alignment);
         container.innerHTML = `
             <div class="result-sheet-container">
                 <h1>Result Sheet:</h1>
                 <div class="stats-container">
                     <div class="stats-row">
-                        <div class="stat-pill">Total Words: ${data.totalWords}</div>
-                        <div class="stat-pill red">Full Mistakes: ${data.fullMistakes}</div>
-                        <div class="stat-pill amber">Half Mistakes: ${data.halfMistakes}</div>
-                        <div class="stat-pill">Accuracy: ${data.accuracy}%</div>
+                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>Total Words: ${data.totalWords}</div>
+                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm.75-13.25a.75.75 0 00-1.5 0v6.5c0 .414.336.75.75.75h4.5a.75.75 0 000-1.5h-3.75v-5.5z" clip-rule="evenodd" /></svg>Typing Speed: ${data.typingSpeed} WPM</div>
+                        <div class="stat-pill red"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" /></svg>Full Mistakes: ${data.fullMistakes}</div>
+                        <div class="stat-pill amber"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" /></svg>Half Mistakes: ${data.halfMistakes}</div>
                     </div>
+                    <div class="stats-row">
+                        <div class="stat-pill">Total % of Mistakes: ${data.mistakePercent}%</div>
+                        <div class="stat-pill"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" /></svg>Accuracy: ${data.accuracy}%</div>
+                    </div>
+                </div>
+                <div class="legend-container">
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span> Additions/Substitutions</div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span> Omissions</div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span> Spelling</div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span> Capitalization</div>
+                    <div class="legend-item"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span> Punctuation</div>
                 </div>
                 <div class="result-controls">
                     <div class="filter-section">
-                        <label>Filter:</label>
-                        <select id="mistakeFilter"><option value="all">Show All</option><option value="omission">Omissions</option><option value="extra">Additions</option><option value="spelling">Spelling</option></select>
+                        <label for="mistakeFilter">Filter:</label>
+                        <select id="mistakeFilter"><option value="all">Show All</option><option value="omission-substitution">Omissions & Additions</option><option value="omission">Omissions Only</option><option value="extra">Additions Only</option><option value="spelling">Spelling Only</option><option value="capitalization">Capitalization Only</option><option value="punctuation">Punctuation Only</option></select>
                     </div>
-                    <button id="viewSwitchBtn" class="view-switch-btn">Switch View</button>
+                    <div class="action-section"><button id="reevaluateBtn" class="view-switch-btn">Re-evaluate Score</button></div>
+                    <button id="viewSwitchBtn" class="view-switch-btn">Switch to Top/Bottom View</button>
                 </div>
                 <div id="comparisonColumns" class="columns view-side-by-side">
-                    <div class="col" id="typedCol"><strong>Transcription:</strong><p>${highlightedHtml}</p></div>
-                    <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="true">${data.alignment.map(e => escapeHtml(e.o || '')).join(' ')}</p></div>
+                    <div class="col" id="typedCol"><strong>Your Transcription:</strong><p>${highlightedHtml}</p></div>
+                    <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="true">${originalTextHtml}</p></div>
                 </div>
             </div>`;
         initializeResultInteractivity();
     }
-
+    
     function initializeResultInteractivity() {
         document.getElementById('mistakeFilter').addEventListener('change', (e) => filterMistakes(e.target.value));
-        document.getElementById('viewSwitchBtn').addEventListener('click', () => document.getElementById('comparisonColumns').classList.toggle('view-side-by-side'));
-    }
-
-    function filterMistakes(type) {
-        document.querySelectorAll('.highlight').forEach(span => {
-            if (type === "all") span.classList.remove('hidden-mistake');
-            else span.classList.toggle('hidden-mistake', !span.classList.contains(type));
+        document.getElementById('reevaluateBtn').addEventListener('click', reevaluateScore);
+        const switchBtn = document.getElementById('viewSwitchBtn');
+        const columnsContainer = document.getElementById('comparisonColumns');
+        switchBtn.addEventListener('click', () => {
+            const isSideBySide = columnsContainer.classList.contains('view-side-by-side');
+            columnsContainer.classList.toggle('view-side-by-side', !isSideBySide);
+            columnsContainer.classList.toggle('view-top-bottom', isSideBySide);
+            switchBtn.textContent = isSideBySide ? 'Switch to Side-by-Side View' : 'Switch to Top/Bottom View';
+        });
+        columnsContainer.addEventListener('click', (e) => {
+            const target = e.target.closest('.word-wrapper');
+            if (!target) return;
+            const wordIndex = target.dataset.index;
+            if (wordIndex === null) return;
+            document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
+            document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => {
+                el.classList.add('active-highlight');
+                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
         });
     }
 
+    function reevaluateScore() {
+        const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
+        if (!correctedOriginalText || !g_lastTypedText) return alert("Could not find text to re-evaluate.");
+        const submitBtn = document.getElementById('submitButton');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Calculating...';
+        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
+        const options = { countCommaMistakes: document.getElementById("includeComma").checked };
+        analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds, options });
+        alert("Re-evaluating score with your corrections.");
+    }
+
+    function filterMistakes(type) {
+        document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
+        const spans = document.querySelectorAll('#typedCol .highlight');
+        spans.forEach(span => {
+            const mistakeType = span.getAttribute('data-mistake-type');
+            if (type === "all") span.classList.remove('hidden-mistake');
+            else if (type === "omission-substitution") span.classList.toggle('hidden-mistake', !(mistakeType === 'omission' || mistakeType === 'extra'));
+            else span.classList.toggle('hidden-mistake', mistakeType !== type);
+        });
+    }
+
+    // --- ORIGINAL UI & EVENT HANDLERS (UNCHANGED) ---
     function goHome() {
         document.getElementById("inputSection").classList.remove("hidden");
         document.getElementById("modern-results-view").classList.add("hidden");
         document.getElementById("original").value = "";
         document.getElementById("typed").value = "";
+        document.getElementById("original").classList.remove("hidden");
+        document.querySelector("label[for='original']").classList.remove("hidden");
+        const typedTextarea = document.getElementById("typed");
+        typedTextarea.style.height = "150px";
+        transcriptionTimerTotalTime = 0;
+        timeLeft = 0;
     }
 
-    // --- EVENT LISTENERS ---
+    function startTypingTimer(durationMinutes = 50) {
+      const timerDisplay = document.createElement('div');
+      timerDisplay.id = 'timerDisplay';
+      document.body.appendChild(timerDisplay);
+      transcriptionTimerTotalTime = durationMinutes * 60;
+      timeLeft = transcriptionTimerTotalTime;
+      function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        timerDisplay.textContent = `Time Left: ${minutes}m ${seconds}s`;
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          timerDisplay.textContent = "Time's up!";
+          submitTranscription();
+          return;
+        }
+        timeLeft--;
+      }
+      updateTimer();
+      timerInterval = setInterval(updateTimer, 1000);
+    }
+    
     document.addEventListener("DOMContentLoaded", () => {
+        // --- NEW Navigation Listeners ---
         document.getElementById('useAudioBtn').addEventListener('click', () => showScreen('audioPlayerSection'));
         document.getElementById('useTextBtn').addEventListener('click', () => showScreen('checkerContainer'));
         document.getElementById('goToCheckerBtn').addEventListener('click', () => showScreen('checkerContainer'));
-        document.getElementById('submitButton').addEventListener('click', submitTranscription);
-        document.getElementById('tryAnotherBtn').addEventListener('click', resetApp);
-        
-        // Player Control Listeners
-        document.getElementById('audioUpload').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file) { audio.src = URL.createObjectURL(file); audio.load(); }
-        });
 
-        document.getElementById('playPauseBtn').addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
-        audio.addEventListener('play', () => { document.getElementById('playIcon').classList.add('hidden'); document.getElementById('pauseIcon').classList.remove('hidden'); });
-        audio.addEventListener('pause', () => { document.getElementById('playIcon').classList.remove('hidden'); document.getElementById('pauseIcon').classList.add('hidden'); });
+        // --- ORIGINAL Event Listeners ---
+        document.getElementById('submitButton').addEventListener('click', submitTranscription);
+        document.getElementById('tryAnotherBtn').addEventListener('click', resetApp); // MODIFIED to call the new reset function
+        document.getElementById('printReportBtn').addEventListener('click', () => window.print());
+        document.getElementById('close-instructions-btn').addEventListener('click', () => {
+            document.getElementById('instructions-modal').classList.remove('visible');
+            localStorage.setItem('hasSeenInstructions', 'true');
+        });
+        if (!localStorage.getItem('hasSeenInstructions')) {
+            document.getElementById('instructions-modal').classList.add('visible');
+        }
+        document.getElementById("original").addEventListener("paste", function () {
+            setTimeout(() => {
+                document.getElementById("original").classList.add("hidden");
+                document.querySelector("label[for='original']").classList.add("hidden");
+                const typedTextarea = document.getElementById("typed");
+                typedTextarea.style.height = "calc(100vh - 200px)";
+                typedTextarea.focus();
+                startTypingTimer(50);
+            }, 100);
+        });
         
+        // --- NEW Audio Player Event Listeners ---
+        const audio = document.getElementById('audioPlayer');
+        const audioUpload = document.getElementById('audioUpload');
+        const fileNameDisplay = document.getElementById('fileName');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const playIcon = document.getElementById('playIcon');
+        const pauseIcon = document.getElementById('pauseIcon');
+        const seekSlider = document.getElementById('seekSlider');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const wordCountInput = document.getElementById('wordCount');
+        const speedControl = document.getElementById('speedControl');
+        const speedValue = document.getElementById('speedValue');
+
+        audioUpload.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = file.name;
+                audio.src = URL.createObjectURL(file);
+                audio.load();
+            }
+        });
+        playPauseBtn.addEventListener('click', () => audio.paused ? audio.play() : audio.pause());
+        audio.addEventListener('play', () => { playIcon.classList.add('hidden'); pauseIcon.classList.remove('hidden'); });
+        audio.addEventListener('pause', () => { playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); });
         audio.addEventListener('loadedmetadata', () => {
             seekSlider.max = audio.duration;
+            document.getElementById('totalDuration').textContent = formatTime(audio.duration);
             adjustPlaybackSpeed();
         });
-
-        audio.addEventListener('timeupdate', updatePlayerUI);
+        audio.addEventListener('timeupdate', () => {
+            document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
+            seekSlider.value = audio.currentTime;
+        });
         seekSlider.addEventListener('input', (e) => audio.currentTime = e.target.value);
-        document.getElementById('volumeSlider').addEventListener('input', (e) => audio.volume = e.target.value);
-        
-        speedDropdown.addEventListener('change', adjustPlaybackSpeed);
+        volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
         wordCountInput.addEventListener('input', adjustPlaybackSpeed);
+        speedControl.addEventListener('input', adjustPlaybackSpeed);
+        
+        function adjustPlaybackSpeed() {
+            const wordCount = parseInt(wordCountInput.value);
+            const targetWPM = parseInt(speedControl.value);
+            speedValue.textContent = targetWPM;
+            if (wordCount > 0 && audio.duration > 0 && isFinite(audio.duration)) {
+                const originalWPM = wordCount / (audio.duration / 60);
+                const rate = targetWPM / originalWPM;
+                audio.playbackRate = isFinite(rate) ? rate : 1;
+            } else {
+                audio.playbackRate = 1;
+            }
+        }
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return "0:00";
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
+            return `${min}:${sec}`;
+        }
     });
 </script>
 </body>
