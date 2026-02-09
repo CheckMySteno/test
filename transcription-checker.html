@@ -86,7 +86,7 @@
         font-weight: 600; transition: background-color 0.2s;
     }
     .file-upload-btn:hover { background-color: #004d40; }
-    .file-upload-btn.disabled { background-color: #a5d6a7; cursor: not-allowed; }
+    .file-upload-btn.disabled { background-color: #a5d6a7; cursor: not-allowed; opacity: 0.7; }
     .file-upload-btn svg { width: 18px; height: 18px; }
     #fileName { color: var(--text-body); font-size: 0.95em; }
 
@@ -399,7 +399,7 @@
         alert("Your browser does not support Web Workers.");
     }
 
-    // --- NEW: Navigation and State Management ---
+    // --- App Navigation & State Management ---
     function showScreen(screenId) {
         document.getElementById('choiceSection').classList.add('hidden');
         document.getElementById('audioPlayerSection').classList.add('hidden');
@@ -407,9 +407,11 @@
         document.getElementById(screenId).classList.remove('hidden');
     }
 
-    function resetApp() {
-        goHome(); 
-        
+    /**
+     * Resets only the state of the audio player without navigating.
+     * Used when switching between audio sources (file vs. YouTube).
+     */
+    function resetPlayerState() {
         const audio = document.getElementById('audioPlayer');
         audio.pause();
         audio.removeAttribute('src');
@@ -422,10 +424,9 @@
 
         document.getElementById("audioUpload").value = "";
         document.getElementById("fileName").textContent = "No file selected";
-        document.getElementById("wordCount").value = "";
         document.getElementById("youtubeUrlInput").value = "";
 
-        // Re-enable inputs
+        // Re-enable all inputs
         document.getElementById('youtubeUrlInput').disabled = false;
         document.getElementById('loadYoutubeBtn').disabled = false;
         document.getElementById('audioUploadLabel').classList.remove('disabled');
@@ -434,8 +435,19 @@
         activeAudioSource = null;
         clearInterval(timeUpdateInterval);
         resetPlayerUI();
-        showScreen('choiceSection');
     }
+
+    /**
+     * Resets the entire application to its initial state and navigates to the choice screen.
+     * Used for the "Start New Comparison" button.
+     */
+    function resetApp() {
+        goHome(); // Resets the checker text fields
+        resetPlayerState(); // Resets the entire player
+        document.getElementById("wordCount").value = ""; // Also clear word count on full reset
+        showScreen('choiceSection'); // Navigate home
+    }
+
 
     // --- ORIGINAL CORE LOGIC (UNCHANGED) ---
     function escapeHtml(s = "") {
@@ -647,7 +659,6 @@
         const seekSlider = document.getElementById('seekSlider');
         seekSlider.max = ytPlayer.getDuration();
         ytPlayer.setVolume(document.getElementById('volumeSlider').value * 100);
-        const availableRates = ytPlayer.getAvailablePlaybackRates();
         adjustPlaybackSpeed();
     }
 
@@ -685,7 +696,7 @@
             seekSlider.value = currentTime;
         }
 
-        if (isFinite(currentTime) && isFinite(duration) && isFinite(playbackRate) && playbackRate > 0) {
+        if (isFinite(currentTime) && isFinite(playbackRate) && playbackRate > 0) {
             document.getElementById('currentTime').textContent = formatTime(currentTime / playbackRate);
         }
     }
@@ -699,7 +710,7 @@
         let originalDuration;
         if (activeAudioSource === 'file') {
             originalDuration = document.getElementById('audioPlayer').duration;
-        } else if (activeAudioSource === 'youtube') {
+        } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getDuration === 'function') {
             originalDuration = ytPlayer.getDuration();
         }
 
@@ -712,12 +723,14 @@
         
         if (activeAudioSource === 'file') {
             document.getElementById('audioPlayer').playbackRate = rate;
-        } else if (activeAudioSource === 'youtube') {
+        } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.setPlaybackRate === 'function') {
             ytPlayer.setPlaybackRate(rate);
         }
 
         const newDuration = originalDuration / rate;
-        document.getElementById('totalDuration').textContent = formatTime(newDuration);
+        if (isFinite(newDuration)) {
+            document.getElementById('totalDuration').textContent = formatTime(newDuration);
+        }
         updatePlayerTime();
     }
 
@@ -749,12 +762,12 @@
             speedSelector.appendChild(option);
         }
 
-        // --- NEW Navigation Listeners ---
+        // --- App Navigation Listeners ---
         document.getElementById('useAudioBtn').addEventListener('click', () => showScreen('audioPlayerSection'));
         document.getElementById('useTextBtn').addEventListener('click', () => showScreen('checkerContainer'));
         document.getElementById('goToCheckerBtn').addEventListener('click', () => showScreen('checkerContainer'));
 
-        // --- ORIGINAL Event Listeners ---
+        // --- Original Checker Event Listeners ---
         document.getElementById('submitButton').addEventListener('click', submitTranscription);
         document.getElementById('tryAnotherBtn').addEventListener('click', resetApp);
         document.getElementById('printReportBtn').addEventListener('click', () => window.print());
@@ -790,7 +803,7 @@
         audioUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                resetApp(); // Reset everything before loading new file
+                resetPlayerState(); // BUG FIX: Reset only the player, not the whole app
                 activeAudioSource = 'file';
                 fileNameDisplay.textContent = file.name;
                 audio.src = URL.createObjectURL(file);
@@ -803,11 +816,10 @@
 
         loadYoutubeBtn.addEventListener('click', () => {
             const url = youtubeUrlInput.value;
-            // Regex to extract video ID from various YouTube URL formats
             const videoIdMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (videoIdMatch && videoIdMatch[1]) {
                 const videoId = videoIdMatch[1];
-                resetApp(); // Reset everything
+                resetPlayerState(); // BUG FIX: Reset only the player, not the whole app
                 activeAudioSource = 'youtube';
                 initializeYoutubePlayer(videoId);
                 fileNameDisplay.textContent = "Loading YouTube Audio...";
@@ -820,9 +832,10 @@
         });
 
         playPauseBtn.addEventListener('click', () => {
+            if (!activeAudioSource) return;
             if (activeAudioSource === 'file') {
                 audio.paused ? audio.play() : audio.pause();
-            } else if (activeAudioSource === 'youtube' && ytPlayer) {
+            } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
                 const playerState = ytPlayer.getPlayerState();
                 if (playerState === YT.PlayerState.PLAYING) {
                     ytPlayer.pauseVideo();
@@ -841,9 +854,10 @@
         audio.addEventListener('timeupdate', updatePlayerTime);
         
         seekSlider.addEventListener('input', (e) => {
+            if (!activeAudioSource) return;
             if (activeAudioSource === 'file') {
                 audio.currentTime = e.target.value;
-            } else if (activeAudioSource === 'youtube' && ytPlayer) {
+            } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.seekTo === 'function') {
                 ytPlayer.seekTo(e.target.value, true);
             }
             updatePlayerTime();
@@ -852,7 +866,7 @@
         volumeSlider.addEventListener('input', (e) => {
              if (activeAudioSource === 'file') {
                 audio.volume = e.target.value;
-            } else if (activeAudioSource === 'youtube' && ytPlayer) {
+            } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.setVolume === 'function') {
                 ytPlayer.setVolume(e.target.value * 100);
             }
         });
