@@ -77,9 +77,9 @@
     .secondary-btn:hover { background-color: #e0f2f1; }
     .form-group { margin-bottom: 25px; }
     #audioPlayerSection label { font-weight: 600; font-size: 1.05em; color: var(--text-header); display: block; }
-    input[type="number"] {
+    input[type="number"], .speed-selector-dropdown {
         width: 100%; margin-top: 8px; padding: 12px; border-radius: 8px; border: 1px solid var(--border-subtle);
-        font-size: 16px; font-family: 'Inter', sans-serif;
+        font-size: 16px; font-family: 'Inter', sans-serif; background-color: white;
     }
     .file-upload-wrapper { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
     #fileName { color: var(--text-muted); font-size: 0.9em; }
@@ -279,9 +279,17 @@
           <input type="number" id="wordCount" placeholder="e.g., 1000">
       </div>
       <div class="form-group">
-          <label for="speedControl" style="margin-top: 10px;">3. Set Playback Speed:</label>
-          <label style="font-weight: normal; font-size: 1em; text-align: center; margin-top: 10px;">Speed: <span id="speedValue">100</span> WPM</label>
-          <input type="range" id="speedControl" min="60" max="160" value="100" step="5">
+          <label for="speedSelector">3. Select Playback Speed:</label>
+          <select id="speedSelector" class="speed-selector-dropdown">
+              <option value="60">60 WPM</option>
+              <option value="80">80 WPM</option>
+              <option value="100" selected>100 WPM</option>
+              <option value="120">120 WPM</option>
+              <option value="140">140 WPM</option>
+              <option value="160">160 WPM</option>
+              <option value="180">180 WPM</option>
+              <option value="200">200 WPM</option>
+          </select>
       </div>
       <button id="goToCheckerBtn" class="primary-btn">Go to Checker</button>
   </div>
@@ -587,8 +595,7 @@
         const seekSlider = document.getElementById('seekSlider');
         const volumeSlider = document.getElementById('volumeSlider');
         const wordCountInput = document.getElementById('wordCount');
-        const speedControl = document.getElementById('speedControl');
-        const speedValue = document.getElementById('speedValue');
+        const speedSelector = document.getElementById('speedSelector');
 
         audioUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
@@ -603,32 +610,37 @@
         audio.addEventListener('pause', () => { playIcon.classList.remove('hidden'); pauseIcon.classList.add('hidden'); });
         audio.addEventListener('loadedmetadata', () => {
             seekSlider.max = audio.duration;
-            document.getElementById('totalDuration').textContent = formatTime(audio.duration);
             adjustPlaybackSpeed();
         });
         audio.addEventListener('timeupdate', () => {
-            document.getElementById('currentTime').textContent = formatTime(audio.currentTime);
+            document.getElementById('currentTime').textContent = formatTime(audio.currentTime / audio.playbackRate);
             seekSlider.value = audio.currentTime;
         });
         seekSlider.addEventListener('input', (e) => audio.currentTime = e.target.value);
         volumeSlider.addEventListener('input', (e) => audio.volume = e.target.value);
         wordCountInput.addEventListener('input', adjustPlaybackSpeed);
-        speedControl.addEventListener('input', adjustPlaybackSpeed);
+        speedSelector.addEventListener('change', adjustPlaybackSpeed);
         
         function adjustPlaybackSpeed() {
             const wordCount = parseInt(wordCountInput.value);
-            const targetWPM = parseInt(speedControl.value);
-            speedValue.textContent = targetWPM;
+            const targetWPM = parseInt(speedSelector.value);
+
+            let rate = 1.0;
             if (wordCount > 0 && audio.duration > 0 && isFinite(audio.duration)) {
                 const originalWPM = wordCount / (audio.duration / 60);
-                const rate = targetWPM / originalWPM;
-                audio.playbackRate = isFinite(rate) ? rate : 1;
-            } else {
-                audio.playbackRate = 1;
+                const calculatedRate = targetWPM / originalWPM;
+                rate = isFinite(calculatedRate) ? calculatedRate : 1.0;
             }
+            audio.playbackRate = rate;
+
+            const newDuration = audio.duration / audio.playbackRate;
+            const newCurrentTime = audio.currentTime / audio.playbackRate;
+            document.getElementById('totalDuration').textContent = formatTime(newDuration);
+            document.getElementById('currentTime').textContent = formatTime(newCurrentTime);
         }
+
         function formatTime(seconds) {
-            if (isNaN(seconds)) return "0:00";
+            if (isNaN(seconds) || seconds < 0) return "0:00";
             const min = Math.floor(seconds / 60);
             const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
             return `${min}:${sec}`;
