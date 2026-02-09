@@ -659,6 +659,11 @@
         const seekSlider = document.getElementById('seekSlider');
         seekSlider.max = ytPlayer.getDuration();
         ytPlayer.setVolume(document.getElementById('volumeSlider').value * 100);
+        
+        // --- FIX: Update status message from "Loading..." to the video title ---
+        const videoTitle = ytPlayer.getVideoData().title;
+        document.getElementById('fileName').textContent = videoTitle || "YouTube audio loaded";
+
         adjustPlaybackSpeed();
     }
 
@@ -686,12 +691,10 @@
         if (activeAudioSource === 'file') {
             const audio = document.getElementById('audioPlayer');
             currentTime = audio.currentTime;
-            duration = audio.duration;
             playbackRate = audio.playbackRate;
             seekSlider.value = currentTime;
         } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
             currentTime = ytPlayer.getCurrentTime();
-            duration = ytPlayer.getDuration();
             playbackRate = ytPlayer.getPlaybackRate();
             seekSlider.value = currentTime;
         }
@@ -803,12 +806,11 @@
         audioUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
-                resetPlayerState(); // BUG FIX: Reset only the player, not the whole app
+                resetPlayerState(); 
                 activeAudioSource = 'file';
                 fileNameDisplay.textContent = file.name;
                 audio.src = URL.createObjectURL(file);
                 audio.load();
-                // Disable YouTube input
                 youtubeUrlInput.disabled = true;
                 loadYoutubeBtn.disabled = true;
             }
@@ -819,11 +821,10 @@
             const videoIdMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
             if (videoIdMatch && videoIdMatch[1]) {
                 const videoId = videoIdMatch[1];
-                resetPlayerState(); // BUG FIX: Reset only the player, not the whole app
+                resetPlayerState();
                 activeAudioSource = 'youtube';
-                initializeYoutubePlayer(videoId);
                 fileNameDisplay.textContent = "Loading YouTube Audio...";
-                // Disable file upload
+                initializeYoutubePlayer(videoId);
                 document.getElementById('audioUploadLabel').classList.add('disabled');
                 document.getElementById('audioUpload').disabled = true;
             } else {
@@ -833,6 +834,13 @@
 
         playPauseBtn.addEventListener('click', () => {
             if (!activeAudioSource) return;
+
+            // --- FIX: Check if word count is entered before playing ---
+            if (!wordCountInput.value) {
+                alert("Please enter the number of words in the dictation to begin.");
+                return;
+            }
+
             if (activeAudioSource === 'file') {
                 audio.paused ? audio.play() : audio.pause();
             } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
