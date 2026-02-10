@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Dexie.js for Local Database -->
+  <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
   <style>
     /* --- 1. Global & Base Styles --- */
@@ -59,7 +61,7 @@
       margin-bottom: 25px;
     }
 
-    /* --- 2. Player Section Styles (Unchanged) --- */
+    /* --- 2. Player Section Styles --- */
     #choiceSection { text-align: center; }
     .choice-btn-group { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
     
@@ -153,7 +155,7 @@
     
     #youtube-player-container { position: absolute; top: -9999px; left: -9999px; }
     
-    /* --- 3. UPDATED CHECKER & RESULT STYLES --- */
+    /* --- 3. Checker & Result Styles --- */
     #inputSection {
       max-width: 900px;
       margin: 0 auto 30px auto;
@@ -224,7 +226,7 @@
         transform: none;
     }
 
-    /* UPDATED: Focus Mode for Exam-like experience */
+    /* Focus Mode for Exam-like experience */
     #checkerContainer.focus-mode {
         position: fixed;
         top: 0; left: 0;
@@ -239,7 +241,7 @@
     #checkerContainer.focus-mode #inputSection {
         padding: 0; margin: 0;
         width: 100%;
-        flex-grow: 1; /* Make section fill parent */
+        flex-grow: 1;
         max-width: none;
         border: none;
         box-shadow: none;
@@ -256,7 +258,6 @@
     }
     #checkerContainer.focus-mode #submitButton { display: none; }
     
-    /* NEW: Finish button for Focus mode */
     #finishButton {
         position: fixed;
         top: 20px;
@@ -311,8 +312,10 @@
     .punctuation { background: var(--hl-punctuation); }
     .hidden-mistake { background: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; font-weight: normal !important; }
     .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
-    .action-buttons { text-align: center; padding-top: 30px; display: flex; gap: 15px; justify-content: center; }
+    .action-buttons { text-align: center; padding-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;}
     .action-buttons .primary-btn { background-color: var(--primary-accent); color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
+    #analysisBtn { background-color: #4f46e5; }
+    
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
     .modal-overlay.visible { opacity: 1; pointer-events: auto; }
     .modal-content { background-color: var(--surface-card); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
@@ -417,6 +420,7 @@
     <div id="modern-results-view" class="hidden">
       <div id="resultSheetContainer"></div>
       <div class="action-buttons">
+        <button id="analysisBtn" class="primary-btn">View Analysis Dashboard</button>
         <button id="printReportBtn" class="primary-btn">Download Report</button>
         <button id="tryAnotherBtn" class="primary-btn">Start New Comparison</button>
       </div>
@@ -458,8 +462,16 @@
 
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
+    // --- Dexie.js Local Database Setup ---
+    const localDb = new Dexie("CheckMyStenoDB");
+    localDb.version(1).stores({
+        attempts: '++id, timestamp, dictationName, accuracy, wpm',
+        mistakeLibrary: '++id, &[originalWord+typedWord], count',
+        overallStats: 'id'
+    });
+
     // --- Global State ---
-    let g_lastTypedText = "";
+    let g_lastTypedText = "", g_lastOriginalText = "";
     let g_current_alignment = [];
     let timerInterval;
     let transcriptionTimerTotalTime = 0, timeLeft = 0;
@@ -539,15 +551,26 @@
         const timerDisplay = document.getElementById('timerDisplay');
         if (timerDisplay) timerDisplay.remove();
         g_lastTypedText = typedText;
+        g_lastOriginalText = originalText;
         const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
         const options = { countCommaMistakes: document.getElementById("includeComma").checked };
         analysisWorker.postMessage({ originalText, typedText, timeTakenSeconds, options });
     }
 
-    function handleWorkerResult(event) {
+    async function handleWorkerResult(event) {
         const results = event.data;
         g_current_alignment = results.alignment;
         renderResultSheet(results);
+        
+        // --- NEW: Auto-Save to Database ---
+        try {
+            await saveAttempt(g_lastOriginalText, g_lastTypedText, results);
+            console.log("✅ Attempt saved successfully to local database.");
+        } catch (error) {
+            console.error("❌ Failed to save attempt:", error);
+            alert("Could not save the results to the analysis dashboard due to an error.");
+        }
+
         document.getElementById("inputSection").classList.add("hidden");
         document.getElementById("modern-results-view").classList.remove("hidden");
         const submitBtn = document.getElementById('submitButton');
@@ -616,7 +639,7 @@
                     <button id="viewSwitchBtn" class="view-switch-btn">Switch to Side-by-Side View</button>
                 </div>
                 <div id="comparisonColumns" class="columns view-top-bottom">
-                    <div class="col" id="typedCol"><strong>Your Transcription:</strong><p>${highlightedHtml}</p></div>
+                    <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText">${highlightedHtml}</p></div>
                     <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="true">${originalTextHtml}</p></div>
                 </div>
             </div>`;
@@ -644,6 +667,9 @@
                 el.classList.add('active-highlight');
                 el.scrollIntoView({ behavior: 'smooth', block: 'center' });
             });
+        });
+        document.getElementById('analysisBtn').addEventListener('click', () => {
+            window.location.href = 'test-analysis.html';
         });
     }
 
@@ -706,8 +732,77 @@
       updateTimer();
       timerInterval = setInterval(updateTimer, 1000);
     }
+
+    // --- DATABASE SAVING LOGIC ---
+    async function updateMistakeLibrary(alignmentData) {
+        const spellingMistakes = alignmentData.filter(e => e.mistakeType === 'spelling');
+        if (spellingMistakes.length === 0) return;
+
+        await localDb.transaction('rw', localDb.mistakeLibrary, async () => {
+            for (const mistake of spellingMistakes) {
+                const originalWord = (mistake.o || '').replace(/[.,]$/, '').toLowerCase();
+                const typedWord = (mistake.t || '').replace(/[.,]$/, '').toLowerCase();
+                if (!originalWord || !typedWord || originalWord === typedWord) continue;
+
+                const existingEntry = await localDb.mistakeLibrary.where({ originalWord, typedWord }).first();
+                if (existingEntry) {
+                    await localDb.mistakeLibrary.update(existingEntry.id, { count: existingEntry.count + 1 });
+                } else {
+                    await localDb.mistakeLibrary.add({ originalWord, typedWord, count: 1 });
+                }
+            }
+        });
+    }
+
+    async function updateOverallStats(newAttemptStats) {
+        await localDb.transaction('rw', localDb.overallStats, async () => {
+            const stats = await localDb.overallStats.get(1);
+            const accuracy = parseFloat(newAttemptStats.accuracy);
+            const wpm = parseFloat(newAttemptStats.typingSpeed);
+
+            if (!stats) {
+                await localDb.overallStats.put({ id: 1, totalAttempts: 1, bestAccuracy: accuracy, bestWPM: wpm, avgAccuracy: accuracy, avgWpm: wpm });
+                return;
+            }
+
+            const newTotal = (stats.totalAttempts || 0) + 1;
+            const newAvgAccuracy = ((stats.avgAccuracy * stats.totalAttempts) + accuracy) / newTotal;
+            const newAvgWpm = ((stats.avgWpm * stats.totalAttempts) + wpm) / newTotal;
+
+            await localDb.overallStats.put({ 
+                id: 1, 
+                totalAttempts: newTotal, 
+                avgAccuracy: newAvgAccuracy, 
+                avgWpm: newAvgWpm, 
+                bestAccuracy: Math.max(stats.bestAccuracy, accuracy), 
+                bestWPM: Math.max(stats.bestWPM, wpm) 
+            });
+        });
+    }
+
+    async function saveAttempt(original, typed, analysisResult) {
+        const stats = await localDb.overallStats.get(1);
+        const attemptNumber = (stats ? stats.totalAttempts : 0) + 1;
+        const dictationName = `Your Steno ${attemptNumber}`;
+
+        const fullResultData = {
+            timestamp: new Date().toISOString(),
+            dictationName: dictationName,
+            accuracy: parseFloat(analysisResult.accuracy),
+            wpm: parseFloat(analysisResult.typingSpeed),
+            originalText: original,
+            typedText: typed,
+            fullMistakes: analysisResult.fullMistakes,
+            halfMistakes: analysisResult.halfMistakes,
+            highlightedHtml: document.getElementById('editableTypedText').innerHTML,
+        };
+
+        await localDb.attempts.add(fullResultData);
+        await updateOverallStats(analysisResult);
+        await updateMistakeLibrary(analysisResult.alignment);
+    }
     
-    // --- PLAYER LOGIC (UNCHANGED) ---
+    // --- PLAYER LOGIC ---
     function onYouTubeIframeAPIReady() {}
     function initializeYoutubePlayer(videoId) {
         if (ytPlayer && typeof ytPlayer.destroy === 'function') ytPlayer.destroy();
