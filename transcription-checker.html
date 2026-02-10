@@ -29,6 +29,7 @@
       --hl-capitalization: #bae6fd; 
       --hl-punctuation: #ddd6fe;   
     }
+    * { box-sizing: border-box; }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -58,7 +59,7 @@
       margin-bottom: 25px;
     }
 
-    /* --- 2. UPDATED: Player Section Styles --- */
+    /* --- 2. Player Section Styles (Unchanged) --- */
     #choiceSection { text-align: center; }
     .choice-btn-group { display: flex; flex-direction: column; gap: 15px; margin-top: 20px; }
     
@@ -171,7 +172,6 @@
       color: var(--text-header);
       text-align: center;
       margin-bottom: 25px;
-      transition: all 0.3s ease-in-out;
     }
     .transcription-box {
       border: 1px solid var(--border-subtle);
@@ -195,12 +195,16 @@
       font-size: 16px;
       font-family: 'Inter', sans-serif;
       resize: vertical;
-      transition: all 0.3s ease;
     }
     textarea:focus {
         outline: none;
         border-color: var(--primary-accent);
         box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
+    }
+    #checker-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
     }
     #submitButton {
       background-color: var(--primary-accent);
@@ -213,7 +217,6 @@
       cursor: pointer;
       display: block;
       width: 100%;
-      margin-top: 5px;
       transition: all 0.2s ease;
     }
     #submitButton:hover {
@@ -226,31 +229,45 @@
         transform: none;
     }
 
-    /* NEW: Focus Mode for Exam-like experience */
-    #checkerContainer.focus-mode #mainTitle {
-        font-size: 0;
-        margin: 0;
-        opacity: 0;
-    }
-    #checkerContainer.focus-mode #inputSection {
+    /* UPDATED: Focus Mode for Exam-like experience */
+    #checkerContainer.focus-mode {
         position: fixed;
-        top: 0; left: 0; right: 0; bottom: 0;
-        width: 100vw; height: 100vh;
-        max-width: none;
-        margin: 0;
+        top: 0; left: 0;
+        width: 100%; height: 100%;
         padding: 20px;
-        border-radius: 0;
+        z-index: 100;
+        background-color: var(--bg-main);
+        display: flex;
+        flex-direction: column;
+    }
+    #checkerContainer.focus-mode #mainTitle { display: none; }
+    #checkerContainer.focus-mode #inputSection {
+        padding: 0; margin: 0;
+        width: 100%;
+        flex-grow: 1; /* Make section fill parent */
+        max-width: none;
         border: none;
-        z-index: 99;
+        box-shadow: none;
+        background: transparent;
     }
     #checkerContainer.focus-mode #typed-box {
-        flex-grow: 1;
+        height: 100%;
         display: flex;
         flex-direction: column;
     }
     #checkerContainer.focus-mode #typed {
-        flex-grow: 1; /* Make textarea fill the available space */
         height: 100%;
+        flex-grow: 1;
+    }
+    #checkerContainer.focus-mode #checker-actions { display: none; }
+    
+    /* NEW: Finish button for Focus mode */
+    #finishButton {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        z-index: 102;
+        width: auto;
     }
 
     #modern-results-view {
@@ -384,7 +401,7 @@
       <button id="goToCheckerBtn" class="primary-btn">Start Transcription</button>
   </div>
   
-  <!-- VIEW 3: YOUR ORIGINAL CHECKER CODE (Initially Hidden) -->
+  <!-- VIEW 3: CHECKER -->
   <div id="checkerContainer" class="hidden">
     <h1 id="mainTitle">Modern Transcription Checker</h1>
     <div id="inputSection">
@@ -396,13 +413,15 @@
           <label for="typed">Your Transcription</label>
           <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
       </div>
-      <div>
+      <div id="checker-actions">
         <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px;">
             <input type="checkbox" id="includeComma"> Count comma (,) mistakes
         </label>
-        <button id="submitButton">Check Accuracy</button>
+        <button id="submitButton" class="primary-btn">Check Accuracy</button>
       </div>
     </div>
+    
+    <button id="finishButton" class="primary-btn hidden">Finish & Check Score</button>
 
     <div id="modern-results-view" class="hidden">
       <div id="resultSheetContainer"></div>
@@ -412,7 +431,7 @@
       </div>
     </div>
 
-    <!-- Instructions Modal (Unchanged) -->
+    <!-- Instructions Modal -->
     <div id="instructions-modal" class="modal-overlay">
       <div class="modal-content">
           <h2>Welcome to the Modern Transcription Checker!</h2>
@@ -429,7 +448,7 @@
       </div>
     </div>
 
-    <!-- NEW: Start Test Confirmation Modal -->
+    <!-- Start Test Confirmation Modal -->
     <div id="start-test-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>Start Timed Transcription?</h2>
@@ -503,17 +522,20 @@
         showScreen('choiceSection');
     }
 
-    // --- ORIGINAL CORE LOGIC (UNCHANGED) ---
+    // --- CORE LOGIC ---
     function escapeHtml(s = "") {
         return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
     function submitTranscription() {
+        document.getElementById('finishButton').classList.add('hidden');
         document.getElementById('checkerContainer').classList.remove('focus-mode');
         const originalText = document.getElementById("original").value.trim();
         const typedText = document.getElementById("typed").value.trim();
         if (!originalText || !typedText) {
-            return alert("Please fill in both the original and transcription text boxes.");
+            alert("Please fill in both the original and transcription text boxes.");
+            goHome(); // Go back if submission fails
+            return;
         }
         const submitBtn = document.getElementById('submitButton');
         submitBtn.disabled = true;
@@ -538,7 +560,7 @@
         submitBtn.textContent = 'Check Accuracy';
     }
     
-    // --- ORIGINAL UI RENDERING (UNCHANGED) ---
+    // --- UI RENDERING ---
     function buildResultHtmlFromAlignment(alignment) {
         let resultHtmlContent = "";
         for (let k = 0; k < alignment.length; k++) {
@@ -653,7 +675,7 @@
         });
     }
 
-    // --- UPDATED UI & EVENT HANDLERS ---
+    // --- UI & EVENT HANDLERS ---
     function goHome() {
         document.getElementById("inputSection").classList.remove("hidden");
         document.getElementById("modern-results-view").classList.add("hidden");
@@ -661,6 +683,7 @@
         document.getElementById("original").value = "";
         document.getElementById("typed").value = "";
         document.getElementById('checkerContainer').classList.remove('focus-mode');
+        document.getElementById('finishButton').classList.add('hidden');
         transcriptionTimerTotalTime = 0;
         timeLeft = 0;
     }
@@ -689,95 +712,72 @@
     
     // --- PLAYER LOGIC (UNCHANGED) ---
     function onYouTubeIframeAPIReady() {}
-
     function initializeYoutubePlayer(videoId) {
-        if (ytPlayer && typeof ytPlayer.destroy === 'function') {
-            ytPlayer.destroy();
-        }
+        if (ytPlayer && typeof ytPlayer.destroy === 'function') ytPlayer.destroy();
         ytPlayer = new YT.Player('youtube-player-container', {
             height: '0', width: '0', videoId: videoId,
             playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
             events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
         });
     }
-
     function onPlayerReady(event) {
         const seekSlider = document.getElementById('seekSlider');
         seekSlider.max = ytPlayer.getDuration();
         ytPlayer.setVolume(document.getElementById('volumeSlider').value * 100);
-        const videoTitle = ytPlayer.getVideoData().title;
-        document.getElementById('fileName').textContent = videoTitle || "YouTube audio loaded";
+        document.getElementById('fileName').textContent = ytPlayer.getVideoData().title || "YouTube audio loaded";
         adjustPlaybackSpeed();
     }
-
     function onPlayerStateChange(event) {
-        const playIcon = document.getElementById('playIcon');
-        const pauseIcon = document.getElementById('pauseIcon');
         clearInterval(timeUpdateInterval);
         if (event.data === YT.PlayerState.PLAYING) {
-            playIcon.classList.add('hidden');
-            pauseIcon.classList.remove('hidden');
+            document.getElementById('playIcon').classList.add('hidden');
+            document.getElementById('pauseIcon').classList.remove('hidden');
             timeUpdateInterval = setInterval(updatePlayerTime, 250);
         } else {
-            playIcon.classList.remove('hidden');
-            pauseIcon.classList.add('hidden');
+            document.getElementById('playIcon').classList.remove('hidden');
+            document.getElementById('pauseIcon').classList.add('hidden');
         }
     }
-
     function updatePlayerTime() {
         if (!activeAudioSource) return;
-        let currentTime, duration, playbackRate;
-        const seekSlider = document.getElementById('seekSlider');
+        let currentTime, playbackRate;
         if (activeAudioSource === 'file') {
             const audio = document.getElementById('audioPlayer');
             currentTime = audio.currentTime;
             playbackRate = audio.playbackRate;
-            seekSlider.value = currentTime;
-        } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getCurrentTime === 'function') {
+        } else if (activeAudioSource === 'youtube' && ytPlayer?.getCurrentTime) {
             currentTime = ytPlayer.getCurrentTime();
             playbackRate = ytPlayer.getPlaybackRate();
-            seekSlider.value = currentTime;
         }
-        if (isFinite(currentTime) && isFinite(playbackRate) && playbackRate > 0) {
-            document.getElementById('currentTime').textContent = formatTime(currentTime / playbackRate);
+        if (isFinite(currentTime) && isFinite(playbackRate)) {
+            document.getElementById('seekSlider').value = currentTime;
+            if (playbackRate > 0) document.getElementById('currentTime').textContent = formatTime(currentTime / playbackRate);
         }
     }
-    
     function adjustPlaybackSpeed() {
         if (!activeAudioSource) return;
         const wordCount = parseInt(document.getElementById('wordCount').value);
         const targetWPM = parseInt(document.getElementById('speedSelector').value);
-        let originalDuration;
-        if (activeAudioSource === 'file') {
-            originalDuration = document.getElementById('audioPlayer').duration;
-        } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getDuration === 'function') {
-            originalDuration = ytPlayer.getDuration();
-        }
-        let rate = 1.0;
+        let originalDuration, rate = 1.0;
+        if (activeAudioSource === 'file') originalDuration = document.getElementById('audioPlayer').duration;
+        else if (activeAudioSource === 'youtube' && ytPlayer?.getDuration) originalDuration = ytPlayer.getDuration();
         if (wordCount > 0 && originalDuration > 0 && isFinite(originalDuration)) {
             const originalWPM = wordCount / (originalDuration / 60);
             const calculatedRate = targetWPM / originalWPM;
             rate = isFinite(calculatedRate) ? calculatedRate : 1.0;
         }
-        if (activeAudioSource === 'file') {
-            document.getElementById('audioPlayer').playbackRate = rate;
-        } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.setPlaybackRate === 'function') {
-            ytPlayer.setPlaybackRate(rate);
-        }
+        if (activeAudioSource === 'file') document.getElementById('audioPlayer').playbackRate = rate;
+        else if (activeAudioSource === 'youtube' && ytPlayer?.setPlaybackRate) ytPlayer.setPlaybackRate(rate);
         const newDuration = originalDuration / rate;
-        if (isFinite(newDuration)) {
-            document.getElementById('totalDuration').textContent = formatTime(newDuration);
-        }
+        if (isFinite(newDuration)) document.getElementById('totalDuration').textContent = formatTime(newDuration);
         updatePlayerTime();
     }
-
     function formatTime(seconds) {
         if (isNaN(seconds) || seconds < 0) return "0:00";
         const min = Math.floor(seconds / 60);
         const sec = Math.floor(seconds % 60).toString().padStart(2, '0');
         return `${min}:${sec}`;
     }
-
     function resetPlayerUI() {
         document.getElementById('currentTime').textContent = '0:00';
         document.getElementById('totalDuration').textContent = '0:00';
@@ -787,135 +787,94 @@
     }
 
     document.addEventListener("DOMContentLoaded", () => {
-        // --- Populate Speed Selector ---
         const speedSelector = document.getElementById('speedSelector');
         for (let wpm = 60; wpm <= 160; wpm += 5) {
             const option = document.createElement('option');
-            option.value = wpm;
-            option.textContent = `${wpm} WPM`;
+            option.value = wpm; option.textContent = `${wpm} WPM`;
             if (wpm === 100) option.selected = true;
             speedSelector.appendChild(option);
         }
 
-        // --- App Navigation Listeners ---
         document.getElementById('useAudioBtn').addEventListener('click', () => showScreen('audioPlayerSection'));
         document.getElementById('useTextBtn').addEventListener('click', () => showScreen('checkerContainer'));
         document.getElementById('goToCheckerBtn').addEventListener('click', () => showScreen('checkerContainer'));
-
-        // --- Checker Event Listeners ---
         document.getElementById('submitButton').addEventListener('click', submitTranscription);
+        document.getElementById('finishButton').addEventListener('click', submitTranscription);
         document.getElementById('tryAnotherBtn').addEventListener('click', resetApp);
         document.getElementById('printReportBtn').addEventListener('click', () => window.print());
         
-        // --- Modal Listeners ---
+        const instructionsModal = document.getElementById('instructions-modal');
         document.getElementById('close-instructions-btn').addEventListener('click', () => {
-            document.getElementById('instructions-modal').classList.remove('visible');
+            instructionsModal.classList.remove('visible');
             localStorage.setItem('hasSeenInstructions', 'true');
         });
-        if (!localStorage.getItem('hasSeenInstructions')) {
-            document.getElementById('instructions-modal').classList.add('visible');
-        }
+        if (!localStorage.getItem('hasSeenInstructions')) instructionsModal.classList.add('visible');
 
-        // --- UPDATED Timer/Focus Mode Logic ---
         const startTestModal = document.getElementById('start-test-modal');
-        
-        document.getElementById("original").addEventListener("paste", function () {
-            setTimeout(() => {
-                if(document.getElementById("original").value.trim() !== "") {
-                   startTestModal.classList.add('visible');
-                }
-            }, 100);
+        document.getElementById("original").addEventListener("paste", () => {
+            setTimeout(() => { if(document.getElementById("original").value.trim() !== "") startTestModal.classList.add('visible'); }, 100);
         });
-
         document.getElementById('confirm-start-btn').addEventListener('click', () => {
             startTestModal.classList.remove('visible');
             document.getElementById("original-box").classList.add("hidden");
             document.getElementById('checkerContainer').classList.add('focus-mode');
+            document.getElementById('finishButton').classList.remove('hidden');
             document.getElementById("typed").focus();
             startTypingTimer(50);
         });
-
-        document.getElementById('cancel-start-btn').addEventListener('click', () => {
-            startTestModal.classList.remove('visible');
-        });
+        document.getElementById('cancel-start-btn').addEventListener('click', () => startTestModal.classList.remove('visible'));
         
-        // --- UNIFIED Audio Player Event Listeners (Unchanged) ---
-        const audio = document.getElementById('audioPlayer');
-        const audioUpload = document.getElementById('audioUpload');
-        const fileNameDisplay = document.getElementById('fileName');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const seekSlider = document.getElementById('seekSlider');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const wordCountInput = document.getElementById('wordCount');
-        const youtubeUrlInput = document.getElementById('youtubeUrlInput');
+        const audio = document.getElementById('audioPlayer'), audioUpload = document.getElementById('audioUpload');
+        const playPauseBtn = document.getElementById('playPauseBtn'), seekSlider = document.getElementById('seekSlider');
+        const volumeSlider = document.getElementById('volumeSlider'), wordCountInput = document.getElementById('wordCount');
         const loadYoutubeBtn = document.getElementById('loadYoutubeBtn');
-
         audioUpload.addEventListener('change', (event) => {
             const file = event.target.files[0];
             if (file) {
                 resetPlayerState(); 
                 activeAudioSource = 'file';
-                fileNameDisplay.textContent = file.name;
+                document.getElementById('fileName').textContent = file.name;
                 audio.src = URL.createObjectURL(file);
                 audio.load();
-                youtubeUrlInput.disabled = true;
+                document.getElementById('youtubeUrlInput').disabled = true;
                 loadYoutubeBtn.disabled = true;
             }
         });
-
         loadYoutubeBtn.addEventListener('click', () => {
-            const url = youtubeUrlInput.value;
+            const url = document.getElementById('youtubeUrlInput').value;
             const videoIdMatch = url.match(/(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
-            if (videoIdMatch && videoIdMatch[1]) {
-                const videoId = videoIdMatch[1];
+            if (videoIdMatch?.[1]) {
                 resetPlayerState();
                 activeAudioSource = 'youtube';
-                fileNameDisplay.textContent = "Loading YouTube Audio...";
-                initializeYoutubePlayer(videoId);
+                document.getElementById('fileName').textContent = "Loading YouTube Audio...";
+                initializeYoutubePlayer(videoIdMatch[1]);
                 document.getElementById('audioUploadLabel').classList.add('disabled');
-                document.getElementById('audioUpload').disabled = true;
-            } else {
-                alert("Invalid YouTube URL. Please check the link and try again.");
-            }
+                audioUpload.disabled = true;
+            } else alert("Invalid YouTube URL. Please check the link and try again.");
         });
-
         playPauseBtn.addEventListener('click', () => {
             if (!activeAudioSource) return;
-            if (!wordCountInput.value) {
-                alert("Please enter the number of words in the dictation to begin.");
-                return;
-            }
-            if (activeAudioSource === 'file') {
-                audio.paused ? audio.play() : audio.pause();
-            } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
-                const playerState = ytPlayer.getPlayerState();
-                (playerState === YT.PlayerState.PLAYING) ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
-            }
+            if (!wordCountInput.value) return alert("Please enter the number of words in the dictation to begin.");
+            if (activeAudioSource === 'file') audio.paused ? audio.play() : audio.pause();
+            else if (activeAudioSource === 'youtube' && ytPlayer?.getPlayerState) (ytPlayer.getPlayerState() === YT.PlayerState.PLAYING) ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
         });
-
         audio.addEventListener('play', () => { document.getElementById('playIcon').classList.add('hidden'); document.getElementById('pauseIcon').classList.remove('hidden'); });
         audio.addEventListener('pause', () => { document.getElementById('playIcon').classList.remove('hidden'); document.getElementById('pauseIcon').classList.add('hidden'); });
-        audio.addEventListener('loadedmetadata', () => {
-            seekSlider.max = audio.duration;
-            adjustPlaybackSpeed();
-        });
+        audio.addEventListener('loadedmetadata', () => { seekSlider.max = audio.duration; adjustPlaybackSpeed(); });
         audio.addEventListener('timeupdate', updatePlayerTime);
-        
         seekSlider.addEventListener('input', (e) => {
             if (!activeAudioSource) return;
             if (activeAudioSource === 'file') audio.currentTime = e.target.value;
-            else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(e.target.value, true);
+            else if (activeAudioSource === 'youtube' && ytPlayer?.seekTo) ytPlayer.seekTo(e.target.value, true);
             updatePlayerTime();
         });
-
         volumeSlider.addEventListener('input', (e) => {
              if (activeAudioSource === 'file') audio.volume = e.target.value;
-             else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(e.target.value * 100);
+             else if (activeAudioSource === 'youtube' && ytPlayer?.setVolume) ytPlayer.setVolume(e.target.value * 100);
         });
-        
         wordCountInput.addEventListener('input', adjustPlaybackSpeed);
         speedSelector.addEventListener('change', adjustPlaybackSpeed);
     });
 </script>
 </body>
-</html>
+</html>```
