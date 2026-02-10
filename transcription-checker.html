@@ -151,8 +151,8 @@
     }
     
     #youtube-player-container { position: absolute; top: -9999px; left: -9999px; }
-
-    /* --- 3. YOUR ORIGINAL CHECKER & RESULT STYLES (UNCHANGED and PERFECTLY PRESERVED) --- */
+    
+    /* --- 3. UPDATED CHECKER & RESULT STYLES --- */
     #inputSection {
       max-width: 900px;
       margin: 0 auto 30px auto;
@@ -161,34 +161,46 @@
       border-radius: 16px;
       border: 1px solid var(--border-subtle);
       box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
     }
-    #mainTitle { /* Title inside your checker */
+    #mainTitle {
       font-size: 2.5em;
       font-weight: 800;
       color: var(--text-header);
       text-align: center;
       margin-bottom: 25px;
+      transition: all 0.3s ease-in-out;
+    }
+    .transcription-box {
+      border: 1px solid var(--border-subtle);
+      border-radius: 12px;
+      padding: 20px;
+      background-color: var(--surface-light);
+    }
+    .transcription-box label {
+      font-weight: 700;
+      margin-bottom: 12px;
+      display: block;
+      color: var(--text-header);
+      font-size: 1.1em;
     }
     textarea {
       width: 100%;
       height: 150px;
-      margin-bottom: 15px;
       padding: 12px;
       border-radius: 8px;
       border: 1px solid var(--border-subtle);
       font-size: 16px;
       font-family: 'Inter', sans-serif;
       resize: vertical;
+      transition: all 0.3s ease;
     }
     textarea:focus {
         outline: none;
         border-color: var(--primary-accent);
         box-shadow: 0 0 0 3px rgba(0, 121, 107, 0.1);
-    }
-    #inputSection label { /* Specific to your original layout */
-      font-weight: 600;
-      margin-bottom: 8px;
-      display: block;
     }
     #submitButton {
       background-color: var(--primary-accent);
@@ -201,7 +213,7 @@
       cursor: pointer;
       display: block;
       width: 100%;
-      margin-top: 15px;
+      margin-top: 5px;
       transition: all 0.2s ease;
     }
     #submitButton:hover {
@@ -213,6 +225,34 @@
         cursor: not-allowed;
         transform: none;
     }
+
+    /* NEW: Focus Mode for Exam-like experience */
+    #checkerContainer.focus-mode #mainTitle {
+        font-size: 0;
+        margin: 0;
+        opacity: 0;
+    }
+    #checkerContainer.focus-mode #inputSection {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        width: 100vw; height: 100vh;
+        max-width: none;
+        margin: 0;
+        padding: 20px;
+        border-radius: 0;
+        border: none;
+        z-index: 99;
+    }
+    #checkerContainer.focus-mode #typed-box {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    #checkerContainer.focus-mode #typed {
+        flex-grow: 1; /* Make textarea fill the available space */
+        height: 100%;
+    }
+
     #modern-results-view {
       max-width: 1200px;
       margin: 30px auto;
@@ -265,10 +305,14 @@
     .modal-overlay.visible { opacity: 1; pointer-events: auto; }
     .modal-content { background-color: var(--surface-card); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
     .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header);}
+    .modal-content p { color: var(--text-body); font-size: 1.1em; line-height: 1.6; margin-bottom: 30px; }
     .modal-content ul { text-align: left; list-style-position: inside; padding: 0; margin: 0 0 30px 0; line-height: 2.2; color: var(--text-body); }
     .modal-content ul li::marker { color: var(--primary-accent); }
-    .modal-close-btn { background-color: var(--primary-accent); color: white; padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; cursor: pointer; border: none; }
-    #timerDisplay { position: fixed; top: 20px; right: 20px; font-size: 20px; background: var(--primary-accent); color: white; padding: 10px 15px; border-radius: 8px; z-index: 100; }
+    .modal-btn-group { display: flex; gap: 15px; justify-content: center; }
+    .modal-close-btn, .modal-confirm-btn, .modal-cancel-btn { padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; cursor: pointer; border: none; }
+    .modal-confirm-btn { background-color: var(--primary-accent); color: white; }
+    .modal-cancel-btn { background-color: var(--surface-light); color: var(--text-body); border: 1px solid var(--border-subtle); }
+    #timerDisplay { position: fixed; top: 20px; right: 20px; font-size: 20px; background: var(--primary-accent); color: white; padding: 10px 15px; border-radius: 8px; z-index: 101; }
     @media print {
       body, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
       .action-buttons, .result-controls, .legend-container, #inputSection { display: none !important; }
@@ -342,16 +386,22 @@
   
   <!-- VIEW 3: YOUR ORIGINAL CHECKER CODE (Initially Hidden) -->
   <div id="checkerContainer" class="hidden">
+    <h1 id="mainTitle">Modern Transcription Checker</h1>
     <div id="inputSection">
-      <h1 id="mainTitle">Modern Transcription Checker</h1>
-      <label for="original">Original Passage:</label>
-      <textarea id="original" placeholder="Paste the original text here..."></textarea>
-      <label for="typed">Your Transcription:</label>
-      <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
-      <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px;">
-          <input type="checkbox" id="includeComma"> Count comma (,) mistakes
-      </label>
-      <button id="submitButton">Check Accuracy</button>
+      <div id="original-box" class="transcription-box">
+          <label for="original">Original Passage (Paste Here to Start Timer)</label>
+          <textarea id="original" placeholder="Paste the original text here..."></textarea>
+      </div>
+      <div id="typed-box" class="transcription-box">
+          <label for="typed">Your Transcription</label>
+          <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
+      </div>
+      <div>
+        <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px;">
+            <input type="checkbox" id="includeComma"> Count comma (,) mistakes
+        </label>
+        <button id="submitButton">Check Accuracy</button>
+      </div>
     </div>
 
     <div id="modern-results-view" class="hidden">
@@ -362,6 +412,7 @@
       </div>
     </div>
 
+    <!-- Instructions Modal (Unchanged) -->
     <div id="instructions-modal" class="modal-overlay">
       <div class="modal-content">
           <h2>Welcome to the Modern Transcription Checker!</h2>
@@ -372,8 +423,22 @@
               <li><b>Timer Mode:</b> Pasting into the top box starts an optional 50-minute typing timer.</li>
               <li><b>Re-evaluate:</b> On the results page, you can edit the original text and re-check your score.</li>
           </ul>
-          <button id="close-instructions-btn" class="modal-close-btn">Got it, Let's Start!</button>
+          <div class="modal-btn-group">
+            <button id="close-instructions-btn" class="modal-confirm-btn">Got it, Let's Start!</button>
+          </div>
       </div>
+    </div>
+
+    <!-- NEW: Start Test Confirmation Modal -->
+    <div id="start-test-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Start Timed Transcription?</h2>
+            <p>A 50-minute timer will begin, and the interface will switch to a full-screen focus mode for your transcription. Are you ready to start?</p>
+            <div class="modal-btn-group">
+                <button id="cancel-start-btn" class="modal-cancel-btn">Cancel</button>
+                <button id="confirm-start-btn" class="modal-confirm-btn">Start Timed Test</button>
+            </div>
+        </div>
     </div>
   </div>
 
@@ -403,14 +468,11 @@
     function showScreen(screenId) {
         document.getElementById('choiceSection').classList.add('hidden');
         document.getElementById('audioPlayerSection').classList.add('hidden');
+        document.getElementById('checkerContainer').classList.remove('focus-mode');
         document.getElementById('checkerContainer').classList.add('hidden');
         document.getElementById(screenId).classList.remove('hidden');
     }
 
-    /**
-     * Resets only the state of the audio player without navigating.
-     * Used when switching between audio sources (file vs. YouTube).
-     */
     function resetPlayerState() {
         const audio = document.getElementById('audioPlayer');
         audio.pause();
@@ -425,29 +487,21 @@
         document.getElementById("audioUpload").value = "";
         document.getElementById("fileName").textContent = "No file selected";
         document.getElementById("youtubeUrlInput").value = "";
-
-        // Re-enable all inputs
         document.getElementById('youtubeUrlInput').disabled = false;
         document.getElementById('loadYoutubeBtn').disabled = false;
         document.getElementById('audioUploadLabel').classList.remove('disabled');
         document.getElementById('audioUpload').disabled = false;
-        
         activeAudioSource = null;
         clearInterval(timeUpdateInterval);
         resetPlayerUI();
     }
 
-    /**
-     * Resets the entire application to its initial state and navigates to the choice screen.
-     * Used for the "Start New Comparison" button.
-     */
     function resetApp() {
-        goHome(); // Resets the checker text fields
-        resetPlayerState(); // Resets the entire player
-        document.getElementById("wordCount").value = ""; // Also clear word count on full reset
-        showScreen('choiceSection'); // Navigate home
+        goHome();
+        resetPlayerState();
+        document.getElementById("wordCount").value = "";
+        showScreen('choiceSection');
     }
-
 
     // --- ORIGINAL CORE LOGIC (UNCHANGED) ---
     function escapeHtml(s = "") {
@@ -455,6 +509,7 @@
     }
 
     function submitTranscription() {
+        document.getElementById('checkerContainer').classList.remove('focus-mode');
         const originalText = document.getElementById("original").value.trim();
         const typedText = document.getElementById("typed").value.trim();
         if (!originalText || !typedText) {
@@ -598,16 +653,14 @@
         });
     }
 
-    // --- ORIGINAL UI & EVENT HANDLERS (UNCHANGED) ---
+    // --- UPDATED UI & EVENT HANDLERS ---
     function goHome() {
         document.getElementById("inputSection").classList.remove("hidden");
         document.getElementById("modern-results-view").classList.add("hidden");
+        document.getElementById("original-box").classList.remove("hidden");
         document.getElementById("original").value = "";
         document.getElementById("typed").value = "";
-        document.getElementById("original").classList.remove("hidden");
-        document.querySelector("label[for='original']").classList.remove("hidden");
-        const typedTextarea = document.getElementById("typed");
-        typedTextarea.style.height = "150px";
+        document.getElementById('checkerContainer').classList.remove('focus-mode');
         transcriptionTimerTotalTime = 0;
         timeLeft = 0;
     }
@@ -634,24 +687,17 @@
       timerInterval = setInterval(updateTimer, 1000);
     }
     
-    // --- UPDATED PLAYER LOGIC ---
-    function onYouTubeIframeAPIReady() {
-        // This function is called by the YouTube API script when it's ready.
-    }
+    // --- PLAYER LOGIC (UNCHANGED) ---
+    function onYouTubeIframeAPIReady() {}
 
     function initializeYoutubePlayer(videoId) {
         if (ytPlayer && typeof ytPlayer.destroy === 'function') {
             ytPlayer.destroy();
         }
         ytPlayer = new YT.Player('youtube-player-container', {
-            height: '0',
-            width: '0',
-            videoId: videoId,
+            height: '0', width: '0', videoId: videoId,
             playerVars: { 'playsinline': 1, 'controls': 0, 'disablekb': 1 },
-            events: {
-                'onReady': onPlayerReady,
-                'onStateChange': onPlayerStateChange
-            }
+            events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange }
         });
     }
 
@@ -659,11 +705,8 @@
         const seekSlider = document.getElementById('seekSlider');
         seekSlider.max = ytPlayer.getDuration();
         ytPlayer.setVolume(document.getElementById('volumeSlider').value * 100);
-        
-        // --- FIX: Update status message from "Loading..." to the video title ---
         const videoTitle = ytPlayer.getVideoData().title;
         document.getElementById('fileName').textContent = videoTitle || "YouTube audio loaded";
-
         adjustPlaybackSpeed();
     }
 
@@ -671,7 +714,6 @@
         const playIcon = document.getElementById('playIcon');
         const pauseIcon = document.getElementById('pauseIcon');
         clearInterval(timeUpdateInterval);
-
         if (event.data === YT.PlayerState.PLAYING) {
             playIcon.classList.add('hidden');
             pauseIcon.classList.remove('hidden');
@@ -684,10 +726,8 @@
 
     function updatePlayerTime() {
         if (!activeAudioSource) return;
-        
         let currentTime, duration, playbackRate;
         const seekSlider = document.getElementById('seekSlider');
-
         if (activeAudioSource === 'file') {
             const audio = document.getElementById('audioPlayer');
             currentTime = audio.currentTime;
@@ -698,7 +738,6 @@
             playbackRate = ytPlayer.getPlaybackRate();
             seekSlider.value = currentTime;
         }
-
         if (isFinite(currentTime) && isFinite(playbackRate) && playbackRate > 0) {
             document.getElementById('currentTime').textContent = formatTime(currentTime / playbackRate);
         }
@@ -706,30 +745,25 @@
     
     function adjustPlaybackSpeed() {
         if (!activeAudioSource) return;
-
         const wordCount = parseInt(document.getElementById('wordCount').value);
         const targetWPM = parseInt(document.getElementById('speedSelector').value);
-        
         let originalDuration;
         if (activeAudioSource === 'file') {
             originalDuration = document.getElementById('audioPlayer').duration;
         } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getDuration === 'function') {
             originalDuration = ytPlayer.getDuration();
         }
-
         let rate = 1.0;
         if (wordCount > 0 && originalDuration > 0 && isFinite(originalDuration)) {
             const originalWPM = wordCount / (originalDuration / 60);
             const calculatedRate = targetWPM / originalWPM;
             rate = isFinite(calculatedRate) ? calculatedRate : 1.0;
         }
-        
         if (activeAudioSource === 'file') {
             document.getElementById('audioPlayer').playbackRate = rate;
         } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.setPlaybackRate === 'function') {
             ytPlayer.setPlaybackRate(rate);
         }
-
         const newDuration = originalDuration / rate;
         if (isFinite(newDuration)) {
             document.getElementById('totalDuration').textContent = formatTime(newDuration);
@@ -759,9 +793,7 @@
             const option = document.createElement('option');
             option.value = wpm;
             option.textContent = `${wpm} WPM`;
-            if (wpm === 100) {
-                option.selected = true;
-            }
+            if (wpm === 100) option.selected = true;
             speedSelector.appendChild(option);
         }
 
@@ -770,10 +802,12 @@
         document.getElementById('useTextBtn').addEventListener('click', () => showScreen('checkerContainer'));
         document.getElementById('goToCheckerBtn').addEventListener('click', () => showScreen('checkerContainer'));
 
-        // --- Original Checker Event Listeners ---
+        // --- Checker Event Listeners ---
         document.getElementById('submitButton').addEventListener('click', submitTranscription);
         document.getElementById('tryAnotherBtn').addEventListener('click', resetApp);
         document.getElementById('printReportBtn').addEventListener('click', () => window.print());
+        
+        // --- Modal Listeners ---
         document.getElementById('close-instructions-btn').addEventListener('click', () => {
             document.getElementById('instructions-modal').classList.remove('visible');
             localStorage.setItem('hasSeenInstructions', 'true');
@@ -781,18 +815,31 @@
         if (!localStorage.getItem('hasSeenInstructions')) {
             document.getElementById('instructions-modal').classList.add('visible');
         }
+
+        // --- UPDATED Timer/Focus Mode Logic ---
+        const startTestModal = document.getElementById('start-test-modal');
+        
         document.getElementById("original").addEventListener("paste", function () {
             setTimeout(() => {
-                document.getElementById("original").classList.add("hidden");
-                document.querySelector("label[for='original']").classList.add("hidden");
-                const typedTextarea = document.getElementById("typed");
-                typedTextarea.style.height = "calc(100vh - 200px)";
-                typedTextarea.focus();
-                startTypingTimer(50);
+                if(document.getElementById("original").value.trim() !== "") {
+                   startTestModal.classList.add('visible');
+                }
             }, 100);
         });
+
+        document.getElementById('confirm-start-btn').addEventListener('click', () => {
+            startTestModal.classList.remove('visible');
+            document.getElementById("original-box").classList.add("hidden");
+            document.getElementById('checkerContainer').classList.add('focus-mode');
+            document.getElementById("typed").focus();
+            startTypingTimer(50);
+        });
+
+        document.getElementById('cancel-start-btn').addEventListener('click', () => {
+            startTestModal.classList.remove('visible');
+        });
         
-        // --- UNIFIED Audio Player Event Listeners ---
+        // --- UNIFIED Audio Player Event Listeners (Unchanged) ---
         const audio = document.getElementById('audioPlayer');
         const audioUpload = document.getElementById('audioUpload');
         const fileNameDisplay = document.getElementById('fileName');
@@ -834,22 +881,15 @@
 
         playPauseBtn.addEventListener('click', () => {
             if (!activeAudioSource) return;
-
-            // --- FIX: Check if word count is entered before playing ---
             if (!wordCountInput.value) {
                 alert("Please enter the number of words in the dictation to begin.");
                 return;
             }
-
             if (activeAudioSource === 'file') {
                 audio.paused ? audio.play() : audio.pause();
             } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.getPlayerState === 'function') {
                 const playerState = ytPlayer.getPlayerState();
-                if (playerState === YT.PlayerState.PLAYING) {
-                    ytPlayer.pauseVideo();
-                } else {
-                    ytPlayer.playVideo();
-                }
+                (playerState === YT.PlayerState.PLAYING) ? ytPlayer.pauseVideo() : ytPlayer.playVideo();
             }
         });
 
@@ -863,20 +903,14 @@
         
         seekSlider.addEventListener('input', (e) => {
             if (!activeAudioSource) return;
-            if (activeAudioSource === 'file') {
-                audio.currentTime = e.target.value;
-            } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.seekTo === 'function') {
-                ytPlayer.seekTo(e.target.value, true);
-            }
+            if (activeAudioSource === 'file') audio.currentTime = e.target.value;
+            else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.seekTo === 'function') ytPlayer.seekTo(e.target.value, true);
             updatePlayerTime();
         });
 
         volumeSlider.addEventListener('input', (e) => {
-             if (activeAudioSource === 'file') {
-                audio.volume = e.target.value;
-            } else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.setVolume === 'function') {
-                ytPlayer.setVolume(e.target.value * 100);
-            }
+             if (activeAudioSource === 'file') audio.volume = e.target.value;
+             else if (activeAudioSource === 'youtube' && ytPlayer && typeof ytPlayer.setVolume === 'function') ytPlayer.setVolume(e.target.value * 100);
         });
         
         wordCountInput.addEventListener('input', adjustPlaybackSpeed);
