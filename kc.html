@@ -47,7 +47,7 @@
     .view { display: none; animation: fadeIn 0.5s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* --- 1a. NEW SELECTION VIEW STYLES --- */
+    /* --- 1a. SELECTION VIEW STYLES --- */
     #selection-view { max-width: 1200px; }
     .page-header {
         display: flex;
@@ -246,121 +246,183 @@
     .quick-resume-box p { margin: 0 0 16px 0; color: var(--medium-grey); }
     .quick-resume-box .intro-actions button { border-color: var(--accent-purple); }
 
-    /* --- 2. MODERN PLAYER STYLES --- */
-    #player-view { max-width: 800px; margin: 40px auto; }
-    .practice-station { border: 1px solid var(--border-color); border-radius: 24px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 20px 40px -10px rgba(78, 93, 143, 0.08); background: var(--surface-color); overflow: hidden; }
-    .player-card { padding: 2rem 2rem 1.5rem 2rem; text-align: center; position: relative; }
-    .player-title { margin: 0; font-size: 1.5rem; font-weight: 700; color: #374151; }
-    .player-subtitle { font-size: 0.9rem; color: #6b7280; margin-bottom: 2rem; }
-    .controls { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-bottom: 2rem; }
-    .btn { background: #f3f4f8; color: #4b5563; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1rem; transition: all 0.2s ease; }
-    .btn:hover { transform: scale(1.1); background-color: #e5e7eb; }
-    .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; background-color: #f3f4f8; }
-    .btn-main { width: 72px; height: 72px; font-size: 1.8rem; background: linear-gradient(135deg, #818cf8, #6366f1); box-shadow: 0 5px 15px -3px rgba(109, 115, 234, 0.5); color: white; }
-    .btn-main svg { width: 30px; height: 30px; }
-    #pauseBtn { display: none; }
-    .progress-bar-wrapper { position: relative; width: 100%; background-color: #e0e7ff; height: 8px; border-radius: 4px; cursor: pointer; }
-    #progress-fill { height: 100%; width: 0%; background-color: #6366f1; border-radius: 4px; transition: width 0.1s linear; }
-    .time-display { display: flex; justify-content: space-between; font-size: 0.875rem; color: #6b7280; font-weight: 500; margin-top: 0.5rem; }
-    .extra-controls { display: flex; justify-content: space-between; align-items: center; margin-top: 1.5rem; }
-    #wpmSpeed { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-color: #f3f4f6; color: #4b5563; border: 1px solid #e5e7eb; border-radius: 8px; padding: 0.4rem 2rem 0.4rem 0.8rem; font-family: 'Manrope', sans-serif; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
-    .volume-control-group { position: relative; }
-    #volume-slider { display: none; position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); -webkit-appearance: none; appearance: none; width: 8px; height: 100px; background: #e5e7eb; border-radius: 4px; padding: 0; margin: 0; }
-    #volume-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; background: #6366f1; border-radius: 50%; cursor: pointer; }
-    #volume-btn:hover + #volume-slider, #volume-slider:hover { display: block; }
-    
-    .player-actions { display: flex; justify-content: center; gap: 10px; margin-top: 1.5rem; }
-    #reviewTranscriptBtn { background-color: #f3f4f6; color: #4b5563; padding: 10px 16px; font-weight: 600; border-radius: 8px; transition: all 0.2s; }
-    #reviewTranscriptBtn:hover { background-color: #e5e7eb; }
-    #transcript-viewer { display: none; background-color: #f9fafb; border-top: 1px solid var(--border-color); padding: 20px; margin: 1.5rem -2rem -1.5rem -2rem; max-height: 200px; overflow-y: auto; text-align: left; line-height: 1.7; color: var(--text-body); }
+    /* --- 2. UPDATED MODERN PLAYER STYLES (Sleek & Professional) --- */
+    #player-view { max-width: 900px; margin: 40px auto; }
 
-    /* --- UPDATED SLEEK TEST SETUP --- */
-    .test-setup { background-color: #f9fafb; padding: 2rem; border-top: 1px solid var(--border-color); }
-    
-    .modern-setup-grid {
+    .practice-station {
+        background: #ffffff;
+        border-radius: 24px;
+        box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(0,0,0,0.05);
+        overflow: visible; 
+        position: relative;
+    }
+
+    /* Glassmorphism Header */
+    .player-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #edf2f7 100%);
+        padding: 25px 30px;
+        border-bottom: 1px solid var(--border-color);
+        border-radius: 24px 24px 0 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .player-info h2 { margin: 0; font-size: 1.25rem; font-weight: 800; color: #1f2937; }
+    .player-info p { margin: 4px 0 0 0; font-size: 0.9rem; color: #6b7280; }
+
+    .transcript-btn {
+        background: white;
+        border: 1px solid var(--border-color);
+        padding: 8px 16px;
+        border-radius: 99px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: var(--text-color);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .transcript-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+
+    .player-body { padding: 40px; text-align: center; }
+
+    /* Sleek Progress Bar */
+    .progress-container { margin-bottom: 30px; }
+    .progress-bar-wrapper {
+        width: 100%;
+        height: 8px;
+        background-color: #e2e8f0;
+        border-radius: 99px;
+        cursor: pointer;
+        position: relative;
+        overflow: hidden;
+        transition: height 0.2s;
+    }
+    .progress-bar-wrapper:hover { height: 12px; }
+    #progress-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        border-radius: 99px;
+        transition: width 0.1s linear;
+    }
+    .time-display {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 8px;
+        font-size: 0.85rem;
+        color: #9ca3af;
+        font-family: 'Inter', monospace;
+        font-weight: 500;
+    }
+
+    /* Modern Controls */
+    .controls-cluster {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        margin-bottom: 30px;
+    }
+
+    .control-btn {
+        width: 50px; height: 50px;
+        border-radius: 50%;
+        border: none;
+        background: #f1f5f9;
+        color: #475569;
+        display: flex; align-items: center; justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .control-btn:hover { background: #e2e8f0; color: #1e293b; }
+    .control-btn svg { width: 22px; height: 22px; }
+
+    .play-btn-large {
+        width: 80px; height: 80px;
+        background: #1f2937;
+        color: white;
+        box-shadow: 0 10px 25px -5px rgba(31, 41, 55, 0.4);
+    }
+    .play-btn-large:hover { transform: scale(1.05); background: #000; }
+    .play-btn-large svg { width: 32px; height: 32px; fill: currentColor; }
+
+    /* Popovers */
+    .setting-wrapper { position: relative; }
+    .setting-popover {
+        position: absolute;
+        bottom: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #1f2937;
+        padding: 10px;
+        border-radius: 12px;
+        display: none;
+        flex-direction: column;
+        align-items: center;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        z-index: 20;
+        min-width: 140px;
+    }
+    .setting-popover::after {
+        content: ''; position: absolute; top: 100%; left: 50%; margin-left: -6px;
+        border-width: 6px; border-style: solid; border-color: #1f2937 transparent transparent transparent;
+    }
+    .setting-wrapper:hover .setting-popover { display: flex; animation: fadeIn 0.2s; }
+    .setting-label { color: #9ca3af; font-size: 0.75rem; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    input[type=range] { width: 100%; accent-color: #8b5cf6; cursor: pointer; }
+    #wpmSpeedDisplay { color: white; font-weight: 700; margin-bottom: 5px; }
+
+    /* Test Configuration Area */
+    .test-config-area {
+        background-color: #fafafa;
+        border-top: 1px solid #f0f0f0;
+        padding: 30px;
+        border-radius: 0 0 24px 24px;
+    }
+    .config-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 16px;
-        margin-bottom: 16px;
+        gap: 20px;
+        margin-bottom: 20px;
     }
-    
-    .setup-input-group {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        text-align: left;
-    }
-    
-    .setup-input-group label {
-        font-size: 0.8em;
-        font-weight: 600;
-        text-transform: uppercase;
-        color: #6b7280;
-        letter-spacing: 0.5px;
-        margin-left: 4px;
-    }
-
+    .config-item label { display: block; font-size: 0.8rem; font-weight: 700; color: #6b7280; margin-bottom: 8px; text-transform: uppercase; }
     .modern-select {
-        -webkit-appearance: none;
-        -moz-appearance: none;
-        appearance: none;
         width: 100%;
-        background-color: white;
-        border: 1px solid var(--border-color);
         padding: 12px 16px;
+        border: 1px solid #e5e7eb;
         border-radius: 12px;
-        font-family: var(--font-family);
-        font-size: 0.95em;
-        font-weight: 500;
-        color: var(--text-color);
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        font-size: 0.95rem;
+        color: #1f2937;
+        background-color: white;
+        cursor: pointer;
+        transition: border-color 0.2s;
+        appearance: none;
+        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3e%3cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3e%3c/path%3e%3c/svg%3e");
         background-repeat: no-repeat;
         background-position: right 1rem center;
-        background-size: 1em;
-        transition: all 0.2s ease;
+        background-size: 1.2em;
+    }
+    .modern-select:focus { outline: none; border-color: #8b5cf6; ring: 2px solid #8b5cf633; }
+
+    #estimatedTimePill {
+        background: #ecfdf5; color: #047857;
+        font-size: 0.85rem; font-weight: 600;
+        padding: 6px 12px; border-radius: 99px;
+        display: inline-block; margin-bottom: 20px;
+        border: 1px solid #a7f3d0;
     }
     
-    .modern-select:focus {
-        outline: none;
-        border-color: var(--accent-purple);
-        box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-    }
-
-    #estimatedTimeDisplay {
-        font-size: 0.85em;
-        color: var(--accent-purple);
-        font-weight: 600;
-        background-color: var(--accent-purple-light);
-        display: inline-block;
-        padding: 4px 12px;
-        border-radius: 99px;
-        margin-bottom: 12px;
-    }
-
-    .comma-check-wrapper {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 8px;
-        margin-bottom: 16px;
-        font-size: 0.9em;
-        color: var(--text-body);
-        font-weight: 500;
-        cursor: pointer;
-    }
-    
-    .comma-check-wrapper input {
-        accent-color: var(--accent-purple);
-        width: 16px;
-        height: 16px;
-        cursor: pointer;
-    }
-
     #startTranscriptionBtn { font-size: 1.1em; padding: 16px; margin-top: 0.5rem; width: 100%; border-radius: 12px; font-weight: 600; transition: all 0.2s ease; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
     #startTranscriptionBtn:disabled { background-color: #e5e7eb; color: #9ca3af; cursor: not-allowed; box-shadow: none; }
     #startTranscriptionBtn:not(:disabled) { background-color: #1f2937; color: white; }
     #startTranscriptionBtn:not(:disabled):hover { background-color: #000000; transform: translateY(-2px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
-    
+
     .back-btn { background: none; color: #9ca3af; font-size: 0.9em; margin-top: 1.5rem; width: 100%; text-decoration: none; font-weight: 500; }
     .back-btn:hover { text-decoration: underline; }
     .loader { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.8); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 10; border-radius: 24px; }
@@ -390,7 +452,7 @@
     .ssc-candidate-info { line-height: 1.8; }
     .ssc-candidate-info b { font-weight: bold; color: #000; }
 
-    /* --- 4. NEW MODERN RESULT SHEET STYLES --- */
+    /* --- 4. RESULT SHEET STYLES --- */
     #results-view { display: none; }
     .result-sheet-container {
         --bg-main: #f8fafc;
@@ -550,6 +612,10 @@
     #deepAnalysisModal tr:nth-child(even) { background-color: #fcfdff; }
     #deepAnalysisModal em { color: var(--text-muted); font-style: italic; }
 
+    /* New Transcript Modal Styles */
+    #transcriptModal .modal-content { max-width: 600px; text-align: left; max-height: 80vh; display: flex; flex-direction: column; }
+    #transcriptTextBody { overflow-y: auto; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; line-height: 1.8; color: #374151; font-size: 1.05rem; margin-bottom: 15px; }
+
     .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
     .confirm-dialog h3 { margin: 0 0 8px 0; font-size: 1.25em; }
     .confirm-dialog p { margin: 0 0 20px 0; color: var(--medium-grey); }
@@ -568,7 +634,7 @@
         .ssc-typing-area { padding: 10px; min-height: 50vh; }
         .ssc-candidate-panel { width: 100%; border-left: none; border-top: 1px solid #ccc; flex-shrink: 1; padding: 10px; }
         .ssc-photo-box { margin-bottom: 10px; }
-        .modern-setup-grid { grid-template-columns: 1fr; }
+        .config-grid { grid-template-columns: 1fr; }
     }
 
     @media print {
@@ -631,63 +697,112 @@
     </div>
     
     <div id="player-view" class="view">
-        <div id="player"></div>
+        <div id="player"></div> <!-- Hidden YouTube Player -->
+        
         <div class="practice-station">
-            <div class="player-card">
-                <div id="player-loader" class="loader"><div class="spinner"></div></div>
-                <h2 class="player-title">Dictation Player</h2>
-                <p id="player-subtitle" class="player-subtitle">&nbsp;</p>
-                <div class="controls">
-                  <button class="btn" onclick="restartVideo()" aria-label="Restart Audio"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 2v6h6"></path><path d="M3.51 15a9 9 0 1 0 2.13-9.36L3 12"></path></svg></button>
-                  <button id="playBtn" class="btn btn-main" onclick="togglePlay()" aria-label="Play Audio"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M7 6V18L18 12L7 6Z"></path></svg></button>
-                  <button id="pauseBtn" class="btn btn-main" onclick="togglePlay()" aria-label="Pause Audio"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18H10V6H6V18ZM14 6V18H18V6H14Z"></path></svg></button>
-                  <div class="volume-control-group">
-                      <button id="volume-btn" class="btn" aria-label="Adjust Volume"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg></button>
-                      <input type="range" id="volume-slider" min="0" max="100" value="100" orient="vertical" aria-label="Volume Slider">
-                  </div>
+            <div id="player-loader" class="loader"><div class="spinner"></div></div>
+            
+            <!-- Modern Header -->
+            <div class="player-header">
+                <div class="player-info">
+                    <h2 class="player-title">Dictation Player</h2>
+                    <p id="player-subtitle">Kailash Chandra - Loading...</p>
                 </div>
-                <div id="progressBar" class="progress-bar-wrapper"><div id="progress-fill"></div></div>
-                <div class="time-display"><span id="current-time">00:00</span><span id="total-time">00:00</span></div>
-                <div class="extra-controls">
-                    <button class="btn speed-adjust-btn" onclick="adjustSpeed(-5)" aria-label="Decrease Speed by 5 WPM">-</button>
-                    <div class="speed-control-wrapper">
-                      <select id="wpmSpeed" onchange="setPlaybackSpeed()" aria-label="Select Dictation Speed in Words Per Minute"><script>for (let i = 60; i <= 160; i += 5) { document.write(`<option value="${i}">${i} WPM</option>`); }</script></select>
+                <button class="transcript-btn" onclick="openTranscriptModal()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    View Transcript
+                </button>
+            </div>
+
+            <div class="player-body">
+                <!-- Progress Bar -->
+                <div class="progress-container">
+                    <div id="progressBar" class="progress-bar-wrapper">
+                        <div id="progress-fill"></div>
                     </div>
-                    <button class="btn speed-adjust-btn" onclick="adjustSpeed(5)" aria-label="Increase Speed by 5 WPM">+</button>
+                    <div class="time-display">
+                        <span id="current-time">00:00</span>
+                        <span id="total-time">00:00</span>
+                    </div>
                 </div>
-                <div class="player-actions">
-                    <button id="reviewTranscriptBtn" class="view-switch-btn">Review Transcript</button>
+
+                <!-- Controls Cluster -->
+                <div class="controls-cluster">
+                     <!-- Volume -->
+                    <div class="setting-wrapper">
+                        <button class="control-btn" id="volumeBtn">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+                        </button>
+                        <div class="setting-popover">
+                            <span class="setting-label">Volume</span>
+                            <input type="range" id="volume-slider" min="0" max="100" value="100">
+                        </div>
+                    </div>
+
+                    <!-- Seek Back -->
+                    <button class="control-btn" onclick="seekRelative(-5)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
+                    </button>
+
+                    <!-- Play/Pause (Big) -->
+                    <button id="playBtn" class="control-btn play-btn-large" onclick="togglePlay()">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                    <button id="pauseBtn" class="control-btn play-btn-large" onclick="togglePlay()" style="display:none;">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                    </button>
+
+                    <!-- Seek Forward -->
+                    <button class="control-btn" onclick="seekRelative(5)">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
+                    </button>
+
+                     <!-- Speed -->
+                     <div class="setting-wrapper">
+                        <button class="control-btn">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                        </button>
+                        <div class="setting-popover" style="min-width: 200px;">
+                            <span class="setting-label">Speed</span>
+                            <div id="wpmSpeedDisplay">100 WPM</div>
+                            <input type="range" id="wpmRange" min="60" max="160" step="5" value="100" oninput="updateSpeedDisplay(this.value)" onchange="setPlaybackSpeed()">
+                            <!-- Hidden input for compatibility with old logic -->
+                            <input type="hidden" id="wpmSpeed" value="100">
+                        </div>
+                    </div>
                 </div>
             </div>
-            
-            <div id="transcript-viewer"></div>
-            
-            <div class="test-setup">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <span id="estimatedTimeDisplay">Audio will play until the end.</span>
+
+            <!-- Configuration Area -->
+            <div class="test-config-area">
+                <div style="text-align: center;">
+                    <span id="estimatedTimePill">Full Passage Mode</span>
                 </div>
                 
-                <div class="modern-setup-grid">
-                    <div class="setup-input-group">
+                <div class="config-grid">
+                    <div class="config-item">
                         <label>Target Words</label>
                         <select id="wordCountSelect" class="modern-select" onchange="calculateEstimatedTime()">
-                            <!-- Populated by JS -->
+                            <!-- JS Populated -->
                         </select>
                     </div>
-                    <div class="setup-input-group">
-                        <label>Timer</label>
+                    <div class="config-item">
+                        <label>Timer Duration</label>
                         <select id="timer-select" class="modern-select">
-                            <option value="50" selected>50 Minute Timer</option>
-                            <option value="40">40 Minute Timer</option>
+                            <option value="50" selected>50 Minutes</option>
+                            <option value="40">40 Minutes</option>
+                            <option value="10">10 Minutes</option>
                         </select>
                     </div>
                 </div>
-                
-                <label class="comma-check-wrapper">
-                  <input type="checkbox" id="includeComma">
-                  Count comma (,) mistakes
-                </label>
-                
+
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <label style="font-size: 0.9rem; color: #4b5563; font-weight: 500; cursor: pointer;">
+                        <input type="checkbox" id="includeComma" style="accent-color: #7c3aed; vertical-align: text-bottom;"> 
+                        Count comma (,) mistakes
+                    </label>
+                </div>
+
                 <button id="startTranscriptionBtn" onclick="showInstructions()" disabled>🚀 Start Transcription Test</button>
             </div>
         </div>
@@ -806,6 +921,16 @@
     </div>
 </div>
 
+<div id="transcriptModal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 style="text-align: left; margin-bottom: 15px;">Passage Transcript</h2>
+        <div id="transcriptTextBody"></div>
+        <div style="text-align: right;">
+            <button class="modal-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')">Close</button>
+        </div>
+    </div>
+</div>
+
 <div id="exam-view">
     <header class="ssc-header">
         <div class="ssc-header-left">
@@ -873,12 +998,12 @@ localDb.version(1).stores({
 // --- Firebase Configuration ---
 // THIS IS THE bs6 code block you requested to be empty. Paste your config here.
 const firebaseConfig = { 
-    apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
-  authDomain: "checkmysteno.firebaseapp.com",
-  projectId: "checkmysteno",
-  storageBucket: "checkmysteno.firebasestorage.app",
-  messagingSenderId: "719325115943",
-  appId: "1:719325115943:web:0dd50a67978816d42a8002"
+    apiKey: "YOUR_API_KEY", 
+    authDomain: "YOUR_AUTH_DOMAIN", 
+    projectId: "YOUR_PROJECT_ID", 
+    storageBucket: "YOUR_STORAGE_BUCKET", 
+    messagingSenderId: "YOUR_SENDER_ID", 
+    appId: "YOUR_APP_ID" 
 };
 // Initialize Firebase
 try {
@@ -893,12 +1018,13 @@ let player, originalText = "", wordCount = 0;
 let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
 let g_vol = "", g_tran = "", candidateId, attemptsRef;
 let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
-let g_alignment = []; // This will now be populated by the evaluation logic
+let g_alignment = []; 
 let allPassageData = [];
 let g_lastTypedText = "";
 let isReevaluateModeActive = false;
-let analysisWorker; // Declare the worker variable
+let analysisWorker; 
 let g_selectedTarget = "full"; // Global variable for Flexible Dictation
+let g_stopVideoWatcher = null; // Sync Watcher
 
 document.addEventListener("DOMContentLoaded", initializePracticeKC);
 
@@ -1126,15 +1252,15 @@ async function loadPractice(volumeId, transcriptId) {
         if (!audioData || !audioData.audioUrl || typeof audioData.wordCount !== 'number') throw new Error("Audio document is missing required fields.");
         wordCount = audioData.wordCount;
 
-        // Populate the transcript viewer with the text
-        document.getElementById('transcript-viewer').textContent = originalText;
+        // Populate transcript modal
+        document.getElementById('transcriptTextBody').textContent = originalText;
 
         saveState({ view: 'player-view', g_vol, g_tran, originalText, wordCount, audioUrl: audioData.audioUrl });
 
         showView('player-view');
         setPlayerLoading(true);
 
-        // --- NEW: Setup Flexible Word Count Dropdown ---
+        // --- Setup Flexible Word Count Dropdown ---
         setupWordCountOptions();
 
         const passageData = allPassageData.find(p => p.volId === g_vol && p.tranId === g_tran);
@@ -1148,48 +1274,46 @@ async function loadPractice(volumeId, transcriptId) {
     }
 }
 
-// --- NEW HELPER: Setup Flexible Word Count Dropdown ---
+// --- FLEXIBLE DICTATION HELPERS ---
 function setupWordCountOptions() {
     const select = document.getElementById('wordCountSelect');
     select.innerHTML = ''; 
     
-    // Create options: 200, 400, 600...
+    // Create options: 200, 400...
     let step = 200;
     for (let i = step; i < wordCount; i += step) {
         let option = document.createElement('option');
         option.value = i;
-        option.text = `Practice approx. ${i} words`;
+        option.text = `${i} Words (Approx)`;
         select.appendChild(option);
     }
     
     // "Full Passage" option
     let fullOption = document.createElement('option');
     fullOption.value = "full";
-    fullOption.text = `Full Passage (${wordCount} words)`;
+    fullOption.text = `Full Passage (${wordCount} Words)`;
     fullOption.selected = true;
     select.appendChild(fullOption);
     
-    // Initialize the display text
     calculateEstimatedTime();
 }
 
-// --- NEW HELPER: Display Estimated Time ---
 function calculateEstimatedTime() {
-    const display = document.getElementById('estimatedTimeDisplay');
+    const display = document.getElementById('estimatedTimePill');
     const select = document.getElementById('wordCountSelect');
     const val = select.value;
 
     if (val === "full") {
-        display.innerText = "Audio will play until the end.";
-        display.style.backgroundColor = 'var(--accent-purple-light)';
-        display.style.color = 'var(--accent-purple)';
+        display.innerText = "Audio plays until end";
+        display.style.background = "#ecfdf5";
+        display.style.color = "#047857";
+        display.style.borderColor = "#a7f3d0";
     } else {
         let words = parseInt(val);
-        // Assuming average 80-100 WPM for display purposes
-        let approxMin = Math.ceil(words / 80); 
-        display.innerText = `Audio will stop automatically after approx. ${approxMin} mins.`;
-        display.style.backgroundColor = '#d1fae5'; // Greenish for active selection
-        display.style.color = '#065f46';
+        display.innerText = `Auto-Stop enabled for ~${words} words`;
+        display.style.background = "#fffbeb";
+        display.style.color = "#b45309";
+        display.style.borderColor = "#fcd34d";
     }
 }
 
@@ -1198,7 +1322,7 @@ function showInstructions() {
     document.getElementById('instructions-modal').classList.add('visible');
 }
 
-// --- UPDATED: Start Test with Flexible Timer Logic ---
+// --- UPDATED: Start Test with SYNC WATCHER Logic ---
 function startTranscriptionTest() {
     document.getElementById('instructions-modal').classList.remove('visible');
     document.documentElement.requestFullscreen().catch(err => console.warn(`Fullscreen failed: ${err.message}.`));
@@ -1212,29 +1336,38 @@ function startTranscriptionTest() {
     const currentState = JSON.parse(localStorage.getItem('stenoState'));
     saveState({ ...currentState, view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
 
-    // --- FLEXIBLE DICTATION LOGIC ---
+    // --- SYNC & AUTO STOP LOGIC ---
     const selectVal = document.getElementById('wordCountSelect').value;
-    g_selectedTarget = selectVal; // Save for later logic in submit
-    
+    g_selectedTarget = selectVal; 
+
+    // Clear any existing watcher
+    if (g_stopVideoWatcher) clearInterval(g_stopVideoWatcher);
+
     if (selectVal !== "full") {
         let targetWords = parseInt(selectVal);
         
-        // Ratio Calculation: (Target / Total) * Duration
+        // 1. Calculate TARGET TIME in Video Seconds (Not wall clock)
         let ratio = targetWords / wordCount;
-        let estimatedSeconds = totalVideoDuration * ratio;
+        let exactVideoTime = totalVideoDuration * ratio;
         
-        // ADD 15-20 SECOND BUFFER (Elasticity)
-        // This effectively plays about 20-30 extra words to ensure target is reached
-        let stopTimeMs = (estimatedSeconds + 20) * 1000; 
+        // 2. Add 15s Buffer (Video Time)
+        let stopAtVideoTimestamp = exactVideoTime + 15;
+        
+        if(stopAtVideoTimestamp > totalVideoDuration) stopAtVideoTimestamp = totalVideoDuration - 0.5;
 
-        console.log(`Smart Playback: Target ${targetWords}, Stop in ${stopTimeMs/1000}s`);
+        console.log(`Auto-Stop set at video timestamp: ${stopAtVideoTimestamp}s`);
 
-        // Schedule the pause
-        setTimeout(() => {
-            if(player && typeof player.pauseVideo === 'function') {
-                player.pauseVideo();
+        // 3. Start The Watcher
+        // Checks the VIDEO'S internal clock. Works regardless of speed.
+        g_stopVideoWatcher = setInterval(() => {
+            if (player && player.getCurrentTime) {
+                if (player.getCurrentTime() >= stopAtVideoTimestamp) {
+                    player.pauseVideo();
+                    clearInterval(g_stopVideoWatcher); // Stop watching
+                    console.log("Auto-Stop triggered by timestamp watcher.");
+                }
             }
-        }, stopTimeMs);
+        }, 250);
     }
 }
 
@@ -1297,11 +1430,6 @@ function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) { 
         playBtn.style.display = 'none'; 
         pauseBtn.style.display = 'flex'; 
-        const transcriptViewer = document.getElementById('transcript-viewer');
-        if (transcriptViewer.style.display === 'block') {
-            transcriptViewer.style.display = 'none';
-            document.getElementById('reviewTranscriptBtn').textContent = 'Review Transcript';
-        }
         trackProgress(); 
     }
     else { 
@@ -1313,11 +1441,21 @@ function onPlayerStateChange(event) {
 
 function setPlaybackSpeed() {
     if (!player || !player.setPlaybackRate) return;
-    const targetWPM = parseInt(document.getElementById('wpmSpeed').value);
-    if (isNaN(targetWPM) || !wordCount || !totalVideoDuration) currentPlaybackRate = 1;
-    else { const originalWPM = wordCount / (totalVideoDuration / 60); currentPlaybackRate = originalWPM > 0 ? targetWPM / originalWPM : 1; }
+    const targetWPM = parseInt(document.getElementById('wpmRange').value);
+    
+    // Calculate speed ratio
+    let currentPlaybackRate = 1;
+    if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
+        const originalWPM = wordCount / (totalVideoDuration / 60); 
+        currentPlaybackRate = originalWPM > 0 ? targetWPM / originalWPM : 1; 
+    }
     player.setPlaybackRate(currentPlaybackRate);
     updateVideoTimeDisplay();
+}
+
+// NEW UI Update function
+function updateSpeedDisplay(val) {
+    document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
 }
 
 function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
@@ -1329,7 +1467,15 @@ function formatTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'
 function updateVideoTimeDisplay() { if (!player || typeof player.getCurrentTime !== 'function') return; const rawCurrentTime = player.getCurrentTime(); const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate; const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate; document.getElementById("progress-fill").style.width = (rawCurrentTime / totalVideoDuration) * 100 + "%"; document.getElementById('current-time').innerText = formatTime(effectiveCurrentTime); document.getElementById('total-time').innerText = formatTime(effectiveTotalDuration); }
 function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
 function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
-function adjustSpeed(amount) { const select = document.getElementById('wpmSpeed'); const currentIndex = select.selectedIndex; const newIndex = currentIndex + (amount / 5); if (newIndex >= 0 && newIndex < select.options.length) { select.selectedIndex = newIndex; setPlaybackSpeed(); } }
+function adjustSpeed(amount) { 
+    const range = document.getElementById('wpmRange');
+    let newVal = parseInt(range.value) + amount;
+    if(newVal < 60) newVal = 60;
+    if(newVal > 160) newVal = 160;
+    range.value = newVal;
+    updateSpeedDisplay(newVal);
+    setPlaybackSpeed();
+}
 
 // --- Result Processing and Display ---
 function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -1421,22 +1567,30 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 function buildResultHtml(alignment) {
     let resultHtmlContent = "";
     
-    // 1. TAIL TRIMMING: Find the index of the last active interaction (word typed/spelled/extra)
-    let lastTypedIndex = -1;
-    for (let i = 0; i < alignment.length; i++) {
-        // If it's NOT a pure omission, it means the user typed something here (match, sub, extra, etc.)
-        if (alignment[i].mistakeType !== 'omission') {
-            lastTypedIndex = i;
+    // Determine Cutoff Index based on Target Count
+    let wordCounter = 0;
+    let cutoffIndex = alignment.length; // Default to end
+    
+    if (g_selectedTarget !== "full") {
+        let targetCount = parseInt(g_selectedTarget);
+        
+        for(let i=0; i<alignment.length; i++) {
+            // Count "Original Words" processed
+            if(alignment[i].mistakeType !== 'extra') {
+                wordCounter++;
+            }
+            if(wordCounter >= targetCount) {
+                cutoffIndex = i + 1; // Stop showing errors after this point
+                break;
+            }
         }
     }
 
     for (let k = 0; k < alignment.length; k++) {
         const entry = alignment[k];
         
-        // 2. TAIL TRIMMING CHECK:
-        // If we are past the last thing the user typed, and this is an Omission,
-        // it means the audio stopped or user stopped early. Hide these phantom errors.
-        if (k > lastTypedIndex && entry.mistakeType === 'omission') {
+        // Hide phantom errors caused by buffer words
+        if (k > cutoffIndex) {
             continue; 
         }
 
@@ -1498,19 +1652,18 @@ function submitTranscription() {
             return;
         }
 
-        // --- SMART CROP / OVERSHOOT LOGIC ---
+        // --- SMART CROP LOGIC ---
         let textForAnalysis = originalText;
         if (g_selectedTarget !== "full") {
             let targetWords = parseInt(g_selectedTarget);
-            // We select Target + 100 words (Overshoot) to ensure all user words are matched.
-            let safeLimit = targetWords + 100;
+            // We select Target + 50 words to ensure all user words are matched.
+            let safeLimit = targetWords + 50;
             
             let wordsArray = originalText.trim().split(/\s+/);
             if (safeLimit < wordsArray.length) {
                 textForAnalysis = wordsArray.slice(0, safeLimit).join(" ");
             }
         }
-        // ------------------------------------
 
         document.getElementById('fullPageLoader').style.display = 'flex';
 
@@ -1713,10 +1866,6 @@ function initializeEventListeners() {
     document.getElementById('errorTypeSelect').addEventListener('change', validateReportForm);
     document.getElementById('otherErrorText').addEventListener('input', validateReportForm);
     
-    // UPDATE 2: Event listener for new "Review Transcript" button
-    document.getElementById('reviewTranscriptBtn').addEventListener('click', toggleTranscriptViewer);
-
-    // UPDATE 4: Event listener for closing Deep Analysis modal
     document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.remove('visible'));
     
     window.addEventListener('beforeunload', function (e) { if (document.getElementById('results-view').style.display === 'block') { const msg = 'Are you sure you want to leave? Your corrected transcript and re-evaluated score will not be saved. Please download the report first.'; (e || window.event).returnValue = msg; return msg; } });
@@ -1740,12 +1889,15 @@ function initializeResultInteractivity() {
     
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
-
-    // UPDATE 1: Initialize the interactive legend filter system
-    initializeInteractiveLegend();
-    
-    // UPDATE 4: Hook up the Deep Analysis button
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
+
+    initializeInteractiveLegend();
+}
+
+function openTranscriptModal() {
+    document.getElementById('transcriptTextBody').innerText = originalText;
+    document.getElementById('transcriptModal').classList.add('visible');
+    if(player && player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
 }
 
 // --- Re-evaluation Mode ---
@@ -1880,7 +2032,6 @@ function renderQuickResume() {
     }
 }
 
-// --- UPDATE 1: JAVASCRIPT FOR INTERACTIVE LEGEND ---
 function initializeInteractiveLegend() {
     const legendContainer = document.getElementById('interactive-legend');
     if (!legendContainer) return;
@@ -1935,25 +2086,6 @@ function applyFilters() {
     });
 }
 
-// --- UPDATE 2: JAVASCRIPT FOR REVIEW TRANSCRIPT ---
-function toggleTranscriptViewer() {
-    const viewer = document.getElementById('transcript-viewer');
-    const button = document.getElementById('reviewTranscriptBtn');
-    const isVisible = viewer.style.display === 'block';
-
-    if (isVisible) {
-        viewer.style.display = 'none';
-        button.textContent = 'Review Transcript';
-    } else {
-        if (player && player.getPlayerState() === YT.PlayerState.PLAYING) {
-            player.pauseVideo();
-        }
-        viewer.style.display = 'block';
-        button.textContent = 'Hide Transcript';
-    }
-}
-
-// --- UPDATE 4: JAVASCRIPT FOR DEEP ANALYSIS MODAL ---
 function showDeepAnalysisModal() {
     const mistakes = g_alignment.filter(entry => entry.mistakeType !== 'correct');
     const tableBody = document.getElementById('deep-analysis-table-body');
@@ -1991,4 +2123,3 @@ function capitalizeFirstLetter(string) {
 </script>
 </body>
 </html>
-
