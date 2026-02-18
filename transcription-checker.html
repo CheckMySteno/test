@@ -472,7 +472,6 @@
               <li><b>Step 1:</b> Paste the original dictation text into the "Original Passage" box.</li>
               <li><b>Step 2:</b> You will then be prompted to start a timed transcription test.</li>
               <li><b>Step 3:</b> Click "Submit" to see a detailed, interactive report.</li>
-              <li><b>Re-evaluate:</b> On the results page, you can edit the original text and re-check your score.</li>
           </ul>
           <div class="modal-btn-group">
             <button id="close-instructions-btn" class="modal-confirm-btn">Got it, Let's Start!</button>
@@ -704,7 +703,7 @@
                 </div>
                 <div id="comparisonColumns" class="columns view-top-bottom">
                     <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText">${highlightedHtml}</p></div>
-                    <div class="col" id="originalCol"><strong>Original Text (Click to edit):</strong><p id="editableOriginalText" contenteditable="true">${originalTextHtml}</p></div>
+                    <div class="col" id="originalCol"><strong>Original Text:</strong><p id="editableOriginalText">${originalTextHtml}</p></div>
                 </div>
             </div>`;
         initializeResultInteractivity();
