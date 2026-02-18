@@ -260,8 +260,8 @@
     
     #finishButton {
         position: fixed;
-        top: 20px;
-        left: 20px;
+        bottom: 20px;
+        right: 20px;
         z-index: 102;
         width: auto;
     }
@@ -328,7 +328,18 @@
     .modal-close-btn, .modal-confirm-btn, .modal-cancel-btn { padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; cursor: pointer; border: none; }
     .modal-confirm-btn { background-color: var(--primary-accent); color: white; }
     .modal-cancel-btn { background-color: var(--surface-light); color: var(--text-body); border: 1px solid var(--border-subtle); }
-    #timerDisplay { position: fixed; top: 20px; right: 20px; font-size: 20px; background: var(--primary-accent); color: white; padding: 10px 15px; border-radius: 8px; z-index: 101; }
+    
+    #timerDisplay { 
+        position: fixed; 
+        bottom: 20px; 
+        left: 20px; 
+        font-size: 16px; 
+        background: var(--primary-accent); 
+        color: white; 
+        padding: 8px 12px; 
+        border-radius: 8px; 
+        z-index: 101; 
+    }
     
     /* --- NEW: Analyzing Animation Styles --- */
     #analysis-overlay {
@@ -831,9 +842,11 @@
     }
 
     async function saveAttempt(original, typed, analysisResult) {
+        // NOTE: The test number is sequential based on the total attempts saved in your browser's local database.
+        // To restart the count from 1, you need to clear the site data for this page in your browser's settings.
         const stats = await localDb.overallStats.get(1);
         const attemptNumber = (stats ? stats.totalAttempts : 0) + 1;
-        const dictationName = `Your Steno ${attemptNumber}`; // This logic correctly provides "Your Steno 1", "Your Steno 2", etc.
+        const dictationName = `Your Steno ${attemptNumber}`; 
 
         const fullResultData = {
             timestamp: new Date().toISOString(),
