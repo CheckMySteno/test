@@ -231,7 +231,7 @@
         position: fixed;
         top: 0; left: 0;
         width: 100%; height: 100%;
-        padding: 20px;
+        padding: 60px 20px 80px 20px; /* Added padding to avoid overlap with timer/button */
         z-index: 100;
         background-color: var(--bg-main);
         display: flex;
@@ -241,6 +241,7 @@
     #checkerContainer.focus-mode #inputSection {
         padding: 0; margin: 0;
         width: 100%;
+        height: 100%;
         flex-grow: 1;
         max-width: none;
         border: none;
@@ -264,6 +265,8 @@
         right: 20px;
         z-index: 102;
         width: auto;
+        padding: 10px 20px;
+        font-size: 1em;
     }
 
     #modern-results-view {
@@ -313,7 +316,11 @@
     .hidden-mistake { background: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; font-weight: normal !important; }
     .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
     .action-buttons { text-align: center; padding-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;}
-    .action-buttons .primary-btn { background-color: var(--primary-accent); color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; cursor: pointer; border: none; }
+    .action-buttons .primary-btn {
+      background-color: var(--primary-accent); color: white; padding: 12px 25px; 
+      border-radius: 8px; font-weight: 600; cursor: pointer; border: none;
+      width: auto; /* Override the global 100% width */
+    }
     #analysisBtn { background-color: #4f46e5; }
     
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
@@ -331,8 +338,8 @@
     
     #timerDisplay { 
         position: fixed; 
-        bottom: 20px; 
-        left: 20px; 
+        top: 20px; 
+        right: 20px; 
         font-size: 16px; 
         background: var(--primary-accent); 
         color: white; 
@@ -582,6 +589,9 @@
     }
 
     function submitTranscription() {
+        const timerDisplay = document.getElementById('timerDisplay');
+        if (timerDisplay) timerDisplay.remove();
+        
         document.getElementById('finishButton').classList.add('hidden');
         document.getElementById('checkerContainer').classList.remove('focus-mode');
         const originalText = document.getElementById("original").value.trim();
@@ -598,8 +608,7 @@
         submitBtn.disabled = true;
         submitBtn.textContent = 'Analyzing...';
         clearInterval(timerInterval);
-        const timerDisplay = document.getElementById('timerDisplay');
-        if (timerDisplay) timerDisplay.remove();
+
         g_lastTypedText = typedText;
         g_lastOriginalText = originalText;
         const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
@@ -618,7 +627,7 @@
         hideAnalyzingOverlay(); // Hide animation
         renderResultSheet(results);
         
-        // --- NEW: Auto-Save to Database ---
+        // --- Auto-Save to Database ---
         try {
             await saveAttempt(g_lastOriginalText, g_lastTypedText, results);
             console.log("✅ Attempt saved successfully to local database.");
@@ -691,7 +700,6 @@
                         <label for="mistakeFilter">Filter:</label>
                         <select id="mistakeFilter"><option value="all">Show All</option><option value="omission-substitution">Omissions & Additions</option><option value="omission">Omissions Only</option><option value="extra">Additions Only</option><option value="spelling">Spelling Only</option><option value="capitalization">Capitalization Only</option><option value="punctuation">Punctuation Only</option></select>
                     </div>
-                    <div class="action-section"><button id="reevaluateBtn" class="view-switch-btn">Re-evaluate Score</button></div>
                     <button id="viewSwitchBtn" class="view-switch-btn">Switch to Side-by-Side View</button>
                 </div>
                 <div id="comparisonColumns" class="columns view-top-bottom">
@@ -704,7 +712,6 @@
     
     function initializeResultInteractivity() {
         document.getElementById('mistakeFilter').addEventListener('change', (e) => filterMistakes(e.target.value));
-        document.getElementById('reevaluateBtn').addEventListener('click', reevaluateScore);
         const switchBtn = document.getElementById('viewSwitchBtn');
         const columnsContainer = document.getElementById('comparisonColumns');
         switchBtn.addEventListener('click', () => {
@@ -727,23 +734,6 @@
         document.getElementById('analysisBtn').addEventListener('click', () => {
             window.location.href = 'test-analysis.html';
         });
-    }
-
-    function reevaluateScore() {
-        const correctedOriginalText = document.getElementById('editableOriginalText').innerText;
-        if (!correctedOriginalText || !g_lastTypedText) return alert("Could not find text to re-evaluate.");
-        
-        showAnalyzingOverlay();
-        const submitBtn = document.getElementById('submitButton');
-        submitBtn.disabled = true;
-        submitBtn.textContent = 'Analyzing...';
-        const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
-        const options = { countCommaMistakes: document.getElementById("includeComma").checked };
-        
-        setTimeout(() => {
-            analysisWorker.postMessage({ originalText: correctedOriginalText, typedText: g_lastTypedText, timeTakenSeconds, options });
-        }, 100);
-        alert("Re-evaluating score with your corrections.");
     }
 
     function filterMistakes(type) {
