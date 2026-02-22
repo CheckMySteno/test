@@ -246,7 +246,7 @@
     .quick-resume-box p { margin: 0 0 16px 0; color: var(--medium-grey); }
     .quick-resume-box .intro-actions button { border-color: var(--accent-purple); }
 
-    /* --- 2. PROFESSIONAL PLAYER STYLES --- */
+    /* --- 2. UPDATED MODERN PLAYER STYLES (Sleek & Professional) --- */
     #player-view { max-width: 900px; margin: 40px auto; }
 
     .practice-station {
@@ -1312,8 +1312,12 @@ function calculateEstimatedTime() {
     } else {
         let words = parseInt(val);
         // Estimate time based on selected speed
-        let estMinutes = (words / speedVal).toFixed(1);
-        display.innerText = `Auto-Stop for ~${words} words (approx. ${estMinutes} min at ${speedVal} WPM)`;
+        let estMinutes = (words / speedVal).toFixed(2);
+        let minutes = Math.floor(estMinutes);
+        let seconds = Math.round((estMinutes - minutes) * 60);
+        let timeString = `${minutes}m ${seconds}s`;
+
+        display.innerText = `Auto-Stop for ~${words} words (~${timeString} + 10s buffer)`;
         display.style.background = "#fffbeb";
         display.style.color = "#b45309";
         display.style.borderColor = "#fcd34d";
@@ -1328,14 +1332,22 @@ function showInstructions() {
 // --- UPDATED: Start Test with SYNC WATCHER Logic ---
 function startTranscriptionTest() {
     document.getElementById('instructions-modal').classList.remove('visible');
-    document.documentElement.requestFullscreen().catch(err => console.warn(`Fullscreen failed: ${err.message}.`));
+    // Try fullscreen
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(err => console.log("Fullscreen optional"));
+    }
     showView('exam-view');
     transcriptionTimerTotalTime = parseInt(document.getElementById('timer-select').value) * 60;
     timeLeft = transcriptionTimerTotalTime;
     document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft);
     document.getElementById('typingBox').value = '';
     document.getElementById('typingBox').focus();
-    document.getElementById('typingBox').addEventListener('keydown', handleFirstKeydown);
+    
+    // Prevent multiple listeners
+    const box = document.getElementById('typingBox');
+    box.removeEventListener('keydown', handleFirstKeydown);
+    box.addEventListener('keydown', handleFirstKeydown);
+
     const currentState = JSON.parse(localStorage.getItem('stenoState'));
     saveState({ ...currentState, view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
 
@@ -1350,25 +1362,26 @@ function startTranscriptionTest() {
         let targetWords = parseInt(selectVal);
         
         // 1. Calculate TARGET TIME in Video Seconds (Not wall clock)
-        // This is speed-independent because we check video timestamp
         let ratio = targetWords / wordCount;
-        let exactVideoTime = totalVideoDuration * ratio;
+        let stopAtVideoTimestamp = totalVideoDuration * ratio;
         
-        // 2. Add 10s Buffer (as requested)
-        let stopAtVideoTimestamp = exactVideoTime + 10;
+        // 2. Add 10s Buffer (Video Time)
+        stopAtVideoTimestamp += 10;
         
         if(stopAtVideoTimestamp > totalVideoDuration) stopAtVideoTimestamp = totalVideoDuration - 0.5;
 
-        console.log(`Auto-Stop set at video timestamp: ${stopAtVideoTimestamp}s`);
+        console.log(`Auto-Stop armed. Target: ${targetWords} words. Video stops at timestamp: ${stopAtVideoTimestamp.toFixed(2)}s`);
 
         // 3. Start The Watcher
-        // Checks the VIDEO'S internal clock. Works regardless of speed.
+        // Checks 10 times a second for precision
         g_stopVideoWatcher = setInterval(() => {
             if (player && player.getCurrentTime) {
-                if (player.getCurrentTime() >= stopAtVideoTimestamp) {
+                const currentVideoTime = player.getCurrentTime();
+                if (currentVideoTime >= stopAtVideoTimestamp) {
                     player.pauseVideo();
-                    clearInterval(g_stopVideoWatcher); // Stop watching
-                    console.log("Auto-Stop triggered by timestamp watcher.");
+                    clearInterval(g_stopVideoWatcher); 
+                    g_stopVideoWatcher = null;
+                    console.log(`Auto-Stop triggered at ${currentVideoTime.toFixed(2)}s`);
                 }
             }
         }, 100);
@@ -1434,6 +1447,11 @@ function onPlayerStateChange(event) {
     if (event.data === YT.PlayerState.PLAYING) { 
         playBtn.style.display = 'none'; 
         pauseBtn.style.display = 'flex'; 
+        const transcriptViewer = document.getElementById('transcript-viewer');
+        if (transcriptViewer && transcriptViewer.style.display === 'block') {
+            transcriptViewer.style.display = 'none';
+            document.getElementById('reviewTranscriptBtn').textContent = 'Review Transcript';
+        }
         trackProgress(); 
     }
     else { 
@@ -1447,17 +1465,20 @@ function setPlaybackSpeed() {
     if (!player || !player.setPlaybackRate) return;
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
     
-    // Calculate speed ratio
-    // FIXED: Remove 'let' to update global variable
+    // Calculate speed ratio (Updated to affect global variable)
     if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
         const originalWPM = wordCount / (totalVideoDuration / 60); 
-        currentPlaybackRate = originalWPM > 0 ? targetWPM / originalWPM : 1; 
+        if(originalWPM > 0) {
+            currentPlaybackRate = targetWPM / originalWPM;
+        } else {
+            currentPlaybackRate = 1;
+        }
     } else {
         currentPlaybackRate = 1;
     }
+    
     player.setPlaybackRate(currentPlaybackRate);
     updateVideoTimeDisplay();
-    // Update estimated time display since speed changed
     calculateEstimatedTime(); 
 }
 
@@ -1472,7 +1493,20 @@ function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; 
 function trackProgress() { clearInterval(progressInterval); progressInterval = setInterval(updateVideoTimeDisplay, 250); }
 function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); const clickPosition = (e.clientX - rect.left) / rect.width; player.seekTo(clickPosition * totalVideoDuration, true); }); }
 function formatTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); const sec = Math.round(s % 60).toString().padStart(2, '0'); return isNaN(m) || isNaN(sec) ? "00:00" : `${m}:${sec}` }
-function updateVideoTimeDisplay() { if (!player || typeof player.getCurrentTime !== 'function') return; const rawCurrentTime = player.getCurrentTime(); const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate; const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate; document.getElementById("progress-fill").style.width = (rawCurrentTime / totalVideoDuration) * 100 + "%"; document.getElementById('current-time').innerText = formatTime(effectiveCurrentTime); document.getElementById('total-time').innerText = formatTime(effectiveTotalDuration); }
+
+function updateVideoTimeDisplay() { 
+    if (!player || typeof player.getCurrentTime !== 'function') return; 
+    const rawCurrentTime = player.getCurrentTime(); 
+    
+    // Divide by playback rate for 'Real World' time display
+    const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate; 
+    const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate; 
+    
+    document.getElementById("progress-fill").style.width = (rawCurrentTime / totalVideoDuration) * 100 + "%"; 
+    document.getElementById('current-time').innerText = formatTime(effectiveCurrentTime); 
+    document.getElementById('total-time').innerText = formatTime(effectiveTotalDuration); 
+}
+
 function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
 function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
 function adjustSpeed(amount) { 
