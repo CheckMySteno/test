@@ -246,7 +246,7 @@
     .quick-resume-box p { margin: 0 0 16px 0; color: var(--medium-grey); }
     .quick-resume-box .intro-actions button { border-color: var(--accent-purple); }
 
-    /* --- 2. UPDATED MODERN PLAYER STYLES (Sleek & Professional) --- */
+    /* --- 2. PROFESSIONAL PLAYER STYLES --- */
     #player-view { max-width: 900px; margin: 40px auto; }
 
     .practice-station {
@@ -766,7 +766,7 @@
                             <span class="setting-label">Speed</span>
                             <div id="wpmSpeedDisplay">100 WPM</div>
                             <input type="range" id="wpmRange" min="60" max="160" step="5" value="100" oninput="updateSpeedDisplay(this.value)" onchange="setPlaybackSpeed()">
-                            <!-- Hidden input for compatibility with old logic -->
+                            <!-- Hidden input for compatibility -->
                             <input type="hidden" id="wpmSpeed" value="100">
                         </div>
                     </div>
@@ -997,8 +997,8 @@ localDb.version(1).stores({
 
 // --- Firebase Configuration ---
 // THIS IS THE bs6 code block you requested to be empty. Paste your config here.
-const firebaseConfig = { 
-    apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
+const firebaseConfig = {
+  apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
   authDomain: "checkmysteno.firebaseapp.com",
   projectId: "checkmysteno",
   storageBucket: "checkmysteno.firebasestorage.app",
@@ -1301,6 +1301,7 @@ function setupWordCountOptions() {
 function calculateEstimatedTime() {
     const display = document.getElementById('estimatedTimePill');
     const select = document.getElementById('wordCountSelect');
+    const speedVal = parseInt(document.getElementById('wpmRange').value) || 100;
     const val = select.value;
 
     if (val === "full") {
@@ -1310,7 +1311,9 @@ function calculateEstimatedTime() {
         display.style.borderColor = "#a7f3d0";
     } else {
         let words = parseInt(val);
-        display.innerText = `Auto-Stop enabled for ~${words} words`;
+        // Estimate time based on selected speed
+        let estMinutes = (words / speedVal).toFixed(1);
+        display.innerText = `Auto-Stop for ~${words} words (approx. ${estMinutes} min at ${speedVal} WPM)`;
         display.style.background = "#fffbeb";
         display.style.color = "#b45309";
         display.style.borderColor = "#fcd34d";
@@ -1347,11 +1350,12 @@ function startTranscriptionTest() {
         let targetWords = parseInt(selectVal);
         
         // 1. Calculate TARGET TIME in Video Seconds (Not wall clock)
+        // This is speed-independent because we check video timestamp
         let ratio = targetWords / wordCount;
         let exactVideoTime = totalVideoDuration * ratio;
         
-        // 2. Add 15s Buffer (Video Time)
-        let stopAtVideoTimestamp = exactVideoTime + 15;
+        // 2. Add 10s Buffer (as requested)
+        let stopAtVideoTimestamp = exactVideoTime + 10;
         
         if(stopAtVideoTimestamp > totalVideoDuration) stopAtVideoTimestamp = totalVideoDuration - 0.5;
 
@@ -1451,6 +1455,8 @@ function setPlaybackSpeed() {
     }
     player.setPlaybackRate(currentPlaybackRate);
     updateVideoTimeDisplay();
+    // Update estimated time display since speed changed
+    calculateEstimatedTime(); 
 }
 
 // NEW UI Update function
@@ -1634,7 +1640,7 @@ function buildResultHtml(alignment) {
     return resultHtmlContent;
 }
 
-// --- UPDATED: Submit Transcription with SMART CROP Logic ---
+// --- UPDATED: Submit Transcription with SMART CROP & TRIMMING Logic ---
 function submitTranscription() {
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
     clearState();
@@ -1652,7 +1658,7 @@ function submitTranscription() {
             return;
         }
 
-        // --- SMART CROP LOGIC ---
+        // --- SMART CROP LOGIC (Overshoot) ---
         let textForAnalysis = originalText;
         if (g_selectedTarget !== "full") {
             let targetWords = parseInt(g_selectedTarget);
@@ -1677,7 +1683,15 @@ function submitTranscription() {
         });
 
         analysisWorker.onmessage = function(event) {
-            const analysisResult = event.data;
+            let analysisResult = event.data;
+            
+            // --- NEW: Trimming Logic (Remove Extra Words) ---
+            if (g_selectedTarget !== "full") {
+                let targetCount = parseInt(g_selectedTarget);
+                analysisResult = refineStatsBasedOnLimit(analysisResult, targetCount);
+            }
+            // ----------------------------------------------
+
             document.getElementById('fullPageLoader').style.display = 'none';
             
             showView('results-view');
@@ -1702,6 +1716,59 @@ function submitTranscription() {
         showErrorModal("Result Error", "An error occurred while preparing your results. Please try again.");
         goHome();
     }
+}
+
+// --- NEW HELPER: Refine Stats (Remove extra user words from score) ---
+function refineStatsBasedOnLimit(result, targetLimit) {
+    let newAlignment = [];
+    let originalCounter = 0;
+    
+    // 1. Filter the alignment
+    for(let entry of result.alignment) {
+        if(entry.mistakeType !== 'extra') {
+            originalCounter++;
+        }
+        
+        // Stop exactly at the target limit
+        if(originalCounter > targetLimit) {
+            break; 
+        }
+        
+        newAlignment.push(entry);
+    }
+    
+    // 2. Recalculate Stats based on newAlignment
+    let fullMistakes = 0;
+    let halfMistakes = 0;
+    let typedWords = 0;
+    
+    newAlignment.forEach(entry => {
+        if(entry.mistakeType !== 'omission') typedWords++; // Count typed words
+        
+        if(entry.mistakeType === 'omission' || entry.mistakeType === 'extra' || entry.mistakeType === 'sub') {
+            fullMistakes++;
+        } else if (entry.mistakeType === 'spelling' || entry.mistakeType === 'capitalization' || entry.mistakeType === 'punctuation') {
+            // Note: Simplification based on typical SSC rules, adjust if your worker has specific logic
+            halfMistakes++;
+        }
+    });
+    
+    // Note: Assuming full mistake = 1 error, half = 0.5 error. 
+    // SSC typically calculates error % = (Errors / Total Words) * 100
+    let totalErrors = fullMistakes + (halfMistakes * 0.5);
+    let mistakePercent = (totalErrors / targetLimit) * 100;
+    let accuracy = Math.max(0, 100 - mistakePercent).toFixed(2);
+    
+    return {
+        ...result,
+        alignment: newAlignment,
+        totalWords: targetLimit,
+        typedWords: typedWords,
+        fullMistakes: fullMistakes,
+        halfMistakes: halfMistakes,
+        mistakePercent: mistakePercent.toFixed(2),
+        accuracy: accuracy
+    };
 }
 
 // --- Data Saving and Progress ---
@@ -2123,4 +2190,3 @@ function capitalizeFirstLetter(string) {
 </script>
 </body>
 </html>
-
