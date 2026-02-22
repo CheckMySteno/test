@@ -1371,7 +1371,7 @@ function startTranscriptionTest() {
                     console.log("Auto-Stop triggered by timestamp watcher.");
                 }
             }
-        }, 250);
+        }, 100);
     }
 }
 
@@ -1448,10 +1448,12 @@ function setPlaybackSpeed() {
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
     
     // Calculate speed ratio
-    let currentPlaybackRate = 1;
+    // FIXED: Remove 'let' to update global variable
     if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
         const originalWPM = wordCount / (totalVideoDuration / 60); 
         currentPlaybackRate = originalWPM > 0 ? targetWPM / originalWPM : 1; 
+    } else {
+        currentPlaybackRate = 1;
     }
     player.setPlaybackRate(currentPlaybackRate);
     updateVideoTimeDisplay();
