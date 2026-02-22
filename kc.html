@@ -782,7 +782,7 @@
                 <div class="config-grid">
                     <div class="config-item">
                         <label>Target Words</label>
-                        <select id="wordCountSelect" class="modern-select" onchange="calculateEstimatedTime()">
+                        <select id="wordCountSelect" class="modern-select" onchange="updateAutoStopSettings()">
                             <!-- JS Populated -->
                         </select>
                     </div>
@@ -997,13 +997,13 @@ localDb.version(1).stores({
 
 // --- Firebase Configuration ---
 // THIS IS THE bs6 code block you requested to be empty. Paste your config here.
-const firebaseConfig = {
-  apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
-  authDomain: "checkmysteno.firebaseapp.com",
-  projectId: "checkmysteno",
-  storageBucket: "checkmysteno.firebasestorage.app",
-  messagingSenderId: "719325115943",
-  appId: "1:719325115943:web:0dd50a67978816d42a8002"
+const firebaseConfig = { 
+    apiKey: "YOUR_API_KEY", 
+    authDomain: "YOUR_AUTH_DOMAIN", 
+    projectId: "YOUR_PROJECT_ID", 
+    storageBucket: "YOUR_STORAGE_BUCKET", 
+    messagingSenderId: "YOUR_SENDER_ID", 
+    appId: "YOUR_APP_ID" 
 };
 // Initialize Firebase
 try {
@@ -1025,6 +1025,7 @@ let isReevaluateModeActive = false;
 let analysisWorker; 
 let g_selectedTarget = "full"; // Global variable for Flexible Dictation
 let g_stopVideoWatcher = null; // Sync Watcher
+let g_autoStopTimestamp = Infinity; // Global variable for Auto-Stop Time
 
 document.addEventListener("DOMContentLoaded", initializePracticeKC);
 
@@ -1295,32 +1296,38 @@ function setupWordCountOptions() {
     fullOption.selected = true;
     select.appendChild(fullOption);
     
-    calculateEstimatedTime();
+    updateAutoStopSettings();
 }
 
-function calculateEstimatedTime() {
+function updateAutoStopSettings() {
     const display = document.getElementById('estimatedTimePill');
     const select = document.getElementById('wordCountSelect');
-    const speedVal = parseInt(document.getElementById('wpmRange').value) || 100;
     const val = select.value;
+    g_selectedTarget = val;
 
     if (val === "full") {
+        g_autoStopTimestamp = Infinity;
         display.innerText = "Audio plays until end";
         display.style.background = "#ecfdf5";
         display.style.color = "#047857";
         display.style.borderColor = "#a7f3d0";
     } else {
         let words = parseInt(val);
-        // Estimate time based on selected speed
-        let estMinutes = (words / speedVal).toFixed(2);
-        let minutes = Math.floor(estMinutes);
-        let seconds = Math.round((estMinutes - minutes) * 60);
-        let timeString = `${minutes}m ${seconds}s`;
-
-        display.innerText = `Auto-Stop for ~${words} words (~${timeString} + 10s buffer)`;
+        // Calculate timestamp based on ratio
+        if(totalVideoDuration > 0) {
+            let ratio = words / wordCount;
+            g_autoStopTimestamp = (totalVideoDuration * ratio) + 10; // +10s buffer
+            if(g_autoStopTimestamp > totalVideoDuration) g_autoStopTimestamp = totalVideoDuration - 0.5;
+        }
+        
+        display.innerText = `Auto-Stop for ~${words} words`;
         display.style.background = "#fffbeb";
         display.style.color = "#b45309";
         display.style.borderColor = "#fcd34d";
+    }
+    // Also recalculate if total duration wasn't ready yet
+    if(totalVideoDuration === 0 && player && player.getDuration) {
+        totalVideoDuration = player.getDuration();
     }
 }
 
@@ -1329,7 +1336,7 @@ function showInstructions() {
     document.getElementById('instructions-modal').classList.add('visible');
 }
 
-// --- UPDATED: Start Test with SYNC WATCHER Logic ---
+// --- UPDATED: Start Test Logic ---
 function startTranscriptionTest() {
     document.getElementById('instructions-modal').classList.remove('visible');
     // Try fullscreen
@@ -1343,49 +1350,12 @@ function startTranscriptionTest() {
     document.getElementById('typingBox').value = '';
     document.getElementById('typingBox').focus();
     
-    // Prevent multiple listeners
     const box = document.getElementById('typingBox');
     box.removeEventListener('keydown', handleFirstKeydown);
     box.addEventListener('keydown', handleFirstKeydown);
 
     const currentState = JSON.parse(localStorage.getItem('stenoState'));
     saveState({ ...currentState, view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
-
-    // --- SYNC & AUTO STOP LOGIC ---
-    const selectVal = document.getElementById('wordCountSelect').value;
-    g_selectedTarget = selectVal; 
-
-    // Clear any existing watcher
-    if (g_stopVideoWatcher) clearInterval(g_stopVideoWatcher);
-
-    if (selectVal !== "full") {
-        let targetWords = parseInt(selectVal);
-        
-        // 1. Calculate TARGET TIME in Video Seconds (Not wall clock)
-        let ratio = targetWords / wordCount;
-        let stopAtVideoTimestamp = totalVideoDuration * ratio;
-        
-        // 2. Add 10s Buffer (Video Time)
-        stopAtVideoTimestamp += 10;
-        
-        if(stopAtVideoTimestamp > totalVideoDuration) stopAtVideoTimestamp = totalVideoDuration - 0.5;
-
-        console.log(`Auto-Stop armed. Target: ${targetWords} words. Video stops at timestamp: ${stopAtVideoTimestamp.toFixed(2)}s`);
-
-        // 3. Start The Watcher
-        // Checks 10 times a second for precision
-        g_stopVideoWatcher = setInterval(() => {
-            if (player && player.getCurrentTime) {
-                const currentVideoTime = player.getCurrentTime();
-                if (currentVideoTime >= stopAtVideoTimestamp) {
-                    player.pauseVideo();
-                    clearInterval(g_stopVideoWatcher); 
-                    g_stopVideoWatcher = null;
-                    console.log(`Auto-Stop triggered at ${currentVideoTime.toFixed(2)}s`);
-                }
-            }
-        }, 100);
-    }
 }
 
 function handleFirstKeydown() {
@@ -1430,6 +1400,8 @@ function loadVideo(url, autoPlay = false) {
         totalVideoDuration = event.target.getDuration();
         setPlayerLoading(false);
         setPlaybackSpeed();
+        // Recalculate auto-stop now that we have duration
+        updateAutoStopSettings();
     };
     if (player && typeof player.loadVideoById === 'function' && player.getIframe()?.isConnected) {
         player.loadVideoById(videoId);
@@ -1444,14 +1416,26 @@ function loadVideo(url, autoPlay = false) {
 
 function onPlayerStateChange(event) {
     const playBtn = document.getElementById("playBtn"), pauseBtn = document.getElementById("pauseBtn");
+    
+    // Clear any existing global watcher
+    if (g_stopVideoWatcher) clearInterval(g_stopVideoWatcher);
+
     if (event.data === YT.PlayerState.PLAYING) { 
         playBtn.style.display = 'none'; 
         pauseBtn.style.display = 'flex'; 
-        const transcriptViewer = document.getElementById('transcript-viewer');
-        if (transcriptViewer && transcriptViewer.style.display === 'block') {
-            transcriptViewer.style.display = 'none';
-            document.getElementById('reviewTranscriptBtn').textContent = 'Review Transcript';
+        
+        // Start the Auto-Stop Watcher (Global Logic)
+        if (g_autoStopTimestamp !== Infinity) {
+            g_stopVideoWatcher = setInterval(() => {
+                if(player && player.getCurrentTime) {
+                    if (player.getCurrentTime() >= g_autoStopTimestamp) {
+                        player.pauseVideo();
+                        clearInterval(g_stopVideoWatcher);
+                    }
+                }
+            }, 100);
         }
+
         trackProgress(); 
     }
     else { 
@@ -1465,7 +1449,7 @@ function setPlaybackSpeed() {
     if (!player || !player.setPlaybackRate) return;
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
     
-    // Calculate speed ratio (Updated to affect global variable)
+    // Calculate speed ratio
     if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
         const originalWPM = wordCount / (totalVideoDuration / 60); 
         if(originalWPM > 0) {
@@ -1479,7 +1463,6 @@ function setPlaybackSpeed() {
     
     player.setPlaybackRate(currentPlaybackRate);
     updateVideoTimeDisplay();
-    calculateEstimatedTime(); 
 }
 
 // NEW UI Update function
@@ -1499,6 +1482,7 @@ function updateVideoTimeDisplay() {
     const rawCurrentTime = player.getCurrentTime(); 
     
     // Divide by playback rate for 'Real World' time display
+    // e.g., if rate is 2.0, 5 min video takes 2.5 mins real time.
     const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate; 
     const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate; 
     
