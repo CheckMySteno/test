@@ -31,8 +31,7 @@
       --accent-purple: #7c3aed;
       --accent-purple-light: #f3e8ff;
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-hover: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -54,44 +53,155 @@
     #selection-view { max-width: 1200px; }
     
     .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; }
-    .page-header h1 { font-size: 2rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.025em; }
+    .page-header h1 { font-size: 1.8rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.025em; }
     
     .search-wrapper { position: relative; }
-    .search-wrapper input { width: 300px; padding: 12px 16px 12px 44px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.95em; background-color: white; color: var(--text-color); box-shadow: var(--shadow-sm); transition: all 0.2s ease; }
-    .search-wrapper input:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
-    .search-wrapper svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
+    .search-wrapper input { width: 280px; padding: 10px 16px 10px 40px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 0.95em; background-color: white; color: var(--text-color); box-shadow: var(--shadow-sm); transition: all 0.2s ease; }
+    .search-wrapper input:focus { outline: none; border-color: #0f172a; }
+    .search-wrapper svg { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #9ca3af; }
 
-    .intro-box { background: white; border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; margin-bottom: 32px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px; }
+    .intro-box { background: white; border: 1px solid var(--border-color); border-radius: 12px; padding: 24px; margin-bottom: 32px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px; }
     .intro-header { display: flex; justify-content: space-between; align-items: center; }
     .intro-header h2 { font-size: 1.25rem; font-weight: 700; margin: 0; color: #1e293b; }
-    .intro-header .tag { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.75em; font-weight: 700; letter-spacing: 0.5px; }
-    .intro-actions button { padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.9em; transition: all 0.2s; }
-    #startFirstTestBtn { background: #1e293b; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-    #startFirstTestBtn:hover { background: #0f172a; transform: translateY(-1px); }
+    .intro-header .tag { background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 0.75em; font-weight: 700; letter-spacing: 0.5px; }
+    .intro-actions button { padding: 10px 20px; border-radius: 6px; font-weight: 600; font-size: 0.9em; transition: all 0.2s; }
+    #startFirstTestBtn { background: #0f172a; color: white; }
+    #startFirstTestBtn:hover { background: #1e293b; }
     #resetProgressBtn { background: white; border: 1px solid var(--border-color); color: #64748b; }
     #resetProgressBtn:hover { background: #f8fafc; color: #ef4444; border-color: #ef4444; }
 
     .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; }
-    .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); }
+    .filter-bar select { padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); }
 
-    #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-    .passage-card { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
-    .passage-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--accent-purple), #a78bfa); opacity: 0; transition: opacity 0.3s; }
-    .passage-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(124, 58, 237, 0.3); }
-    .passage-card:hover::before { opacity: 1; }
-
-    .card-header { margin-bottom: 12px; width: 100%; }
-    .card-title-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .card-title-group h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0; }
-    .card-id-badge { font-size: 0.75em; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* --- NEW COMMERCIAL CARD DESIGN --- */
+    #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; }
     
-    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.8em; font-weight: 600; background-color: #f1f5f9; color: #64748b; width: 100%; }
-    .status-badge.attempted { background-color: #ecfdf5; color: #059669; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; }
+    .passage-card {
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        position: relative;
+        transition: all 0.2s ease;
+        min-height: 280px;
+    }
+    
+    .passage-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-hover);
+        border-color: #cbd5e1;
+    }
 
-    .card-buttons { margin-top: 16px; }
-    .take-test-btn { width: 100%; padding: 10px; background-color: white; border: 1px solid var(--border-color); color: #1e293b; font-weight: 600; border-radius: 8px; transition: all 0.2s; }
-    .passage-card:hover .take-test-btn { background-color: #1e293b; color: white; border-color: #1e293b; }
+    /* Card Header */
+    .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 16px;
+    }
+    
+    .card-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+        line-height: 1.3;
+    }
+    
+    .heart-icon {
+        color: #cbd5e1;
+        width: 20px;
+        height: 20px;
+        cursor: pointer;
+        transition: color 0.2s;
+        flex-shrink: 0;
+        margin-left: 10px;
+    }
+    .heart-icon:hover { color: #ef4444; }
+
+    /* Card List Items */
+    .card-details {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-grow: 1;
+    }
+    
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #475569;
+        font-weight: 500;
+    }
+    
+    /* The Red Checkmark */
+    .check-icon {
+        color: #ef4444; /* Commercial red */
+        width: 14px;
+        height: 14px;
+        stroke-width: 3px;
+        flex-shrink: 0;
+    }
+
+    /* Badges */
+    .badge-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .badge {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+    }
+    
+    .badge-paid {
+        background-color: #fef2f2;
+        color: #ef4444;
+    }
+    
+    .badge-status {
+        background-color: #f1f5f9;
+        color: #64748b;
+    }
+    
+    .badge-status.success {
+        background-color: #f0fdf4;
+        color: #166534;
+    }
+
+    /* Card Button */
+    .take-test-btn-card {
+        background-color: #0f172a; /* Dark Navy from ref */
+        color: white;
+        border: none;
+        padding: 10px 16px;
+        border-radius: 6px;
+        font-weight: 600;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        width: fit-content;
+        transition: background 0.2s;
+    }
+    .take-test-btn-card:hover {
+        background-color: #1e293b;
+    }
+    .take-test-btn-card svg {
+        width: 16px;
+        height: 16px;
+        fill: currentColor;
+    }
 
     /* --- 2. SLIM & MODERN PLAYER STYLES --- */
     #player-view { max-width: 680px; margin: 20px auto; }
@@ -877,21 +987,41 @@ function renderGrid() {
         const attemptData = progressData[key];
         const isAttempted = !!attemptData;
 
+        // NEW COMMERCIAL CARD STRUCTURE
         card.innerHTML = `
-              <div class="card-header">
-                  <div class="card-title-group">
-                      <span class="card-id-badge">KC / VOL ${data.volume}</span>
-                      <span class="status-badge ${isAttempted ? 'attempted' : ''}">
-                        <span class="status-dot"></span>
-                        ${isAttempted ? `${attemptData.accuracy}%` : 'New'}
-                      </span>
-                  </div>
-                  <h3>Passage ${data.transcriptNumber}</h3>
-              </div>
-              <div class="card-buttons">
-                  <button class="take-test-btn">${isAttempted ? 'Retake Test' : 'Start Practice'}</button>
-              </div>
-          `;
+            <div class="card-top">
+                <h3 class="card-title">Dictation No. ${data.transcriptNumber}</h3>
+                <svg class="heart-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+            </div>
+            
+            <div class="card-details">
+                <div class="detail-item">
+                    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    Volume ${data.volume}
+                </div>
+                <div class="detail-item">
+                    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    All Speeds
+                </div>
+                <div class="detail-item">
+                    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    800-1000 Words
+                </div>
+            </div>
+
+            <div class="badge-row">
+                <span class="badge badge-paid">Paid</span>
+                ${isAttempted 
+                    ? `<span class="badge badge-status success">Score: ${attemptData.accuracy}%</span>` 
+                    : `<span class="badge badge-status">New</span>`
+                }
+            </div>
+
+            <button class="take-test-btn-card take-test-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                ${isAttempted ? 'Retake Test' : 'Take Test'}
+            </button>
+        `;
         fragment.appendChild(card);
     });
     grid.appendChild(fragment);
