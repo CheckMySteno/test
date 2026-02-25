@@ -3,6 +3,7 @@
  *  worker.js — High-Performance Stenography Transcription Analysis
  *  - Includes Hardcoded Fallbacks for Shortforms
  *  - Includes Fix for Single-Word Numbers (e.g. "six" == "6")
+ *  - Includes AI Icon Injection for Mistakes
  *
  *******************************************************************/
 
@@ -310,7 +311,7 @@ function computeScore(c, cfg) {
 }
 
 // ────────────────────────────────────────────────────────────────────────────
-//  The Main Comparison Function (DP Algorithm)
+//  The Main Comparison Function (DP Algorithm) - UPDATED WITH AI ICON
 // ────────────────────────────────────────────────────────────────────────────
 function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSpellings) {
     const m = origComp.length, n = userComp.length;
@@ -320,8 +321,11 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
     for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) M[i][j] = Math.min(M[i - 1][j] + 1, M[i][j - 1] + 1, M[i - 1][j - 1] + ((origComp[i - 1] === userComp[j - 1]) ? 0 : 1));
 
     let i = m, j = n;
-    const out =[];
-    const trace =[];
+    const out = [];
+    const trace = [];
+
+    // --- NEW: The Icon HTML ---
+    const icon = `<span class="ai-icon" title="Ask AI Explanation">ⓘ</span>`;
 
     while (i > 0 || j > 0) {
         const oc = origComp[i - 1], uc = userComp[j - 1];
@@ -337,7 +341,8 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
             if (oDisp !== uDisp && stripPunc(oDisp) === stripPunc(uDisp)) {
                 const op = getLastPunctuation(oDisp), up = getLastPunctuation(uDisp);
                 if (shouldCountPunctuation(op, up, cfg)) {
-                    out.unshift(`<span class="punctuation mis" data-oi="${oi.span[0]}" data-ui="${uj.span[0]}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}</span>`);
+                    // UPDATED: Added ${icon} and class highlight
+                    out.unshift(`<span class="punctuation mis highlight" data-mistake-type="punctuation" data-oi="${oi.span[0]}" data-ui="${uj.span[0]}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}${icon}</span>`);
                     if (cfg.punctuation.mode === 'fullstop-only') { if (op === '.' || up === '.') WorkerState.mistakeCounters.punctuation.fullstop++; }
                     else { if ((op === '.' && !up) || (up === '.' && !op)) WorkerState.mistakeCounters.punctuation.fullstop++; else WorkerState.mistakeCounters.punctuation.other++; }
                     trace.unshift({ type: 'punc', ow: oDisp, uw: uDisp }); i--; j--; continue;
@@ -349,8 +354,9 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
                 const singleWordSyno = (oSpanLen === 1 && uSpanLen === 1 && !/\s/.test(oDisp) && !/\s/.test(uDisp));
                 if (singleWordSyno && isSpellingDiff(oDisp, uDisp)) {
                     if ((cfg.spelling || 0) > 0) {
-                        const isSaved = (savedSpellings ||[]).includes(oDisp.toLowerCase());
-                        out.unshift(`<span class="spelling mis" data-correct="${escapeHtml(oDisp)}" data-wrong="${escapeHtml(uDisp)}" data-oi="${oi?.span?.[0] ?? -1}" data-ui="${uj?.span?.[0] ?? -1}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}</span>`);
+                        const isSaved = (savedSpellings || []).includes(oDisp.toLowerCase());
+                        // UPDATED: Added ${icon} and class highlight
+                        out.unshift(`<span class="spelling mis highlight" data-mistake-type="spelling" data-correct="${escapeHtml(oDisp)}" data-wrong="${escapeHtml(uDisp)}" data-oi="${oi?.span?.[0] ?? -1}" data-ui="${uj?.span?.[0] ?? -1}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}${icon}</span>`);
                         WorkerState.mistakeCounters.spelling++; WorkerState.studentMistakes.spelling.push({ correct: oDisp, wrong: uDisp });
                         trace.unshift({ type: 'spell', ow: oDisp, uw: uDisp });
                     } else { out.unshift(escapeHtml(oDisp)); trace.unshift({ type: 'eq', ow: oDisp, uw: uDisp }); }
@@ -360,7 +366,8 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
             }
             if (oDisp.toLowerCase() === uDisp.toLowerCase() && oDisp !== uDisp) {
                 if ((cfg.capitalization || 0) > 0) {
-                    out.unshift(`<span class="capitalization mis" data-oi="${oi.span[0]}" data-ui="${uj.span[0]}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}</span>`);
+                    // UPDATED: Added ${icon} and class highlight
+                    out.unshift(`<span class="capitalization mis highlight" data-mistake-type="capitalization" data-oi="${oi.span[0]}" data-ui="${uj.span[0]}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}${icon}</span>`);
                     WorkerState.mistakeCounters.capitalization++; WorkerState.studentMistakes.capitalisation.push({ correct: oDisp, wrong: uDisp });
                     trace.unshift({ type: 'cap', ow: oDisp, uw: uDisp });
                 } else { out.unshift(escapeHtml(oDisp)); trace.unshift({ type: 'eq', ow: oDisp, uw: uDisp }); }
@@ -378,7 +385,8 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
                 if (origComp[i - 1] !== userComp[j - 1] && stripPunc(oDisp) === stripPunc(uDisp) && oDisp !== uDisp) {
                     const op = getLastPunctuation(oDisp), up = getLastPunctuation(uDisp);
                     if (shouldCountPunctuation(op, up, cfg)) {
-                        out.unshift(`<span class="punctuation mis" data-oi="${oiObj?.span?.[0] ?? -1}" data-ui="${ujObj?.span?.[0] ?? -1}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}</span>`);
+                        // UPDATED: Added ${icon} and class highlight
+                        out.unshift(`<span class="punctuation mis highlight" data-mistake-type="punctuation" data-oi="${oiObj?.span?.[0] ?? -1}" data-ui="${ujObj?.span?.[0] ?? -1}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}${icon}</span>`);
                         if (cfg.punctuation.mode === 'fullstop-only') { if (op === '.' || up === '.') WorkerState.mistakeCounters.punctuation.fullstop++; }
                         else { if ((op === '.' && !up) || (up === '.' && !op)) WorkerState.mistakeCounters.punctuation.fullstop++; else WorkerState.mistakeCounters.punctuation.other++; }
                         trace.unshift({ type: 'punc', ow: oDisp, uw: uDisp });
@@ -387,7 +395,8 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
                 }
                 if (isSpellingDiff(oDisp, uDisp)) {
                     if ((cfg.spelling || 0) > 0) {
-                        out.unshift(`<span class="spelling mis" data-correct="${escapeHtml(oDisp)}" data-wrong="${escapeHtml(uDisp)}" data-oi="${oiObj?.span?.[0] ?? -1}" data-ui="${ujObj?.span?.[0] ?? -1}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}</span>`);
+                        // UPDATED: Added ${icon} and class highlight
+                        out.unshift(`<span class="spelling mis highlight" data-mistake-type="spelling" data-correct="${escapeHtml(oDisp)}" data-wrong="${escapeHtml(uDisp)}" data-oi="${oiObj?.span?.[0] ?? -1}" data-ui="${ujObj?.span?.[0] ?? -1}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}${icon}</span>`);
                         WorkerState.mistakeCounters.spelling++; WorkerState.studentMistakes.spelling.push({ correct: oDisp, wrong: uDisp });
                         trace.unshift({ type: 'spell', ow: oDisp, uw: uDisp });
                     } else { out.unshift(escapeHtml(oDisp)); trace.unshift({ type: 'eq', ow: oDisp, uw: uDisp }); }
@@ -398,12 +407,14 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
 
         if (j > 0 && (i === 0 || M[i][j - 1] <= M[i - 1][j])) {
             const disp = uj?.display || '';
-            out.unshift(`<span class="addition mis" data-oi="-1" data-ui="${uj?.span[0] ?? -1}">${escapeHtml(disp)}</span>`);
+            // No icon for addition, but added highlight class for consistency
+            out.unshift(`<span class="addition mis highlight" data-mistake-type="extra" data-oi="-1" data-ui="${uj?.span[0] ?? -1}">${escapeHtml(disp)}</span>`);
             WorkerState.mistakeCounters.addition++; trace.unshift({ type: 'add', ow: null, uw: disp }); j--; continue;
         }
 
         const disp = oi?.display || '';
-        out.unshift(`<span class="omission mis" data-oi="${oi?.span[0] ?? -1}" data-ui="-1">${escapeHtml(disp)}</span>`);
+        // No icon for omission, but added highlight class for consistency
+        out.unshift(`<span class="omission mis highlight" data-mistake-type="omission" data-oi="${oi?.span[0] ?? -1}" data-ui="-1">${escapeHtml(disp)}</span>`);
         WorkerState.mistakeCounters.omission++; trace.unshift({ type: 'omit', ow: disp, uw: null }); i--;
     }
     for (let k = 0; k < trace.length - 1; k++) {
