@@ -381,7 +381,7 @@
         justify-content: center;
         width: 16px;
         height: 16px;
-        background-color: #4f46e5; /* Indigo color */
+        background-color: #4f46e5;
         color: white !important;
         border-radius: 50%;
         font-size: 10px;
@@ -391,17 +391,11 @@
         vertical-align: middle;
         user-select: none;
         transition: transform 0.2s;
-        text-decoration: none !important;
     }
 
     .ai-icon:hover {
         transform: scale(1.2);
         background-color: #4338ca;
-    }
-
-    /* Ensure the parent span allows the icon to sit nicely */
-    .highlight {
-        display: inline; /* Keep default text flow */
     }
 </style>
 </head>
@@ -1550,13 +1544,41 @@ function initializeEventListeners() {
 }
 
 function initializeResultInteractivity() {
-    const columns = document.getElementById('comparisonColumns');
-    if (!columns) return;
+    const container = document.getElementById('resultSheetContainer');
+    if (!container) return;
+
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
+    
     initializeInteractiveLegend();
-    initializeAiClickListeners();
+    
+    // PERMANENT LISTENER: Attach to resultSheetContainer so it persists
+    container.removeEventListener('click', aiIconClickHandler);
+    container.addEventListener('click', aiIconClickHandler);
+}
+
+function aiIconClickHandler(e) {
+    const icon = e.target.closest('.ai-icon');
+    if (!icon) return;
+
+    const highlight = icon.closest('.highlight');
+    if (!highlight) return;
+
+    e.stopPropagation();
+    const type = highlight.dataset.mistakeType;
+
+    let originalWord = highlight.getAttribute('data-correct') || "unknown";
+    let typedWord = highlight.getAttribute('data-wrong') || "unknown";
+
+    // Clean up if worker didn't provide specific attributes
+    if (originalWord === "unknown") {
+        const index = highlight.closest('.word-wrapper')?.dataset.index;
+        const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
+        if (originalWordEl) originalWord = originalWordEl.innerText.trim().replace(/[^\w\s-]/g, '');
+    }
+
+    triggerAiAnalysis(originalWord, typedWord, type);
 }
 
 function openTranscriptModal() {
@@ -1714,44 +1736,13 @@ function validateReportForm() {
 // 🧠 AI INTEGRATION MODULE (Stable Backend)
 // ==========================================
 
+// PASTE YOUR GOOGLE SCRIPT URL HERE ↓
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw3pJIzS70de9tPcOlB53rHwjMzD9rficgN951XF0LptzZigJ5ngRNY2FgIv2PXmmE/exec"; 
 
 let aiMistakesCache = null; 
 let isAiFetching = false;
 
-function initializeAiClickListeners() {
-    const columns = document.getElementById('comparisonColumns');
-    if (!columns) return;
-
-    columns.addEventListener('click', (e) => {
-        const icon = e.target.closest('.ai-icon');
-        if (!icon) return;
-
-        const highlight = icon.closest('.highlight');
-        if (!highlight) return;
-
-        e.stopPropagation(); 
-        const type = highlight.dataset.mistakeType;
-
-        const clone = highlight.cloneNode(true);
-        if (clone.querySelector('.ai-icon')) clone.querySelector('.ai-icon').remove();
-        if (clone.querySelector('s')) clone.querySelector('s').remove(); // Remove the strike-through original
-        
-        const typedWord = clone.innerText.trim().replace(/[^\w\s-]/g, '');
-
-        let originalWord = "unknown";
-        if (highlight.hasAttribute('data-correct')) {
-            originalWord = highlight.getAttribute('data-correct').replace(/[^\w\s-]/g, '');
-        } else {
-            const index = highlight.closest('.word-wrapper')?.dataset.index;
-            const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
-            if (originalWordEl) originalWord = originalWordEl.innerText.trim().replace(/[^\w\s-]/g, '');
-        }
-
-        triggerAiAnalysis(originalWord, typedWord, type);
-    });
-}
-
+// 1. Trigger Analysis
 async function triggerAiAnalysis(original, typed, type) {
     const modal = document.getElementById('aiModal');
     const content = document.getElementById('aiModalContent');
