@@ -1,17 +1,42 @@
 /*******************************************************************
  *
- *  advanced_worker.js — High-Performance Stenography Transcription Analysis
- *
- *  This worker contains the advanced "Flex Synonym Engine" and comparison
- *  logic, isolated from the DOM for maximum performance. It receives
- *  text and configuration from the main thread, performs the complex
- *  analysis, and sends back a detailed result object.
+ *  worker.js — High-Performance Stenography Transcription Analysis
+ *  WITH HARDCODED FALLBACKS FOR SHORTFORMS AND NUMBERS
  *
  *******************************************************************/
 
 'use strict';
 
-// This object holds the state for a single comparison task inside the worker.
+// 1. HARDCODED SHORT-FORMS (From your old software)
+// Injected directly into the Flex Synonym Engine to guarantee they never fail.
+const HARDCODED_SYNONYMS = [
+    { group: 'AND', variants:['&', 'and'] },
+    { group: 'PERCENT', variants:['%', 'percent', 'per cent'] },
+    { group: 'HON', variants:['honourable', 'honble', "hon'ble", 'hon'] },
+    { group: 'DR', variants:['doctor', 'dr', 'dr.'] },
+    { group: 'MR', variants: ['mister', 'mr', 'mr.'] },
+    { group: 'MRS', variants: ['misses', 'mrs', 'mrs.'] },
+    { group: 'GOVTS', variants: ['governments', 'govts'] },
+    { group: 'GOVT', variants: ['government', 'govt'] },
+    { group: 'SPL', variants: ['special', 'spl'] },
+    { group: 'THRU', variants:['through', 'thru'] },
+    { group: 'DEPT', variants: ['department', 'dept'] },
+    { group: 'ASSOC', variants: ['association', 'assoc'] },
+    { group: '1ST', variants: ['first', '1st'] },
+    { group: '2ND', variants:['second', '2nd'] },
+    { group: '3RD', variants: ['third', '3rd'] },
+    { group: 'RS', variants: ['rupees', 'rs', 'rs.'] },
+    { group: 'RE', variants: ['rupee', 're', 're.'] },
+    { group: 'ADVT', variants: ['advertisement', 'advt'] },
+    { group: 'ADDL', variants: ['additional', 'addl'] },
+    { group: 'SECY', variants:['secretary', 'secy'] },
+    { group: 'VS', variants: ['versus', 'vs', 'v/s'] },
+    { group: 'LTD', variants: ['limited', 'ltd', 'ltd.'] },
+    { group: 'PVT', variants: ['private', 'pvt', 'pvt.'] },
+    { group: 'NO', variants: ['number', 'no', 'no.'] },
+    { group: 'MADAM', variants: ["ma'am", 'madam'] }
+];
+
 const WorkerState = {
     synoIndex: null,
     synoFlatIndex: null,
@@ -20,15 +45,8 @@ const WorkerState = {
     studentMistakes: {},
 };
 
-
-// =================================================================================
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                    CORE LOGIC (EXTRACTED FROM steno.html)                    ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-// =================================================================================
-
 // ────────────────────────────────────────────────────────────────────────────
-//  Levenshtein Distance (Required for fuzzy matching)
+//  Levenshtein Distance
 // ────────────────────────────────────────────────────────────────────────────
 function levenshteinDistance(s1, s2) {
     const rows = s2.length + 1, cols = s1.length + 1;
@@ -44,15 +62,12 @@ function levenshteinDistance(s1, s2) {
     return dp[rows - 1][cols - 1];
 }
 
-
 // ────────────────────────────────────────────────────────────────────────────
 //  Flex Synonym & Number Engine
 // ────────────────────────────────────────────────────────────────────────────
 function _normalizeCore(str) {
     return (str || '')
       .replace(/[\u2018\u2019\u201A\u201B\u2032\u2035]/g, "'")
-      .replace(/[\u2013\u2014]/g, '-')
-      .replace(/\s+/g, ' ')
       .trim();
 }
 
@@ -182,18 +197,18 @@ function buildSynoIndex(groups) {
     const idx = Object.create(null);
     const flatIdx = Object.create(null);
     const grpNum = Object.create(null);
-    for (const g of groups || []) {
+    for (const g of groups ||[]) {
         const group = String(g.group || g.group_key || '').trim();
         if (!group) continue;
         let seenValue = null, conflict = false;
-        for (const raw of g.variants || g.variant_list || []) {
+        for (const raw of g.variants || g.variant_list ||[]) {
             const tokens = tokenize(raw).map(normTokenForCompare);
             if (!tokens.length) continue;
             const key = tokens[0];
-            (idx[key] ||= []).push({ group, variantTokens: tokens, variantRaw: raw, len: tokens.length });
+            (idx[key] ||=[]).push({ group, variantTokens: tokens, variantRaw: raw, len: tokens.length });
             const flat = tokens.join('');
             const firstChar = flat.charAt(0) || '';
-            if (firstChar) (flatIdx[firstChar] ||= []).push({ group, flat, len: tokens.length, variantRaw: raw });
+            if (firstChar) (flatIdx[firstChar] ||=[]).push({ group, flat, len: tokens.length, variantRaw: raw });
             const val = numberValueFromTokens(tokens);
             if (val !== null) {
                 if (seenValue === null) seenValue = val;
@@ -238,7 +253,7 @@ function matchSynoAt(arr, pos) {
 }
 
 function collapseWithSynonyms(rawTokens) {
-    const comp = [];
+    const comp =[];
     const norm = rawTokens.map(normTokenForCompare);
     let i = 0;
     while (i < norm.length) {
@@ -250,7 +265,7 @@ function collapseWithSynonyms(rawTokens) {
             const perVariantNum = numberValueFromTokens(matchedNormSlice);
             const groupNum = WorkerState.synoGroupToNum?.[group] ?? null;
             const numeric = perVariantNum ?? groupNum;
-            comp.push({ comp: numeric ? `__NUM:${numeric}__` : `__GX:${group}__`, display: displaySpan, span: [i, i + len], isSyno: true });
+            comp.push({ comp: numeric ? `__NUM:${numeric}__` : `__GX:${group}__`, display: displaySpan, span:[i, i + len], isSyno: true });
             i += len; continue;
         }
         const tk = norm[i];
@@ -304,7 +319,7 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
 
     let i = m, j = n;
     const out = [];
-    const trace = [];
+    const trace =[];
 
     while (i > 0 || j > 0) {
         const oc = origComp[i - 1], uc = userComp[j - 1];
@@ -332,7 +347,7 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
                 const singleWordSyno = (oSpanLen === 1 && uSpanLen === 1 && !/\s/.test(oDisp) && !/\s/.test(uDisp));
                 if (singleWordSyno && isSpellingDiff(oDisp, uDisp)) {
                     if ((cfg.spelling || 0) > 0) {
-                        const isSaved = (savedSpellings || []).includes(oDisp.toLowerCase());
+                        const isSaved = (savedSpellings ||[]).includes(oDisp.toLowerCase());
                         out.unshift(`<span class="spelling mis" data-correct="${escapeHtml(oDisp)}" data-wrong="${escapeHtml(uDisp)}" data-oi="${oi?.span?.[0] ?? -1}" data-ui="${uj?.span?.[0] ?? -1}"><s>${escapeHtml(uDisp)}</s> ${escapeHtml(oDisp)}</span>`);
                         WorkerState.mistakeCounters.spelling++; WorkerState.studentMistakes.spelling.push({ correct: oDisp, wrong: uDisp });
                         trace.unshift({ type: 'spell', ow: oDisp, uw: uDisp });
@@ -397,23 +412,21 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
     return out.join(' ');
 }
 
-
-// =================================================================================
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║                    WORKER'S MAIN ANALYSIS & MESSAGE HANDLER                  ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-// =================================================================================
-
-/**
- * The primary analysis function. It orchestrates the entire comparison process.
- */
+// ────────────────────────────────────────────────────────────────────────────
+//  Main Analysis Function
+// ────────────────────────────────────────────────────────────────────────────
 function performAnalysis(originalText, userText, config, savedSpellings) {
-    // Reset counters for this specific job
+    // Reset counters
     WorkerState.mistakeCounters = { addition: 0, omission: 0, spelling: 0, capitalization: 0, punctuation: { fullstop: 0, other: 0 } };
-    WorkerState.studentMistakes = { spelling: [], capitalisation: [], replacements: [] };
+    WorkerState.studentMistakes = { spelling: [], capitalisation: [], replacements:[] };
 
-    const originalWordsRaw = tokenize(originalText);
-    const userWordsRaw     = tokenize(userText);
+    // 2. Add light text normalisation (hyphen splitting and percent formatting) 
+    // to match exactly what the old logic did.
+    let safeOriginal = (originalText || '').replace(/per\s+cent/gi, 'percent').replace(/[\u2013\u2014-]/g, ' ');
+    let safeUser = (userText || '').replace(/per\s+cent/gi, 'percent').replace(/[\u2013\u2014-]/g, ' ');
+
+    const originalWordsRaw = tokenize(safeOriginal);
+    const userWordsRaw     = tokenize(safeUser);
 
     const origItems = collapseWithSynonyms(originalWordsRaw);
     const userItems = collapseWithSynonyms(userWordsRaw);
@@ -421,7 +434,6 @@ function performAnalysis(originalText, userText, config, savedSpellings) {
     const originalComp = origItems.map(x => x.comp);
     const userComp     = userItems.map(x => x.comp);
     
-    // Pass the config and saved spellings directly into the comparison function
     const resultHTML = compareCollapsed(originalComp, userComp, origItems, userItems, config, savedSpellings);
 
     const totalWordsP1 = originalWordsRaw.length;
@@ -444,21 +456,17 @@ function performAnalysis(originalText, userText, config, savedSpellings) {
     };
 }
 
-
-/**
- * The worker's main entry point. It listens for jobs from the main thread.
- */
+// ────────────────────────────────────────────────────────────────────────────
+//  Worker Entry Point
+// ────────────────────────────────────────────────────────────────────────────
 self.onmessage = function(event) {
-    console.log("Advanced Worker: Received job from main thread.");
     const { originalText, userText, config, synonymData, savedSpellings } = event.data;
 
-    // 1. Initialize the synonym engine with data from the main thread
-    WorkerState.synoIndex = buildSynoIndex(synonymData || []);
+    // COMBINE the API data with the HARDCODED fallbacks
+    const combinedSynonyms = [...HARDCODED_SYNONYMS, ...(synonymData || [])];
+    WorkerState.synoIndex = buildSynoIndex(combinedSynonyms);
 
-    // 2. Run the advanced analysis
     const results = performAnalysis(originalText, userText, config, savedSpellings);
 
-    // 3. Send the complete result object back to the main thread
     self.postMessage(results);
-    console.log("Advanced Worker: Job complete. Sent results back.");
 };
