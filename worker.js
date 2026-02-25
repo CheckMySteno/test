@@ -1,13 +1,14 @@
 /*******************************************************************
  *
  *  worker.js — High-Performance Stenography Transcription Analysis
- *  WITH HARDCODED FALLBACKS FOR SHORTFORMS AND NUMBERS
+ *  - Includes Hardcoded Fallbacks for Shortforms
+ *  - Includes Fix for Single-Word Numbers (e.g. "six" == "6")
  *
  *******************************************************************/
 
 'use strict';
 
-// 1. HARDCODED SHORT-FORMS (From your old software)
+// 1. HARDCODED SHORT-FORMS
 // Injected directly into the Flex Synonym Engine to guarantee they never fail.
 const HARDCODED_SYNONYMS = [
     { group: 'AND', variants:['&', 'and'] },
@@ -18,17 +19,17 @@ const HARDCODED_SYNONYMS = [
     { group: 'MRS', variants: ['misses', 'mrs', 'mrs.'] },
     { group: 'GOVTS', variants: ['governments', 'govts'] },
     { group: 'GOVT', variants: ['government', 'govt'] },
-    { group: 'SPL', variants: ['special', 'spl'] },
+    { group: 'SPL', variants:['special', 'spl'] },
     { group: 'THRU', variants:['through', 'thru'] },
     { group: 'DEPT', variants: ['department', 'dept'] },
     { group: 'ASSOC', variants: ['association', 'assoc'] },
-    { group: '1ST', variants: ['first', '1st'] },
+    { group: '1ST', variants:['first', '1st'] },
     { group: '2ND', variants:['second', '2nd'] },
     { group: '3RD', variants: ['third', '3rd'] },
     { group: 'RS', variants: ['rupees', 'rs', 'rs.'] },
     { group: 'RE', variants: ['rupee', 're', 're.'] },
     { group: 'ADVT', variants: ['advertisement', 'advt'] },
-    { group: 'ADDL', variants: ['additional', 'addl'] },
+    { group: 'ADDL', variants:['additional', 'addl'] },
     { group: 'SECY', variants:['secretary', 'secy'] },
     { group: 'VS', variants: ['versus', 'vs', 'v/s'] },
     { group: 'LTD', variants: ['limited', 'ltd', 'ltd.'] },
@@ -178,8 +179,9 @@ function parseNumberWordsRun(arr, pos) {
         consumed++; j++;
     }
     if (!touched) return null;
-    const isCompound = hadHyphen || consumed >= 2 || total > 0 || current >= 100;
-    if (!isCompound) return null;
+    
+    // -> FIX: Removed isCompound restriction completely! 
+    // Now single-word numbers like "six", "twelve", "ten" are successfully parsed into digits.
     return { value: String(total + current), len: consumed };
 }
 
@@ -318,7 +320,7 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
     for (let i = 1; i <= m; i++) for (let j = 1; j <= n; j++) M[i][j] = Math.min(M[i - 1][j] + 1, M[i][j - 1] + 1, M[i - 1][j - 1] + ((origComp[i - 1] === userComp[j - 1]) ? 0 : 1));
 
     let i = m, j = n;
-    const out = [];
+    const out =[];
     const trace =[];
 
     while (i > 0 || j > 0) {
@@ -418,10 +420,9 @@ function compareCollapsed(origComp, userComp, origItems, userItems, cfg, savedSp
 function performAnalysis(originalText, userText, config, savedSpellings) {
     // Reset counters
     WorkerState.mistakeCounters = { addition: 0, omission: 0, spelling: 0, capitalization: 0, punctuation: { fullstop: 0, other: 0 } };
-    WorkerState.studentMistakes = { spelling: [], capitalisation: [], replacements:[] };
+    WorkerState.studentMistakes = { spelling: [], capitalisation:[], replacements:[] };
 
-    // 2. Add light text normalisation (hyphen splitting and percent formatting) 
-    // to match exactly what the old logic did.
+    // Hyphen splitting and percent formatting
     let safeOriginal = (originalText || '').replace(/per\s+cent/gi, 'percent').replace(/[\u2013\u2014-]/g, ' ');
     let safeUser = (userText || '').replace(/per\s+cent/gi, 'percent').replace(/[\u2013\u2014-]/g, ' ');
 
