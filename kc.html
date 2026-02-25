@@ -369,12 +369,40 @@
       .columns { grid-template-columns: 1fr 1fr !important; }
     }
     
-    /* Specific styles for AI Modal */
+    /* Specific styles for AI Modal & Icon */
     .ai-mistake-context { background:#f1f5f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #4f46e5; }
     .ai-explanation-text { font-size: 1rem; color: #1e293b; }
     .ai-rule-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform:uppercase; margin-bottom: 5px; }
-    /* Make mistakes clickable */
-    .highlight.spelling, .highlight.capitalization, .highlight.punctuation { cursor: help; }
+    
+    /* AI Icon Styling */
+    .ai-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        background-color: #4f46e5; /* Indigo color */
+        color: white;
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: bold;
+        margin-left: 4px;
+        cursor: pointer;
+        vertical-align: middle;
+        user-select: none;
+        transition: transform 0.2s;
+        text-decoration: none !important;
+    }
+
+    .ai-icon:hover {
+        transform: scale(1.2);
+        background-color: #4338ca;
+    }
+
+    /* Ensure the parent span allows the icon to sit nicely */
+    .highlight {
+        display: inline; /* Keep default text flow */
+    }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -1955,20 +1983,41 @@ function initializeAiClickListeners() {
     if (!columns) return;
 
     columns.addEventListener('click', (e) => {
-        const highlight = e.target.closest('.highlight');
-        if (!highlight) return;
+        // CHANGED: Only trigger if the clicked element is the .ai-icon
+        const icon = e.target.closest('.ai-icon');
+        if (!icon) return;
 
-        // Skip additions/omissions (usually obvious)
-        const type = highlight.dataset.mistakeType;
-        if (type === 'extra' || type === 'omission') return;
+        // Get the parent highlight wrapper to extract data
+        const highlight = icon.closest('.highlight');
+        if (!highlight) return;
 
         e.stopPropagation(); 
         
-        // Get words
-        const typedWord = highlight.innerText.split(' ')[0].replace(/[^\w\s-]/g, '').trim();
-        const index = highlight.closest('.word-wrapper').dataset.index;
-        const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
-        const originalWord = originalWordEl ? originalWordEl.innerText.replace(/[^\w\s-]/g, '').trim() : "unknown";
+        // Get words and type from data attributes
+        const type = highlight.dataset.mistakeType;
+        
+        // Clean up the text (remove the icon text itself)
+        const clone = highlight.cloneNode(true);
+        if (clone.querySelector('.ai-icon')) {
+            clone.querySelector('.ai-icon').remove();
+        }
+        const typedWord = clone.innerText.split(' ')[0].replace(/[^\w\s-]/g, '').trim();
+
+        // Get Original Word logic
+        let originalWord = "unknown";
+        
+        // Data attributes on the highlight span are the most reliable source now (added in worker)
+        if (highlight.hasAttribute('data-correct')) {
+            originalWord = highlight.getAttribute('data-correct');
+        } else {
+            // Fallback to index lookup
+            const wordWrapper = highlight.closest('.word-wrapper');
+            if (wordWrapper) {
+                const index = wordWrapper.dataset.index;
+                const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
+                if (originalWordEl) originalWord = originalWordEl.innerText.replace(/[^\w\s-]/g, '').trim();
+            }
+        }
 
         triggerAiAnalysis(originalWord, typedWord, type);
     });
