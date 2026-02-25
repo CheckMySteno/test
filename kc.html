@@ -368,6 +368,13 @@
       .col { border: 1px solid #ccc; max-height: none; overflow-y: visible; }
       .columns { grid-template-columns: 1fr 1fr !important; }
     }
+    
+    /* Specific styles for AI Modal */
+    .ai-mistake-context { background:#f1f5f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #4f46e5; }
+    .ai-explanation-text { font-size: 1rem; color: #1e293b; }
+    .ai-rule-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform:uppercase; margin-bottom: 5px; }
+    /* Make mistakes clickable */
+    .highlight.spelling, .highlight.capitalization, .highlight.punctuation { cursor: help; }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -703,6 +710,28 @@
         <div class="confirm-dialog-actions">
             <button id="cancelResetBtn">Cancel</button>
             <button id="confirmResetBtn">Confirm & Reset</button>
+        </div>
+    </div>
+</div>
+
+<!-- AI Analysis Modal -->
+<div id="aiModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 600px; text-align: left; border-radius: 12px; font-family: 'Inter', sans-serif;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+            <h3 style="margin:0; font-size:1.1rem; color:#4f46e5; display:flex; align-items:center; gap:8px;">
+                <span>🧠</span> AI Teacher Analysis
+            </h3>
+            <button class="modal-close-btn" onclick="document.getElementById('aiModal').classList.remove('visible')" style="background:none; color:#666; font-size:1.2rem; padding:0;">✕</button>
+        </div>
+        
+        <div id="aiModalContent" style="line-height:1.6; color:#334155; font-size:0.95rem;">
+            <!-- AI Content Goes Here -->
+        </div>
+
+        <div id="aiLoadingState" style="display:none; text-align:center; padding:30px;">
+            <div class="spinner" style="margin:0 auto 15px auto; border-top-color:#4f46e5;"></div>
+            <p style="color:#64748b; font-weight:500;">Analyzing your dictation context...</p>
+            <p style="font-size:0.8rem; color:#94a3b8;">This will take a few seconds, then other clicks will be instant.</p>
         </div>
     </div>
 </div>
@@ -1400,6 +1429,9 @@ function buildResultHtml(alignment) { ... }
 // ============================= MAJOR CHANGE =============================
 // Replaced the entire function body to use the new worker and its required data.
 function submitTranscription() {
+    // 1. Reset AI Cache
+    aiMistakesCache = null; 
+
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
     clearState();
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
@@ -1661,6 +1693,9 @@ function initializeResultInteractivity() {
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
 
     initializeInteractiveLegend();
+    
+    // Add AI listeners
+    initializeAiClickListeners();
 }
 
 function openTranscriptModal() {
@@ -1902,6 +1937,137 @@ function showDeepAnalysisModal() {
 function capitalizeFirstLetter(string) {
     if(!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
+}
+
+// ==========================================
+// 🧠 AI INTEGRATION MODULE (Smart Caching)
+// ==========================================
+
+// PASTE YOUR GOOGLE SCRIPT URL HERE ↓
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw3pJIzS70de9tPcOlB53rHwjMzD9rficgN951XF0LptzZigJ5ngRNY2FgIv2PXmmE/exec"; 
+
+let aiMistakesCache = null; 
+let isAiFetching = false;
+
+// 1. Initialize Listeners (We will call this from initializeResultInteractivity)
+function initializeAiClickListeners() {
+    const columns = document.getElementById('comparisonColumns');
+    if (!columns) return;
+
+    columns.addEventListener('click', (e) => {
+        const highlight = e.target.closest('.highlight');
+        if (!highlight) return;
+
+        // Skip additions/omissions (usually obvious)
+        const type = highlight.dataset.mistakeType;
+        if (type === 'extra' || type === 'omission') return;
+
+        e.stopPropagation(); 
+        
+        // Get words
+        const typedWord = highlight.innerText.split(' ')[0].replace(/[^\w\s-]/g, '').trim();
+        const index = highlight.closest('.word-wrapper').dataset.index;
+        const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
+        const originalWord = originalWordEl ? originalWordEl.innerText.replace(/[^\w\s-]/g, '').trim() : "unknown";
+
+        triggerAiAnalysis(originalWord, typedWord, type);
+    });
+}
+
+// 2. Trigger Analysis
+async function triggerAiAnalysis(original, typed, type) {
+    const modal = document.getElementById('aiModal');
+    const content = document.getElementById('aiModalContent');
+    const loader = document.getElementById('aiLoadingState');
+    
+    modal.classList.add('visible');
+    
+    // Create cache key: "Original_Typed"
+    const cacheKey = `${original}_${typed}`;
+    
+    // A. Check Cache (Instant)
+    if (aiMistakesCache && aiMistakesCache[cacheKey]) {
+        renderAiResult(aiMistakesCache[cacheKey], original, typed);
+        return;
+    }
+
+    // B. Check if already loading
+    if (isAiFetching) {
+        content.style.display = 'none';
+        loader.style.display = 'block';
+        return;
+    }
+
+    // C. Fetch from Backend (Batch)
+    isAiFetching = true;
+    content.style.display = 'none';
+    loader.style.display = 'block';
+
+    try {
+        const mistakesList = prepareMistakesList();
+        
+        if (mistakesList.length === 0) {
+            throw new Error("No complex mistakes found to analyze.");
+        }
+
+        // Call Google Apps Script
+        const response = await fetch(GOOGLE_SCRIPT_URL, {
+            method: 'POST',
+            body: JSON.stringify({ mistakes: mistakesList })
+        });
+
+        const data = await response.json();
+        
+        if (!data.success) throw new Error("AI Backend Error: " + (data.error || "Unknown"));
+
+        // Parse JSON from Gemini
+        const cleanJson = data.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+        aiMistakesCache = JSON.parse(cleanJson);
+
+        // Show result
+        if (aiMistakesCache[cacheKey]) {
+            renderAiResult(aiMistakesCache[cacheKey], original, typed);
+        } else {
+            renderAiResult("General error detected. Please review spelling and capitalization rules.", original, typed);
+        }
+
+    } catch (error) {
+        console.error(error);
+        content.style.display = 'block';
+        content.innerHTML = `<p style="color:#ef4444;">Could not analyze. Reason: ${error.message}</p>`;
+    } finally {
+        isAiFetching = false;
+        loader.style.display = 'none';
+        content.style.display = 'block';
+    }
+}
+
+// 3. Helper: Convert worker mistakes to list
+function prepareMistakesList() {
+    if (!g_lastAnalysisResult || !g_lastAnalysisResult.studentMistakes) return [];
+
+    const sm = g_lastAnalysisResult.studentMistakes;
+    const list = [];
+
+    sm.spelling.forEach(m => list.push({ Original: m.correct, Typed: m.wrong }));
+    sm.capitalisation.forEach(m => list.push({ Original: m.correct, Typed: m.wrong }));
+    // We send original_typed keys to match what the backend expects
+    
+    return list;
+}
+
+// 4. Helper: Render HTML
+function renderAiResult(explanation, orig, typed) {
+    const content = document.getElementById('aiModalContent');
+    content.innerHTML = `
+        <div class="ai-mistake-context">
+            Comparing: <b>${orig}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typed}</b> <span style="color:#dc2626">(Your Typo)</span>
+        </div>
+        <div>
+            <span class="ai-rule-badge">AI Explanation</span>
+            <p class="ai-explanation-text">${explanation}</p>
+        </div>
+    `;
 }
 
 </script>
