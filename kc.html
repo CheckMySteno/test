@@ -41,7 +41,7 @@
     *, *::before, *::after { box-sizing: border-box; }
     html, body {
       font-family: var(--font-body); background-color: var(--bg-color); color: var(--text-main);
-      margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.5;
+      margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.6;
       -webkit-font-smoothing: antialiased;
     }
     .app-container {
@@ -85,25 +85,25 @@
     .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; }
     .filter-bar select { padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border-color); background-color: white; color: var(--text-muted); font-weight: 500; cursor: pointer; }
 
-    /* --- NEW LIST STYLE CARD DESIGN --- */
+    /* --- NEW LIST STYLE CARD DESIGN (FIXED LAYOUT) --- */
     #passage-grid {
         display: flex;
         flex-direction: column;
-        gap: 16px; /* Space between cards */
+        gap: 16px;
     }
     
     .passage-card {
         background: white;
         border: 1px solid var(--border-color);
-        border-radius: 16px; /* Smooth rounded corners */
-        padding: 24px 30px;
+        border-radius: 16px;
+        padding: 0; /* Remove default padding to handle accent bar */
         display: flex;
-        align-items: center;
+        align-items: stretch; /* Stretch accent bar */
         justify-content: space-between;
         transition: all 0.2s ease;
         position: relative;
-        flex-wrap: wrap;
-        gap: 20px;
+        overflow: hidden;
+        min-height: 90px;
     }
     
     .passage-card:hover {
@@ -112,32 +112,42 @@
         transform: translateY(-2px);
     }
 
-    /* Left Side: Title & Meta */
-    .card-left {
-        display: flex;
-        align-items: center;
-        gap: 20px;
-    }
-
-    .accent-bar {
-        width: 4px;
-        height: 40px;
+    /* Vertical Accent Bar */
+    .card-accent {
+        width: 6px;
         background-color: var(--accent-purple);
-        border-radius: 4px;
         flex-shrink: 0;
     }
 
-    .card-info h3 {
-        font-size: 1.25rem;
+    /* Main Container for Flex Layout */
+    .card-container {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        padding: 24px 30px;
+        gap: 20px;
+    }
+
+    /* Left Side */
+    .card-left {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        flex-grow: 1; /* Allow it to take up space */
+    }
+
+    .card-title {
+        font-size: 1.2rem;
         font-weight: 700;
         color: var(--text-main);
-        margin: 0 0 8px 0;
+        margin: 0;
     }
 
     .meta-row {
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 15px;
         flex-wrap: wrap;
     }
 
@@ -153,37 +163,37 @@
     .check-icon-circle {
         background-color: var(--success-green);
         color: white;
-        width: 18px;
-        height: 18px;
+        width: 16px;
+        height: 16px;
         border-radius: 50%;
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-shrink: 0;
     }
-    .check-icon-circle svg { width: 12px; height: 12px; stroke-width: 3px; }
+    .check-icon-circle svg { width: 10px; height: 10px; stroke-width: 3px; }
 
     .word-count-text {
         font-size: 0.9rem;
-        color: var(--text-muted);
-        font-weight: 600;
+        color: var(--text-main);
+        font-weight: 700;
     }
-    .word-count-text b { color: var(--text-main); }
 
-    /* Right Side: Buttons */
+    /* Right Side Buttons */
     .card-right {
         display: flex;
         align-items: center;
         gap: 12px;
+        flex-shrink: 0; /* Prevent buttons from squishing */
     }
 
-    /* Analyze Button (Green) */
     .btn-analyse {
         background-color: var(--success-green);
         color: white;
         padding: 10px 18px;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         display: inline-flex;
         align-items: center;
         gap: 8px;
@@ -198,12 +208,11 @@
         font-size: 0.85em;
     }
 
-    /* Start Button (Dark or Outline) */
     .btn-start {
         padding: 10px 20px;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
         transition: all 0.2s;
         cursor: pointer;
     }
@@ -222,16 +231,15 @@
     }
     .btn-start.outline:hover { border-color: var(--btn-dark); }
 
-    /* Responsive adjustments for cards */
     @media (max-width: 768px) {
-        .passage-card { flex-direction: column; align-items: flex-start; padding: 20px; }
+        .card-container { flex-direction: column; align-items: flex-start; }
         .card-right { width: 100%; justify-content: flex-start; margin-top: 10px; }
         .btn-start, .btn-analyse { flex: 1; justify-content: center; }
     }
 
 
-    /* --- 2. SLIM PLAYER STYLES --- */
-    #player-view { max-width: 680px; margin: 40px auto; } /* Slim Width */
+    /* --- 2. SLIM & MODERN PLAYER STYLES --- */
+    #player-view { max-width: 680px; margin: 40px auto; }
 
     .practice-station {
         background: #ffffff;
@@ -407,7 +415,7 @@
     .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
     .columns.view-top-bottom { grid-template-columns: 1fr; }
-    .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; }
+    .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; font-family: var(--font-body); }
     .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; }
     .col p { margin: 0; }
     .word-wrapper { cursor: pointer; display: inline; transition: background-color 0.2s ease, transform 0.2s ease; position: relative; }
@@ -490,7 +498,7 @@
 
     /* New Transcript Modal Styles */
     #transcriptModal .modal-content { max-width: 600px; text-align: left; max-height: 80vh; display: flex; flex-direction: column; }
-    #transcriptTextBody { overflow-y: auto; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; line-height: 1.8; color: #374151; font-size: 1.05rem; margin-bottom: 15px; }
+    #transcriptTextBody { overflow-y: auto; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; line-height: 1.8; color: #374151; font-size: 1.05rem; margin-bottom: 15px; font-family: var(--font-body); }
 
     .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
     .confirm-dialog h3 { margin: 0 0 8px 0; font-size: 1.25em; }
@@ -584,7 +592,7 @@
                 <div class="intro-header">
                     <h2>Practice Section</h2>
                 </div>
-                <p>Practice all passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
+                <p>Practice all passages. Your progress is saved automatically.</p>
             </div>
             <div class="intro-actions">
                 <button id="startFirstTestBtn">Start First Test</button>
@@ -954,7 +962,7 @@ let player, originalText = "", wordCount = 0;
 let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
 let g_vol = "", g_tran = "", candidateId, attemptsRef;
 let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
-let g_lastAnalysisResult; // Replaces g_alignment
+let g_alignment = []; 
 let allPassageData = [];
 let g_lastTypedText = "";
 let isReevaluateModeActive = false;
@@ -1174,7 +1182,7 @@ function renderGrid() {
                 <div class="card-right">
                     ${isAttempted 
                         ? `<button class="btn-analyse">
-                            ✓ Analyse <span class="score-pill">${attemptData.accuracy}%</span>
+                            ✓ Analyse <span class="score-badge">${attemptData.accuracy}%</span>
                            </button>
                            <button class="btn-start-outline take-test-btn">Start Attempt</button>`
                         : `<button class="btn-start-solid take-test-btn">Start Attempt</button>`
@@ -1558,70 +1566,50 @@ function adjustSpeed(amount) {
 // --- Result Processing and Display ---
 function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-// ============================= MAJOR CHANGE =============================
-// Replaced the entire function body to work with the new advanced worker's response object.
 function renderResultSheet(analysisResult, isReevaluation = false) {
-    g_lastAnalysisResult = analysisResult; // Store the full result from the new worker
+    g_alignment = analysisResult.alignment; // Store full alignment
 
-    // The logic for re-evaluation mode remains similar, but it now uses the new data structure.
+    // --- RE-EVALUATION LOGIC ---
     if (isReevaluation) {
         const reevalContainer = document.getElementById('reevaluated-accuracy-container');
-        if (reevalContainer) {
-            reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${analysisResult.accuracy.toFixed(2)}%</div></div>`;
-        }
+        if(reevalContainer) reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${analysisResult.accuracy}%</div></div>`;
         
-        // Use the pre-rendered HTML from the worker
-        document.getElementById('editableTypedText').innerHTML = analysisResult.resultHTML;
-        
-        // Rebuild the original text view from the `originalWords` array
-        let originalTextHtml = analysisResult.originalWords.map((word, index) => 
-            `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
-        ).join(' ');
+        document.getElementById('editableTypedText').innerHTML = buildResultHtml(g_alignment);
+        let originalTextHtml = g_alignment.map((entry, index) => (entry.type === 'ins') ? '' : `<span class="word-wrapper" data-index="${index}" data-mistake-type="${entry.mistakeType}">${escapeHtml(entry.o || '')}</span>`).join(' ');
         document.getElementById('editableOriginalText').innerHTML = originalTextHtml;
         initializeResultInteractivity();
-
+    
+    // --- STANDARD RESULT LOGIC ---
     } else {
         const container = document.getElementById('resultSheetContainer');
         const dictationName = `Kailash Chandra - Volume ${g_vol.replace('vol', '')} / Transcript ${g_tran.replace('t', '')}`;
         const testDate = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
-
-        const { mistakeCounters, halfBucketCount, totalWordsP1, totalWordsP2, percentageDiff, accuracy } = analysisResult;
         
-        // Calculate WPM on the main thread as the worker doesn't know about time.
-        const timeTakenMinutes = (transcriptionTimerTotalTime - timeLeft) / 60;
-        const wpm = timeTakenMinutes > 0 ? (totalWordsP2 / timeTakenMinutes).toFixed(2) : "0.00";
-        analysisResult.wpm = wpm; // Add it to the result object for saving
-
-        // Calculate total full mistakes for display
-        const fullMistakesCount = (mistakeCounters.addition || 0) + (mistakeCounters.omission || 0);
-
-        // Rebuild the original text view from the `originalWords` array
-        let originalTextHtml = analysisResult.originalWords.map((word, index) => 
-            `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
-        ).join(' ');
-
+        const highlightedHtml = buildResultHtml(g_alignment);
+        let originalTextHtml = g_alignment.map((entry, index) => (entry.type === 'ins') ? '' : `<span class="word-wrapper" data-index="${index}" data-mistake-type="${entry.mistakeType}">${escapeHtml(entry.o || '')}</span>`).join(' ');
+        
         container.innerHTML = `
         <div class="result-sheet-container">
             <h1>Result Sheet:</h1>
             <div class="stats-container">
                 <div class="stats-row"><div class="stat-pill full-width">${escapeHtml(dictationName)}</div></div>
                 <div class="stats-row">
-                    <div class="stat-pill">Total words: ${totalWordsP1}</div>
-                    <div class="stat-pill">Typed words: ${totalWordsP2}</div>
-                    <div class="stat-pill">Typing Speed: ${wpm} WPM</div>
+                    <div class="stat-pill">Total words: ${analysisResult.totalWords}</div>
+                    <div class="stat-pill">Typed words: ${analysisResult.typedWords}</div>
+                    <div class="stat-pill">Typing Speed: ${analysisResult.typingSpeed} WPM</div>
                 </div>
                 <div class="stats-row">
-                    <div class="stat-pill red">Full Mistakes: ${fullMistakesCount}</div>
-                    <div class="stat-pill amber">Half Mistakes: ${halfBucketCount}</div>
-                    <div class="stat-pill">Total % of Mistakes: ${percentageDiff.toFixed(2)}%</div>
-                    <div class="stat-pill">Accuracy: ${accuracy.toFixed(2)}%</div>
+                    <div class="stat-pill red">Full Mistakes: ${analysisResult.fullMistakes}</div>
+                    <div class="stat-pill amber">Half Mistakes: ${analysisResult.halfMistakes}</div>
+                    <div class="stat-pill">Total % of Mistakes: ${analysisResult.mistakePercent}%</div>
+                    <div class="stat-pill">Accuracy: ${analysisResult.accuracy}%</div>
                 </div>
                 <div id="reevaluated-accuracy-container"></div>
                 <div class="stats-row"><div class="stat-pill">Test Date: ${escapeHtml(testDate)}</div></div>
             </div>
             <div class="legend-container" id="interactive-legend">
                 <div class="legend-item" data-filter-type="omission"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span>Omissions<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="addition"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span>Additions<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="extra"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span>Additions<span class="mistake-count"></span></div>
                 <div class="legend-item" data-filter-type="spelling"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span>Spelling<span class="mistake-count"></span></div>
                 <div class="legend-item" data-filter-type="capitalization"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span>Capitalization<span class="mistake-count"></span></div>
                 <div class="legend-item" data-filter-type="punctuation"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span>Punctuation<span class="mistake-count"></span></div>
@@ -1639,7 +1627,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <button id="viewSwitchBtn" class="view-switch-btn">Switch to Side-by-Side View</button>
             </div>
             <div id="comparisonColumns" class="columns view-top-bottom">
-                <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText" contenteditable="false">${analysisResult.resultHTML}</p></div>
+                <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText" contenteditable="false">${highlightedHtml}</p></div>
                 <div class="col" id="originalCol"><strong>Original Text:</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div>
             </div>
         </div>`;
@@ -1663,16 +1651,86 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
         initializeResultInteractivity();
     }
 }
-// ========================== END MAJOR CHANGE ============================
 
-// buildResultHtml is now obsolete as the worker provides the HTML directly.
-// We are keeping it commented out in case you need to reference the old logic.
-/* 
-function buildResultHtml(alignment) { ... }
-*/
+// --- HTML BUILDER (RESTORED & FIXED) ---
+function buildResultHtml(alignment) {
+    let resultHtmlContent = "";
+    
+    // 1. Determine Cutoff Index based on Target Count
+    // This loops through the alignment. Once we have counted enough "Original" words
+    // to match the user's selected target (e.g. 200), we mark the index.
+    // Anything after this index (extra typing during the 10s buffer) is ignored.
+    let wordCounter = 0;
+    let cutoffIndex = alignment.length; // Default to end (Full Passage)
+    
+    if (g_selectedTarget !== "full") {
+        let targetCount = parseInt(g_selectedTarget);
+        
+        for(let i=0; i<alignment.length; i++) {
+            // "Extra" words (insertions) do not advance the original text counter.
+            // Match, Substitution, and Deletion do advance it.
+            if(alignment[i].mistakeType !== 'extra') {
+                wordCounter++;
+            }
+            
+            // Once we hit the target count, everything after this index is "Extra Buffer Material"
+            if(wordCounter >= targetCount) {
+                cutoffIndex = i + 1; 
+                break;
+            }
+        }
+    }
 
-// ============================= MAJOR CHANGE =============================
-// Replaced the entire function body to use the new worker and its required data.
+    // 2. Build HTML loop
+    for (let k = 0; k < alignment.length; k++) {
+        const entry = alignment[k];
+        
+        // SKIP logic for buffer words
+        if (k > cutoffIndex) {
+            continue; 
+        }
+
+        let wordHtml = '', tooltipText = '', statusIcon = '✔️';
+        
+        switch(entry.mistakeType) {
+            case 'correct':
+                wordHtml = `<span>${escapeHtml(entry.t || '')}</span>`;
+                tooltipText = "Correct";
+                break;
+            case 'capitalization':
+                tooltipText = `Capitalization: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+                wordHtml = `<span class='highlight capitalization' data-mistake-type='capitalization' data-tooltip-text='${tooltipText}'>${escapeHtml(entry.t)}</span>`;
+                statusIcon = '⚠️';
+                break;
+            case 'punctuation':
+                tooltipText = `Punctuation: Typed "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+                wordHtml = `<span class='highlight punctuation' data-mistake-type='punctuation' data-tooltip-text='${tooltipText}'>${escapeHtml(entry.t)}</span>`;
+                statusIcon = '⚠️';
+                break;
+            case 'omission':
+                tooltipText = `Omitted: "${escapeHtml(entry.o)}"`;
+                wordHtml = `<span class='highlight omission' data-mistake-type='omission' data-tooltip-text='${tooltipText}'>(${escapeHtml(entry.o)})</span>`;
+                statusIcon = '❌';
+                break;
+            case 'extra':
+                tooltipText = `Extra Word: "${escapeHtml(entry.t)}"`;
+                wordHtml = `<span class='highlight extra' data-mistake-type='extra' data-tooltip-text='${tooltipText}'>${escapeHtml(entry.t)}</span>`;
+                statusIcon = '❌';
+                break;
+            case 'spelling':
+                tooltipText = `You typed: "${escapeHtml(entry.t)}" (was "${escapeHtml(entry.o)}")`;
+                wordHtml = `<span class='highlight spelling' data-mistake-type='spelling' data-tooltip-text='${tooltipText}'>${escapeHtml(entry.t)} (<b>${escapeHtml(entry.o)}</b>)</span>`;
+                statusIcon = '⚠️';
+                break;
+        }
+
+        entry.statusIcon = statusIcon;
+        resultHtmlContent += `<span class="word-wrapper" data-index="${k}" data-status-icon="${statusIcon}" data-mistake-type="${entry.mistakeType}">${wordHtml}</span> `;
+    }
+    return resultHtmlContent;
+}
+
+// --- UPDATED: Submit Transcription with SLICING Logic ---
 function submitTranscription() {
     // 1. Reset AI Cache
     aiMistakesCache = null; 
@@ -1693,10 +1751,14 @@ function submitTranscription() {
             return;
         }
 
+        // --- SMART CROP LOGIC (Pre-Analysis) ---
         let textForAnalysis = originalText;
         if (g_selectedTarget !== "full") {
             let targetWords = parseInt(g_selectedTarget);
+            // We select Target + 50 words to ensure the diff algorithm has context
+            // to find matches. We will trim the RESULT later.
             let safeLimit = targetWords + 50;
+            
             let wordsArray = originalText.trim().split(/\s+/);
             if (safeLimit < wordsArray.length) {
                 textForAnalysis = wordsArray.slice(0, safeLimit).join(" ");
@@ -1712,47 +1774,19 @@ function submitTranscription() {
         analysisWorker.postMessage({
             originalText: textForAnalysis,
             userText: g_lastTypedText,
-            config: config, // NEW: Send the config object
-            synonymData: g_synonymData // NEW: Send the loaded synonym data
+            config: config, 
+            synonymData: g_synonymData 
         });
 
-        // 3. Update the onmessage handler to process the new result object
+        // 3. Update the onmessage handler
         analysisWorker.onmessage = function(event) {
             let analysisResult = event.data;
             
-            // --- NEW: Trimming Logic (Remove Extra Words) ---
+            // --- NEW: Trimming Logic (Post-Analysis) ---
+            // If user selected 200 words, we want stats based on exactly that.
             if (g_selectedTarget !== "full") {
                 let targetCount = parseInt(g_selectedTarget);
-                // Call a helper to refine stats based on the exact target count
-                // Note: Since the worker produces the result, we might need to adjust this logic
-                // For now, let's assume the worker handles basic comparison, and we refine stats here if needed.
-                // However, since the worker returns pre-rendered HTML, refining it post-hoc is tricky.
-                // The correct way with the NEW worker is to ensure the `originalText` sent is trimmed correctly OR rely on the worker.
-                // Given the instructions to keep previous logic:
-                // The previous logic used `refineStatsBasedOnLimit` which manipulated alignment arrays.
-                // The new worker returns `resultHTML` string directly.
-                // IF we need to support trimming with the new worker, we must ask the worker to stop at a certain index,
-                // OR we accept that the text sent `textForAnalysis` (target + 50) is what gets graded.
-                
-                // Let's stick to the previous successful pattern: Send only what's needed?
-                // Actually, the previous 'Smart Crop' logic (sending Target + 50) relies on `refineStats` to cut off the tail.
-                // With the new worker returning HTML, we can't easily cut the tail in JS.
-                // SOLUTION: We will filter the `mistakeCounters` and `totalWords` based on our target,
-                // but visually the extra words might still show (though marked/unmarked depending on worker).
-                // To strictly follow "remove them", we might need to modify the worker call or process the result differently.
-                
-                // For this specific request, to ensure "words after 200 ... automatically removed",
-                // we should rely on the text we sent.
-                // If we sent 250 words, and user typed 250, they get graded on 250.
-                // To strictly grade on 200, we should slice `textForAnalysis` to exactly 200?
-                // No, because of the buffer.
-                
-                // Let's implement a post-processing step if possible, or accept the smart crop.
-                // The prompt says "keep all the other thing exact same copy paste".
-                // The previous code used `refineStatsBasedOnLimit`.
-                // I will add a similar logic here to adjust the stats, 
-                // but note that modifying the HTML string is hard.
-                // Instead, I'll rely on the `textForAnalysis` variable being the primary controller.
+                analysisResult = refineStatsBasedOnLimit(analysisResult, targetCount);
             }
             // ----------------------------------------------
 
@@ -1762,7 +1796,6 @@ function submitTranscription() {
             renderResultSheet(analysisResult, false);
 
             saveProgressToLocalStorage(analysisResult);
-            // The new worker's result has different properties, so we pass the whole object
             saveAttemptHybrid(originalText, typedText, analysisResult);
 
             resetTimer();
@@ -1782,15 +1815,59 @@ function submitTranscription() {
         goHome();
     }
 }
-// ========================== END MAJOR CHANGE ============================
 
-// The 'refineStatsBasedOnLimit' function is no longer needed because the advanced
-// worker's logic is significantly different, and this kind of post-processing
-// is overly complex and less accurate than the worker's own calculations.
-// The "smart crop" logic in submitTranscription handles partial passages sufficiently.
-/*
-function refineStatsBasedOnLimit(result, targetLimit) { ... }
-*/
+// --- NEW HELPER: Refine Stats (This slices the data) ---
+function refineStatsBasedOnLimit(result, targetLimit) {
+    let newAlignment = [];
+    let originalCounter = 0;
+    
+    // 1. Filter the alignment array
+    // This creates a clean array that stops exactly where the user asked.
+    for(let entry of result.alignment) {
+        if(entry.mistakeType !== 'extra') {
+            originalCounter++;
+        }
+        
+        // Stop exactly at the target limit
+        if(originalCounter > targetLimit) {
+            break; 
+        }
+        
+        newAlignment.push(entry);
+    }
+    
+    // 2. Recalculate Stats based on this new sliced alignment
+    let fullMistakes = 0;
+    let halfMistakes = 0;
+    let typedWords = 0;
+    
+    newAlignment.forEach(entry => {
+        if(entry.mistakeType !== 'omission') typedWords++; // Count typed words
+        
+        if(entry.mistakeType === 'omission' || entry.mistakeType === 'extra' || entry.mistakeType === 'sub') {
+            fullMistakes++;
+        } else if (entry.mistakeType === 'spelling' || entry.mistakeType === 'capitalization' || entry.mistakeType === 'punctuation') {
+            // Assuming standard SSC weighting for half mistakes
+            halfMistakes++;
+        }
+    });
+    
+    let totalErrors = fullMistakes + (halfMistakes * 0.5);
+    let mistakePercent = (totalErrors / targetLimit) * 100;
+    let accuracy = Math.max(0, 100 - mistakePercent).toFixed(2);
+    
+    // Return a new result object with corrected stats
+    return {
+        ...result,
+        alignment: newAlignment,
+        totalWords: targetLimit,
+        typedWords: typedWords,
+        fullMistakes: fullMistakes,
+        halfMistakes: halfMistakes,
+        mistakePercent: mistakePercent.toFixed(2),
+        accuracy: accuracy
+    };
+}
 
 // --- Data Saving and Progress ---
 function saveProgressToLocalStorage(resultData) {
@@ -1897,7 +1974,7 @@ async function saveAttemptHybrid(original, typed, analysisResult) {
         typedText: typed,
         fullMistakes: fullMistakesCount,
         halfMistakes: analysisResult.halfBucketCount,
-        highlightedHtml: analysisResult.resultHTML,
+        highlightedHtml: analysisResult.resultHTML, // Note: This will save the full HTML. For sliced, we rely on the dynamic buildResultHtml
     };
 
     try {
@@ -1918,10 +1995,10 @@ async function sendLightweightStatsToFirebase(analysisResult) {
     if (!attemptsRef) return;
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
     const lightweightStat = {
-        accuracy: analysisResult.accuracy.toFixed(2) + "%",
+        accuracy: analysisResult.accuracy + "%", // Accuracy is already fixed string in refineStats
         wpm: analysisResult.wpm,
         timeTakenSeconds: timeTakenSeconds,
-        totalWords: analysisResult.totalWordsP1,
+        totalWords: analysisResult.totalWords,
         volume: g_vol,
         transcript: g_tran,
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
@@ -1970,11 +2047,18 @@ function initializeResultInteractivity() {
     const columns = document.getElementById('comparisonColumns');
     if (!columns) return;
     
-    // The interactivity for highlighting corresponding words is now broken because
-    // the original text column is rendered differently and doesn't have the same mistake spans.
-    // This would require a more significant rewrite to fully restore.
-    // The core functionality of viewing mistakes in the typed text still works.
-
+    columns.addEventListener('click', (e) => {
+        const target = e.target.closest('.word-wrapper');
+        if (!target) return;
+        const wordIndex = target.dataset.index;
+        if (wordIndex === null) return;
+        document.querySelectorAll('.active-highlight').forEach(el => el.classList.remove('active-highlight'));
+        document.querySelectorAll(`.word-wrapper[data-index="${wordIndex}"]`).forEach(el => el.classList.add('active-highlight'));
+        const otherColId = target.closest('.col').id === 'typedCol' ? 'originalCol' : 'typedCol';
+        const correspondingWord = document.querySelector(`#${otherColId} .word-wrapper[data-index="${wordIndex}"]`);
+        if (correspondingWord) correspondingWord.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
@@ -1991,8 +2075,7 @@ function openTranscriptModal() {
     if(player && player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
 }
 
-// ============================= MAJOR CHANGE =============================
-// Rewrote this function to use the new worker and data structures.
+// --- Re-evaluation Mode ---
 function toggleReevaluateMode() {
     isReevaluateModeActive = !isReevaluateModeActive;
     const resultsView = document.getElementById('results-view');
@@ -2006,13 +2089,11 @@ function toggleReevaluateMode() {
         toggleBtn.style.backgroundColor = 'var(--accent-purple)'; 
         toggleBtn.style.color = 'white';
         
-        // Populate edit boxes with clean text from the last result
-        typedTextP.innerHTML = g_lastAnalysisResult.userWords.join(' ');
-        originalTextP.innerHTML = g_lastAnalysisResult.originalWords.join(' ');
+        typedTextP.innerHTML = getCleanTextFromAlignment('typed');
+        originalTextP.innerHTML = getCleanTextFromAlignment('original');
         typedTextP.contentEditable = true; 
         originalTextP.contentEditable = true;
         alert("Re-evaluate Mode is ON. You can now edit both your transcription and the original text.");
-
     } else {
         resultsView.classList.remove('reevaluate-mode-active');
         toggleBtn.textContent = 'Enter Re-evaluate Mode';
@@ -2056,12 +2137,15 @@ function toggleReevaluateMode() {
         };
     }
 }
-// ========================== END MAJOR CHANGE ============================
 
-// This function is no longer needed as we get clean text from `g_lastAnalysisResult.userWords` etc.
-/*
-function getCleanTextFromAlignment(type = 'typed') { ... }
-*/
+function getCleanTextFromAlignment(type = 'typed') {
+    if (!g_alignment || g_alignment.length === 0) return "";
+    let textParts = g_alignment.map(entry => {
+        if (type === 'typed') return (entry.type === 'match' || entry.type === 'sub' || entry.type === 'ins') ? entry.t || '' : null;
+        else return (entry.type === 'match' || entry.type === 'sub' || entry.type === 'del') ? entry.o || '' : null;
+    }).filter(part => part !== null);
+    return textParts.join(' ').replace(/\s+/g, ' ').trim();
+}
 
 // --- Error Reporting ---
 function validateReportForm() {
@@ -2124,21 +2208,21 @@ function renderQuickResume() {
 
 function initializeInteractiveLegend() {
     const legendContainer = document.getElementById('interactive-legend');
-    if (!legendContainer || !g_lastAnalysisResult) return;
+    if (!legendContainer) return;
 
-    const mistakeCounters = g_lastAnalysisResult.mistakeCounters;
-    const mistakeMap = {
-        omission: mistakeCounters.omission || 0,
-        addition: mistakeCounters.addition || 0,
-        spelling: mistakeCounters.spelling || 0,
-        capitalization: mistakeCounters.capitalization || 0,
-        punctuation: (mistakeCounters.punctuation.fullstop || 0) + (mistakeCounters.punctuation.other || 0),
-    };
-    
+    const mistakeCounts = {};
+    const allMistakes = document.querySelectorAll('#editableTypedText .highlight');
+    allMistakes.forEach(el => {
+        const type = el.dataset.mistakeType;
+        if (type && type !== 'correct') {
+            mistakeCounts[type] = (mistakeCounts[type] || 0) + 1;
+        }
+    });
+
     legendContainer.querySelectorAll('.legend-item').forEach(item => {
         const filterType = item.dataset.filterType;
         const countSpan = item.querySelector('.mistake-count');
-        countSpan.textContent = `(${(mistakeMap[filterType] || 0)})`;
+        countSpan.textContent = `(${(mistakeCounts[filterType] || 0)})`;
     });
 
     legendContainer.addEventListener('click', function(e) {
@@ -2165,22 +2249,10 @@ function initializeInteractiveLegend() {
 
 function applyFilters() {
     const activeFilters = Array.from(document.querySelectorAll('#interactive-legend .legend-item.active')).map(item => item.dataset.filterType);
-    const allHighlightElements = document.querySelectorAll('#editableTypedText .mis');
+    const allHighlightElements = document.querySelectorAll('#editableTypedText .highlight, #editableTypedText .omission');
     
     allHighlightElements.forEach(el => {
-        let isVisible = false;
-        if(activeFilters.length === 0) {
-            isVisible = true;
-        } else {
-            for(const filter of activeFilters) {
-                if(el.classList.contains(filter)) {
-                    isVisible = true;
-                    break;
-                }
-            }
-        }
-        
-        if (isVisible) {
+        if (activeFilters.length === 0 || activeFilters.includes(el.dataset.mistakeType)) {
             el.classList.remove('hidden-mistake');
         } else {
             el.classList.add('hidden-mistake');
@@ -2189,29 +2261,25 @@ function applyFilters() {
 }
 
 function showDeepAnalysisModal() {
-    if (!g_lastAnalysisResult || !g_lastAnalysisResult.studentMistakes) {
-        alert("Analysis data not available.");
-        return;
-    }
-    const { spelling, capitalisation, replacements } = g_lastAnalysisResult.studentMistakes;
+    const mistakes = g_alignment.filter(entry => entry.mistakeType !== 'correct');
     const tableBody = document.getElementById('deep-analysis-table-body');
     let tableRowsHtml = '';
-    
-    const mistakes = [
-        ...spelling.map(m => ({ type: 'Spelling', wrong: m.wrong, correct: m.correct })),
-        ...capitalisation.map(m => ({ type: 'Capitalization', wrong: m.wrong, correct: m.correct })),
-        ...replacements.map(m => ({ type: 'Replacement', wrong: m.added, correct: m.omitted }))
-    ];
 
     if (mistakes.length === 0) {
-        tableRowsHtml = '<tr><td colspan="3" style="text-align:center; padding: 20px;">No specific spelling, capitalization, or replacement mistakes were found. Check for additions/omissions.</td></tr>';
+        tableRowsHtml = '<tr><td colspan="3" style="text-align:center; padding: 20px;">Congratulations! No mistakes were found.</td></tr>';
     } else {
         mistakes.forEach(mistake => {
+            let yourWord = mistake.t || '---';
+            let originalWord = mistake.o || '---';
+
+            if (mistake.mistakeType === 'omission') { yourWord = `<em>(Omitted)</em>`; }
+            if (mistake.mistakeType === 'extra') { originalWord = `<em>(Not in original)</em>`; }
+
             tableRowsHtml += `
                 <tr>
-                    <td><strong>${escapeHtml(mistake.type)}</strong></td>
-                    <td>${escapeHtml(mistake.wrong)}</td>
-                    <td>${escapeHtml(mistake.correct)}</td>
+                    <td><strong>${capitalizeFirstLetter(mistake.mistakeType)}</strong></td>
+                    <td>${yourWord}</td>
+                    <td>${originalWord}</td>
                 </tr>
             `;
         });
