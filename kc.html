@@ -798,7 +798,7 @@ let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
 let g_vol = "", g_tran = "", candidateId, attemptsRef;
 let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
 let g_lastAnalysisResult; // Replaces g_alignment
-let allPassageData = [];
+let allPassageData =[];
 let g_lastTypedText = "";
 let isReevaluateModeActive = false;
 let analysisWorker; 
@@ -807,7 +807,7 @@ let g_stopVideoWatcher = null; // Sync Watcher
 let g_autoStopTimestamp = Infinity; // Global variable for Auto-Stop Time
 // ============================= NEW CHANGE =============================
 // Variable to hold synonym data for the new worker
-let g_synonymData = [];
+let g_synonymData =[];
 // ========================== END NEW CHANGE ============================
 
 document.addEventListener("DOMContentLoaded", initializePracticeKC);
@@ -887,11 +887,11 @@ async function loadSynonyms() {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        g_synonymData = Array.isArray(data) ? data : [];
+        g_synonymData = Array.isArray(data) ? data :[];
         console.log(`Synonym engine loaded with ${g_synonymData.length} groups.`);
     } catch (error) {
         console.error("Could not load synonym data. The checker will be less accurate.", error);
-        g_synonymData = []; // Ensure it's an empty array on failure
+        g_synonymData =[]; // Ensure it's an empty array on failure
     }
 }
 
@@ -923,7 +923,7 @@ function getCurrentConfigForWorker() {
 
 // --- Passage Data and Grid Rendering ---
 function generateAllPassageData() {
-    allPassageData = [];
+    allPassageData =[];
     let transcriptCounter = 1;
     for (let i = 1; i <= 24; i++) {
         for (let j = 1; j <= 22; j++) {
@@ -946,7 +946,7 @@ function renderGrid() {
     grid.innerHTML = '';
 
     const progressData = JSON.parse(localStorage.getItem(`kcProgress_${candidateId}`) || '{}');
-    let dataToRender = [...allPassageData];
+    let dataToRender =[...allPassageData];
 
     const filterValue = document.getElementById('filter-select').value;
     if (filterValue !== 'all') {
@@ -1448,14 +1448,9 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 }
 // ========================== END MAJOR CHANGE ============================
 
-// buildResultHtml is now obsolete as the worker provides the HTML directly.
-// We are keeping it commented out in case you need to reference the old logic.
-/* 
-function buildResultHtml(alignment) { ... }
-*/
-
 // ============================= MAJOR CHANGE =============================
 // Replaced the entire function body to use the new worker and its required data.
+// UPDATED: Now strictly crops both Original and Typed texts to match target words!
 function submitTranscription() {
     // 1. Reset AI Cache
     aiMistakesCache = null; 
@@ -1467,8 +1462,7 @@ function submitTranscription() {
     try {
         if (!originalText) throw new Error("Original transcript not found. Please try the test again.");
 
-        const typedText = document.getElementById('typingBox').value;
-        g_lastTypedText = typedText;
+        let typedText = document.getElementById('typingBox').value;
 
         if (typedText.trim().split(/\s+/).filter(Boolean).length < 10) {
             alert("Please type at least 10 words.");
@@ -1477,14 +1471,26 @@ function submitTranscription() {
         }
 
         let textForAnalysis = originalText;
+        let typedTextForAnalysis = typedText;
+
         if (g_selectedTarget !== "full") {
             let targetWords = parseInt(g_selectedTarget);
-            let safeLimit = targetWords + 50;
-            let wordsArray = originalText.trim().split(/\s+/);
-            if (safeLimit < wordsArray.length) {
-                textForAnalysis = wordsArray.slice(0, safeLimit).join(" ");
+            
+            // Strictly crop Original Text to exact target words
+            let orgWordsArray = originalText.trim().split(/\s+/).filter(Boolean);
+            if (targetWords < orgWordsArray.length) {
+                textForAnalysis = orgWordsArray.slice(0, targetWords).join(" ");
+            }
+            
+            // Strictly crop User Typed Text to exact target words
+            // This ensures extra words are ignored and not counted as mistakes
+            let userWordsArray = typedText.trim().split(/\s+/).filter(Boolean);
+            if (targetWords < userWordsArray.length) {
+                typedTextForAnalysis = userWordsArray.slice(0, targetWords).join(" ");
             }
         }
+
+        g_lastTypedText = typedTextForAnalysis;
 
         document.getElementById('fullPageLoader').style.display = 'flex';
 
@@ -1495,8 +1501,8 @@ function submitTranscription() {
         analysisWorker.postMessage({
             originalText: textForAnalysis,
             userText: g_lastTypedText,
-            config: config, // NEW: Send the config object
-            synonymData: g_synonymData // NEW: Send the loaded synonym data
+            config: config, // Send the config object
+            synonymData: g_synonymData // Send the loaded synonym data
         });
 
         // 3. Update the onmessage handler to process the new result object
@@ -1508,8 +1514,8 @@ function submitTranscription() {
             renderResultSheet(analysisResult, false);
 
             saveProgressToLocalStorage(analysisResult);
-            // The new worker's result has different properties, so we pass the whole object
-            saveAttemptHybrid(originalText, typedText, analysisResult);
+            // Pass strictly the cropped texts so evaluation matches what is saved
+            saveAttemptHybrid(textForAnalysis, g_lastTypedText, analysisResult);
 
             resetTimer();
         };
@@ -1529,14 +1535,6 @@ function submitTranscription() {
     }
 }
 // ========================== END MAJOR CHANGE ============================
-
-// The 'refineStatsBasedOnLimit' function is no longer needed because the advanced
-// worker's logic is significantly different, and this kind of post-processing
-// is overly complex and less accurate than the worker's own calculations.
-// The "smart crop" logic in submitTranscription handles partial passages sufficiently.
-/*
-function refineStatsBasedOnLimit(result, targetLimit) { ... }
-*/
 
 // --- Data Saving and Progress ---
 function saveProgressToLocalStorage(resultData) {
@@ -1574,7 +1572,7 @@ async function resetProgress() {
 
         if (attemptsRef) {
             const querySnapshot = await attemptsRef.get();
-            const deletePromises = [];
+            const deletePromises =[];
             querySnapshot.forEach(doc => {
                 deletePromises.push(doc.ref.delete());
             });
@@ -1710,11 +1708,6 @@ function initializeEventListeners() {
 function initializeResultInteractivity() {
     const columns = document.getElementById('comparisonColumns');
     if (!columns) return;
-    
-    // The interactivity for highlighting corresponding words is now broken because
-    // the original text column is rendered differently and doesn't have the same mistake spans.
-    // This would require a more significant rewrite to fully restore.
-    // The core functionality of viewing mistakes in the typed text still works.
 
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
@@ -1798,11 +1791,6 @@ function toggleReevaluateMode() {
     }
 }
 // ========================== END MAJOR CHANGE ============================
-
-// This function is no longer needed as we get clean text from `g_lastAnalysisResult.userWords` etc.
-/*
-function getCleanTextFromAlignment(type = 'typed') { ... }
-*/
 
 // --- Error Reporting ---
 function validateReportForm() {
@@ -1938,7 +1926,7 @@ function showDeepAnalysisModal() {
     const tableBody = document.getElementById('deep-analysis-table-body');
     let tableRowsHtml = '';
     
-    const mistakes = [
+    const mistakes =[
         ...spelling.map(m => ({ type: 'Spelling', wrong: m.wrong, correct: m.correct })),
         ...capitalisation.map(m => ({ type: 'Capitalization', wrong: m.wrong, correct: m.correct })),
         ...replacements.map(m => ({ type: 'Replacement', wrong: m.added, correct: m.omitted }))
