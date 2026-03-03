@@ -207,7 +207,7 @@
         box-shadow: 0 0 0 3px var(--accent-purple), 0 8px 25px rgba(0,0,0,0.1);
     }
 
-    #results-view.reevaluate-mode-active [contenteditable="true"] {
+    #results-view.reevaluate-mode-active[contenteditable="true"] {
         outline: 2px solid var(--accent-purple);
         background-color: white;
         box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
@@ -775,7 +775,6 @@ localDb.version(1).stores({
 });
 
 // --- Firebase Configuration ---
-// THIS IS THE bs6 code block you requested to be empty. Paste your config here.
 const firebaseConfig = {
   apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
   authDomain: "checkmysteno.firebaseapp.com",
@@ -797,18 +796,15 @@ let player, originalText = "", wordCount = 0;
 let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
 let g_vol = "", g_tran = "", candidateId, attemptsRef;
 let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
-let g_lastAnalysisResult; // Replaces g_alignment
+let g_lastAnalysisResult; 
 let allPassageData =[];
 let g_lastTypedText = "";
 let isReevaluateModeActive = false;
 let analysisWorker; 
-let g_selectedTarget = "full"; // Global variable for Flexible Dictation
-let g_stopVideoWatcher = null; // Sync Watcher
-let g_autoStopTimestamp = Infinity; // Global variable for Auto-Stop Time
-// ============================= NEW CHANGE =============================
-// Variable to hold synonym data for the new worker
+let g_selectedTarget = "full"; 
+let g_stopVideoWatcher = null; 
+let g_autoStopTimestamp = Infinity; 
 let g_synonymData =[];
-// ========================== END NEW CHANGE ============================
 
 document.addEventListener("DOMContentLoaded", initializePracticeKC);
 
@@ -862,26 +858,18 @@ async function initializePracticeKC() {
         alert("Your browser does not support Web Workers. The application may be slow.");
     }
     
-    // ============================= NEW CHANGE =============================
-    // Load synonyms needed by the advanced worker as soon as the app starts.
     await loadSynonyms();
-    // ========================== END NEW CHANGE ============================
-
     await generateAllPassageData();
     renderGrid();
-
     initializeEventListeners();
     renderQuickResume();
 }
 
-// ============================= NEW CHANGE =============================
 /**
  * Fetches synonym data from the server and stores it globally.
- * This is required for the new advanced worker.
  */
 async function loadSynonyms() {
     try {
-        // This endpoint must be correct and accessible from your domain.
         const response = await fetch('/config/flex_synonyms.php');
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -895,16 +883,8 @@ async function loadSynonyms() {
     }
 }
 
-/**
- * Creates the configuration object required by the new advanced worker.
- * It sets standard SSC rules and respects the "Count comma mistakes" checkbox.
- */
 function getCurrentConfigForWorker() {
     const includeCommas = document.getElementById("includeComma")?.checked;
-    
-    // This config matches typical SSC rules:
-    // - Additions & Omissions are full mistakes.
-    // - Spelling, Capitalization, and Punctuation are half mistakes.
     const config = {
       mode: 'exam',
       addition: 1,
@@ -912,14 +892,12 @@ function getCurrentConfigForWorker() {
       spelling: 0.5,
       capitalization: 0.5,
       punctuation: { 
-          // If commas are included, we check all punctuation. Otherwise, only full stops.
           mode: includeCommas ? 'all' : 'fullstop-only', 
           weight: 0.5 
       },
     };
     return config;
 }
-// ========================== END NEW CHANGE ============================
 
 // --- Passage Data and Grid Rendering ---
 function generateAllPassageData() {
@@ -1096,7 +1074,6 @@ async function loadPractice(volumeId, transcriptId) {
         showView('player-view');
         setPlayerLoading(true);
 
-        // --- Setup Flexible Word Count Dropdown ---
         setupWordCountOptions();
 
         const passageData = allPassageData.find(p => p.volId === g_vol && p.tranId === g_tran);
@@ -1110,12 +1087,10 @@ async function loadPractice(volumeId, transcriptId) {
     }
 }
 
-// --- FLEXIBLE DICTATION HELPERS ---
 function setupWordCountOptions() {
     const select = document.getElementById('wordCountSelect');
     select.innerHTML = ''; 
     
-    // Create options: 200, 400...
     let step = 200;
     for (let i = step; i < wordCount; i += step) {
         let option = document.createElement('option');
@@ -1124,7 +1099,6 @@ function setupWordCountOptions() {
         select.appendChild(option);
     }
     
-    // "Full Passage" option
     let fullOption = document.createElement('option');
     fullOption.value = "full";
     fullOption.text = `Full Passage (${wordCount} Words)`;
@@ -1148,10 +1122,9 @@ function updateAutoStopSettings() {
         display.style.borderColor = "#a7f3d0";
     } else {
         let words = parseInt(val);
-        // Calculate timestamp based on ratio
         if(totalVideoDuration > 0) {
             let ratio = words / wordCount;
-            g_autoStopTimestamp = (totalVideoDuration * ratio) + 10; // +10s buffer
+            g_autoStopTimestamp = (totalVideoDuration * ratio) + 10;
             if(g_autoStopTimestamp > totalVideoDuration) g_autoStopTimestamp = totalVideoDuration - 0.5;
         }
         
@@ -1160,7 +1133,6 @@ function updateAutoStopSettings() {
         display.style.color = "#b45309";
         display.style.borderColor = "#fcd34d";
     }
-    // Also recalculate if total duration wasn't ready yet
     if(totalVideoDuration === 0 && player && player.getDuration) {
         totalVideoDuration = player.getDuration();
     }
@@ -1171,10 +1143,8 @@ function showInstructions() {
     document.getElementById('instructions-modal').classList.add('visible');
 }
 
-// --- UPDATED: Start Test Logic ---
 function startTranscriptionTest() {
     document.getElementById('instructions-modal').classList.remove('visible');
-    // Try fullscreen
     if (document.documentElement.requestFullscreen) {
         document.documentElement.requestFullscreen().catch(err => console.log("Fullscreen optional"));
     }
@@ -1235,7 +1205,6 @@ function loadVideo(url, autoPlay = false) {
         totalVideoDuration = event.target.getDuration();
         setPlayerLoading(false);
         setPlaybackSpeed();
-        // Recalculate auto-stop now that we have duration
         updateAutoStopSettings();
     };
     if (player && typeof player.loadVideoById === 'function' && player.getIframe()?.isConnected) {
@@ -1252,7 +1221,6 @@ function loadVideo(url, autoPlay = false) {
 function onPlayerStateChange(event) {
     const playBtn = document.getElementById("playBtn"), pauseBtn = document.getElementById("pauseBtn");
     
-    // Clear any existing global watcher
     if (g_stopVideoWatcher) clearInterval(g_stopVideoWatcher);
 
     if (event.data === YT.PlayerState.PLAYING) { 
@@ -1263,7 +1231,6 @@ function onPlayerStateChange(event) {
             transcriptViewer.style.display = 'none';
         }
         
-        // Start the Auto-Stop Watcher (Global Logic)
         if (g_autoStopTimestamp !== Infinity) {
             g_stopVideoWatcher = setInterval(() => {
                 if(player && player.getCurrentTime) {
@@ -1338,25 +1305,19 @@ function adjustSpeed(amount) {
     setPlaybackSpeed();
 }
 
-// --- Result Processing and Display ---
 function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-// ============================= MAJOR CHANGE =============================
-// Replaced the entire function body to work with the new advanced worker's response object.
 function renderResultSheet(analysisResult, isReevaluation = false) {
-    g_lastAnalysisResult = analysisResult; // Store the full result from the new worker
+    g_lastAnalysisResult = analysisResult;
 
-    // The logic for re-evaluation mode remains similar, but it now uses the new data structure.
     if (isReevaluation) {
         const reevalContainer = document.getElementById('reevaluated-accuracy-container');
         if (reevalContainer) {
             reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${analysisResult.accuracy.toFixed(2)}%</div></div>`;
         }
         
-        // Use the pre-rendered HTML from the worker
         document.getElementById('editableTypedText').innerHTML = analysisResult.resultHTML;
         
-        // Rebuild the original text view from the `originalWords` array
         let originalTextHtml = analysisResult.originalWords.map((word, index) => 
             `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
         ).join(' ');
@@ -1370,15 +1331,12 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 
         const { mistakeCounters, halfBucketCount, totalWordsP1, totalWordsP2, percentageDiff, accuracy } = analysisResult;
         
-        // Calculate WPM on the main thread as the worker doesn't know about time.
         const timeTakenMinutes = (transcriptionTimerTotalTime - timeLeft) / 60;
         const wpm = timeTakenMinutes > 0 ? (totalWordsP2 / timeTakenMinutes).toFixed(2) : "0.00";
-        analysisResult.wpm = wpm; // Add it to the result object for saving
+        analysisResult.wpm = wpm;
 
-        // Calculate total full mistakes for display
         const fullMistakesCount = (mistakeCounters.addition || 0) + (mistakeCounters.omission || 0);
 
-        // Rebuild the original text view from the `originalWords` array
         let originalTextHtml = analysisResult.originalWords.map((word, index) => 
             `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
         ).join(' ');
@@ -1446,13 +1404,9 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
         initializeResultInteractivity();
     }
 }
-// ========================== END MAJOR CHANGE ============================
 
-// ============================= MAJOR CHANGE =============================
-// Replaced the entire function body to use the new worker and its required data.
-// UPDATED: Now strictly crops both Original and Typed texts to match target words!
+// ============================= BUG FIX: SMART CROP =============================
 function submitTranscription() {
-    // 1. Reset AI Cache
     aiMistakesCache = null; 
 
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
@@ -1476,17 +1430,60 @@ function submitTranscription() {
         if (g_selectedTarget !== "full") {
             let targetWords = parseInt(g_selectedTarget);
             
-            // Strictly crop Original Text to exact target words
             let orgWordsArray = originalText.trim().split(/\s+/).filter(Boolean);
-            if (targetWords < orgWordsArray.length) {
-                textForAnalysis = orgWordsArray.slice(0, targetWords).join(" ");
-            }
-            
-            // Strictly crop User Typed Text to exact target words
-            // This ensures extra words are ignored and not counted as mistakes
             let userWordsArray = typedText.trim().split(/\s+/).filter(Boolean);
-            if (targetWords < userWordsArray.length) {
-                typedTextForAnalysis = userWordsArray.slice(0, targetWords).join(" ");
+            
+            if (targetWords < orgWordsArray.length) {
+                // Strictly crop Original Text to exact target words
+                let targetOrgWords = orgWordsArray.slice(0, targetWords);
+                textForAnalysis = targetOrgWords.join(" ");
+                
+                // --- Smart Crop User Text using DP Alignment ---
+                // This guarantees we find exactly where the original 200th word ends in your typed text
+                const n = targetOrgWords.length;
+                const m = userWordsArray.length;
+                
+                if (m > 0 && n > 0) {
+                    let dp = [];
+                    for (let i = 0; i <= n; i++) {
+                        dp[i] = new Int32Array(m + 1);
+                        dp[i][0] = i; 
+                    }
+                    for (let j = 0; j <= m; j++) {
+                        dp[0][j] = j; 
+                    }
+
+                    for (let i = 1; i <= n; i++) {
+                        let oWord = targetOrgWords[i - 1].toLowerCase().replace(/[^a-z0-9]/g, '');
+                        for (let j = 1; j <= m; j++) {
+                            let uWord = userWordsArray[j - 1].toLowerCase().replace(/[^a-z0-9]/g, '');
+                            if (oWord === uWord && oWord !== '') {
+                                dp[i][j] = dp[i - 1][j - 1];
+                            } else {
+                                dp[i][j] = 1 + Math.min(
+                                    dp[i - 1][j - 1], // substitution
+                                    dp[i - 1][j],     // omission
+                                    dp[i][j - 1]      // addition
+                                );
+                            }
+                        }
+                    }
+
+                    let minCost = Infinity;
+                    let bestJ = m;
+
+                    // Find where the 200th original word ends inside the user's text
+                    // `<= minCost` drops any trailing unneeded words that were typed ahead
+                    for (let j = 0; j <= m; j++) {
+                        if (dp[n][j] <= minCost) {
+                            minCost = dp[n][j];
+                            bestJ = j;
+                        }
+                    }
+                    typedTextForAnalysis = userWordsArray.slice(0, bestJ).join(" ");
+                } else {
+                    typedTextForAnalysis = typedText;
+                }
             }
         }
 
@@ -1494,18 +1491,15 @@ function submitTranscription() {
 
         document.getElementById('fullPageLoader').style.display = 'flex';
 
-        // 1. Get the configuration for the new worker
         const config = getCurrentConfigForWorker();
         
-        // 2. Post the new data structure to the worker
         analysisWorker.postMessage({
             originalText: textForAnalysis,
             userText: g_lastTypedText,
-            config: config, // Send the config object
-            synonymData: g_synonymData // Send the loaded synonym data
+            config: config, 
+            synonymData: g_synonymData 
         });
 
-        // 3. Update the onmessage handler to process the new result object
         analysisWorker.onmessage = function(event) {
             const analysisResult = event.data;
             document.getElementById('fullPageLoader').style.display = 'none';
@@ -1514,7 +1508,6 @@ function submitTranscription() {
             renderResultSheet(analysisResult, false);
 
             saveProgressToLocalStorage(analysisResult);
-            // Pass strictly the cropped texts so evaluation matches what is saved
             saveAttemptHybrid(textForAnalysis, g_lastTypedText, analysisResult);
 
             resetTimer();
@@ -1534,15 +1527,13 @@ function submitTranscription() {
         goHome();
     }
 }
-// ========================== END MAJOR CHANGE ============================
+// ========================== END BUG FIX ============================
 
-// --- Data Saving and Progress ---
 function saveProgressToLocalStorage(resultData) {
     if (!candidateId) return;
     const key = `${g_vol}-${g_tran}`;
     const progressData = JSON.parse(localStorage.getItem(`kcProgress_${candidateId}`) || '{}');
 
-    // Use the accuracy from the new result object
     const newScore = {
         accuracy: parseFloat(resultData.accuracy),
         wpm: parseFloat(resultData.wpm),
@@ -1674,7 +1665,6 @@ async function sendLightweightStatsToFirebase(analysisResult) {
     catch (e) { console.error("Firebase save failed:", e); }
 }
 
-// --- Event Listeners and Interactivity ---
 function initializeEventListeners() {
     document.getElementById('passage-grid').addEventListener('click', (e) => {
         const button = e.target.closest('.take-test-btn');
@@ -1714,8 +1704,6 @@ function initializeResultInteractivity() {
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
 
     initializeInteractiveLegend();
-    
-    // Add AI listeners
     initializeAiClickListeners();
 }
 
@@ -1725,8 +1713,6 @@ function openTranscriptModal() {
     if(player && player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
 }
 
-// ============================= MAJOR CHANGE =============================
-// Rewrote this function to use the new worker and data structures.
 function toggleReevaluateMode() {
     isReevaluateModeActive = !isReevaluateModeActive;
     const resultsView = document.getElementById('results-view');
@@ -1740,7 +1726,6 @@ function toggleReevaluateMode() {
         toggleBtn.style.backgroundColor = 'var(--accent-purple)'; 
         toggleBtn.style.color = 'white';
         
-        // Populate edit boxes with clean text from the last result
         typedTextP.innerHTML = g_lastAnalysisResult.userWords.join(' ');
         originalTextP.innerHTML = g_lastAnalysisResult.originalWords.join(' ');
         typedTextP.contentEditable = true; 
@@ -1761,13 +1746,12 @@ function toggleReevaluateMode() {
 
         if (!correctedOriginalText) {
             alert("The original text cannot be empty for re-evaluation.");
-            renderResultSheet(g_lastAnalysisResult, true); // Re-render with old data
+            renderResultSheet(g_lastAnalysisResult, true); 
             return;
         }
         
         document.getElementById('fullPageLoader').style.display = 'flex';
 
-        // Use the same logic as the main submission to call the worker
         const config = getCurrentConfigForWorker();
         analysisWorker.postMessage({
             originalText: correctedOriginalText,
@@ -1790,9 +1774,7 @@ function toggleReevaluateMode() {
         };
     }
 }
-// ========================== END MAJOR CHANGE ============================
 
-// --- Error Reporting ---
 function validateReportForm() {
     const errorType = document.getElementById('errorTypeSelect').value;
     const otherText = document.getElementById('otherErrorText').value.trim();
@@ -1826,7 +1808,6 @@ async function submitErrorReport() {
     }
 }
 
-// --- Utility Functions ---
 function debounce(func, delay) { let timeout; return function (...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
 function showErrorModal(title, message) { document.getElementById('error-title').textContent = title; document.getElementById('error-message').textContent = message; document.getElementById('error-modal').classList.add('visible'); }
 
@@ -1955,11 +1936,6 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-// ==========================================
-// 🧠 AI INTEGRATION MODULE (Smart Caching)
-// ==========================================
-
-// PASTE YOUR GOOGLE SCRIPT URL HERE ↓
 const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw3pJIzS70de9tPcOlB53rHwjMzD9rficgN951XF0LptzZigJ5ngRNY2FgIv2PXmmE/exec"; 
 
 let aiMistakesCache = null; 
