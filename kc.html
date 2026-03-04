@@ -1631,7 +1631,7 @@ async function triggerAiAnalysis(original, typed, type, sentence) {
             prompt = `You are a stenography instructor. I typed "${typed}" instead of the correct word "${original}" in the following sentence: "${sentence}". Briefly explain this mistake. Could I have avoided this by looking at sentence context or grammar rules? Guide me simply, as if teaching a student.`;
         }
 
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbzw3pJIzS70de9tPcOlB53rHwjMzD9rficgN951XF0LptzZigJ5ngRNY2FgIv2PXmmE/exec")) {
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbyMQRbwQid5a9d8oxIBSoniigEzmLMuFFTHzNXDDYvpVpj2fOqC48wqfTzNYwKpDYdg/exec")) {
             throw new Error("Please replace 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' with your actual Google Script Web App URL.");
         }
 
@@ -1665,3 +1665,4 @@ async function triggerAiAnalysis(original, typed, type, sentence) {
 </script>
 </body>
 </html>
+
