@@ -1444,7 +1444,7 @@ function submitTranscription() {
                 const m = userWordsArray.length;
                 
                 if (m > 0 && n > 0) {
-                    let dp = [];
+                    let dp =[];
                     for (let i = 0; i <= n; i++) {
                         dp[i] = new Int32Array(m + 1);
                         dp[i][0] = i; 
@@ -1936,113 +1936,149 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw3pJIzS70de9tPcOlB53rHwjMzD9rficgN951XF0LptzZigJ5ngRNY2FgIv2PXmmE/exec"; 
-
+// -------------------------------------------------------------
+// AI INTEGRATION CODE STARTS HERE
+// -------------------------------------------------------------
+const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE"; 
 let aiMistakesCache = null; 
 let isAiFetching = false;
 
-// 1. Initialize Listeners (We will call this from initializeResultInteractivity)
+// Tool 1: Get Exact Sentence Context
+function extractSentenceWithContext(text, wordIndex) {
+    const abbrevs =['hon.', 'etc.', 'mr.', 'mrs.', 'dr.', 'sh.', 'no.', 'sr.', 'jr.', 'prof.'];
+    const words = (text || '').split(/\s+/);
+    let sentenceStart = 0, sentenceEnd = words.length - 1;
+    for (let i = wordIndex; i >= 0; i--) {
+        const w = (words[i] || '').toLowerCase();
+        if (w.endsWith('.') && !abbrevs.includes(w)) { sentenceStart = i + 1; break; }
+    }
+    for (let i = wordIndex; i < words.length; i++) {
+        const w = (words[i] || '').toLowerCase();
+        if (w.endsWith('.') && !abbrevs.includes(w)) { sentenceEnd = i; break; }
+    }
+    return words.slice(sentenceStart, sentenceEnd + 1).join(' ').replace(/\s+([.,])/g, '$1');
+}
+
+// Tool 1: AI Click Listener 
 function initializeAiClickListeners() {
     const columns = document.getElementById('comparisonColumns');
     if (!columns) return;
 
     columns.addEventListener('click', (e) => {
-        // CHANGED: Only trigger if the clicked element is the .ai-icon
         const icon = e.target.closest('.ai-icon');
         if (!icon) return;
 
-        // Get the parent highlight wrapper to extract data
         const highlight = icon.closest('.highlight');
         if (!highlight) return;
 
         e.stopPropagation(); 
         
-        // Get words and type from data attributes
-        const type = highlight.dataset.mistakeType;
+        const type = highlight.dataset.mistakeType || '';
         
-        // Clean up the text (remove the icon text itself)
         const clone = highlight.cloneNode(true);
-        if (clone.querySelector('.ai-icon')) {
-            clone.querySelector('.ai-icon').remove();
-        }
-        const typedWord = clone.innerText.split(' ')[0].replace(/[^\w\s-]/g, '').trim();
+        if (clone.querySelector('.ai-icon')) clone.querySelector('.ai-icon').remove();
+        const typedWord = clone.innerText.split(' ')[0].replace(/[^\w\s-]/g, '').trim() || '(Missing)';
 
-        // Get Original Word logic
-        let originalWord = "unknown";
+        let originalWord = highlight.getAttribute('data-correct') || "unknown";
         
-        // Data attributes on the highlight span are the most reliable source now (added in worker)
-        if (highlight.hasAttribute('data-correct')) {
-            originalWord = highlight.getAttribute('data-correct');
-        } else {
-            // Fallback to index lookup
-            const wordWrapper = highlight.closest('.word-wrapper');
-            if (wordWrapper) {
-                const index = wordWrapper.dataset.index;
+        // Exact sentence context calculation
+        const wordWrapper = highlight.closest('.word-wrapper');
+        let sentence = "Sentence context unavailable.";
+        if (wordWrapper) {
+            const index = parseInt(wordWrapper.dataset.index, 10);
+            sentence = extractSentenceWithContext(originalText, index);
+            
+            if (!highlight.hasAttribute('data-correct')) {
                 const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
                 if (originalWordEl) originalWord = originalWordEl.innerText.replace(/[^\w\s-]/g, '').trim();
             }
         }
 
-        triggerAiAnalysis(originalWord, typedWord, type);
+        triggerAiAnalysis(originalWord, typedWord, type, sentence);
     });
 }
 
-// 2. Trigger Analysis
-async function triggerAiAnalysis(original, typed, type) {
+// Format the AI response (Markdown -> HTML)
+function formatAIResponseBeautifully(text) {
+    let safe = (text || '').replace(/\*+/g, '');
+    safe = safe.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    safe = safe.replace(/(^|\n)([A-Z][A-Za-z \-]{3,}:)/g, '<div class="ai-heading" style="color:#4f46e5; font-weight:bold; margin-top:10px;">$2</div>');
+    safe = safe.replace(/(^|\n)(\d+\.)/g, '<div class="ai-point" style="font-weight:bold; margin-top:5px;">$2</div>');
+    safe = safe.replace(/\n+/g, '<br>');
+    return `<div class="ai-content">${safe}</div>`;
+}
+
+// Display Result in Modal
+function renderAiResult(explanation, orig, typed) {
+    const content = document.getElementById('aiModalContent');
+    const formattedExplanation = formatAIResponseBeautifully(explanation);
+    content.innerHTML = `
+        <div class="ai-mistake-context">
+            Comparing: <b>${escapeHtml(orig)}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${escapeHtml(typed)}</b> <span style="color:#dc2626">(Your Typo)</span>
+        </div>
+        <div>
+            <span class="ai-rule-badge">AI Explanation</span>
+            <div class="ai-explanation-text" style="margin-top:10px;">${formattedExplanation}</div>
+        </div>
+    `;
+}
+
+// Connect to Updated Backend API
+async function triggerAiAnalysis(original, typed, type, sentence) {
     const modal = document.getElementById('aiModal');
     const content = document.getElementById('aiModalContent');
     const loader = document.getElementById('aiLoadingState');
     
     modal.classList.add('visible');
     
-    // Create cache key: "Original_Typed"
-    const cacheKey = `${original}_${typed}`;
+    // Hash map cache key
+    const cacheKey = `${original}_${typed}_${sentence}`;
     
-    // A. Check Cache (Instant)
     if (aiMistakesCache && aiMistakesCache[cacheKey]) {
         renderAiResult(aiMistakesCache[cacheKey], original, typed);
         return;
     }
 
-    // B. Check if already loading
     if (isAiFetching) {
         content.style.display = 'none';
         loader.style.display = 'block';
         return;
     }
 
-    // C. Fetch from Backend (Batch)
     isAiFetching = true;
     content.style.display = 'none';
     loader.style.display = 'block';
 
     try {
-        const mistakesList = prepareMistakesList();
-        
-        if (mistakesList.length === 0) {
-            throw new Error("No complex mistakes found to analyze.");
+        // Build the precise prompt you requested
+        let prompt = "";
+        if (type === "capitalization") {
+            const firstChar = original.charAt(0);
+            const capOrLow = (firstChar === firstChar.toUpperCase() && /[A-Z]/.test(firstChar)) ? 'capitalize' : 'lowercase';
+            prompt = `I was typing a transcription and I came to know that I need to ${capOrLow} "${original}" in the sentence "${sentence}". Tell me why should I do this as per the given sentence in this context. Please also provide some similar examples with explanation.`;
+        } 
+        else if (type === "punctuation") {
+            prompt = `There is a punctuation or grammatical error regarding "${original}" and "${typed}" in the sentence: "${sentence}". Explain the mistake clearly, why the original format is correct, and how to avoid it. Provide similar examples.`;
+        }
+        else {
+            // General prompt
+            prompt = `Analyse my shorthand transcription mistake. The correct text has "${original}" but I typed "${typed}" in the sentence: "${sentence}". Tell me whether it could have been corrected at the typing stage by using grammar rules, sentence sense, or nearby words, even if the shorthand outline was written wrongly or read incorrectly. Explain clearly how I could have avoided it. Guide me in a positive, motivating way, as if teaching a child.`;
         }
 
-        // Call Google Apps Script
+        // Hit the updated Google Script Backend
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ mistakes: mistakesList })
+            body: JSON.stringify({ prompt: prompt }) // Only sending the prompt text!
         });
 
         const data = await response.json();
         
         if (!data.success) throw new Error("AI Backend Error: " + (data.error || "Unknown"));
 
-        // Parse JSON from Gemini
-        const cleanJson = data.reply.replace(/```json/g, '').replace(/```/g, '').trim();
-        aiMistakesCache = JSON.parse(cleanJson);
+        if (!aiMistakesCache) aiMistakesCache = {};
+        aiMistakesCache[cacheKey] = data.reply; // Cache the response so it's instant next time
 
-        // Show result
-        if (aiMistakesCache[cacheKey]) {
-            renderAiResult(aiMistakesCache[cacheKey], original, typed);
-        } else {
-            renderAiResult("General error detected. Please review spelling and capitalization rules.", original, typed);
-        }
+        renderAiResult(data.reply, original, typed);
 
     } catch (error) {
         console.error(error);
@@ -2053,34 +2089,6 @@ async function triggerAiAnalysis(original, typed, type) {
         loader.style.display = 'none';
         content.style.display = 'block';
     }
-}
-
-// 3. Helper: Convert worker mistakes to list
-function prepareMistakesList() {
-    if (!g_lastAnalysisResult || !g_lastAnalysisResult.studentMistakes) return [];
-
-    const sm = g_lastAnalysisResult.studentMistakes;
-    const list = [];
-
-    sm.spelling.forEach(m => list.push({ Original: m.correct, Typed: m.wrong }));
-    sm.capitalisation.forEach(m => list.push({ Original: m.correct, Typed: m.wrong }));
-    // We send original_typed keys to match what the backend expects
-    
-    return list;
-}
-
-// 4. Helper: Render HTML
-function renderAiResult(explanation, orig, typed) {
-    const content = document.getElementById('aiModalContent');
-    content.innerHTML = `
-        <div class="ai-mistake-context">
-            Comparing: <b>${orig}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typed}</b> <span style="color:#dc2626">(Your Typo)</span>
-        </div>
-        <div>
-            <span class="ai-rule-badge">AI Explanation</span>
-            <p class="ai-explanation-text">${explanation}</p>
-        </div>
-    `;
 }
 
 </script>
