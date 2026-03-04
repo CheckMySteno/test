@@ -744,26 +744,29 @@
 
 <!-- AI Analysis Modal -->
 <div id="aiModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 600px; text-align: left; border-radius: 12px; font-family: 'Inter', sans-serif;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
+    <div class="modal-content" style="max-width: 600px; width: 95%; max-height: 85vh; display: flex; flex-direction: column; text-align: left; border-radius: 12px; font-family: 'Inter', sans-serif; padding: 25px;">
+        
+        <!-- Fixed Header -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px; flex-shrink: 0;">
             <h3 style="margin:0; font-size:1.1rem; color:#4f46e5; display:flex; align-items:center; gap:8px;">
                 <span>🧠</span> AI Teacher Analysis
             </h3>
-            <button class="modal-close-btn" onclick="document.getElementById('aiModal').classList.remove('visible')" style="background:none; color:#666; font-size:1.2rem; padding:0;">✕</button>
+            <button class="modal-close-btn" onclick="document.getElementById('aiModal').classList.remove('visible')" style="background:none; color:#666; font-size:1.4rem; padding:0; line-height: 1; border: none; cursor: pointer;">✕</button>
         </div>
         
-        <div id="aiModalContent" style="line-height:1.6; color:#334155; font-size:0.95rem;">
+        <!-- Scrollable Content Area -->
+        <div id="aiModalContent" style="overflow-y: auto; flex-grow: 1; line-height:1.6; color:#334155; font-size:0.95rem; padding-right: 5px;">
             <!-- AI Content Goes Here -->
         </div>
 
-        <div id="aiLoadingState" style="display:none; text-align:center; padding:30px;">
+        <!-- Loading State -->
+        <div id="aiLoadingState" style="display:none; text-align:center; padding:30px; flex-shrink: 0;">
             <div class="spinner" style="margin:0 auto 15px auto; border-top-color:#4f46e5;"></div>
             <p style="color:#64748b; font-weight:500;">Analyzing your dictation context...</p>
-            <p style="font-size:0.8rem; color:#94a3b8;">This will take a few seconds, then other clicks will be instant.</p>
         </div>
+
     </div>
 </div>
-
 <!-- Link to your new JavaScript files -->
 <script>
 // --- Dexie.js Local Database Setup ---
@@ -1939,14 +1942,18 @@ function capitalizeFirstLetter(string) {
 // -------------------------------------------------------------
 // AI INTEGRATION CODE STARTS HERE
 // -------------------------------------------------------------
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzw3pJIzS70de9tPcOlB53rHwjMzD9rficgN951XF0LptzZigJ5ngRNY2FgIv2PXmmE/exec"; 
-let aiMistakesCache = null; 
-let isAiFetching = false;
 
-// Tool 1: Get Exact Sentence Context
+// Tool 1: Get Exact Sentence Context Safely
 function extractSentenceWithContext(text, wordIndex) {
+    if (!text) return "";
     const abbrevs =['hon.', 'etc.', 'mr.', 'mrs.', 'dr.', 'sh.', 'no.', 'sr.', 'jr.', 'prof.'];
-    const words = (text || '').split(/\s+/);
+    const words = text.trim().split(/\s+/);
+    
+    // Safety check if index is invalid
+    if (isNaN(wordIndex) || wordIndex < 0 || wordIndex >= words.length) {
+        return ""; 
+    }
+
     let sentenceStart = 0, sentenceEnd = words.length - 1;
     for (let i = wordIndex; i >= 0; i--) {
         const w = (words[i] || '').toLowerCase();
@@ -1956,42 +1963,74 @@ function extractSentenceWithContext(text, wordIndex) {
         const w = (words[i] || '').toLowerCase();
         if (w.endsWith('.') && !abbrevs.includes(w)) { sentenceEnd = i; break; }
     }
+    
+    if (sentenceStart > wordIndex) sentenceStart = 0;
     return words.slice(sentenceStart, sentenceEnd + 1).join(' ').replace(/\s+([.,])/g, '$1');
 }
 
-// Tool 1: AI Click Listener 
+// Fallback: If index is missing, simply search the original text for the word
+function fallbackExtractSentence(text, word) {
+    if (!text || !word) return "Sentence context unavailable.";
+    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+    for (let s of sentences) {
+        if (s.toLowerCase().includes(word.toLowerCase())) {
+            return s.trim();
+        }
+    }
+    return text.substring(0, 150) + "..."; 
+}
+
+// Tool 2: Smarter AI Click Listener 
 function initializeAiClickListeners() {
     const columns = document.getElementById('comparisonColumns');
     if (!columns) return;
 
     columns.addEventListener('click', (e) => {
-        const icon = e.target.closest('.ai-icon');
+        // Catch clicks on any info icon variant
+        const icon = e.target.closest('.ai-icon') || e.target.closest('.cap-info-icon') || e.target.closest('.punc-info-icon');
         if (!icon) return;
-
-        const highlight = icon.closest('.highlight');
-        if (!highlight) return;
-
         e.stopPropagation(); 
-        
-        const type = highlight.dataset.mistakeType || '';
-        
-        const clone = highlight.cloneNode(true);
-        if (clone.querySelector('.ai-icon')) clone.querySelector('.ai-icon').remove();
-        const typedWord = clone.innerText.split(' ')[0].replace(/[^\w\s-]/g, '').trim() || '(Missing)';
 
-        let originalWord = highlight.getAttribute('data-correct') || "unknown";
+        // Find the parent mistake element (.mis is usually generated by the worker)
+        const mistakeSpan = icon.closest('.mis') || icon.closest('.highlight') || icon.parentElement;
+        if (!mistakeSpan) return;
+
+        // 1. Determine Mistake Type
+        let type = "general";
+        if (mistakeSpan.classList.contains('capitalization')) type = "capitalization";
+        else if (mistakeSpan.classList.contains('punctuation')) type = "punctuation";
+        else if (mistakeSpan.classList.contains('spelling')) type = "spelling";
+
+        // 2. Extract Original Word (Check all possible attributes your worker might use)
+        let originalWord = icon.getAttribute('data-word') || mistakeSpan.getAttribute('data-correct') || icon.getAttribute('data-oi');
+        if (!originalWord) {
+            let clone = mistakeSpan.cloneNode(true);
+            const sTag = clone.querySelector('s');
+            if (sTag) sTag.remove(); // Remove the crossed out wrong word
+            const iconTag = clone.querySelector('.ai-icon') || clone.querySelector('.cap-info-icon') || clone.querySelector('.punc-info-icon');
+            if (iconTag) iconTag.remove(); // Remove icon text
+            originalWord = clone.innerText.trim();
+        }
+
+        // 3. Extract Typed Word
+        let typedWord = mistakeSpan.getAttribute('data-wrong') || icon.getAttribute('data-ui');
+        if (!typedWord) {
+            const sTag = mistakeSpan.querySelector('s');
+            typedWord = sTag ? sTag.innerText.trim() : "(Missing)";
+        }
+
+        // 4. Extract Exact Sentence Context safely
+        let sentence = "";
+        let indexStr = icon.getAttribute('data-index') || mistakeSpan.getAttribute('data-oi');
+        let index = parseInt(indexStr, 10);
         
-        // Exact sentence context calculation
-        const wordWrapper = highlight.closest('.word-wrapper');
-        let sentence = "Sentence context unavailable.";
-        if (wordWrapper) {
-            const index = parseInt(wordWrapper.dataset.index, 10);
+        if (!isNaN(index)) {
             sentence = extractSentenceWithContext(originalText, index);
-            
-            if (!highlight.hasAttribute('data-correct')) {
-                const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
-                if (originalWordEl) originalWord = originalWordEl.innerText.replace(/[^\w\s-]/g, '').trim();
-            }
+        }
+        
+        // If index failed, fallback to searching the word in the original text
+        if (!sentence) {
+            sentence = fallbackExtractSentence(originalText, originalWord);
         }
 
         triggerAiAnalysis(originalWord, typedWord, type, sentence);
@@ -2050,48 +2089,56 @@ async function triggerAiAnalysis(original, typed, type, sentence) {
     loader.style.display = 'block';
 
     try {
-        // Build the precise prompt you requested
+        // Precise prompts so the AI acts exactly like a teacher
         let prompt = "";
         if (type === "capitalization") {
-            const firstChar = original.charAt(0);
-            const capOrLow = (firstChar === firstChar.toUpperCase() && /[A-Z]/.test(firstChar)) ? 'capitalize' : 'lowercase';
-            prompt = `I was typing a transcription and I came to know that I need to ${capOrLow} "${original}" in the sentence "${sentence}". Tell me why should I do this as per the given sentence in this context. Please also provide some similar examples with explanation.`;
+            prompt = `You are a stenography instructor. I typed "${typed}" instead of the correct word "${original}" in the following sentence: "${sentence}". Explain briefly and simply why "${original}" MUST have its specific capitalization in this sentence context. Provide 1 or 2 short examples.`;
         } 
         else if (type === "punctuation") {
-            prompt = `There is a punctuation or grammatical error regarding "${original}" and "${typed}" in the sentence: "${sentence}". Explain the mistake clearly, why the original format is correct, and how to avoid it. Provide similar examples.`;
+            prompt = `You are a stenography instructor. I made a punctuation error regarding "${original}" and "${typed}" in the following sentence: "${sentence}". Explain briefly and simply why the original punctuation is correct according to grammar rules, and how to avoid this mistake. Provide 1 or 2 short examples.`;
         }
         else {
-            // General prompt
-            prompt = `Analyse my shorthand transcription mistake. The correct text has "${original}" but I typed "${typed}" in the sentence: "${sentence}". Tell me whether it could have been corrected at the typing stage by using grammar rules, sentence sense, or nearby words, even if the shorthand outline was written wrongly or read incorrectly. Explain clearly how I could have avoided it. Guide me in a positive, motivating way, as if teaching a child.`;
+            prompt = `You are a stenography instructor. I typed "${typed}" instead of the correct word "${original}" in the following sentence: "${sentence}". Briefly explain this mistake. Could I have avoided this by looking at sentence context or grammar rules? Guide me simply, as if teaching a student.`;
         }
 
-        // Hit the updated Google Script Backend
+        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbzw3pJIzS70de9tPcOlB53rHwjMzD9rficgN951XF0LptzZigJ5ngRNY2FgIv2PXmmE/exec")) {
+            throw new Error("Please replace 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' with your actual Google Script Web App URL.");
+        }
+
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ prompt: prompt }) // Only sending the prompt text!
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ prompt: prompt })
         });
 
-        const data = await response.json();
+        const responseText = await response.text();
+        
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (err) {
+            throw new Error("Google Apps Script returned an HTML page. This means your script permissions are wrong. Please deploy it as a NEW version and set 'Who has access' strictly to 'Anyone'.");
+        }
         
         if (!data.success) throw new Error("AI Backend Error: " + (data.error || "Unknown"));
 
         if (!aiMistakesCache) aiMistakesCache = {};
-        aiMistakesCache[cacheKey] = data.reply; // Cache the response so it's instant next time
+        aiMistakesCache[cacheKey] = data.reply; 
 
         renderAiResult(data.reply, original, typed);
 
     } catch (error) {
         console.error(error);
         content.style.display = 'block';
-        content.innerHTML = `<p style="color:#ef4444;">Could not analyze. Reason: ${error.message}</p>`;
+        content.innerHTML = `<p style="color:#ef4444; font-weight: 600;">Could not analyze.</p><p style="color:#ef4444; font-size:0.9rem;">Reason: ${error.message}</p>`;
     } finally {
         isAiFetching = false;
         loader.style.display = 'none';
-        content.style.display = 'block';
     }
 }
 
 </script>
 </body>
 </html>
+
 
