@@ -12,11 +12,13 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
+
 <!-- Google Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
 
 <style>
     /* --- 1. Global Styles --- */
@@ -397,8 +399,9 @@
         background-color: #4338ca;
     }
 
+    /* Ensure the parent span allows the icon to sit nicely */
     .highlight {
-        display: inline; 
+        display: inline; /* Keep default text flow */
     }
 </style>
 </head>
@@ -456,6 +459,7 @@
         <div class="practice-station">
             <div id="player-loader" class="loader"><div class="spinner"></div></div>
             
+            <!-- Modern Header -->
             <div class="player-header">
                 <div class="player-info">
                     <h2 class="player-title">Dictation Player</h2>
@@ -468,6 +472,7 @@
             </div>
 
             <div class="player-body">
+                <!-- Progress Bar -->
                 <div class="progress-container">
                     <div id="progressBar" class="progress-bar-wrapper">
                         <div id="progress-fill"></div>
@@ -478,7 +483,9 @@
                     </div>
                 </div>
 
+                <!-- Controls Cluster -->
                 <div class="controls-cluster">
+                     <!-- Volume -->
                     <div class="setting-wrapper">
                         <button class="control-btn" id="volumeBtn">
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
@@ -489,10 +496,12 @@
                         </div>
                     </div>
 
+                    <!-- Seek Back -->
                     <button class="control-btn" onclick="seekRelative(-5)">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 17l-5-5 5-5M18 17l-5-5 5-5"/></svg>
                     </button>
 
+                    <!-- Play/Pause (Big) -->
                     <button id="playBtn" class="control-btn play-btn-large" onclick="togglePlay()">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
                     </button>
@@ -500,10 +509,12 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                     </button>
 
+                    <!-- Seek Forward -->
                     <button class="control-btn" onclick="seekRelative(5)">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 17l5-5-5-5M6 17l5-5-5-5"/></svg>
                     </button>
 
+                     <!-- Speed -->
                      <div class="setting-wrapper">
                         <button class="control-btn">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
@@ -512,12 +523,14 @@
                             <span class="setting-label">Speed</span>
                             <div id="wpmSpeedDisplay">100 WPM</div>
                             <input type="range" id="wpmRange" min="60" max="160" step="5" value="100" oninput="updateSpeedDisplay(this.value)" onchange="setPlaybackSpeed()">
+                            <!-- Hidden input for compatibility -->
                             <input type="hidden" id="wpmSpeed" value="100">
                         </div>
                     </div>
                 </div>
             </div>
 
+            <!-- Configuration Area -->
             <div class="test-config-area">
                 <div style="text-align: center;">
                     <span id="estimatedTimePill">Full Passage Mode</span>
@@ -527,6 +540,7 @@
                     <div class="config-item">
                         <label>Target Words</label>
                         <select id="wordCountSelect" class="modern-select" onchange="updateAutoStopSettings()">
+                            <!-- JS Populated -->
                         </select>
                     </div>
                     <div class="config-item">
@@ -597,6 +611,7 @@
                     </tr>
                 </thead>
                 <tbody id="deep-analysis-table-body">
+                    <!-- Rows will be injected by JavaScript -->
                 </tbody>
             </table>
         </div>
@@ -636,6 +651,7 @@
             <h2 style="font-size: 1.6em;">Advanced Re-evaluation Mode</h2>
             <p style="font-size: 0.95em;">Instantly see how corrections impact your score. In this mode, you can edit both the original text and your own transcription.</p>
         </div>
+        
         <div class="pro-welcome-grid" style="padding: 20px 30px; grid-template-columns: 1fr;">
             <div class="pro-feature-box">
                 <div class="pro-feature-header">
@@ -651,6 +667,7 @@
                 </ul>
             </div>
         </div>
+
         <div class="pro-modal-footer" style="padding: 15px 30px;">
             <label>
                 <input type="checkbox" id="dontShowAgainCheckbox">
@@ -725,29 +742,29 @@
     </div>
 </div>
 
-<!-- AI Analysis Modal (UPDATED SCROLLABLE DESIGN) -->
+<!-- AI Analysis Modal -->
 <div id="aiModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 600px; width: 95%; max-height: 85vh; display: flex; flex-direction: column; text-align: left; border-radius: 12px; font-family: 'Inter', sans-serif; padding: 25px;">
-        <!-- Fixed Header -->
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px; flex-shrink: 0;">
+    <div class="modal-content" style="max-width: 600px; text-align: left; border-radius: 12px; font-family: 'Inter', sans-serif;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
             <h3 style="margin:0; font-size:1.1rem; color:#4f46e5; display:flex; align-items:center; gap:8px;">
                 <span>🧠</span> AI Teacher Analysis
             </h3>
-            <button class="modal-close-btn" onclick="document.getElementById('aiModal').classList.remove('visible')" style="background:none; color:#666; font-size:1.4rem; padding:0; line-height: 1; border: none; cursor: pointer;">✕</button>
+            <button class="modal-close-btn" onclick="document.getElementById('aiModal').classList.remove('visible')" style="background:none; color:#666; font-size:1.2rem; padding:0;">✕</button>
         </div>
-        <!-- Scrollable Content Area -->
-        <div id="aiModalContent" style="overflow-y: auto; flex-grow: 1; line-height:1.6; color:#334155; font-size:0.95rem; padding-right: 5px;">
+        
+        <div id="aiModalContent" style="line-height:1.6; color:#334155; font-size:0.95rem;">
             <!-- AI Content Goes Here -->
         </div>
-        <!-- Loading State -->
-        <div id="aiLoadingState" style="display:none; text-align:center; padding:30px; flex-shrink: 0;">
+
+        <div id="aiLoadingState" style="display:none; text-align:center; padding:30px;">
             <div class="spinner" style="margin:0 auto 15px auto; border-top-color:#4f46e5;"></div>
             <p style="color:#64748b; font-weight:500;">Analyzing your dictation context...</p>
+            <p style="font-size:0.8rem; color:#94a3b8;">This will take a few seconds, then other clicks will be instant.</p>
         </div>
     </div>
 </div>
 
-<!-- Scripts -->
+<!-- Link to your new JavaScript files -->
 <script>
 // --- Dexie.js Local Database Setup ---
 const localDb = new Dexie("CheckMyStenoDB");
@@ -766,7 +783,12 @@ const firebaseConfig = {
   messagingSenderId: "719325115943",
   appId: "1:719325115943:web:0dd50a67978816d42a8002"
 };
-try { firebase.initializeApp(firebaseConfig); } catch (e) { console.error(e); }
+// Initialize Firebase
+try {
+    firebase.initializeApp(firebaseConfig);
+} catch (e) {
+    console.error("Firebase initialization failed. Please provide valid credentials.", e);
+}
 const db = firebase.firestore ? firebase.firestore() : null;
 
 // --- Global State Variables ---
@@ -786,6 +808,7 @@ let g_synonymData =[];
 
 document.addEventListener("DOMContentLoaded", initializePracticeKC);
 
+// --- Anti-Cheating & Setup ---
 function setupAntiInspection() {
     document.addEventListener('keydown', (e) => {
         if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) || (e.ctrlKey && e.key === 'u')) {
@@ -793,14 +816,18 @@ function setupAntiInspection() {
         }
     });
     const typingBox = document.getElementById('typingBox');
-    if (typingBox) typingBox.addEventListener('contextmenu', (e) => e.stopPropagation());
+    if (typingBox) {
+        typingBox.addEventListener('contextmenu', (e) => e.stopPropagation());
+    }
 }
 
 function setLogoSource() {
+    const defaultLogo = ""; 
     const logoImg = document.getElementById('ssc-logo-img');
-    if (logoImg) logoImg.src = "";
+    if (logoImg) logoImg.src = defaultLogo || "";
 }
 
+// --- Initialization ---
 async function initializePracticeKC() {
     const accessCode = localStorage.getItem("currentAccessCode");
     if (!accessCode) {
@@ -810,12 +837,26 @@ async function initializePracticeKC() {
     }
     candidateId = accessCode;
     document.getElementById('candidate-name-display').textContent = candidateId.toUpperCase();
-    if (db) attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
+    
+    // Safely initialize Firebase reference
+    if (db) {
+        attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
+    } else {
+        console.warn("Firestore is not available. Progress will not be saved to the cloud.");
+    }
 
-    setupAntiInspection(); setupProgressBar(); setupExtraControls(); setLogoSource(); restoreSession();
+    setupAntiInspection();
+    setupProgressBar();
+    setupExtraControls();
+    setLogoSource();
+    restoreSession();
 
-    if (window.Worker) analysisWorker = new Worker('worker.js');
-    else alert("Browser does not support Web Workers.");
+    // --- WORKER INITIALIZATION ---
+    if (window.Worker) {
+        analysisWorker = new Worker('worker.js');
+    } else {
+        alert("Your browser does not support Web Workers. The application may be slow.");
+    }
     
     await loadSynonyms();
     await generateAllPassageData();
@@ -824,31 +865,54 @@ async function initializePracticeKC() {
     renderQuickResume();
 }
 
+/**
+ * Fetches synonym data from the server and stores it globally.
+ */
 async function loadSynonyms() {
     try {
         const response = await fetch('/config/flex_synonyms.php');
-        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
         g_synonymData = Array.isArray(data) ? data :[];
+        console.log(`Synonym engine loaded with ${g_synonymData.length} groups.`);
     } catch (error) {
-        g_synonymData =[]; 
+        console.error("Could not load synonym data. The checker will be less accurate.", error);
+        g_synonymData =[]; // Ensure it's an empty array on failure
     }
 }
 
 function getCurrentConfigForWorker() {
     const includeCommas = document.getElementById("includeComma")?.checked;
-    return {
-      mode: 'exam', addition: 1, omission: 1, spelling: 0.5, capitalization: 0.5,
-      punctuation: { mode: includeCommas ? 'all' : 'fullstop-only', weight: 0.5 },
+    const config = {
+      mode: 'exam',
+      addition: 1,
+      omission: 1,
+      spelling: 0.5,
+      capitalization: 0.5,
+      punctuation: { 
+          mode: includeCommas ? 'all' : 'fullstop-only', 
+          weight: 0.5 
+      },
     };
+    return config;
 }
 
+// --- Passage Data and Grid Rendering ---
 function generateAllPassageData() {
     allPassageData =[];
     let transcriptCounter = 1;
     for (let i = 1; i <= 24; i++) {
         for (let j = 1; j <= 22; j++) {
-            allPassageData.push({ id: `passage-${i}-${j}`, volume: i, transcript: transcriptCounter, transcriptNumber: transcriptCounter, volId: `vol${i}`, tranId: `t${transcriptCounter}` });
+            allPassageData.push({
+                id: `passage-${i}-${j}`,
+                volume: i,
+                transcript: transcriptCounter,
+                transcriptNumber: transcriptCounter,
+                volId: `vol${i}`,
+                tranId: `t${transcriptCounter}`
+            });
             transcriptCounter++;
         }
     }
@@ -865,7 +929,8 @@ function renderGrid() {
     const filterValue = document.getElementById('filter-select').value;
     if (filterValue !== 'all') {
         dataToRender = dataToRender.filter(passage => {
-            const hasAttempt = !!progressData[`${passage.volId}-${passage.tranId}`];
+            const key = `${passage.volId}-${passage.tranId}`;
+            const hasAttempt = !!progressData[key];
             return (filterValue === 'attempted' && hasAttempt) || (filterValue === 'not-attempted' && !hasAttempt);
         });
     }
@@ -873,8 +938,10 @@ function renderGrid() {
     const sortValue = document.getElementById('sort-select').value;
     if (sortValue !== 'default') {
         dataToRender.sort((a, b) => {
-            const scoreA = progressData[`${a.volId}-${a.tranId}`] ? progressData[`${a.volId}-${a.tranId}`].accuracy : -1;
-            const scoreB = progressData[`${b.volId}-${b.tranId}`] ? progressData[`${b.volId}-${b.tranId}`].accuracy : -1;
+            const keyA = `${a.volId}-${a.tranId}`;
+            const keyB = `${b.volId}-${b.tranId}`;
+            const scoreA = progressData[keyA] ? progressData[keyA].accuracy : -1;
+            const scoreB = progressData[keyB] ? progressData[keyB].accuracy : -1;
             if (sortValue === 'score-asc') return scoreA - scoreB;
             if (sortValue === 'score-desc') return scoreB - scoreA;
             return 0;
@@ -883,7 +950,11 @@ function renderGrid() {
 
     const searchTerm = document.getElementById('passageSearch').value.toLowerCase();
     if (searchTerm) {
-        dataToRender = dataToRender.filter(p => `vol ${p.volume} / tran ${p.transcript}`.includes(searchTerm) || `passage ${p.transcriptNumber}`.includes(searchTerm));
+        dataToRender = dataToRender.filter(p => {
+            const title = `vol ${p.volume} / tran ${p.transcript}`;
+            const passageNum = `passage ${p.transcriptNumber}`;
+            return title.includes(searchTerm) || passageNum.includes(searchTerm);
+        });
     }
 
     const fragment = document.createDocumentFragment();
@@ -894,39 +965,55 @@ function renderGrid() {
         card.dataset.volume = data.volId;
         card.dataset.transcript = data.tranId;
 
-        const attemptData = progressData[`${data.volId}-${data.tranId}`];
+        const key = `${data.volId}-${data.tranId}`;
+        const attemptData = progressData[key];
         const isAttempted = !!attemptData;
 
         card.innerHTML = `
               <div class="card-header">
                   <div class="card-title-group">
                       <span class="card-id-badge">KC / VOL ${data.volume}</span>
-                      <span class="status-badge ${isAttempted ? 'attempted' : ''}"><span class="status-dot"></span>${isAttempted ? `${attemptData.accuracy}%` : 'New'}</span>
+                      <span class="status-badge ${isAttempted ? 'attempted' : ''}">
+                        <span class="status-dot"></span>
+                        ${isAttempted ? `${attemptData.accuracy}%` : 'New'}
+                      </span>
                   </div>
                   <h3>Passage ${data.transcriptNumber}</h3>
               </div>
               <div class="card-buttons">
                   <button class="take-test-btn">${isAttempted ? 'Retake Test' : 'Start Practice'}</button>
-              </div>`;
+              </div>
+          `;
         fragment.appendChild(card);
     });
     grid.appendChild(fragment);
 }
 
+// --- Application State and View Management ---
 function saveState(state) { localStorage.setItem('stenoState', JSON.stringify(state)); }
 function clearState() { localStorage.removeItem('stenoState'); }
 
 function restoreSession() {
     const savedState = JSON.parse(localStorage.getItem('stenoState'));
-    if (!savedState) { showView('selection-view'); return; }
+    if (!savedState) {
+        showView('selection-view');
+        return;
+    }
     if (savedState.view === 'exam-view') {
-        g_vol = savedState.g_vol; g_tran = savedState.g_tran; originalText = savedState.originalText; wordCount = savedState.wordCount;
+        g_vol = savedState.g_vol;
+        g_tran = savedState.g_tran;
+        originalText = savedState.originalText;
+        wordCount = savedState.wordCount;
         showView('exam-view');
         document.documentElement.requestFullscreen().catch(err => { });
         document.getElementById('typingBox').value = savedState.typedText || '';
-        transcriptionTimerTotalTime = savedState.totalTime; timeLeft = savedState.timeLeft; timerStarted = true;
+        transcriptionTimerTotalTime = savedState.totalTime;
+        timeLeft = savedState.timeLeft;
+        timerStarted = true;
         startTimer();
-    } else { showView('selection-view'); }
+    } else {
+        showView('selection-view');
+    }
 }
 
 function showView(viewId) {
@@ -945,16 +1032,28 @@ function showView(viewId) {
     if (viewId === 'selection-view') {
         clearState();
         if (player && typeof player.stopVideo === 'function') player.stopVideo();
-        renderGrid(); renderQuickResume();
+        renderGrid();
+        renderQuickResume();
     }
 }
 
-function goHome() { if (document.fullscreenElement) document.exitFullscreen().catch(() => { }); showView('selection-view'); }
-function clearStateAndGoBack() { showView('selection-view'); }
+function goHome() {
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => { });
+    showView('selection-view');
+}
 
+function clearStateAndGoBack() {
+    showView('selection-view');
+}
+
+// --- Player and Test Logic ---
 async function loadPractice(volumeId, transcriptId) {
-    g_vol = volumeId; g_tran = transcriptId;
-    if (!g_vol || !g_tran) { showErrorModal("Passage Error", "Could not identify the passage. Please try again."); return; }
+    g_vol = volumeId;
+    g_tran = transcriptId;
+    if (!g_vol || !g_tran) {
+        showErrorModal("Passage Error", "Could not identify the passage. Please try again.");
+        return;
+    }
     document.getElementById('fullPageLoader').style.display = 'flex';
     try {
         if (!db) throw new Error("Database connection is not available.");
@@ -967,11 +1066,14 @@ async function loadPractice(volumeId, transcriptId) {
         if (!audioData || !audioData.audioUrl || typeof audioData.wordCount !== 'number') throw new Error("Audio document is missing required fields.");
         wordCount = audioData.wordCount;
 
+        // Populate transcript modal
         document.getElementById('transcriptTextBody').textContent = originalText;
+
         saveState({ view: 'player-view', g_vol, g_tran, originalText, wordCount, audioUrl: audioData.audioUrl });
 
         showView('player-view');
         setPlayerLoading(true);
+
         setupWordCountOptions();
 
         const passageData = allPassageData.find(p => p.volId === g_vol && p.tranId === g_tran);
@@ -988,25 +1090,36 @@ async function loadPractice(volumeId, transcriptId) {
 function setupWordCountOptions() {
     const select = document.getElementById('wordCountSelect');
     select.innerHTML = ''; 
-    for (let i = 200; i < wordCount; i += 200) {
+    
+    let step = 200;
+    for (let i = step; i < wordCount; i += step) {
         let option = document.createElement('option');
-        option.value = i; option.text = `${i} Words (Approx)`;
+        option.value = i;
+        option.text = `${i} Words (Approx)`;
         select.appendChild(option);
     }
+    
     let fullOption = document.createElement('option');
-    fullOption.value = "full"; fullOption.text = `Full Passage (${wordCount} Words)`;
-    fullOption.selected = true; select.appendChild(fullOption);
+    fullOption.value = "full";
+    fullOption.text = `Full Passage (${wordCount} Words)`;
+    fullOption.selected = true;
+    select.appendChild(fullOption);
+    
     updateAutoStopSettings();
 }
 
 function updateAutoStopSettings() {
     const display = document.getElementById('estimatedTimePill');
-    const val = document.getElementById('wordCountSelect').value;
+    const select = document.getElementById('wordCountSelect');
+    const val = select.value;
     g_selectedTarget = val;
 
     if (val === "full") {
         g_autoStopTimestamp = Infinity;
-        display.innerText = "Audio plays until end"; display.style.background = "#ecfdf5"; display.style.color = "#047857"; display.style.borderColor = "#a7f3d0";
+        display.innerText = "Audio plays until end";
+        display.style.background = "#ecfdf5";
+        display.style.color = "#047857";
+        display.style.borderColor = "#a7f3d0";
     } else {
         let words = parseInt(val);
         if(totalVideoDuration > 0) {
@@ -1014,16 +1127,27 @@ function updateAutoStopSettings() {
             g_autoStopTimestamp = (totalVideoDuration * ratio) + 10;
             if(g_autoStopTimestamp > totalVideoDuration) g_autoStopTimestamp = totalVideoDuration - 0.5;
         }
-        display.innerText = `Auto-Stop for ~${words} words`; display.style.background = "#fffbeb"; display.style.color = "#b45309"; display.style.borderColor = "#fcd34d";
+        
+        display.innerText = `Auto-Stop for ~${words} words`;
+        display.style.background = "#fffbeb";
+        display.style.color = "#b45309";
+        display.style.borderColor = "#fcd34d";
     }
-    if(totalVideoDuration === 0 && player && player.getDuration) totalVideoDuration = player.getDuration();
+    if(totalVideoDuration === 0 && player && player.getDuration) {
+        totalVideoDuration = player.getDuration();
+    }
 }
 
-function showInstructions() { if (player && typeof player.pauseVideo === 'function') player.pauseVideo(); document.getElementById('instructions-modal').classList.add('visible'); }
+function showInstructions() {
+    if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
+    document.getElementById('instructions-modal').classList.add('visible');
+}
 
 function startTranscriptionTest() {
     document.getElementById('instructions-modal').classList.remove('visible');
-    if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(err => console.log("Fullscreen optional"));
+    if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(err => console.log("Fullscreen optional"));
+    }
     showView('exam-view');
     transcriptionTimerTotalTime = parseInt(document.getElementById('timer-select').value) * 60;
     timeLeft = transcriptionTimerTotalTime;
@@ -1031,21 +1155,29 @@ function startTranscriptionTest() {
     document.getElementById('typingBox').value = '';
     document.getElementById('typingBox').focus();
     
-    document.getElementById('typingBox').removeEventListener('keydown', handleFirstKeydown);
-    document.getElementById('typingBox').addEventListener('keydown', handleFirstKeydown);
+    const box = document.getElementById('typingBox');
+    box.removeEventListener('keydown', handleFirstKeydown);
+    box.addEventListener('keydown', handleFirstKeydown);
 
-    saveState({ ...JSON.parse(localStorage.getItem('stenoState')), view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
+    const currentState = JSON.parse(localStorage.getItem('stenoState'));
+    saveState({ ...currentState, view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
 }
 
 function handleFirstKeydown() {
-    if (!timerStarted) { timerStarted = true; startTimer(); document.getElementById('typingBox').removeEventListener('keydown', handleFirstKeydown); }
+    if (!timerStarted) {
+        timerStarted = true;
+        startTimer();
+        document.getElementById('typingBox').removeEventListener('keydown', handleFirstKeydown);
+    }
 }
 
 function startTimer() {
     if (timer) return;
     timer = setInterval(() => {
         if (--timeLeft < 0) {
-            clearInterval(timer); alert("Time is up! Submitting automatically."); submitTranscription();
+            clearInterval(timer);
+            alert("Time is up! Submitting automatically.");
+            submitTranscription();
         } else {
             document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft);
             const currentState = JSON.parse(localStorage.getItem('stenoState'));
@@ -1054,18 +1186,32 @@ function startTimer() {
     }, 1000);
 }
 
-function resetTimer() { if (timer) clearInterval(timer); timer = null; timerStarted = false; timeLeft = transcriptionTimerTotalTime; document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft); }
+function resetTimer() {
+    if (timer) clearInterval(timer);
+    timer = null;
+    timerStarted = false;
+    timeLeft = transcriptionTimerTotalTime;
+    document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft);
+}
 
+// --- YouTube Player Controls ---
 function onYouTubeIframeAPIReady() { }
 function extractVideoID(url) { if (typeof url !== 'string') return null; const regex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/; return (url.match(regex) || [])[1] || null; }
 
 function loadVideo(url, autoPlay = false) {
     const videoId = extractVideoID(url);
     if (!videoId) { showErrorModal("Invalid URL", "Invalid YouTube URL provided: " + url); return; }
-    const onPlayerReady = (event) => { totalVideoDuration = event.target.getDuration(); setPlayerLoading(false); setPlaybackSpeed(); updateAutoStopSettings(); };
+    const onPlayerReady = (event) => {
+        totalVideoDuration = event.target.getDuration();
+        setPlayerLoading(false);
+        setPlaybackSpeed();
+        updateAutoStopSettings();
+    };
     if (player && typeof player.loadVideoById === 'function' && player.getIframe()?.isConnected) {
         player.loadVideoById(videoId);
-        const readyCheck = setInterval(() => { if (player.getDuration() > 0 && player.getPlayerState() !== -1) { clearInterval(readyCheck); onPlayerReady({ target: player }); } }, 100);
+        const readyCheck = setInterval(() => {
+            if (player.getDuration() > 0 && player.getPlayerState() !== -1) { clearInterval(readyCheck); onPlayerReady({ target: player }); }
+        }, 100);
     } else {
         if (player && typeof player.destroy === 'function') player.destroy();
         player = new YT.Player('player', { height: '1', width: '1', videoId, playerVars: { 'autoplay': autoPlay ? 1 : 0, 'controls': 0 }, events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange } });
@@ -1074,53 +1220,89 @@ function loadVideo(url, autoPlay = false) {
 
 function onPlayerStateChange(event) {
     const playBtn = document.getElementById("playBtn"), pauseBtn = document.getElementById("pauseBtn");
+    
     if (g_stopVideoWatcher) clearInterval(g_stopVideoWatcher);
 
     if (event.data === YT.PlayerState.PLAYING) { 
-        playBtn.style.display = 'none'; pauseBtn.style.display = 'flex'; 
+        playBtn.style.display = 'none'; 
+        pauseBtn.style.display = 'flex'; 
         const transcriptViewer = document.getElementById('transcript-viewer');
-        if (transcriptViewer && transcriptViewer.style.display === 'block') transcriptViewer.style.display = 'none';
+        if (transcriptViewer && transcriptViewer.style.display === 'block') {
+            transcriptViewer.style.display = 'none';
+        }
         
         if (g_autoStopTimestamp !== Infinity) {
             g_stopVideoWatcher = setInterval(() => {
-                if(player && player.getCurrentTime && player.getCurrentTime() >= g_autoStopTimestamp) { player.pauseVideo(); clearInterval(g_stopVideoWatcher); }
+                if(player && player.getCurrentTime) {
+                    if (player.getCurrentTime() >= g_autoStopTimestamp) {
+                        player.pauseVideo();
+                        clearInterval(g_stopVideoWatcher);
+                    }
+                }
             }, 100);
         }
+
         trackProgress(); 
     }
-    else { playBtn.style.display = 'flex'; pauseBtn.style.display = 'none'; clearInterval(progressInterval); }
+    else { 
+        playBtn.style.display = 'flex'; 
+        pauseBtn.style.display = 'none'; 
+        clearInterval(progressInterval); 
+    }
 }
 
 function setPlaybackSpeed() {
     if (!player || !player.setPlaybackRate) return;
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
+    
     if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
         const originalWPM = wordCount / (totalVideoDuration / 60); 
-        currentPlaybackRate = originalWPM > 0 ? targetWPM / originalWPM : 1;
-    } else { currentPlaybackRate = 1; }
-    player.setPlaybackRate(currentPlaybackRate); updateVideoTimeDisplay();
+        if(originalWPM > 0) {
+            currentPlaybackRate = targetWPM / originalWPM;
+        } else {
+            currentPlaybackRate = 1;
+        }
+    } else {
+        currentPlaybackRate = 1;
+    }
+    
+    player.setPlaybackRate(currentPlaybackRate);
+    updateVideoTimeDisplay();
 }
 
-function updateSpeedDisplay(val) { document.getElementById('wpmSpeedDisplay').textContent = val + " WPM"; }
+function updateSpeedDisplay(val) {
+    document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
+}
+
 function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
 function restartVideo() { if (player) { player.seekTo(0, true); player.playVideo(); } }
-function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; player.seekTo(player.getCurrentTime() + seconds, true); }
+function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
 function trackProgress() { clearInterval(progressInterval); progressInterval = setInterval(updateVideoTimeDisplay, 250); }
-function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); player.seekTo(((e.clientX - rect.left) / rect.width) * totalVideoDuration, true); }); }
+function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); const clickPosition = (e.clientX - rect.left) / rect.width; player.seekTo(clickPosition * totalVideoDuration, true); }); }
 function formatTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); const sec = Math.round(s % 60).toString().padStart(2, '0'); return isNaN(m) || isNaN(sec) ? "00:00" : `${m}:${sec}` }
 
 function updateVideoTimeDisplay() { 
     if (!player || typeof player.getCurrentTime !== 'function') return; 
-    document.getElementById("progress-fill").style.width = (player.getCurrentTime() / totalVideoDuration) * 100 + "%"; 
-    document.getElementById('current-time').innerText = formatTime(player.getCurrentTime() / currentPlaybackRate); 
-    document.getElementById('total-time').innerText = formatTime(totalVideoDuration / currentPlaybackRate); 
+    const rawCurrentTime = player.getCurrentTime(); 
+    
+    const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate; 
+    const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate; 
+    
+    document.getElementById("progress-fill").style.width = (rawCurrentTime / totalVideoDuration) * 100 + "%"; 
+    document.getElementById('current-time').innerText = formatTime(effectiveCurrentTime); 
+    document.getElementById('total-time').innerText = formatTime(effectiveTotalDuration); 
 }
 
-function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = isLoading; }
+function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
 function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
 function adjustSpeed(amount) { 
-    let newVal = Math.max(60, Math.min(160, parseInt(document.getElementById('wpmRange').value) + amount));
-    document.getElementById('wpmRange').value = newVal; updateSpeedDisplay(newVal); setPlaybackSpeed();
+    const range = document.getElementById('wpmRange');
+    let newVal = parseInt(range.value) + amount;
+    if(newVal < 60) newVal = 60;
+    if(newVal > 160) newVal = 160;
+    range.value = newVal;
+    updateSpeedDisplay(newVal);
+    setPlaybackSpeed();
 }
 
 function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -1130,14 +1312,23 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 
     if (isReevaluation) {
         const reevalContainer = document.getElementById('reevaluated-accuracy-container');
-        if (reevalContainer) reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${analysisResult.accuracy.toFixed(2)}%</div></div>`;
+        if (reevalContainer) {
+            reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${analysisResult.accuracy.toFixed(2)}%</div></div>`;
+        }
+        
         document.getElementById('editableTypedText').innerHTML = analysisResult.resultHTML;
-        document.getElementById('editableOriginalText').innerHTML = analysisResult.originalWords.map((word, index) => `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`).join(' ');
+        
+        let originalTextHtml = analysisResult.originalWords.map((word, index) => 
+            `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
+        ).join(' ');
+        document.getElementById('editableOriginalText').innerHTML = originalTextHtml;
         initializeResultInteractivity();
+
     } else {
         const container = document.getElementById('resultSheetContainer');
         const dictationName = `Kailash Chandra - Volume ${g_vol.replace('vol', '')} / Transcript ${g_tran.replace('t', '')}`;
         const testDate = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
+
         const { mistakeCounters, halfBucketCount, totalWordsP1, totalWordsP2, percentageDiff, accuracy } = analysisResult;
         
         const timeTakenMinutes = (transcriptionTimerTotalTime - timeLeft) / 60;
@@ -1145,6 +1336,10 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
         analysisResult.wpm = wpm;
 
         const fullMistakesCount = (mistakeCounters.addition || 0) + (mistakeCounters.omission || 0);
+
+        let originalTextHtml = analysisResult.originalWords.map((word, index) => 
+            `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
+        ).join(' ');
 
         container.innerHTML = `
         <div class="result-sheet-container">
@@ -1186,24 +1381,35 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
             <div id="comparisonColumns" class="columns view-top-bottom">
                 <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText" contenteditable="false">${analysisResult.resultHTML}</p></div>
-                <div class="col" id="originalCol"><strong>Original Text:</strong><p id="editableOriginalText" contenteditable="false">${analysisResult.originalWords.map((word, index) => `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`).join(' ')}</p></div>
+                <div class="col" id="originalCol"><strong>Original Text:</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div>
             </div>
         </div>`;
 
         if (!localStorage.getItem('hideResultsWelcome')) document.getElementById('resultsWelcomeModal').classList.add('visible');
 
         document.getElementById('viewSwitchBtn').addEventListener('click', () => {
-            const cols = document.getElementById('comparisonColumns');
-            cols.classList.toggle('view-top-bottom'); cols.classList.toggle('view-side-by-side');
-            document.getElementById('viewSwitchBtn').textContent = cols.classList.contains('view-top-bottom') ? 'Switch to Side-by-Side View' : 'Switch to Top/Bottom View';
+            const columnsContainer = document.getElementById('comparisonColumns');
+            const isTopBottom = columnsContainer.classList.contains('view-top-bottom');
+            if (isTopBottom) {
+                columnsContainer.classList.remove('view-top-bottom');
+                columnsContainer.classList.add('view-side-by-side');
+                document.getElementById('viewSwitchBtn').textContent = 'Switch to Top/Bottom View';
+            } else {
+                columnsContainer.classList.remove('view-side-by-side');
+                columnsContainer.classList.add('view-top-bottom');
+                document.getElementById('viewSwitchBtn').textContent = 'Switch to Side-by-Side View';
+            }
         });
         document.getElementById('printReportBtn').addEventListener('click', () => window.print());
         initializeResultInteractivity();
     }
 }
 
+// ============================= BUG FIX: SMART CROP =============================
 function submitTranscription() {
     aiMistakesCache = null; 
+
+    const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
     clearState();
     if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
 
@@ -1211,95 +1417,171 @@ function submitTranscription() {
         if (!originalText) throw new Error("Original transcript not found. Please try the test again.");
 
         let typedText = document.getElementById('typingBox').value;
-        if (typedText.trim().split(/\s+/).filter(Boolean).length < 10) { alert("Please type at least 10 words."); goHome(); return; }
+
+        if (typedText.trim().split(/\s+/).filter(Boolean).length < 10) {
+            alert("Please type at least 10 words.");
+            goHome();
+            return;
+        }
 
         let textForAnalysis = originalText;
         let typedTextForAnalysis = typedText;
 
         if (g_selectedTarget !== "full") {
             let targetWords = parseInt(g_selectedTarget);
+            
             let orgWordsArray = originalText.trim().split(/\s+/).filter(Boolean);
             let userWordsArray = typedText.trim().split(/\s+/).filter(Boolean);
             
             if (targetWords < orgWordsArray.length) {
+                // Strictly crop Original Text to exact target words
                 let targetOrgWords = orgWordsArray.slice(0, targetWords);
                 textForAnalysis = targetOrgWords.join(" ");
                 
-                const n = targetOrgWords.length; const m = userWordsArray.length;
+                // --- Smart Crop User Text using DP Alignment ---
+                // This guarantees we find exactly where the original 200th word ends in your typed text
+                const n = targetOrgWords.length;
+                const m = userWordsArray.length;
+                
                 if (m > 0 && n > 0) {
-                    let dp =[];
-                    for (let i = 0; i <= n; i++) { dp[i] = new Int32Array(m + 1); dp[i][0] = i; }
-                    for (let j = 0; j <= m; j++) { dp[0][j] = j; }
+                    let dp = [];
+                    for (let i = 0; i <= n; i++) {
+                        dp[i] = new Int32Array(m + 1);
+                        dp[i][0] = i; 
+                    }
+                    for (let j = 0; j <= m; j++) {
+                        dp[0][j] = j; 
+                    }
 
                     for (let i = 1; i <= n; i++) {
                         let oWord = targetOrgWords[i - 1].toLowerCase().replace(/[^a-z0-9]/g, '');
                         for (let j = 1; j <= m; j++) {
                             let uWord = userWordsArray[j - 1].toLowerCase().replace(/[^a-z0-9]/g, '');
-                            if (oWord === uWord && oWord !== '') dp[i][j] = dp[i - 1][j - 1];
-                            else dp[i][j] = 1 + Math.min(dp[i - 1][j - 1], dp[i - 1][j], dp[i][j - 1]);
+                            if (oWord === uWord && oWord !== '') {
+                                dp[i][j] = dp[i - 1][j - 1];
+                            } else {
+                                dp[i][j] = 1 + Math.min(
+                                    dp[i - 1][j - 1], // substitution
+                                    dp[i - 1][j],     // omission
+                                    dp[i][j - 1]      // addition
+                                );
+                            }
                         }
                     }
 
-                    let minCost = Infinity; let bestJ = m;
-                    for (let j = 0; j <= m; j++) { if (dp[n][j] <= minCost) { minCost = dp[n][j]; bestJ = j; } }
+                    let minCost = Infinity;
+                    let bestJ = m;
+
+                    // Find where the 200th original word ends inside the user's text
+                    // `<= minCost` drops any trailing unneeded words that were typed ahead
+                    for (let j = 0; j <= m; j++) {
+                        if (dp[n][j] <= minCost) {
+                            minCost = dp[n][j];
+                            bestJ = j;
+                        }
+                    }
                     typedTextForAnalysis = userWordsArray.slice(0, bestJ).join(" ");
-                } else { typedTextForAnalysis = typedText; }
+                } else {
+                    typedTextForAnalysis = typedText;
+                }
             }
         }
 
         g_lastTypedText = typedTextForAnalysis;
+
         document.getElementById('fullPageLoader').style.display = 'flex';
 
-        analysisWorker.postMessage({ originalText: textForAnalysis, userText: g_lastTypedText, config: getCurrentConfigForWorker(), synonymData: g_synonymData });
+        const config = getCurrentConfigForWorker();
+        
+        analysisWorker.postMessage({
+            originalText: textForAnalysis,
+            userText: g_lastTypedText,
+            config: config, 
+            synonymData: g_synonymData 
+        });
 
         analysisWorker.onmessage = function(event) {
             const analysisResult = event.data;
             document.getElementById('fullPageLoader').style.display = 'none';
-            showView('results-view'); renderResultSheet(analysisResult, false);
-            saveProgressToLocalStorage(analysisResult); saveAttemptHybrid(textForAnalysis, g_lastTypedText, analysisResult);
+            
+            showView('results-view');
+            renderResultSheet(analysisResult, false);
+
+            saveProgressToLocalStorage(analysisResult);
+            saveAttemptHybrid(textForAnalysis, g_lastTypedText, analysisResult);
+
             resetTimer();
         };
 
         analysisWorker.onerror = function(error) {
-            console.error(error); document.getElementById('fullPageLoader').style.display = 'none';
-            showErrorModal("Result Error", "An error occurred in the analysis worker. Please try again."); goHome();
+            console.error("!!! WORKER ERROR:", error);
+            document.getElementById('fullPageLoader').style.display = 'none';
+            showErrorModal("Result Error", "An error occurred in the analysis worker. Please try again.");
+            goHome();
         };
 
     } catch (error) {
-        console.error(error); document.getElementById('fullPageLoader').style.display = 'none';
-        showErrorModal("Result Error", "An error occurred while preparing your results. Please try again."); goHome();
+        console.error("!!! ERROR during transcription submission:", error);
+        document.getElementById('fullPageLoader').style.display = 'none';
+        showErrorModal("Result Error", "An error occurred while preparing your results. Please try again.");
+        goHome();
     }
 }
+// ========================== END BUG FIX ============================
 
 function saveProgressToLocalStorage(resultData) {
     if (!candidateId) return;
     const key = `${g_vol}-${g_tran}`;
     const progressData = JSON.parse(localStorage.getItem(`kcProgress_${candidateId}`) || '{}');
-    const newScore = { accuracy: parseFloat(resultData.accuracy), wpm: parseFloat(resultData.wpm) };
 
-    if (!progressData[key] || newScore.accuracy > progressData[key].accuracy) {
+    const newScore = {
+        accuracy: parseFloat(resultData.accuracy),
+        wpm: parseFloat(resultData.wpm),
+    };
+
+    const existingScore = progressData[key];
+    if (!existingScore || newScore.accuracy > existingScore.accuracy) {
         progressData[key] = newScore;
         localStorage.setItem(`kcProgress_${candidateId}`, JSON.stringify(progressData));
     }
+
     localStorage.setItem(`kcLastAttempt_${candidateId}`, JSON.stringify({ vol: g_vol, tran: g_tran }));
 }
 
 async function resetProgress() {
     if (!candidateId) { showErrorModal("Action Failed", "Cannot reset progress. User not identified."); return; }
-    localStorage.removeItem(`kcProgress_${candidateId}`); localStorage.removeItem(`kcLastAttempt_${candidateId}`); localStorage.removeItem('hideResultsWelcome');
+
+    localStorage.removeItem(`kcProgress_${candidateId}`);
+    localStorage.removeItem(`kcLastAttempt_${candidateId}`);
+    localStorage.removeItem('hideResultsWelcome');
 
     try {
-        await localDb.attempts.clear(); await localDb.overallStats.clear(); await localDb.mistakeLibrary.clear();
+        await localDb.attempts.clear();
+        await localDb.overallStats.clear();
+        await localDb.mistakeLibrary.clear();
+        console.log("Local database cleared.");
+
         if (attemptsRef) {
             const querySnapshot = await attemptsRef.get();
-            await Promise.all(querySnapshot.docs.map(doc => doc.ref.delete()));
+            const deletePromises =[];
+            querySnapshot.forEach(doc => {
+                deletePromises.push(doc.ref.delete());
+            });
+            await Promise.all(deletePromises);
+            console.log("Firebase attempts cleared.");
         }
-        alert("Your progress has been successfully reset."); window.location.reload();
-    } catch (error) { showErrorModal("Reset Error", "Could not clear all data. Please check your connection and try again."); }
+
+        alert("Your progress has been successfully reset.");
+        window.location.reload();
+    } catch (error) {
+        console.error("Error during reset:", error);
+        showErrorModal("Reset Error", "Could not clear all data. Please check your connection and try again.");
+    }
 }
 
 async function updateMistakeLibrary(studentMistakes) {
     if (!studentMistakes || !studentMistakes.spelling || studentMistakes.spelling.length === 0) return;
+
     await localDb.transaction('rw', localDb.mistakeLibrary, async () => {
         for (const mistake of studentMistakes.spelling) {
             const originalWord = (mistake.correct || '').replace(/[.,]$/, '').toLowerCase();
@@ -1307,16 +1589,21 @@ async function updateMistakeLibrary(studentMistakes) {
             if (!originalWord || !typedWord || originalWord === typedWord) continue;
 
             const existingEntry = await localDb.mistakeLibrary.where({ originalWord, typedWord }).first();
-            if (existingEntry) await localDb.mistakeLibrary.update(existingEntry.id, { count: existingEntry.count + 1 });
-            else await localDb.mistakeLibrary.add({ originalWord, typedWord, count: 1 });
+            if (existingEntry) {
+                await localDb.mistakeLibrary.update(existingEntry.id, { count: existingEntry.count + 1 });
+            } else {
+                await localDb.mistakeLibrary.add({ originalWord, typedWord, count: 1 });
+            }
         }
     });
+    console.log(`📚 ${studentMistakes.spelling.length} spelling mistake(s) processed for the library.`);
 }
 
 async function updateOverallStats(newAttemptStats) {
     await localDb.transaction('rw', localDb.overallStats, async () => {
         const stats = await localDb.overallStats.get(1);
-        const accuracy = parseFloat(newAttemptStats.accuracy); const wpm = parseFloat(newAttemptStats.wpm);
+        const accuracy = parseFloat(newAttemptStats.accuracy);
+        const wpm = parseFloat(newAttemptStats.wpm);
 
         if (!stats) {
             await localDb.overallStats.put({ id: 1, totalAttempts: 1, bestAccuracy: accuracy, bestWPM: wpm, avgAccuracy: accuracy, avgWpm: wpm });
@@ -1324,21 +1611,65 @@ async function updateOverallStats(newAttemptStats) {
         }
 
         const newTotal = (stats.totalAttempts || 0) + 1;
-        await localDb.overallStats.put({ id: 1, totalAttempts: newTotal, avgAccuracy: ((stats.avgAccuracy * stats.totalAttempts) + accuracy) / newTotal, avgWpm: ((stats.avgWpm * stats.totalAttempts) + wpm) / newTotal, bestAccuracy: Math.max(stats.bestAccuracy, accuracy), bestWPM: Math.max(stats.bestWPM, wpm) });
+        const newAvgAccuracy = ((stats.avgAccuracy * stats.totalAttempts) + accuracy) / newTotal;
+        const newAvgWpm = ((stats.avgWpm * stats.totalAttempts) + wpm) / newTotal;
+
+        await localDb.overallStats.put({ id: 1, totalAttempts: newTotal, avgAccuracy: newAvgAccuracy, avgWpm: newAvgWpm, bestAccuracy: Math.max(stats.bestAccuracy, accuracy), bestWPM: Math.max(stats.bestWPM, wpm) });
     });
 }
 
 async function saveAttemptHybrid(original, typed, analysisResult) {
-    if (!candidateId) return;
+    if (!candidateId) { console.error("Candidate not initialized, cannot save."); return; }
+
+    const fullMistakesCount = (analysisResult.mistakeCounters.addition || 0) + (analysisResult.mistakeCounters.omission || 0);
+
+    const fullResultData = {
+        timestamp: new Date().toISOString(),
+        dictationName: `Kailash Chandra - Volume ${g_vol.replace('vol', '')} / Transcript ${g_tran.replace('t', '')}`,
+        accuracy: parseFloat(analysisResult.accuracy),
+        wpm: parseFloat(analysisResult.wpm),
+        originalText: original,
+        typedText: typed,
+        fullMistakes: fullMistakesCount,
+        halfMistakes: analysisResult.halfBucketCount,
+        highlightedHtml: analysisResult.resultHTML,
+    };
+
     try {
-        await localDb.attempts.add({ timestamp: new Date().toISOString(), dictationName: `Kailash Chandra - Volume ${g_vol.replace('vol', '')} / Transcript ${g_tran.replace('t', '')}`, accuracy: parseFloat(analysisResult.accuracy), wpm: parseFloat(analysisResult.wpm), originalText: original, typedText: typed, fullMistakes: (analysisResult.mistakeCounters.addition || 0) + (analysisResult.mistakeCounters.omission || 0), halfMistakes: analysisResult.halfBucketCount, highlightedHtml: analysisResult.resultHTML });
-        await updateOverallStats(analysisResult); await updateMistakeLibrary(analysisResult.studentMistakes);
-        if (attemptsRef) await attemptsRef.add({ accuracy: analysisResult.accuracy.toFixed(2) + "%", wpm: analysisResult.wpm, timeTakenSeconds: (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0, totalWords: analysisResult.totalWordsP1, volume: g_vol, transcript: g_tran, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-    } catch (err) { console.error("Failed to save attempt:", err); }
+        await localDb.attempts.add(fullResultData);
+        console.log("✅ Full attempt with HTML saved locally.");
+
+        await updateOverallStats(analysisResult);
+        await updateMistakeLibrary(analysisResult.studentMistakes);
+
+        await sendLightweightStatsToFirebase(analysisResult);
+
+    } catch (err) {
+        console.error("❌ Failed to save attempt using hybrid system:", err);
+    }
+}
+
+async function sendLightweightStatsToFirebase(analysisResult) {
+    if (!attemptsRef) return;
+    const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
+    const lightweightStat = {
+        accuracy: analysisResult.accuracy.toFixed(2) + "%",
+        wpm: analysisResult.wpm,
+        timeTakenSeconds: timeTakenSeconds,
+        totalWords: analysisResult.totalWordsP1,
+        volume: g_vol,
+        transcript: g_tran,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    try { await attemptsRef.add(lightweightStat); console.log("✅ Lightweight stats sent to Firebase."); }
+    catch (e) { console.error("Firebase save failed:", e); }
 }
 
 function initializeEventListeners() {
-    document.getElementById('passage-grid').addEventListener('click', (e) => { const btn = e.target.closest('.take-test-btn'); if (btn) loadPractice(btn.closest('.passage-card').dataset.volume, btn.closest('.passage-card').dataset.transcript); });
+    document.getElementById('passage-grid').addEventListener('click', (e) => {
+        const button = e.target.closest('.take-test-btn');
+        if (button) { const card = button.closest('.passage-card'); loadPractice(card.dataset.volume, card.dataset.transcript); }
+    });
     document.getElementById('passageSearch').addEventListener('input', debounce(renderGrid, 300));
     document.getElementById('filter-select').addEventListener('change', renderGrid);
     document.getElementById('sort-select').addEventListener('change', renderGrid);
@@ -1350,7 +1681,8 @@ function initializeEventListeners() {
     document.getElementById('cancelResetBtn').addEventListener('click', () => resetModal.classList.remove('visible'));
     document.getElementById('confirmResetBtn').addEventListener('click', () => { resetProgress(); resetModal.classList.remove('visible'); });
 
-    document.getElementById('closeWelcomeBtn').addEventListener('click', () => { if (document.getElementById('dontShowAgainCheckbox').checked) localStorage.setItem('hideResultsWelcome', 'true'); document.getElementById('resultsWelcomeModal').classList.remove('visible'); });
+    const welcomeModal = document.getElementById('resultsWelcomeModal');
+    document.getElementById('closeWelcomeBtn').addEventListener('click', () => { if (document.getElementById('dontShowAgainCheckbox').checked) localStorage.setItem('hideResultsWelcome', 'true'); welcomeModal.classList.remove('visible'); });
 
     const reportModal = document.getElementById('reportErrorModal');
     document.getElementById('cancelReportBtn').addEventListener('click', () => reportModal.classList.remove('visible'));
@@ -1364,51 +1696,116 @@ function initializeEventListeners() {
 }
 
 function initializeResultInteractivity() {
-    if (!document.getElementById('comparisonColumns')) return;
+    const columns = document.getElementById('comparisonColumns');
+    if (!columns) return;
+
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
-    initializeInteractiveLegend(); initializeAiClickListeners();
+
+    initializeInteractiveLegend();
+    initializeAiClickListeners();
 }
 
-function openTranscriptModal() { document.getElementById('transcriptTextBody').innerText = originalText; document.getElementById('transcriptModal').classList.add('visible'); if(player && player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo(); }
+function openTranscriptModal() {
+    document.getElementById('transcriptTextBody').innerText = originalText;
+    document.getElementById('transcriptModal').classList.add('visible');
+    if(player && player.getPlayerState() === YT.PlayerState.PLAYING) player.pauseVideo();
+}
 
 function toggleReevaluateMode() {
     isReevaluateModeActive = !isReevaluateModeActive;
-    const resultsView = document.getElementById('results-view'), toggleBtn = document.getElementById('toggleReevaluateBtn'), typedTextP = document.getElementById('editableTypedText'), originalTextP = document.getElementById('editableOriginalText');
+    const resultsView = document.getElementById('results-view');
+    const toggleBtn = document.getElementById('toggleReevaluateBtn');
+    const typedTextP = document.getElementById('editableTypedText');
+    const originalTextP = document.getElementById('editableOriginalText');
 
     if (isReevaluateModeActive) {
-        resultsView.classList.add('reevaluate-mode-active'); toggleBtn.textContent = 'Calculate & Exit Mode'; toggleBtn.style.backgroundColor = 'var(--accent-purple)'; toggleBtn.style.color = 'white';
-        typedTextP.innerHTML = g_lastAnalysisResult.userWords.join(' '); originalTextP.innerHTML = g_lastAnalysisResult.originalWords.join(' ');
-        typedTextP.contentEditable = true; originalTextP.contentEditable = true;
+        resultsView.classList.add('reevaluate-mode-active');
+        toggleBtn.textContent = 'Calculate & Exit Mode';
+        toggleBtn.style.backgroundColor = 'var(--accent-purple)'; 
+        toggleBtn.style.color = 'white';
+        
+        typedTextP.innerHTML = g_lastAnalysisResult.userWords.join(' ');
+        originalTextP.innerHTML = g_lastAnalysisResult.originalWords.join(' ');
+        typedTextP.contentEditable = true; 
+        originalTextP.contentEditable = true;
         alert("Re-evaluate Mode is ON. You can now edit both your transcription and the original text.");
-    } else {
-        resultsView.classList.remove('reevaluate-mode-active'); toggleBtn.textContent = 'Enter Re-evaluate Mode'; toggleBtn.style.backgroundColor = ''; toggleBtn.style.color = '';
-        g_lastTypedText = typedTextP.innerText; typedTextP.contentEditable = false; originalTextP.contentEditable = false;
 
-        if (!originalTextP.innerText) { alert("The original text cannot be empty for re-evaluation."); renderResultSheet(g_lastAnalysisResult, true); return; }
+    } else {
+        resultsView.classList.remove('reevaluate-mode-active');
+        toggleBtn.textContent = 'Enter Re-evaluate Mode';
+        toggleBtn.style.backgroundColor = ''; 
+        toggleBtn.style.color = '';
+
+        const correctedOriginalText = originalTextP.innerText;
+        const correctedTypedText = typedTextP.innerText;
+        g_lastTypedText = correctedTypedText;
+        typedTextP.contentEditable = false; 
+        originalTextP.contentEditable = false;
+
+        if (!correctedOriginalText) {
+            alert("The original text cannot be empty for re-evaluation.");
+            renderResultSheet(g_lastAnalysisResult, true); 
+            return;
+        }
         
         document.getElementById('fullPageLoader').style.display = 'flex';
-        analysisWorker.postMessage({ originalText: originalTextP.innerText, userText: g_lastTypedText, config: getCurrentConfigForWorker(), synonymData: g_synonymData });
+
+        const config = getCurrentConfigForWorker();
+        analysisWorker.postMessage({
+            originalText: correctedOriginalText,
+            userText: correctedTypedText,
+            config: config,
+            synonymData: g_synonymData
+        });
 
         analysisWorker.onmessage = function(event) {
+            const analysisResult = event.data;
             document.getElementById('fullPageLoader').style.display = 'none';
-            renderResultSheet(event.data, true);
+            renderResultSheet(analysisResult, true);
             alert("Score has been re-evaluated with your corrections. Note: This updated score is for your reference only and is not saved.");
         };
-        analysisWorker.onerror = function() { document.getElementById('fullPageLoader').style.display = 'none'; alert("Could not re-evaluate the score due to an error."); };
+
+        analysisWorker.onerror = function(error) {
+             console.error("!!! RE-EVAL WORKER ERROR:", error);
+             document.getElementById('fullPageLoader').style.display = 'none';
+             alert("Could not re-evaluate the score due to an error.");
+        };
     }
 }
 
-function validateReportForm() { document.getElementById('submitReportBtn').disabled = !(document.getElementById('errorTypeSelect').value && document.getElementById('otherErrorText').value.trim()); }
-function showReportModal() { document.getElementById('reportErrorModal').classList.add('visible'); validateReportForm(); }
+function validateReportForm() {
+    const errorType = document.getElementById('errorTypeSelect').value;
+    const otherText = document.getElementById('otherErrorText').value.trim();
+    document.getElementById('submitReportBtn').disabled = !(errorType && otherText);
+}
+
+function showReportModal() {
+    document.getElementById('reportErrorModal').classList.add('visible');
+    validateReportForm();
+}
 
 async function submitErrorReport() {
     if (!attemptsRef) { alert("Cannot submit report, database not connected."); return; }
+    const reportModal = document.getElementById('reportErrorModal');
+    const reportData = {
+        candidateId: candidateId,
+        volume: g_vol,
+        transcript: g_tran,
+        originalTextInSystem: originalText,
+        userCorrectedText: document.getElementById('editableOriginalText').innerText,
+        reason: `${document.getElementById('errorTypeSelect').value}: ${document.getElementById('otherErrorText').value}`,
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    };
     try {
-        await db.collection("transcriptionReports").add({ candidateId, volume: g_vol, transcript: g_tran, originalTextInSystem: originalText, userCorrectedText: document.getElementById('editableOriginalText').innerText, reason: `${document.getElementById('errorTypeSelect').value}: ${document.getElementById('otherErrorText').value}`, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        alert("Thank you! Your report has been submitted successfully."); document.getElementById('reportErrorModal').classList.remove('visible');
-    } catch (error) { alert("Could not submit report. Please check your internet connection."); }
+        await db.collection("transcriptionReports").add(reportData);
+        alert("Thank you! Your report has been submitted successfully.");
+        reportModal.classList.remove('visible');
+    } catch (error) {
+        console.error("Error submitting report:", error);
+        alert("Could not submit report. Please check your internet connection.");
+    }
 }
 
 function debounce(func, delay) { let timeout; return function (...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), delay); }; }
@@ -1418,6 +1815,7 @@ function renderQuickResume() {
     const container = document.getElementById('quick-resume-container');
     container.innerHTML = '';
     const lastAttempt = JSON.parse(localStorage.getItem(`kcLastAttempt_${candidateId}`));
+
     if (lastAttempt && allPassageData.length > 0) {
         const { vol, tran } = lastAttempt;
         const currentPassage = allPassageData.find(p => p.volId === vol && p.tranId === tran);
@@ -1439,231 +1837,252 @@ function initializeInteractiveLegend() {
     if (!legendContainer || !g_lastAnalysisResult) return;
 
     const mistakeCounters = g_lastAnalysisResult.mistakeCounters;
-    const mistakeMap = { omission: mistakeCounters.omission || 0, addition: mistakeCounters.addition || 0, spelling: mistakeCounters.spelling || 0, capitalization: mistakeCounters.capitalization || 0, punctuation: (mistakeCounters.punctuation.fullstop || 0) + (mistakeCounters.punctuation.other || 0) };
+    const mistakeMap = {
+        omission: mistakeCounters.omission || 0,
+        addition: mistakeCounters.addition || 0,
+        spelling: mistakeCounters.spelling || 0,
+        capitalization: mistakeCounters.capitalization || 0,
+        punctuation: (mistakeCounters.punctuation.fullstop || 0) + (mistakeCounters.punctuation.other || 0),
+    };
     
-    legendContainer.querySelectorAll('.legend-item').forEach(item => { item.querySelector('.mistake-count').textContent = `(${(mistakeMap[item.dataset.filterType] || 0)})`; });
+    legendContainer.querySelectorAll('.legend-item').forEach(item => {
+        const filterType = item.dataset.filterType;
+        const countSpan = item.querySelector('.mistake-count');
+        countSpan.textContent = `(${(mistakeMap[filterType] || 0)})`;
+    });
 
     legendContainer.addEventListener('click', function(e) {
         const clickedItem = e.target.closest('.legend-item');
         if (!clickedItem) return;
 
-        if (e.ctrlKey || e.metaKey) clickedItem.classList.toggle('active');
-        else {
+        if (e.ctrlKey || e.metaKey) {
+            clickedItem.classList.toggle('active');
+        } else {
             const wasActive = clickedItem.classList.contains('active');
             legendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
-            if (!wasActive) clickedItem.classList.add('active');
+            if (!wasActive) {
+                clickedItem.classList.add('active');
+            }
         }
         applyFilters();
     });
 
-    document.getElementById('reset-filter-btn').addEventListener('click', () => { legendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active')); applyFilters(); });
+    document.getElementById('reset-filter-btn').addEventListener('click', () => {
+        legendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
+        applyFilters();
+    });
 }
 
 function applyFilters() {
     const activeFilters = Array.from(document.querySelectorAll('#interactive-legend .legend-item.active')).map(item => item.dataset.filterType);
-    document.querySelectorAll('#editableTypedText .mis').forEach(el => {
-        let isVisible = activeFilters.length === 0;
-        if(!isVisible) for(const filter of activeFilters) { if(el.classList.contains(filter)) { isVisible = true; break; } }
-        isVisible ? el.classList.remove('hidden-mistake') : el.classList.add('hidden-mistake');
+    const allHighlightElements = document.querySelectorAll('#editableTypedText .mis');
+    
+    allHighlightElements.forEach(el => {
+        let isVisible = false;
+        if(activeFilters.length === 0) {
+            isVisible = true;
+        } else {
+            for(const filter of activeFilters) {
+                if(el.classList.contains(filter)) {
+                    isVisible = true;
+                    break;
+                }
+            }
+        }
+        
+        if (isVisible) {
+            el.classList.remove('hidden-mistake');
+        } else {
+            el.classList.add('hidden-mistake');
+        }
     });
 }
 
 function showDeepAnalysisModal() {
-    if (!g_lastAnalysisResult || !g_lastAnalysisResult.studentMistakes) { alert("Analysis data not available."); return; }
+    if (!g_lastAnalysisResult || !g_lastAnalysisResult.studentMistakes) {
+        alert("Analysis data not available.");
+        return;
+    }
     const { spelling, capitalisation, replacements } = g_lastAnalysisResult.studentMistakes;
     const tableBody = document.getElementById('deep-analysis-table-body');
     let tableRowsHtml = '';
     
-    const mistakes =[ ...spelling.map(m => ({ type: 'Spelling', wrong: m.wrong, correct: m.correct })), ...capitalisation.map(m => ({ type: 'Capitalization', wrong: m.wrong, correct: m.correct })), ...replacements.map(m => ({ type: 'Replacement', wrong: m.added, correct: m.omitted })) ];
+    const mistakes =[
+        ...spelling.map(m => ({ type: 'Spelling', wrong: m.wrong, correct: m.correct })),
+        ...capitalisation.map(m => ({ type: 'Capitalization', wrong: m.wrong, correct: m.correct })),
+        ...replacements.map(m => ({ type: 'Replacement', wrong: m.added, correct: m.omitted }))
+    ];
 
-    if (mistakes.length === 0) tableRowsHtml = '<tr><td colspan="3" style="text-align:center; padding: 20px;">No specific spelling, capitalization, or replacement mistakes were found. Check for additions/omissions.</td></tr>';
-    else mistakes.forEach(mistake => { tableRowsHtml += `<tr><td><strong>${escapeHtml(mistake.type)}</strong></td><td>${escapeHtml(mistake.wrong)}</td><td>${escapeHtml(mistake.correct)}</td></tr>`; });
+    if (mistakes.length === 0) {
+        tableRowsHtml = '<tr><td colspan="3" style="text-align:center; padding: 20px;">No specific spelling, capitalization, or replacement mistakes were found. Check for additions/omissions.</td></tr>';
+    } else {
+        mistakes.forEach(mistake => {
+            tableRowsHtml += `
+                <tr>
+                    <td><strong>${escapeHtml(mistake.type)}</strong></td>
+                    <td>${escapeHtml(mistake.wrong)}</td>
+                    <td>${escapeHtml(mistake.correct)}</td>
+                </tr>
+            `;
+        });
+    }
 
-    tableBody.innerHTML = tableRowsHtml; document.getElementById('deepAnalysisModal').classList.add('visible');
+    tableBody.innerHTML = tableRowsHtml;
+    document.getElementById('deepAnalysisModal').classList.add('visible');
 }
 
-// -------------------------------------------------------------
-// AI INTEGRATION CODE STARTS HERE
-// -------------------------------------------------------------
+function capitalizeFirstLetter(string) {
+    if(!string) return '';
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
 
-// REPLACE THIS WITH YOUR DEPLOYED GOOGLE APPS SCRIPT URL:
-const GOOGLE_SCRIPT_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL_HERE"; 
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec"; 
 
 let aiMistakesCache = null; 
 let isAiFetching = false;
 
-// Tool 1: Get Exact Sentence Context Safely
-function extractSentenceWithContext(text, wordIndex) {
-    if (!text) return "";
-    const abbrevs =['hon.', 'etc.', 'mr.', 'mrs.', 'dr.', 'sh.', 'no.', 'sr.', 'jr.', 'prof.'];
-    const words = text.trim().split(/\s+/);
-    
-    if (isNaN(wordIndex) || wordIndex < 0 || wordIndex >= words.length) return ""; 
-
-    let sentenceStart = 0, sentenceEnd = words.length - 1;
-    for (let i = wordIndex; i >= 0; i--) {
-        const w = (words[i] || '').toLowerCase();
-        if (w.endsWith('.') && !abbrevs.includes(w)) { sentenceStart = i + 1; break; }
-    }
-    for (let i = wordIndex; i < words.length; i++) {
-        const w = (words[i] || '').toLowerCase();
-        if (w.endsWith('.') && !abbrevs.includes(w)) { sentenceEnd = i; break; }
-    }
-    
-    if (sentenceStart > wordIndex) sentenceStart = 0;
-    return words.slice(sentenceStart, sentenceEnd + 1).join(' ').replace(/\s+([.,])/g, '$1');
-}
-
-// Fallback: If index is missing, search original text for the word
-function fallbackExtractSentence(text, word) {
-    if (!text || !word) return "Sentence context unavailable.";
-    const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
-    for (let s of sentences) {
-        if (s.toLowerCase().includes(word.toLowerCase())) return s.trim();
-    }
-    return text.substring(0, 150) + "..."; 
-}
-
-// Tool 2: Smarter AI Click Listener 
+// 1. Initialize Listeners (We will call this from initializeResultInteractivity)
 function initializeAiClickListeners() {
     const columns = document.getElementById('comparisonColumns');
     if (!columns) return;
 
     columns.addEventListener('click', (e) => {
-        const icon = e.target.closest('.ai-icon') || e.target.closest('.cap-info-icon') || e.target.closest('.punc-info-icon');
+        // CHANGED: Only trigger if the clicked element is the .ai-icon
+        const icon = e.target.closest('.ai-icon');
         if (!icon) return;
+
+        // Get the parent highlight wrapper to extract data
+        const highlight = icon.closest('.highlight');
+        if (!highlight) return;
+
         e.stopPropagation(); 
-
-        const mistakeSpan = icon.closest('.mis') || icon.closest('.highlight') || icon.parentElement;
-        if (!mistakeSpan) return;
-
-        let type = "general";
-        if (mistakeSpan.classList.contains('capitalization')) type = "capitalization";
-        else if (mistakeSpan.classList.contains('punctuation')) type = "punctuation";
-        else if (mistakeSpan.classList.contains('spelling')) type = "spelling";
-
-        let originalWord = icon.getAttribute('data-word') || mistakeSpan.getAttribute('data-correct') || icon.getAttribute('data-oi');
-        if (!originalWord) {
-            let clone = mistakeSpan.cloneNode(true);
-            const sTag = clone.querySelector('s');
-            if (sTag) sTag.remove(); 
-            const iconTag = clone.querySelector('.ai-icon') || clone.querySelector('.cap-info-icon') || clone.querySelector('.punc-info-icon');
-            if (iconTag) iconTag.remove(); 
-            originalWord = clone.innerText.trim();
-        }
-
-        let typedWord = mistakeSpan.getAttribute('data-wrong') || icon.getAttribute('data-ui');
-        if (!typedWord) {
-            const sTag = mistakeSpan.querySelector('s');
-            typedWord = sTag ? sTag.innerText.trim() : "(Missing)";
-        }
-
-        let sentence = "";
-        let indexStr = icon.getAttribute('data-index') || mistakeSpan.getAttribute('data-oi');
-        let index = parseInt(indexStr, 10);
         
-        if (!isNaN(index)) sentence = extractSentenceWithContext(originalText, index);
-        if (!sentence) sentence = fallbackExtractSentence(originalText, originalWord);
+        // Get words and type from data attributes
+        const type = highlight.dataset.mistakeType;
+        
+        // Clean up the text (remove the icon text itself)
+        const clone = highlight.cloneNode(true);
+        if (clone.querySelector('.ai-icon')) {
+            clone.querySelector('.ai-icon').remove();
+        }
+        const typedWord = clone.innerText.split(' ')[0].replace(/[^\w\s-]/g, '').trim();
 
-        triggerAiAnalysis(originalWord, typedWord, type, sentence);
+        // Get Original Word logic
+        let originalWord = "unknown";
+        
+        // Data attributes on the highlight span are the most reliable source now (added in worker)
+        if (highlight.hasAttribute('data-correct')) {
+            originalWord = highlight.getAttribute('data-correct');
+        } else {
+            // Fallback to index lookup
+            const wordWrapper = highlight.closest('.word-wrapper');
+            if (wordWrapper) {
+                const index = wordWrapper.dataset.index;
+                const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
+                if (originalWordEl) originalWord = originalWordEl.innerText.replace(/[^\w\s-]/g, '').trim();
+            }
+        }
+
+        triggerAiAnalysis(originalWord, typedWord, type);
     });
 }
 
-// Format Markdown -> HTML
-function formatAIResponseBeautifully(text) {
-    let safe = (text || '').replace(/\*+/g, '');
-    safe = safe.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    safe = safe.replace(/(^|\n)([A-Z][A-Za-z \-]{3,}:)/g, '<div class="ai-heading" style="color:#4f46e5; font-weight:bold; margin-top:10px;">$2</div>');
-    safe = safe.replace(/(^|\n)(\d+\.)/g, '<div class="ai-point" style="font-weight:bold; margin-top:5px;">$2</div>');
-    safe = safe.replace(/\n+/g, '<br>');
-    return `<div class="ai-content">${safe}</div>`;
-}
-
-// Display Result in Modal
-function renderAiResult(explanation, orig, typed) {
-    const content = document.getElementById('aiModalContent');
-    const loader = document.getElementById('aiLoadingState');
-    
-    const formattedExplanation = formatAIResponseBeautifully(explanation);
-    content.innerHTML = `
-        <div class="ai-mistake-context">
-            Comparing: <b>${escapeHtml(orig)}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${escapeHtml(typed)}</b> <span style="color:#dc2626">(Your Typo)</span>
-        </div>
-        <div>
-            <span class="ai-rule-badge">AI Explanation</span>
-            <div class="ai-explanation-text" style="margin-top:10px;">${formattedExplanation}</div>
-        </div>
-    `;
-    
-    loader.style.display = 'none';
-    content.style.display = 'block';
-}
-
-// Connect to API
-async function triggerAiAnalysis(original, typed, type, sentence) {
+// 2. Trigger Analysis
+async function triggerAiAnalysis(original, typed, type) {
     const modal = document.getElementById('aiModal');
     const content = document.getElementById('aiModalContent');
     const loader = document.getElementById('aiLoadingState');
     
     modal.classList.add('visible');
     
-    const cacheKey = `${original}_${typed}_${sentence}`;
+    // Create cache key: "Original_Typed"
+    const cacheKey = `${original}_${typed}`;
+    
+    // A. Check Cache (Instant)
     if (aiMistakesCache && aiMistakesCache[cacheKey]) {
         renderAiResult(aiMistakesCache[cacheKey], original, typed);
         return;
     }
 
+    // B. Check if already loading
     if (isAiFetching) {
-        content.style.display = 'none'; loader.style.display = 'block'; return;
+        content.style.display = 'none';
+        loader.style.display = 'block';
+        return;
     }
 
+    // C. Fetch from Backend (Batch)
     isAiFetching = true;
     content.style.display = 'none';
     loader.style.display = 'block';
 
     try {
-        let prompt = "";
-        if (type === "capitalization") {
-            prompt = `You are a stenography instructor. I typed "${typed}" instead of the correct word "${original}" in the following sentence: "${sentence}". Explain briefly and simply why "${original}" MUST have its specific capitalization in this sentence context. Provide 1 or 2 short examples.`;
-        } else if (type === "punctuation") {
-            prompt = `You are a stenography instructor. I made a punctuation error regarding "${original}" and "${typed}" in the following sentence: "${sentence}". Explain briefly and simply why the original punctuation is correct according to grammar rules, and how to avoid this mistake. Provide 1 or 2 short examples.`;
-        } else {
-            prompt = `You are a stenography instructor. I typed "${typed}" instead of the correct word "${original}" in the following sentence: "${sentence}". Briefly explain this mistake. Could I have avoided this by looking at sentence context or grammar rules? Guide me simply, as if teaching a student.`;
+        const mistakesList = prepareMistakesList();
+        
+        if (mistakesList.length === 0) {
+            throw new Error("No complex mistakes found to analyze.");
         }
 
-        if (!GOOGLE_SCRIPT_URL || GOOGLE_SCRIPT_URL.includes("https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec")) {
-            throw new Error("Please replace 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE' with your actual Google Script Web App URL.");
-        }
-
+        // Call Google Apps Script
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            headers: { "Content-Type": "text/plain;charset=utf-8" },
-            body: JSON.stringify({ prompt: prompt })
+            body: JSON.stringify({ mistakes: mistakesList })
         });
 
-        const responseText = await response.text();
-        let data;
-        try { data = JSON.parse(responseText); } catch (err) {
-            throw new Error("Google Apps Script returned an HTML page. This means your script permissions are wrong. Please deploy it as a NEW version and set 'Who has access' strictly to 'Anyone'.");
-        }
+        const data = await response.json();
         
         if (!data.success) throw new Error("AI Backend Error: " + (data.error || "Unknown"));
 
-        if (!aiMistakesCache) aiMistakesCache = {};
-        aiMistakesCache[cacheKey] = data.reply; 
+        // Parse JSON from Gemini
+        const cleanJson = data.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+        aiMistakesCache = JSON.parse(cleanJson);
 
-        renderAiResult(data.reply, original, typed);
+        // Show result
+        if (aiMistakesCache[cacheKey]) {
+            renderAiResult(aiMistakesCache[cacheKey], original, typed);
+        } else {
+            renderAiResult("General error detected. Please review spelling and capitalization rules.", original, typed);
+        }
 
     } catch (error) {
-        content.innerHTML = `<p style="color:#ef4444; font-weight: 600;">Could not analyze.</p><p style="color:#ef4444; font-size:0.9rem;">Reason: ${error.message}</p>`;
-        content.style.display = 'block'; 
-        loader.style.display = 'none';
+        console.error(error);
+        content.style.display = 'block';
+        content.innerHTML = `<p style="color:#ef4444;">Could not analyze. Reason: ${error.message}</p>`;
     } finally {
         isAiFetching = false;
+        loader.style.display = 'none';
+        content.style.display = 'block';
     }
 }
+
+// 3. Helper: Convert worker mistakes to list
+function prepareMistakesList() {
+    if (!g_lastAnalysisResult || !g_lastAnalysisResult.studentMistakes) return [];
+
+    const sm = g_lastAnalysisResult.studentMistakes;
+    const list = [];
+
+    sm.spelling.forEach(m => list.push({ Original: m.correct, Typed: m.wrong }));
+    sm.capitalisation.forEach(m => list.push({ Original: m.correct, Typed: m.wrong }));
+    // We send original_typed keys to match what the backend expects
+    
+    return list;
+}
+
+// 4. Helper: Render HTML
+function renderAiResult(explanation, orig, typed) {
+    const content = document.getElementById('aiModalContent');
+    content.innerHTML = `
+        <div class="ai-mistake-context">
+            Comparing: <b>${orig}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typed}</b> <span style="color:#dc2626">(Your Typo)</span>
+        </div>
+        <div>
+            <span class="ai-rule-badge">AI Explanation</span>
+            <p class="ai-explanation-text">${explanation}</p>
+        </div>
+    `;
+}
+
 </script>
 </body>
 </html>
-
-
