@@ -12,13 +12,11 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
-
 <!-- Google Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
 
 <style>
     /* --- 1. Global Styles --- */
@@ -1444,7 +1442,7 @@ function submitTranscription() {
                 const m = userWordsArray.length;
                 
                 if (m > 0 && n > 0) {
-                    let dp = [];
+                    let dp =[];
                     for (let i = 0; i <= n; i++) {
                         dp[i] = new Int32Array(m + 1);
                         dp[i][0] = i; 
@@ -1936,67 +1934,98 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec"; 
+// --------------------------------------------------------
+// NEW AI ANALYSIS SYSTEM
+// --------------------------------------------------------
+
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec"; // Ensure this matches your new deployment ID
 
 let aiMistakesCache = null; 
 let isAiFetching = false;
 
-// 1. Initialize Listeners (We will call this from initializeResultInteractivity)
+// 1. Initialize Listeners
 function initializeAiClickListeners() {
     const columns = document.getElementById('comparisonColumns');
     if (!columns) return;
 
     columns.addEventListener('click', (e) => {
-        // CHANGED: Only trigger if the clicked element is the .ai-icon
         const icon = e.target.closest('.ai-icon');
         if (!icon) return;
 
-        // Get the parent highlight wrapper to extract data
         const highlight = icon.closest('.highlight');
         if (!highlight) return;
 
         e.stopPropagation(); 
         
-        // Get words and type from data attributes
-        const type = highlight.dataset.mistakeType;
-        
-        // Clean up the text (remove the icon text itself)
+        // Extract mistake type (fallback to checking class names if dataset is empty)
+        let type = highlight.dataset.mistakeType;
+        if (!type) {
+            if (highlight.classList.contains('capitalization')) type = 'Capitalization';
+            else if (highlight.classList.contains('spelling')) type = 'Spelling';
+            else if (highlight.classList.contains('punctuation')) type = 'Punctuation';
+            else if (highlight.classList.contains('omission')) type = 'Omission';
+            else if (highlight.classList.contains('substitution')) type = 'Substitution';
+            else if (highlight.classList.contains('addition')) type = 'Addition';
+            else type = 'Unknown';
+        }
+
+        // Clean up the typed text (remove the ai-icon text)
         const clone = highlight.cloneNode(true);
-        if (clone.querySelector('.ai-icon')) {
-            clone.querySelector('.ai-icon').remove();
-        }
-        const typedWord = clone.innerText.split(' ')[0].replace(/[^\w\s-]/g, '').trim();
+        const iconNode = clone.querySelector('.ai-icon');
+        if (iconNode) iconNode.remove();
+        const typedWord = clone.innerText.split(' ')[0].trim();
 
-        // Get Original Word logic
         let originalWord = "unknown";
-        
-        // Data attributes on the highlight span are the most reliable source now (added in worker)
-        if (highlight.hasAttribute('data-correct')) {
-            originalWord = highlight.getAttribute('data-correct');
-        } else {
-            // Fallback to index lookup
-            const wordWrapper = highlight.closest('.word-wrapper');
-            if (wordWrapper) {
-                const index = wordWrapper.dataset.index;
-                const originalWordEl = document.querySelector(`#originalCol .word-wrapper[data-index="${index}"]`);
-                if (originalWordEl) originalWord = originalWordEl.innerText.replace(/[^\w\s-]/g, '').trim();
+        let sentenceContext = "Context not available.";
+
+        // Use the index to definitively find the original word and sentence context
+        const wordWrapper = highlight.closest('.word-wrapper');
+        if (wordWrapper) {
+            const index = parseInt(wordWrapper.dataset.index, 10);
+            
+            if (!isNaN(index) && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
+                const originalWordsArray = g_lastAnalysisResult.originalWords;
+                originalWord = originalWordsArray[index] || "unknown";
+
+                // Build sentence context by scanning backwards and forwards for sentence terminators (. ! ?)
+                let startIdx = index;
+                while (startIdx > 0 && !/[.!?]$/.test(originalWordsArray[startIdx - 1])) {
+                    startIdx--;
+                }
+                
+                let endIdx = index;
+                while (endIdx < originalWordsArray.length - 1 && !/[.!?]$/.test(originalWordsArray[endIdx])) {
+                    endIdx++;
+                }
+                
+                // Join the extracted range to form the full sentence
+                sentenceContext = originalWordsArray.slice(startIdx, endIdx + 1).join(" ");
+            } else if (highlight.hasAttribute('data-correct')) {
+                // Fallback
+                originalWord = highlight.getAttribute('data-correct');
             }
+        } else if (highlight.hasAttribute('data-correct')) {
+            originalWord = highlight.getAttribute('data-correct');
         }
 
-        triggerAiAnalysis(originalWord, typedWord, type);
+        // Clean punctuation from targeted words for clear comparison
+        const cleanTyped = typedWord.replace(/[^\w\s-]/g, '').trim() || typedWord;
+        const cleanOriginal = originalWord.replace(/[^\w\s-]/g, '').trim() || originalWord;
+
+        triggerAiAnalysis(cleanOriginal, cleanTyped, type, sentenceContext);
     });
 }
 
-// 2. Trigger Analysis
-async function triggerAiAnalysis(original, typed, type) {
+// 2. Trigger Analysis (Single Request with Context)
+async function triggerAiAnalysis(original, typed, type, context) {
     const modal = document.getElementById('aiModal');
     const content = document.getElementById('aiModalContent');
     const loader = document.getElementById('aiLoadingState');
     
     modal.classList.add('visible');
     
-    // Create cache key: "Original_Typed"
-    const cacheKey = `${original}_${typed}`;
+    // Create cache key for this specific mistake scenario
+    const cacheKey = `${original}_${typed}_${type}`;
     
     // A. Check Cache (Instant)
     if (aiMistakesCache && aiMistakesCache[cacheKey]) {
@@ -2011,38 +2040,54 @@ async function triggerAiAnalysis(original, typed, type) {
         return;
     }
 
-    // C. Fetch from Backend (Batch)
+    // C. Fetch from Backend
     isAiFetching = true;
     content.style.display = 'none';
     loader.style.display = 'block';
 
     try {
-        const mistakesList = prepareMistakesList();
-        
-        if (mistakesList.length === 0) {
-            throw new Error("No complex mistakes found to analyze.");
-        }
+        // Construct an explicit prompt to ensure Gemini behaves as expected
+        const promptText = `Act as an English grammar teacher for stenography students.
+Analyze the following transcription mistake:
+Correct word: "${original}"
+Typed word: "${typed}"
+Mistake type: "${type}"
+Sentence context: "${context}"
 
-        // Call Google Apps Script
+Respond EXACTLY in this JSON format:
+{
+  "explanation": "Explain why the student's word is incorrect based on the context.",
+  "rule": "Explain the grammar, spelling, or punctuation rule involved.",
+  "examples": ["Example 1 demonstrating correct usage", "Example 2 demonstrating correct usage"]
+}`;
+
+        // Send contextual data & prompt payload to Google Apps Script
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
-            body: JSON.stringify({ mistakes: mistakesList })
+            body: JSON.stringify({
+                action: "analyzeSingle",
+                correctWord: original,
+                typedWord: typed,
+                mistakeType: type,
+                sentenceContext: context,
+                prompt: promptText 
+            })
         });
 
         const data = await response.json();
         
-        if (!data.success) throw new Error("AI Backend Error: " + (data.error || "Unknown"));
+        if (!data.success) throw new Error("AI Backend Error: " + (data.error || "Unknown error"));
 
-        // Parse JSON from Gemini
+        // Parse structured JSON returned by Gemini
         const cleanJson = data.reply.replace(/```json/g, '').replace(/```/g, '').trim();
-        aiMistakesCache = JSON.parse(cleanJson);
+        const aiResultData = JSON.parse(cleanJson);
+
+        // Save to cache
+        if (!aiMistakesCache) aiMistakesCache = {};
+        aiMistakesCache[cacheKey] = aiResultData;
 
         // Show result
-        if (aiMistakesCache[cacheKey]) {
-            renderAiResult(aiMistakesCache[cacheKey], original, typed);
-        } else {
-            renderAiResult("General error detected. Please review spelling and capitalization rules.", original, typed);
-        }
+        renderAiResult(aiResultData, original, typed);
 
     } catch (error) {
         console.error(error);
@@ -2055,31 +2100,46 @@ async function triggerAiAnalysis(original, typed, type) {
     }
 }
 
-// 3. Helper: Convert worker mistakes to list
-function prepareMistakesList() {
-    if (!g_lastAnalysisResult || !g_lastAnalysisResult.studentMistakes) return [];
-
-    const sm = g_lastAnalysisResult.studentMistakes;
-    const list = [];
-
-    sm.spelling.forEach(m => list.push({ Original: m.correct, Typed: m.wrong }));
-    sm.capitalisation.forEach(m => list.push({ Original: m.correct, Typed: m.wrong }));
-    // We send original_typed keys to match what the backend expects
-    
-    return list;
-}
-
-// 4. Helper: Render HTML
-function renderAiResult(explanation, orig, typed) {
+// 3. Helper: Render Structured HTML Output
+function renderAiResult(aiData, orig, typed) {
     const content = document.getElementById('aiModalContent');
+    
+    let explanation = "General error detected. Please review spelling and rules.";
+    let rule = "Grammar rule not identified.";
+    let examplesHtml = "";
+
+    // Parse the newly structured AI data
+    if (typeof aiData === 'object') {
+        explanation = aiData.explanation || explanation;
+        rule = aiData.rule || rule;
+        
+        if (aiData.examples && Array.isArray(aiData.examples)) {
+            examplesHtml = `
+                <div style="margin-top: 15px;">
+                    <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
+                    <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
+                        ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
+                    </ul>
+                </div>`;
+        }
+    } else {
+        // Fallback if the AI returned a plain string
+        explanation = aiData;
+    }
+
     content.innerHTML = `
         <div class="ai-mistake-context">
             Comparing: <b>${orig}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typed}</b> <span style="color:#dc2626">(Your Typo)</span>
         </div>
         <div>
-            <span class="ai-rule-badge">AI Explanation</span>
-            <p class="ai-explanation-text">${explanation}</p>
+            <span class="ai-rule-badge">Explanation</span>
+            <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
         </div>
+        <div>
+            <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
+            <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
+        </div>
+        ${examplesHtml}
     `;
 }
 
