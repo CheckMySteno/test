@@ -1929,47 +1929,6 @@ function capitalizeFirstLetter(string) {
     if(!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
-
-// =========================================================================
-// AI TEACHER MODULE - SEPARATED FOR EASY MODIFICATION
-// This handles all Extraction, Context Generation, and API Calls for AI
-// =========================================================================
-
-const AITeacher = {
-    // Make sure this is your active Google Apps Script Deployment URL
-    ENDPOINT_URL: "https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec",
-    
-    cache: {},
-    isFetching: false,
-
-    init: function() {
-        const columns = document.getElementById('comparisonColumns');
-        if (!columns) return;
-        // Bind click listener for the AI icon specifically
-        columns.removeEventListener('click', this.handleMistakeClick);
-        columns.addEventListener('click', this.handleMistakeClick.bind(this));
-    },
-
-    clearCache: function() {
-        this.cache = {}; // Resets on new test submission
-    },
-
-    handleMistakeClick: function(e) {
-        const icon = e.target.closest('.ai-icon');
-        if (!icon) return;
-
-        const highlight = icon.closest('.highlight');
-        if (!highlight) return;
-
-        e.stopPropagation(); 
-        
-        // 1. Extract exactly what was typed, expected, and the context
-        const mistakeData = this.extractMistakeData(highlight);
-        
-        // 2. Pass it to the AI Fetch engine
-        this.fetchAnalysis(mistakeData);
-    },
-
      // =========================================================================
 // AI TEACHER MODULE - SEPARATED FOR EASY MODIFICATION
 // This handles all Extraction, Context Generation, and API Calls for AI
@@ -2303,3 +2262,4 @@ Return ONLY JSON:
 </script>
 </body>
 </html>
+
