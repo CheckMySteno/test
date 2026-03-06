@@ -762,7 +762,6 @@
     </div>
 </div>
 
-<!-- Link to your new JavaScript files -->
 <script>
 // --- Dexie.js Local Database Setup ---
 const localDb = new Dexie("CheckMyStenoDB");
@@ -1935,15 +1934,14 @@ function capitalizeFirstLetter(string) {
 }
 
 // --------------------------------------------------------
-// NEW AI ANALYSIS SYSTEM
+// BULLETPROOF AI EXTRACTION SYSTEM
 // --------------------------------------------------------
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec"; // Ensure this matches your new deployment ID
+const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec"; // Ensure this matches your deployment ID
 
 let aiMistakesCache = null; 
 let isAiFetching = false;
 
-// 1. Initialize Listeners
 function initializeAiClickListeners() {
     const columns = document.getElementById('comparisonColumns');
     if (!columns) return;
@@ -1957,7 +1955,7 @@ function initializeAiClickListeners() {
 
         e.stopPropagation(); 
         
-        // Extract mistake type (fallback to checking class names if dataset is empty)
+        // 1. EXTRACT TYPE
         let type = highlight.dataset.mistakeType;
         if (!type) {
             if (highlight.classList.contains('capitalization')) type = 'Capitalization';
@@ -1969,54 +1967,98 @@ function initializeAiClickListeners() {
             else type = 'Unknown';
         }
 
-        // Clean up the typed text (remove the ai-icon text)
+        // 2. EXTRACT TYPED WORD (Removing the AI Icon correctly)
         const clone = highlight.cloneNode(true);
-        const iconNode = clone.querySelector('.ai-icon');
-        if (iconNode) iconNode.remove();
-        const typedWord = clone.innerText.split(' ')[0].trim();
+        const icons = clone.querySelectorAll('.ai-icon');
+        icons.forEach(i => i.remove());
+        let typedWord = clone.innerText.trim();
 
+        // 3. EXTRACT ORIGINAL WORD (4-Layer Fallback)
         let originalWord = "unknown";
-        let sentenceContext = "Context not available.";
+        let index = -1;
 
-        // Use the index to definitively find the original word and sentence context
-        const wordWrapper = highlight.closest('.word-wrapper');
-        if (wordWrapper) {
-            const index = parseInt(wordWrapper.dataset.index, 10);
-            
-            if (!isNaN(index) && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
-                const originalWordsArray = g_lastAnalysisResult.originalWords;
-                originalWord = originalWordsArray[index] || "unknown";
-
-                // Build sentence context by scanning backwards and forwards for sentence terminators (. ! ?)
-                let startIdx = index;
-                while (startIdx > 0 && !/[.!?]$/.test(originalWordsArray[startIdx - 1])) {
-                    startIdx--;
-                }
-                
-                let endIdx = index;
-                while (endIdx < originalWordsArray.length - 1 && !/[.!?]$/.test(originalWordsArray[endIdx])) {
-                    endIdx++;
-                }
-                
-                // Join the extracted range to form the full sentence
-                sentenceContext = originalWordsArray.slice(startIdx, endIdx + 1).join(" ");
-            } else if (highlight.hasAttribute('data-correct')) {
-                // Fallback
-                originalWord = highlight.getAttribute('data-correct');
-            }
-        } else if (highlight.hasAttribute('data-correct')) {
-            originalWord = highlight.getAttribute('data-correct');
+        // Layer A: Explicit dataset-correct attribute
+        if (highlight.dataset.correct) {
+            originalWord = highlight.dataset.correct;
         }
 
-        // Clean punctuation from targeted words for clear comparison
-        const cleanTyped = typedWord.replace(/[^\w\s-]/g, '').trim() || typedWord;
-        const cleanOriginal = originalWord.replace(/[^\w\s-]/g, '').trim() || originalWord;
+        // Layer B: Extract from Tooltip (Most reliable fallback for web worker highlight systems)
+        if (originalWord === "unknown" || !originalWord) {
+            const tooltip = highlight.getAttribute('data-tooltip-text');
+            if (tooltip) {
+                if (tooltip.toLowerCase().includes('expected:')) {
+                    originalWord = tooltip.replace(/.*Expected:\s*/i, '').trim();
+                } else if (tooltip.toLowerCase().includes('missing:')) {
+                    originalWord = tooltip.replace(/.*Missing:\s*/i, '').trim();
+                } else {
+                    originalWord = tooltip; 
+                }
+            }
+        }
 
-        triggerAiAnalysis(cleanOriginal, cleanTyped, type, sentenceContext);
+        // Try getting exact array index
+        if (highlight.dataset.index) {
+            index = parseInt(highlight.dataset.index, 10);
+        } else {
+            const wordWrapper = highlight.closest('.word-wrapper');
+            if (wordWrapper && wordWrapper.dataset.index) {
+                index = parseInt(wordWrapper.dataset.index, 10);
+            }
+        }
+
+        const cleanTyped = typedWord.replace(/[^\w\s-]/g, '').toLowerCase().trim();
+
+        // Layer C: Fallback to the student mistakes object arrays (Absolute guarantee for typos)
+        if (originalWord === "unknown" && g_lastAnalysisResult && g_lastAnalysisResult.studentMistakes) {
+            const sm = g_lastAnalysisResult.studentMistakes;
+            let match = null;
+            if (type === 'Capitalization' && sm.capitalisation) {
+                match = sm.capitalisation.find(m => m.wrong.replace(/[^\w\s-]/g, '').toLowerCase() === cleanTyped);
+                if (match) originalWord = match.correct;
+            } else if (type === 'Spelling' && sm.spelling) {
+                match = sm.spelling.find(m => m.wrong.replace(/[^\w\s-]/g, '').toLowerCase() === cleanTyped);
+                if (match) originalWord = match.correct;
+            } else if ((type === 'Substitution' || type === 'Addition') && sm.replacements) {
+                match = sm.replacements.find(m => m.added.replace(/[^\w\s-]/g, '').toLowerCase() === cleanTyped);
+                if (match) originalWord = match.omitted;
+            }
+        }
+
+        // Layer D: Array indexing fallback
+        if (originalWord === "unknown" && !isNaN(index) && index >= 0 && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
+            originalWord = g_lastAnalysisResult.originalWords[index] || "unknown";
+        }
+
+        // 4. EXTRACT SENTENCE CONTEXT
+        if ((isNaN(index) || index < 0) && originalWord !== "unknown" && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
+            const cleanOrig = originalWord.replace(/[^\w\s-]/g, '').toLowerCase().trim();
+            index = g_lastAnalysisResult.originalWords.findIndex(w => w.replace(/[^\w\s-]/g, '').toLowerCase() === cleanOrig);
+        }
+
+        let sentenceContext = "Context not available.";
+        if (!isNaN(index) && index >= 0 && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
+            const words = g_lastAnalysisResult.originalWords;
+            let startIdx = index;
+            while (startIdx > 0 && !/[.!?]$/.test(words[startIdx - 1])) {
+                startIdx--;
+            }
+            let endIdx = index;
+            while (endIdx < words.length - 1 && !/[.!?]$/.test(words[endIdx])) {
+                endIdx++;
+            }
+            sentenceContext = words.slice(startIdx, endIdx + 1).join(" ");
+        }
+
+        // Format clean strings for the AI prompt
+        if (!typedWord || typedWord === ' ') typedWord = '[Missing Word]';
+        const cleanOriginalForAi = originalWord.replace(/[\[\]]/g, '').trim();
+        const cleanTypedForAi = typedWord.trim();
+
+        triggerAiAnalysis(cleanOriginalForAi, cleanTypedForAi, type, sentenceContext);
     });
 }
 
-// 2. Trigger Analysis (Single Request with Context)
+// 5. TRIGGER AI FETCH
 async function triggerAiAnalysis(original, typed, type, context) {
     const modal = document.getElementById('aiModal');
     const content = document.getElementById('aiModalContent');
@@ -2024,29 +2066,26 @@ async function triggerAiAnalysis(original, typed, type, context) {
     
     modal.classList.add('visible');
     
-    // Create cache key for this specific mistake scenario
     const cacheKey = `${original}_${typed}_${type}`;
     
-    // A. Check Cache (Instant)
+    // Check Cache
     if (aiMistakesCache && aiMistakesCache[cacheKey]) {
         renderAiResult(aiMistakesCache[cacheKey], original, typed);
         return;
     }
 
-    // B. Check if already loading
+    // Check Loading State
     if (isAiFetching) {
         content.style.display = 'none';
         loader.style.display = 'block';
         return;
     }
 
-    // C. Fetch from Backend
     isAiFetching = true;
     content.style.display = 'none';
     loader.style.display = 'block';
 
     try {
-        // Construct an explicit prompt to ensure Gemini behaves as expected
         const promptText = `Act as an English grammar teacher for stenography students.
 Analyze the following transcription mistake:
 Correct word: "${original}"
@@ -2061,15 +2100,10 @@ Respond EXACTLY in this JSON format:
   "examples": ["Example 1 demonstrating correct usage", "Example 2 demonstrating correct usage"]
 }`;
 
-        // Send contextual data & prompt payload to Google Apps Script
         const response = await fetch(GOOGLE_SCRIPT_URL, {
             method: 'POST',
             body: JSON.stringify({
                 action: "analyzeSingle",
-                correctWord: original,
-                typedWord: typed,
-                mistakeType: type,
-                sentenceContext: context,
                 prompt: promptText 
             })
         });
@@ -2078,21 +2112,18 @@ Respond EXACTLY in this JSON format:
         
         if (!data.success) throw new Error("AI Backend Error: " + (data.error || "Unknown error"));
 
-        // Parse structured JSON returned by Gemini
         const cleanJson = data.reply.replace(/```json/g, '').replace(/```/g, '').trim();
         const aiResultData = JSON.parse(cleanJson);
 
-        // Save to cache
         if (!aiMistakesCache) aiMistakesCache = {};
         aiMistakesCache[cacheKey] = aiResultData;
 
-        // Show result
         renderAiResult(aiResultData, original, typed);
 
     } catch (error) {
         console.error(error);
         content.style.display = 'block';
-        content.innerHTML = `<p style="color:#ef4444;">Could not analyze. Reason: ${error.message}</p>`;
+        content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
     } finally {
         isAiFetching = false;
         loader.style.display = 'none';
@@ -2100,7 +2131,7 @@ Respond EXACTLY in this JSON format:
     }
 }
 
-// 3. Helper: Render Structured HTML Output
+// 6. RENDER AI RESPONSE (Ensuring exact styles)
 function renderAiResult(aiData, orig, typed) {
     const content = document.getElementById('aiModalContent');
     
@@ -2108,7 +2139,6 @@ function renderAiResult(aiData, orig, typed) {
     let rule = "Grammar rule not identified.";
     let examplesHtml = "";
 
-    // Parse the newly structured AI data
     if (typeof aiData === 'object') {
         explanation = aiData.explanation || explanation;
         rule = aiData.rule || rule;
@@ -2123,7 +2153,6 @@ function renderAiResult(aiData, orig, typed) {
                 </div>`;
         }
     } else {
-        // Fallback if the AI returned a plain string
         explanation = aiData;
     }
 
