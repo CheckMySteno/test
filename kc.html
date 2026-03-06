@@ -1,3 +1,19 @@
+
+
+
+
+
+Here is the complete, fully updated code. 
+
+I have solved the `"now, Now,"` extraction bug by explicitly separating what the user typed from the injected correction tags (like `<b>` tags) that the system uses to show the expected word. 
+
+More importantly, as requested, **I have completely separated the AI logic into its own dedicated, easy-to-read object called `AITeacher`.** This acts as an isolated module at the very bottom of the script. From now on, if you ever want to change the AI prompt, data extraction, or UI rendering, you only need to look at the `AITeacher` block without touching the rest of the app.
+
+### The Complete Updated Code
+
+Replace your **entire HTML file** with this:
+
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -368,7 +384,7 @@
     }
     
     /* Specific styles for AI Modal & Icon */
-    .ai-mistake-context { background:#f1f5f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #4f46e5; }
+    .ai-mistake-context { background:#f1f5f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #4f46e5; font-size: 0.95rem; }
     .ai-explanation-text { font-size: 1rem; color: #1e293b; }
     .ai-rule-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform:uppercase; margin-bottom: 5px; }
     
@@ -1404,7 +1420,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 
 // ============================= BUG FIX: SMART CROP =============================
 function submitTranscription() {
-    aiMistakesCache = null; 
+    AITeacher.clearCache(); // clear cache on new submit
 
     const timeTakenSeconds = (transcriptionTimerTotalTime - timeLeft) > 0 ? (transcriptionTimerTotalTime - timeLeft) : 0;
     clearState();
@@ -1431,12 +1447,9 @@ function submitTranscription() {
             let userWordsArray = typedText.trim().split(/\s+/).filter(Boolean);
             
             if (targetWords < orgWordsArray.length) {
-                // Strictly crop Original Text to exact target words
                 let targetOrgWords = orgWordsArray.slice(0, targetWords);
                 textForAnalysis = targetOrgWords.join(" ");
                 
-                // --- Smart Crop User Text using DP Alignment ---
-                // This guarantees we find exactly where the original 200th word ends in your typed text
                 const n = targetOrgWords.length;
                 const m = userWordsArray.length;
                 
@@ -1469,8 +1482,6 @@ function submitTranscription() {
                     let minCost = Infinity;
                     let bestJ = m;
 
-                    // Find where the 200th original word ends inside the user's text
-                    // `<= minCost` drops any trailing unneeded words that were typed ahead
                     for (let j = 0; j <= m; j++) {
                         if (dp[n][j] <= minCost) {
                             minCost = dp[n][j];
@@ -1701,7 +1712,9 @@ function initializeResultInteractivity() {
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
 
     initializeInteractiveLegend();
-    initializeAiClickListeners();
+    
+    // Initialize the new modular AI teacher system
+    AITeacher.init();
 }
 
 function openTranscriptModal() {
@@ -1933,20 +1946,31 @@ function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
 
-// --------------------------------------------------------
-// BULLETPROOF AI EXTRACTION SYSTEM
-// --------------------------------------------------------
+// =========================================================================
+// AI TEACHER MODULE - SEPARATED FOR EASY MODIFICATION
+// This handles all Extraction, Context Generation, and API Calls for AI
+// =========================================================================
 
-const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec"; // Ensure this matches your deployment ID
+const AITeacher = {
+    // Make sure this is your active Google Apps Script Deployment URL
+    ENDPOINT_URL: "https://script.google.com/macros/s/AKfycbwuMUAUpcqTexkhDFcCFpfwtWaTQI5qV4r-vCNlN2MGrRWxZrRtxryYw0j9AbLAC1be/exec",
+    
+    cache: {},
+    isFetching: false,
 
-let aiMistakesCache = null; 
-let isAiFetching = false;
+    init: function() {
+        const columns = document.getElementById('comparisonColumns');
+        if (!columns) return;
+        // Bind click listener for the AI icon specifically
+        columns.removeEventListener('click', this.handleMistakeClick);
+        columns.addEventListener('click', this.handleMistakeClick.bind(this));
+    },
 
-function initializeAiClickListeners() {
-    const columns = document.getElementById('comparisonColumns');
-    if (!columns) return;
+    clearCache: function() {
+        this.cache = {}; // Resets on new test submission
+    },
 
-    columns.addEventListener('click', (e) => {
+    handleMistakeClick: function(e) {
         const icon = e.target.closest('.ai-icon');
         if (!icon) return;
 
@@ -1955,199 +1979,254 @@ function initializeAiClickListeners() {
 
         e.stopPropagation(); 
         
-        // 1. EXTRACT TYPE
-        let type = highlight.dataset.mistakeType;
-        if (!type) {
-            if (highlight.classList.contains('capitalization')) type = 'Capitalization';
-            else if (highlight.classList.contains('spelling')) type = 'Spelling';
-            else if (highlight.classList.contains('punctuation')) type = 'Punctuation';
-            else if (highlight.classList.contains('omission')) type = 'Omission';
-            else if (highlight.classList.contains('substitution')) type = 'Substitution';
-            else if (highlight.classList.contains('addition') || highlight.classList.contains('extra')) type = 'Addition';
-            else type = 'Unknown';
-        }
-
-        // 2. EXTRACT WORDS (Handling the <b> tag injected by the worker)
-        const clone = highlight.cloneNode(true);
+        // 1. Extract exactly what was typed, expected, and the context
+        const mistakeData = this.extractMistakeData(highlight);
         
-        // Remove AI Icon from clone
-        const iconNode = clone.querySelector('.ai-icon');
+        // 2. Pass it to the AI Fetch engine
+        this.fetchAnalysis(mistakeData);
+    },
+
+    // ---------------------------------------------------------------------
+    // EXTRACTION LOGIC: Pulls precise words and surrounding raw sentences
+    // ---------------------------------------------------------------------
+    extractMistakeData: function(highlight) {
+        let type = this.getMistakeType(highlight);
+        let clone = highlight.cloneNode(true);
+        
+        // Remove the AI button from the text we want to read
+        let iconNode = clone.querySelector('.ai-icon'); 
         if (iconNode) iconNode.remove();
 
         let originalWord = "unknown";
         let typedWord = "";
 
-        // The worker usually puts the expected correct word inside a <b> tag
-        const bTag = clone.querySelector('b');
-        
-        if (bTag) {
-            // If there's a <b> tag, that's the correct word.
-            originalWord = bTag.innerText.trim();
-            bTag.remove(); // Remove it from the clone
-            // What's left in the clone is the user's typed word
-            typedWord = clone.innerText.trim();
+        // Determine if it is omission/addition
+        let isOmission = highlight.classList.contains('omission');
+        let isAddition = highlight.classList.contains('addition') || highlight.classList.contains('extra');
+
+        // FIX FOR "now, Now," BUG: 
+        // The worker injects the correct word inside a <b> tag.
+        // We MUST remove all child elements (like <b>) to isolate what the user *actually* typed.
+        if (isOmission) {
+            originalWord = clone.textContent.trim();
+            typedWord = "[Missing Word]";
+        } else if (isAddition) {
+            originalWord = "[Extra Word]";
+            Array.from(clone.children).forEach(c => c.remove());
+            typedWord = clone.textContent.trim();
         } else {
-            // No <b> tag found.
-            if (type === 'Omission') {
-                originalWord = clone.innerText.trim();
-                typedWord = "[Missing Word]";
-            } else if (type === 'Addition') {
-                originalWord = "[Extra Word]";
-                typedWord = clone.innerText.trim();
+            // For Substitution, Spelling, Capitalization: Look for the hidden <b> tag
+            let bTag = highlight.querySelector('b');
+            if (bTag) {
+                originalWord = bTag.textContent.trim();
+                // Strip the bTag out of the clone to leave ONLY the user's text
+                Array.from(clone.children).forEach(c => c.remove());
+                typedWord = clone.textContent.trim();
             } else {
-                typedWord = clone.innerText.trim();
-                // Try Tooltip fallback
-                const tooltip = highlight.getAttribute('data-tooltip-text');
-                if (tooltip) {
-                    if (tooltip.includes('Expected:')) originalWord = tooltip.replace(/.*Expected:\s*/i, '').trim();
-                    else if (tooltip.includes('Missing:')) originalWord = tooltip.replace(/.*Missing:\s*/i, '').trim();
-                    else originalWord = tooltip;
+                // Absolute fallback if no <b> tag exists
+                typedWord = clone.textContent.trim();
+                let tooltip = highlight.getAttribute('data-tooltip-text') || "";
+                if (tooltip.includes('Expected:')) {
+                    originalWord = tooltip.split('Expected:')[1].trim();
                 }
             }
         }
 
-        // Clean up trailing commas/periods for the prompt to avoid confusing the AI
-        let cleanOriginalForAi = originalWord.replace(/^[^\w]+|[^\w]+$/g, ''); 
-        let cleanTypedForAi = typedWord.replace(/^[^\w]+|[^\w]+$/g, '');
+        // Clean punctuation for clear prompt reading
+        let cleanOriginal = originalWord.replace(/^[^\w]+|[^\w]+$/g, '') || originalWord;
+        let cleanTyped = typedWord.replace(/^[^\w]+|[^\w]+$/g, '') || typedWord;
 
-        if (!cleanTypedForAi) cleanTypedForAi = typedWord || "[None]";
-        if (!cleanOriginalForAi) cleanOriginalForAi = originalWord || "unknown";
+        // Get Surrounding Sentence Contexts
+        let userContext = this.getUserContext(highlight, cleanTyped);
+        let origContext = this.getOriginalContext(highlight, cleanOriginal);
 
-        // 3. EXTRACT CONTEXT (Grab surrounding words from originalText based on originalWord)
-        let sentenceContext = "Context not fully available.";
-        if (g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
-            let origArray = g_lastAnalysisResult.originalWords;
-            // Find index of the word
-            let searchWord = cleanOriginalForAi.toLowerCase();
-            let foundIdx = origArray.findIndex(w => w.toLowerCase().replace(/[^a-z0-9]/g, '') === searchWord.replace(/[^a-z0-9]/g, ''));
-            
-            if (foundIdx !== -1) {
-                let start = Math.max(0, foundIdx - 10);
-                let end = Math.min(origArray.length - 1, foundIdx + 10);
-                sentenceContext = origArray.slice(start, end + 1).join(" ") + "...";
-            } else {
-                // Fallback context: Just send the first 30 words of the text
-                sentenceContext = origArray.slice(0, 30).join(" ") + "...";
-            }
+        return {
+            type: type,
+            originalWord: cleanOriginal,
+            typedWord: cleanTyped,
+            userContext: userContext,
+            originalContext: origContext
+        };
+    },
+
+    getMistakeType: function(highlight) {
+        if (highlight.dataset.mistakeType) return highlight.dataset.mistakeType;
+        if (highlight.classList.contains('capitalization')) return 'Capitalization';
+        if (highlight.classList.contains('spelling')) return 'Spelling';
+        if (highlight.classList.contains('punctuation')) return 'Punctuation';
+        if (highlight.classList.contains('omission')) return 'Omission';
+        if (highlight.classList.contains('substitution')) return 'Substitution';
+        if (highlight.classList.contains('addition') || highlight.classList.contains('extra')) return 'Addition';
+        return 'Unknown';
+    },
+
+    // Gets the previous 10 words and next 10 words from the DOM directly around the error
+    getUserContext: function(element, isolatedTypedWord) {
+        let before =[];
+        let curr = element.previousSibling;
+        while (curr && before.length < 15) {
+            let text = curr.textContent || curr.innerText || "";
+            let words = text.trim().split(/\s+/).filter(Boolean);
+            before.unshift(...words);
+            curr = curr.previousSibling;
+        }
+        
+        let after =[];
+        curr = element.nextSibling;
+        while (curr && after.length < 15) {
+            let text = curr.textContent || curr.innerText || "";
+            let words = text.trim().split(/\s+/).filter(Boolean);
+            after.push(...words);
+            curr = curr.nextSibling;
+        }
+        
+        let preStr = before.slice(-10).join(" ");
+        let postStr = after.slice(0, 10).join(" ");
+        return `${preStr}[${isolatedTypedWord}] ${postStr}`;
+    },
+
+    // Finds the word in the original array and grabs surrounding words
+    getOriginalContext: function(element, cleanOriginal) {
+        let origArray = g_lastAnalysisResult ? g_lastAnalysisResult.originalWords :[];
+        if (!origArray || origArray.length === 0) return "Context not available.";
+
+        // Estimate proportional position in text to prevent matching the wrong "the" or "now"
+        let allHighlights = Array.from(document.querySelectorAll('#editableTypedText .highlight'));
+        let elementIndex = allHighlights.indexOf(element);
+        let ratio = Math.max(0, elementIndex / (allHighlights.length || 1));
+        let estimatedCenter = Math.floor(ratio * origArray.length);
+
+        let start = Math.max(0, estimatedCenter - 15);
+        let end = Math.min(origArray.length, estimatedCenter + 15);
+        
+        return origArray.slice(start, end).join(" ") + "...";
+    },
+
+    // ---------------------------------------------------------------------
+    // API FETCH LOGIC: Constructs prompt and calls backend
+    // ---------------------------------------------------------------------
+    fetchAnalysis: async function(data) {
+        const modal = document.getElementById('aiModal');
+        const content = document.getElementById('aiModalContent');
+        const loader = document.getElementById('aiLoadingState');
+        
+        modal.classList.add('visible');
+        
+        const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
+        
+        if (this.cache[cacheKey]) {
+            this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
+            return;
         }
 
-        triggerAiAnalysis(cleanOriginalForAi, cleanTypedForAi, type, sentenceContext);
-    });
-}
+        if (this.isFetching) {
+            content.style.display = 'none';
+            loader.style.display = 'block';
+            return;
+        }
 
-// 4. TRIGGER AI FETCH
-async function triggerAiAnalysis(original, typed, type, context) {
-    const modal = document.getElementById('aiModal');
-    const content = document.getElementById('aiModalContent');
-    const loader = document.getElementById('aiLoadingState');
-    
-    modal.classList.add('visible');
-    
-    const cacheKey = `${original}_${typed}_${type}`;
-    
-    // Check Cache
-    if (aiMistakesCache && aiMistakesCache[cacheKey]) {
-        renderAiResult(aiMistakesCache[cacheKey], original, typed);
-        return;
-    }
-
-    // Check Loading State
-    if (isAiFetching) {
+        this.isFetching = true;
         content.style.display = 'none';
         loader.style.display = 'block';
-        return;
-    }
 
-    isAiFetching = true;
-    content.style.display = 'none';
-    loader.style.display = 'block';
+        try {
+            // Highly specific prompt with pure raw text context injected
+            const promptText = `Act as an English grammar teacher for stenography students.
+A student made a transcription error. Analyze it and explain the grammar rule.
 
-    try {
-        const promptText = `Act as an English grammar teacher for stenography students.
-Analyze the following transcription mistake:
-Correct word: "${original}"
-Typed word: "${typed}"
-Mistake type: "${type}"
-Sentence context: "${context}"
+Error Type: ${data.type}
+What the student typed: "${data.typedWord}"
+What the original passage actually said: "${data.originalWord}"
 
+--- Context ---
+Student's Raw Sentence: "... ${data.userContext} ..."
+Original Raw Sentence: "... ${data.originalContext} ..."
+
+Explain why the student's typed word is grammatically or contextually incorrect here. 
 Respond EXACTLY in this JSON format:
 {
-  "explanation": "Explain why the student's word is incorrect based on the context.",
-  "rule": "Explain the grammar, spelling, or punctuation rule involved.",
-  "examples":["Example 1 demonstrating correct usage", "Example 2 demonstrating correct usage"]
+  "explanation": "Explain why it is incorrect based purely on the provided context.",
+  "rule": "Explain the grammar, capitalization, or punctuation rule involved.",
+  "examples": ["Example 1", "Example 2"]
 }`;
 
-        const response = await fetch(GOOGLE_SCRIPT_URL, {
-            method: 'POST',
-            body: JSON.stringify({
-                action: "analyzeSingle",
-                prompt: promptText 
-            })
-        });
+            const response = await fetch(this.ENDPOINT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: "analyzeSingle",
+                    prompt: promptText 
+                })
+            });
 
-        const data = await response.json();
-        
-        if (!data.success) throw new Error("AI Backend Error: " + (data.error || "Unknown error"));
+            const result = await response.json();
+            
+            if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
 
-        const cleanJson = data.reply.replace(/```json/g, '').replace(/```/g, '').trim();
-        const aiResultData = JSON.parse(cleanJson);
+            // Parse response safely
+            const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+            const aiParsedData = JSON.parse(cleanJson);
 
-        if (!aiMistakesCache) aiMistakesCache = {};
-        aiMistakesCache[cacheKey] = aiResultData;
+            // Save to Cache
+            this.cache[cacheKey] = aiParsedData;
 
-        renderAiResult(aiResultData, original, typed);
+            // Render
+            this.renderUI(aiParsedData, data.originalWord, data.typedWord);
 
-    } catch (error) {
-        console.error(error);
-        content.style.display = 'block';
-        content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
-    } finally {
-        isAiFetching = false;
-        loader.style.display = 'none';
-        content.style.display = 'block';
-    }
-}
-
-// 5. RENDER AI RESPONSE
-function renderAiResult(aiData, orig, typed) {
-    const content = document.getElementById('aiModalContent');
-    
-    let explanation = "General error detected. Please review spelling and rules.";
-    let rule = "Grammar rule not identified.";
-    let examplesHtml = "";
-
-    if (typeof aiData === 'object') {
-        explanation = aiData.explanation || explanation;
-        rule = aiData.rule || rule;
-        
-        if (aiData.examples && Array.isArray(aiData.examples)) {
-            examplesHtml = `
-                <div style="margin-top: 15px;">
-                    <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
-                    <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
-                        ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
-                    </ul>
-                </div>`;
+        } catch (error) {
+            console.error(error);
+            content.style.display = 'block';
+            content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
+        } finally {
+            this.isFetching = false;
+            loader.style.display = 'none';
+            content.style.display = 'block';
         }
-    } else {
-        explanation = aiData;
-    }
+    },
 
-    content.innerHTML = `
-        <div class="ai-mistake-context">
-            Comparing: <b>${orig}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typed}</b> <span style="color:#dc2626">(Your Typo)</span>
-        </div>
-        <div>
-            <span class="ai-rule-badge">Explanation</span>
-            <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
-        </div>
-        <div>
-            <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
-            <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
-        </div>
-        ${examplesHtml}
-    `;
-}
+    // ---------------------------------------------------------------------
+    // UI RENDER LOGIC: Formats the JSON into HTML
+    // ---------------------------------------------------------------------
+    renderUI: function(aiData, origWord, typedWord) {
+        const content = document.getElementById('aiModalContent');
+        
+        let explanation = "General error detected.";
+        let rule = "Grammar rule not identified.";
+        let examplesHtml = "";
+
+        if (typeof aiData === 'object') {
+            explanation = aiData.explanation || explanation;
+            rule = aiData.rule || rule;
+            
+            if (aiData.examples && Array.isArray(aiData.examples)) {
+                examplesHtml = `
+                    <div style="margin-top: 15px;">
+                        <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
+                        <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
+                            ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
+                        </ul>
+                    </div>`;
+            }
+        } else {
+            explanation = aiData; // Fallback if AI returned raw string
+        }
+
+        content.innerHTML = `
+            <div class="ai-mistake-context">
+                Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
+            </div>
+            <div>
+                <span class="ai-rule-badge">Explanation</span>
+                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
+            </div>
+            <div>
+                <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
+                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
+            </div>
+            ${examplesHtml}
+        `;
+    }
+};
+// =========================================================================
 
 </script>
 </body>
