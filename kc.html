@@ -808,7 +808,7 @@ document.addEventListener("DOMContentLoaded", initializePracticeKC);
 // --- Anti-Cheating & Setup ---
 function setupAntiInspection() {
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'J', 'C'].includes(e.key)) || (e.ctrlKey && e.key === 'u')) {
+        if (e.key === 'F12' || (e.ctrlKey && e.shiftKey &&['I', 'J', 'C'].includes(e.key)) || (e.ctrlKey && e.key === 'u')) {
             e.preventDefault();
         }
     });
@@ -1963,102 +1963,79 @@ function initializeAiClickListeners() {
             else if (highlight.classList.contains('punctuation')) type = 'Punctuation';
             else if (highlight.classList.contains('omission')) type = 'Omission';
             else if (highlight.classList.contains('substitution')) type = 'Substitution';
-            else if (highlight.classList.contains('addition')) type = 'Addition';
+            else if (highlight.classList.contains('addition') || highlight.classList.contains('extra')) type = 'Addition';
             else type = 'Unknown';
         }
 
-        // 2. EXTRACT TYPED WORD (Removing the AI Icon correctly)
+        // 2. EXTRACT WORDS (Handling the <b> tag injected by the worker)
         const clone = highlight.cloneNode(true);
-        const icons = clone.querySelectorAll('.ai-icon');
-        icons.forEach(i => i.remove());
-        let typedWord = clone.innerText.trim();
+        
+        // Remove AI Icon from clone
+        const iconNode = clone.querySelector('.ai-icon');
+        if (iconNode) iconNode.remove();
 
-        // 3. EXTRACT ORIGINAL WORD (4-Layer Fallback)
         let originalWord = "unknown";
-        let index = -1;
+        let typedWord = "";
 
-        // Layer A: Explicit dataset-correct attribute
-        if (highlight.dataset.correct) {
-            originalWord = highlight.dataset.correct;
-        }
-
-        // Layer B: Extract from Tooltip (Most reliable fallback for web worker highlight systems)
-        if (originalWord === "unknown" || !originalWord) {
-            const tooltip = highlight.getAttribute('data-tooltip-text');
-            if (tooltip) {
-                if (tooltip.toLowerCase().includes('expected:')) {
-                    originalWord = tooltip.replace(/.*Expected:\s*/i, '').trim();
-                } else if (tooltip.toLowerCase().includes('missing:')) {
-                    originalWord = tooltip.replace(/.*Missing:\s*/i, '').trim();
-                } else {
-                    originalWord = tooltip; 
+        // The worker usually puts the expected correct word inside a <b> tag
+        const bTag = clone.querySelector('b');
+        
+        if (bTag) {
+            // If there's a <b> tag, that's the correct word.
+            originalWord = bTag.innerText.trim();
+            bTag.remove(); // Remove it from the clone
+            // What's left in the clone is the user's typed word
+            typedWord = clone.innerText.trim();
+        } else {
+            // No <b> tag found.
+            if (type === 'Omission') {
+                originalWord = clone.innerText.trim();
+                typedWord = "[Missing Word]";
+            } else if (type === 'Addition') {
+                originalWord = "[Extra Word]";
+                typedWord = clone.innerText.trim();
+            } else {
+                typedWord = clone.innerText.trim();
+                // Try Tooltip fallback
+                const tooltip = highlight.getAttribute('data-tooltip-text');
+                if (tooltip) {
+                    if (tooltip.includes('Expected:')) originalWord = tooltip.replace(/.*Expected:\s*/i, '').trim();
+                    else if (tooltip.includes('Missing:')) originalWord = tooltip.replace(/.*Missing:\s*/i, '').trim();
+                    else originalWord = tooltip;
                 }
             }
         }
 
-        // Try getting exact array index
-        if (highlight.dataset.index) {
-            index = parseInt(highlight.dataset.index, 10);
-        } else {
-            const wordWrapper = highlight.closest('.word-wrapper');
-            if (wordWrapper && wordWrapper.dataset.index) {
-                index = parseInt(wordWrapper.dataset.index, 10);
+        // Clean up trailing commas/periods for the prompt to avoid confusing the AI
+        let cleanOriginalForAi = originalWord.replace(/^[^\w]+|[^\w]+$/g, ''); 
+        let cleanTypedForAi = typedWord.replace(/^[^\w]+|[^\w]+$/g, '');
+
+        if (!cleanTypedForAi) cleanTypedForAi = typedWord || "[None]";
+        if (!cleanOriginalForAi) cleanOriginalForAi = originalWord || "unknown";
+
+        // 3. EXTRACT CONTEXT (Grab surrounding words from originalText based on originalWord)
+        let sentenceContext = "Context not fully available.";
+        if (g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
+            let origArray = g_lastAnalysisResult.originalWords;
+            // Find index of the word
+            let searchWord = cleanOriginalForAi.toLowerCase();
+            let foundIdx = origArray.findIndex(w => w.toLowerCase().replace(/[^a-z0-9]/g, '') === searchWord.replace(/[^a-z0-9]/g, ''));
+            
+            if (foundIdx !== -1) {
+                let start = Math.max(0, foundIdx - 10);
+                let end = Math.min(origArray.length - 1, foundIdx + 10);
+                sentenceContext = origArray.slice(start, end + 1).join(" ") + "...";
+            } else {
+                // Fallback context: Just send the first 30 words of the text
+                sentenceContext = origArray.slice(0, 30).join(" ") + "...";
             }
         }
-
-        const cleanTyped = typedWord.replace(/[^\w\s-]/g, '').toLowerCase().trim();
-
-        // Layer C: Fallback to the student mistakes object arrays (Absolute guarantee for typos)
-        if (originalWord === "unknown" && g_lastAnalysisResult && g_lastAnalysisResult.studentMistakes) {
-            const sm = g_lastAnalysisResult.studentMistakes;
-            let match = null;
-            if (type === 'Capitalization' && sm.capitalisation) {
-                match = sm.capitalisation.find(m => m.wrong.replace(/[^\w\s-]/g, '').toLowerCase() === cleanTyped);
-                if (match) originalWord = match.correct;
-            } else if (type === 'Spelling' && sm.spelling) {
-                match = sm.spelling.find(m => m.wrong.replace(/[^\w\s-]/g, '').toLowerCase() === cleanTyped);
-                if (match) originalWord = match.correct;
-            } else if ((type === 'Substitution' || type === 'Addition') && sm.replacements) {
-                match = sm.replacements.find(m => m.added.replace(/[^\w\s-]/g, '').toLowerCase() === cleanTyped);
-                if (match) originalWord = match.omitted;
-            }
-        }
-
-        // Layer D: Array indexing fallback
-        if (originalWord === "unknown" && !isNaN(index) && index >= 0 && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
-            originalWord = g_lastAnalysisResult.originalWords[index] || "unknown";
-        }
-
-        // 4. EXTRACT SENTENCE CONTEXT
-        if ((isNaN(index) || index < 0) && originalWord !== "unknown" && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
-            const cleanOrig = originalWord.replace(/[^\w\s-]/g, '').toLowerCase().trim();
-            index = g_lastAnalysisResult.originalWords.findIndex(w => w.replace(/[^\w\s-]/g, '').toLowerCase() === cleanOrig);
-        }
-
-        let sentenceContext = "Context not available.";
-        if (!isNaN(index) && index >= 0 && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
-            const words = g_lastAnalysisResult.originalWords;
-            let startIdx = index;
-            while (startIdx > 0 && !/[.!?]$/.test(words[startIdx - 1])) {
-                startIdx--;
-            }
-            let endIdx = index;
-            while (endIdx < words.length - 1 && !/[.!?]$/.test(words[endIdx])) {
-                endIdx++;
-            }
-            sentenceContext = words.slice(startIdx, endIdx + 1).join(" ");
-        }
-
-        // Format clean strings for the AI prompt
-        if (!typedWord || typedWord === ' ') typedWord = '[Missing Word]';
-        const cleanOriginalForAi = originalWord.replace(/[\[\]]/g, '').trim();
-        const cleanTypedForAi = typedWord.trim();
 
         triggerAiAnalysis(cleanOriginalForAi, cleanTypedForAi, type, sentenceContext);
     });
 }
 
-// 5. TRIGGER AI FETCH
+// 4. TRIGGER AI FETCH
 async function triggerAiAnalysis(original, typed, type, context) {
     const modal = document.getElementById('aiModal');
     const content = document.getElementById('aiModalContent');
@@ -2097,7 +2074,7 @@ Respond EXACTLY in this JSON format:
 {
   "explanation": "Explain why the student's word is incorrect based on the context.",
   "rule": "Explain the grammar, spelling, or punctuation rule involved.",
-  "examples": ["Example 1 demonstrating correct usage", "Example 2 demonstrating correct usage"]
+  "examples":["Example 1 demonstrating correct usage", "Example 2 demonstrating correct usage"]
 }`;
 
         const response = await fetch(GOOGLE_SCRIPT_URL, {
@@ -2131,7 +2108,7 @@ Respond EXACTLY in this JSON format:
     }
 }
 
-// 6. RENDER AI RESPONSE (Ensuring exact styles)
+// 5. RENDER AI RESPONSE
 function renderAiResult(aiData, orig, typed) {
     const content = document.getElementById('aiModalContent');
     
