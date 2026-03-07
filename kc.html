@@ -1975,63 +1975,71 @@ const AITeacher = {
     // ---------------------------------------------------------------------
     extractMistakeData: function(highlight) {
         let type = this.getMistakeType(highlight);
-        let originalWord = "";
-        let typedWord = "";
+        let clone = highlight.cloneNode(true);
+        let iconNode = clone.querySelector('.ai-icon'); 
+        if (iconNode) iconNode.remove();
 
-        // Determine if it is omission/addition
-        let isOmission = highlight.classList.contains('omission');
-        let isAddition = highlight.classList.contains('addition') || highlight.classList.contains('extra');
+        let wrongText = "";
+        let correctText = "";
 
-        // FIX FOR "now, Now," BUG: 
-        // We MUST explicitly extract ONLY the text nodes from the highlight element to get what the user typed.
-        // We ignore the inner HTML elements (like <b> tags and the ai-icon) which contain the system's corrections.
-        for (let child of highlight.childNodes) {
-            if (child.nodeType === Node.TEXT_NODE) {
-                typedWord += child.textContent;
-            }
-        }
-        typedWord = typedWord.trim();
-
-        // Extract original word
-        let bTag = highlight.querySelector('b');
-        if (bTag) {
-            originalWord = bTag.textContent.trim();
+        // NEW DOM EXTRACTION LOGIC:
+        // We look specifically for tags the worker injects to separate your text from the answer.
+        
+        // 1. Find the crossed out word (what the user typed)
+        let strikeEl = clone.querySelector('del, s, strike');
+        if (strikeEl) {
+            wrongText = strikeEl.textContent.trim();
+            strikeEl.remove();
         }
 
-        // Apply rules based on type
-        if (isOmission) {
-            originalWord = typedWord; // In omission, the text node IS the missed word
-            typedWord = "[Missing Word]";
-        } else if (isAddition) {
-            originalWord = "[Extra Word]";
-            // typedWord is already correct from the text node extraction
-        } else if (!bTag) {
-            // Absolute fallback if no <b> tag exists
-            let tooltip = highlight.getAttribute('data-tooltip-text') || "";
-            if (tooltip.includes('Expected:')) {
-                originalWord = tooltip.split('Expected:')[1].trim();
+        // 2. Find the correct word injected by the worker
+        let boldEl = clone.querySelector('b, ins');
+        if (boldEl) {
+            correctText = boldEl.textContent.trim();
+            boldEl.remove();
+        }
+
+        // 3. Whatever is left over after removing the tags
+        let remainingText = clone.textContent.trim();
+
+        // 4. Resolve the words based on the tags we found
+        if (wrongText && correctText) {
+            // We successfully separated both from tags!
+        } else if (wrongText && !correctText) {
+            correctText = remainingText;
+        } else if (!wrongText && correctText) {
+            wrongText = remainingText;
+        } else {
+            // No explicit tags found, rely on mistake type
+            if (type === 'Omission') {
+                correctText = remainingText;
+                wrongText = "[Missing Word]";
+            } else if (type === 'Addition') {
+                wrongText = remainingText;
+                correctText = "[Extra Word]";
             } else {
-                originalWord = "unknown";
+                wrongText = remainingText;
+                // Attempt tooltip fallback for correct text
+                let tooltip = highlight.getAttribute('data-tooltip-text') || "";
+                if (tooltip.includes('Expected:')) {
+                    correctText = tooltip.split('Expected:')[1].trim();
+                } else if (tooltip.includes('Missing:')) {
+                    correctText = tooltip.split('Missing:')[1].trim();
+                } else {
+                    correctText = "unknown";
+                }
             }
         }
 
-        // Clean punctuation for clear prompt reading
-        let cleanOriginal = originalWord.replace(/^[^\w]+|[^\w]+$/g, '') || originalWord;
-        let cleanTyped = typedWord.replace(/^[^\w]+|[^\w]+$/g, '') || typedWord;
+        let cleanOriginal = correctText.trim();
+        let cleanTyped = wrongText.trim();
 
-        // Get Surrounding Sentence Contexts
-        // We grab 4 words immediately before the mistake to find exactly where this happened in the raw text.
-        let anchorText = "";
-        let prev = highlight.previousSibling;
-        while (prev && anchorText.length < 40) {
-            let txt = prev.textContent || prev.innerText || "";
-            anchorText = txt.trim() + " " + anchorText;
-            prev = prev.previousSibling;
-        }
-        let anchorWords = anchorText.trim().split(/\s+/).filter(Boolean).slice(-4).join(" ");
+        // GET CONTEXT FROM THE RAW TEXT STRINGS
+        // We get a 3-word anchor before the mistake to safely find it in the raw strings
+        let anchorWords = this.getAnchorWords(highlight);
 
-        let userContext = this.findContextInRawString(g_lastTypedText || "", anchorWords, cleanTyped);
-        let origContext = this.findContextInRawString(originalText || "", anchorWords, cleanOriginal);
+        let userContext = this.findContext(g_lastTypedText, anchorWords, cleanTyped, type === 'Omission');
+        let origContext = this.findContext(originalText, anchorWords, cleanOriginal, type === 'Addition');
 
         return {
             type: type,
@@ -2053,42 +2061,90 @@ const AITeacher = {
         return 'Unknown';
     },
 
-    // Finds the word in the completely raw text arrays and returns a 25-word window
-    findContextInRawString: function(rawString, anchorWords, targetWord) {
-        if (!rawString) return "Context not available.";
-        let words = rawString.split(/\s+/);
+    getAnchorWords: function(highlight) {
+        // Walks backwards in the DOM to gather the 3 words the user typed immediately before the error
+        let container = document.getElementById('editableTypedText');
+        if (!container) return "";
+        let walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
+        let node;
+        let textBefore = "";
         
-        let targetLower = targetWord.toLowerCase().replace(/[^\w]/g, '');
+        while ((node = walker.nextNode())) {
+            if (highlight.contains(node)) break;
+            
+            // Skip injected worker tags in prior highlights so we only get pure user text
+            let parent = node.parentElement;
+            if (parent && (parent.tagName === 'B' || parent.tagName === 'INS')) continue;
+            
+            textBefore += " " + node.textContent;
+        }
+        
+        let words = textBefore.trim().split(/\s+/).filter(Boolean);
+        return words.slice(-3).join(" ");
+    },
+
+    findContext: function(rawText, anchorText, targetWord, isMissing) {
+        // Searches the RAW string to build a perfect 20-word window context
+        if (!rawText) return "Context not available.";
+        let words = rawText.split(/\s+/);
+        
+        let targetClean = targetWord.toLowerCase().replace(/[^\w]/g, '');
+        let anchorClean = anchorText.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(Boolean);
+        
         let bestIdx = -1;
         
         for (let i = 0; i < words.length; i++) {
-            let w = words[i].toLowerCase().replace(/[^\w]/g, '');
-            if (w === targetLower) {
-                bestIdx = i; // found a match
-                
-                // Use anchor to verify it's the CORRECT "now" or "the"
-                let anchorArr = anchorWords.toLowerCase().split(' ');
-                if (anchorArr.length > 0 && i > 0) {
-                    let prevW = words[i-1].toLowerCase().replace(/[^\w]/g, '');
-                    if (prevW === anchorArr[anchorArr.length - 1].replace(/[^\w]/g, '')) {
-                        break; // Perfect match found!
+            if (isMissing) {
+                // If it's a missing word, we just match the anchor exactly
+                if (anchorClean.length > 0 && i >= anchorClean.length) {
+                    let anchorMatch = true;
+                    for (let a = 0; a < anchorClean.length; a++) {
+                        if (words[i - anchorClean.length + a].toLowerCase().replace(/[^\w]/g, '') !== anchorClean[a]) {
+                            anchorMatch = false;
+                            break;
+                        }
                     }
-                } else {
-                    break; // No anchor to check
+                    if (anchorMatch) {
+                        bestIdx = i;
+                        break;
+                    }
+                }
+            } else {
+                // If not missing, match the target word AND the anchor
+                if (words[i].toLowerCase().replace(/[^\w]/g, '') === targetClean) {
+                    if (anchorClean.length === 0) {
+                        bestIdx = i;
+                        break;
+                    } else if (i >= anchorClean.length) {
+                        let anchorMatch = true;
+                        for (let a = 0; a < anchorClean.length; a++) {
+                            if (words[i - anchorClean.length + a].toLowerCase().replace(/[^\w]/g, '') !== anchorClean[a]) {
+                                anchorMatch = false;
+                                break;
+                            }
+                        }
+                        if (anchorMatch) {
+                            bestIdx = i;
+                            break;
+                        }
+                    }
+                    if (bestIdx === -1) bestIdx = i; // Fallback
                 }
             }
         }
         
-        if (bestIdx === -1) bestIdx = Math.floor(words.length / 2); // default to middle if not found
+        if (bestIdx === -1) bestIdx = Math.floor(words.length / 2); // Absolute fallback
         
-        let start = Math.max(0, bestIdx - 12);
-        let end = Math.min(words.length, bestIdx + 12);
+        let start = Math.max(0, bestIdx - 10);
+        let end = Math.min(words.length, bestIdx + 10);
         
-        // Wrap the target word in brackets so the AI knows exactly which one is being discussed
         let windowWords = words.slice(start, end);
+        
         let adjustedIdx = bestIdx - start;
-        if (windowWords[adjustedIdx]) {
-            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
+        if (!isMissing && windowWords[adjustedIdx]) {
+            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`; // highlight word in context
+        } else if (isMissing && windowWords[adjustedIdx]) {
+            windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
         }
         
         return windowWords.join(" ") + "...";
@@ -2124,22 +2180,22 @@ const AITeacher = {
         try {
             // Highly specific prompt with pure raw text context injected
             const promptText = `Act as an English grammar teacher for stenography students.
-A student made a transcription error. Analyze it and explain the grammar rule.
+A student made a transcription error. Analyze it and explain the grammar or punctuation rule.
 
 Error Type: ${data.type}
-What the student typed: "${data.typedWord}"
-What the original passage actually said: "${data.originalWord}"
+What the student ACTUALLY TYPED: "${data.typedWord}"
+What the original passage CORRECTLY HAD: "${data.originalWord}"
 
 --- Context ---
 Student's Raw Sentence: "... ${data.userContext} ..."
 Original Raw Sentence: "... ${data.originalContext} ..."
 
-Explain why the student's typed word is grammatically or contextually incorrect here. 
+Explain why "${data.typedWord}" is incorrect and why "${data.originalWord}" is correct based purely on the provided context. Do not hallucinate errors.
 Respond EXACTLY in this JSON format:
 {
-  "explanation": "Explain why it is incorrect based purely on the provided context.",
-  "rule": "Explain the grammar, capitalization, or punctuation rule involved.",
-  "examples": ["Example 1", "Example 2"]
+  "explanation": "Clear explanation of the mistake based on the context.",
+  "rule": "The underlying grammar, spelling, or punctuation rule.",
+  "examples":["Correct example 1", "Correct example 2"]
 }`;
 
             const response = await fetch(this.ENDPOINT_URL, {
