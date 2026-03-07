@@ -1929,7 +1929,8 @@ function capitalizeFirstLetter(string) {
     if(!string) return '';
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
-     // =========================================================================
+
+// =========================================================================
 // AI TEACHER MODULE - SEPARATED FOR EASY MODIFICATION
 // This handles all Extraction, Context Generation, and API Calls for AI
 // =========================================================================
@@ -1944,82 +1945,93 @@ const AITeacher = {
     init: function() {
         const columns = document.getElementById('comparisonColumns');
         if (!columns) return;
+        // Bind click listener for the AI icon specifically
         columns.removeEventListener('click', this.handleMistakeClick);
         columns.addEventListener('click', this.handleMistakeClick.bind(this));
     },
 
     clearCache: function() {
-        this.cache = {};
+        this.cache = {}; // Resets on new test submission
     },
 
     handleMistakeClick: function(e) {
         const icon = e.target.closest('.ai-icon');
         if (!icon) return;
 
-        const highlight = icon.closest('.highlight');
+        const highlight = e.target.closest('.highlight');
         if (!highlight) return;
 
         e.stopPropagation(); 
         
+        // 1. Extract exactly what was typed, expected, and the context
         const mistakeData = this.extractMistakeData(highlight);
+        
+        // 2. Pass it to the AI Fetch engine
         this.fetchAnalysis(mistakeData);
     },
 
     // ---------------------------------------------------------------------
-    // EXTRACTION LOGIC
+    // EXTRACTION LOGIC: Pulls precise words and surrounding raw sentences
     // ---------------------------------------------------------------------
     extractMistakeData: function(highlight) {
-
         let type = this.getMistakeType(highlight);
-        let clone = highlight.cloneNode(true);
-        
-        let iconNode = clone.querySelector('.ai-icon'); 
-        if (iconNode) iconNode.remove();
-
-        let originalWord = "unknown";
+        let originalWord = "";
         let typedWord = "";
 
+        // Determine if it is omission/addition
         let isOmission = highlight.classList.contains('omission');
         let isAddition = highlight.classList.contains('addition') || highlight.classList.contains('extra');
 
+        // FIX FOR "now, Now," BUG: 
+        // We MUST explicitly extract ONLY the text nodes from the highlight element to get what the user typed.
+        // We ignore the inner HTML elements (like <b> tags and the ai-icon) which contain the system's corrections.
+        for (let child of highlight.childNodes) {
+            if (child.nodeType === Node.TEXT_NODE) {
+                typedWord += child.textContent;
+            }
+        }
+        typedWord = typedWord.trim();
+
+        // Extract original word
+        let bTag = highlight.querySelector('b');
+        if (bTag) {
+            originalWord = bTag.textContent.trim();
+        }
+
+        // Apply rules based on type
         if (isOmission) {
-
-            originalWord = clone.textContent.trim();
+            originalWord = typedWord; // In omission, the text node IS the missed word
             typedWord = "[Missing Word]";
-
         } else if (isAddition) {
-
             originalWord = "[Extra Word]";
-            Array.from(clone.children).forEach(c => c.remove());
-            typedWord = clone.textContent.trim();
-
-        } else {
-
-            let bTag = highlight.querySelector('b');
-
-            if (bTag) {
-
-                originalWord = bTag.textContent.trim();
-                Array.from(clone.children).forEach(c => c.remove());
-                typedWord = clone.textContent.trim();
-
+            // typedWord is already correct from the text node extraction
+        } else if (!bTag) {
+            // Absolute fallback if no <b> tag exists
+            let tooltip = highlight.getAttribute('data-tooltip-text') || "";
+            if (tooltip.includes('Expected:')) {
+                originalWord = tooltip.split('Expected:')[1].trim();
             } else {
-
-                typedWord = clone.textContent.trim();
-
-                let tooltip = highlight.getAttribute('data-tooltip-text') || "";
-
-                if (tooltip.includes('Expected:')) {
-                    originalWord = tooltip.split('Expected:')[1].trim();
-                }
+                originalWord = "unknown";
             }
         }
 
+        // Clean punctuation for clear prompt reading
         let cleanOriginal = originalWord.replace(/^[^\w]+|[^\w]+$/g, '') || originalWord;
         let cleanTyped = typedWord.replace(/^[^\w]+|[^\w]+$/g, '') || typedWord;
 
-        let userContext = this.getUserContext(highlight, cleanTyped);
-        let origContext = this.getOriginalContext(highlight, cleanOriginal);
+        // Get Surrounding Sentence Contexts
+        // We grab 4 words immediately before the mistake to find exactly where this happened in the raw text.
+        let anchorText = "";
+        let prev = highlight.previousSibling;
+        while (prev && anchorText.length < 40) {
+            let txt = prev.textContent || prev.innerText || "";
+            anchorText = txt.trim() + " " + anchorText;
+            prev = prev.previousSibling;
+        }
+        let anchorWords = anchorText.trim().split(/\s+/).filter(Boolean).slice(-4).join(" ");
+
+        let userContext = this.findContextInRawString(g_lastTypedText || "", anchorWords, cleanTyped);
+        let origContext = this.findContextInRawString(originalText || "", anchorWords, cleanOriginal);
 
         return {
             type: type,
@@ -2031,7 +2043,6 @@ const AITeacher = {
     },
 
     getMistakeType: function(highlight) {
-
         if (highlight.dataset.mistakeType) return highlight.dataset.mistakeType;
         if (highlight.classList.contains('capitalization')) return 'Capitalization';
         if (highlight.classList.contains('spelling')) return 'Spelling';
@@ -2039,66 +2050,54 @@ const AITeacher = {
         if (highlight.classList.contains('omission')) return 'Omission';
         if (highlight.classList.contains('substitution')) return 'Substitution';
         if (highlight.classList.contains('addition') || highlight.classList.contains('extra')) return 'Addition';
-
         return 'Unknown';
     },
 
-    // ---------------------------------------------------------------------
-    // CONTEXT EXTRACTION
-    // ---------------------------------------------------------------------
-    getUserContext: function(element, isolatedTypedWord) {
-
-        let before = [];
-        let curr = element.previousSibling;
-
-        while (curr && before.length < 15) {
-            let text = curr.textContent || curr.innerText || "";
-            let words = text.trim().split(/\s+/).filter(Boolean);
-            before.unshift(...words);
-            curr = curr.previousSibling;
+    // Finds the word in the completely raw text arrays and returns a 25-word window
+    findContextInRawString: function(rawString, anchorWords, targetWord) {
+        if (!rawString) return "Context not available.";
+        let words = rawString.split(/\s+/);
+        
+        let targetLower = targetWord.toLowerCase().replace(/[^\w]/g, '');
+        let bestIdx = -1;
+        
+        for (let i = 0; i < words.length; i++) {
+            let w = words[i].toLowerCase().replace(/[^\w]/g, '');
+            if (w === targetLower) {
+                bestIdx = i; // found a match
+                
+                // Use anchor to verify it's the CORRECT "now" or "the"
+                let anchorArr = anchorWords.toLowerCase().split(' ');
+                if (anchorArr.length > 0 && i > 0) {
+                    let prevW = words[i-1].toLowerCase().replace(/[^\w]/g, '');
+                    if (prevW === anchorArr[anchorArr.length - 1].replace(/[^\w]/g, '')) {
+                        break; // Perfect match found!
+                    }
+                } else {
+                    break; // No anchor to check
+                }
+            }
         }
         
-        let after = [];
-        curr = element.nextSibling;
-
-        while (curr && after.length < 15) {
-            let text = curr.textContent || curr.innerText || "";
-            let words = text.trim().split(/\s+/).filter(Boolean);
-            after.push(...words);
-            curr = curr.nextSibling;
+        if (bestIdx === -1) bestIdx = Math.floor(words.length / 2); // default to middle if not found
+        
+        let start = Math.max(0, bestIdx - 12);
+        let end = Math.min(words.length, bestIdx + 12);
+        
+        // Wrap the target word in brackets so the AI knows exactly which one is being discussed
+        let windowWords = words.slice(start, end);
+        let adjustedIdx = bestIdx - start;
+        if (windowWords[adjustedIdx]) {
+            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
         }
         
-        let preStr = before.slice(-10).join(" ");
-        let postStr = after.slice(0, 10).join(" ");
-
-        return `${preStr} [${isolatedTypedWord}] ${postStr}`;
-    },
-
-    getOriginalContext: function(element, cleanOriginal) {
-
-        let origArray = g_lastAnalysisResult ? g_lastAnalysisResult.originalWords : [];
-
-        if (!origArray || origArray.length === 0) return "Context not available.";
-
-        let allHighlights = Array.from(document.querySelectorAll('#editableTypedText .highlight'));
-
-        let elementIndex = allHighlights.indexOf(element);
-
-        let ratio = Math.max(0, elementIndex / (allHighlights.length || 1));
-
-        let estimatedCenter = Math.floor(ratio * origArray.length);
-
-        let start = Math.max(0, estimatedCenter - 15);
-        let end = Math.min(origArray.length, estimatedCenter + 15);
-        
-        return origArray.slice(start, end).join(" ") + "...";
+        return windowWords.join(" ") + "...";
     },
 
     // ---------------------------------------------------------------------
-    // AI API CALL
+    // API FETCH LOGIC: Constructs prompt and calls backend
     // ---------------------------------------------------------------------
     fetchAnalysis: async function(data) {
-
         const modal = document.getElementById('aiModal');
         const content = document.getElementById('aiModalContent');
         const loader = document.getElementById('aiLoadingState');
@@ -2119,94 +2118,67 @@ const AITeacher = {
         }
 
         this.isFetching = true;
-
         content.style.display = 'none';
         loader.style.display = 'block';
 
         try {
-
-            const promptText = `
-You are an English grammar teacher for stenography students.
-
-A student made a transcription error.
+            // Highly specific prompt with pure raw text context injected
+            const promptText = `Act as an English grammar teacher for stenography students.
+A student made a transcription error. Analyze it and explain the grammar rule.
 
 Error Type: ${data.type}
+What the student typed: "${data.typedWord}"
+What the original passage actually said: "${data.originalWord}"
 
-Student typed:
-"${data.typedWord}"
+--- Context ---
+Student's Raw Sentence: "... ${data.userContext} ..."
+Original Raw Sentence: "... ${data.originalContext} ..."
 
-Correct word:
-"${data.originalWord}"
-
-Student sentence context:
-"... ${data.userContext} ..."
-
-Original passage sentence:
-"... ${data.originalContext} ..."
-
-Explain clearly why the student's word is incorrect in THIS sentence.
-
-Return ONLY JSON:
-
+Explain why the student's typed word is grammatically or contextually incorrect here. 
+Respond EXACTLY in this JSON format:
 {
-"explanation":"Explain why the word is wrong in the sentence.",
-"rule":"Grammar or punctuation rule.",
-"examples":["Example 1","Example 2"]
-}
-`;
+  "explanation": "Explain why it is incorrect based purely on the provided context.",
+  "rule": "Explain the grammar, capitalization, or punctuation rule involved.",
+  "examples": ["Example 1", "Example 2"]
+}`;
 
             const response = await fetch(this.ENDPOINT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
                     action: "analyzeSingle",
-                    prompt: promptText
+                    prompt: promptText 
                 })
             });
 
             const result = await response.json();
+            
+            if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
 
-            if (!result.success) throw new Error("AI Backend Error");
-
-            let cleanJson = result.reply
-            .replace(/```json/g,'')
-            .replace(/```/g,'')
-            .trim();
-
-            const firstBrace = cleanJson.indexOf("{");
-            const lastBrace = cleanJson.lastIndexOf("}");
-
-            cleanJson = cleanJson.substring(firstBrace, lastBrace + 1);
-
+            // Parse response safely
+            const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
             const aiParsedData = JSON.parse(cleanJson);
 
+            // Save to Cache
             this.cache[cacheKey] = aiParsedData;
 
+            // Render
             this.renderUI(aiParsedData, data.originalWord, data.typedWord);
 
         } catch (error) {
-
             console.error(error);
-
             content.style.display = 'block';
-
-            content.innerHTML =
-            `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
-
+            content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
         } finally {
-
             this.isFetching = false;
-
             loader.style.display = 'none';
-
             content.style.display = 'block';
         }
     },
 
     // ---------------------------------------------------------------------
-    // UI RENDER
+    // UI RENDER LOGIC: Formats the JSON into HTML
     // ---------------------------------------------------------------------
     renderUI: function(aiData, origWord, typedWord) {
-
         const content = document.getElementById('aiModalContent');
         
         let explanation = "General error detected.";
@@ -2214,52 +2186,40 @@ Return ONLY JSON:
         let examplesHtml = "";
 
         if (typeof aiData === 'object') {
-
             explanation = aiData.explanation || explanation;
             rule = aiData.rule || rule;
             
             if (aiData.examples && Array.isArray(aiData.examples)) {
-
                 examplesHtml = `
-                <div style="margin-top:15px;">
-                <span class="ai-rule-badge" style="background:#dcfce7;color:#166534;">Examples</span>
-                <ul style="padding-left:20px;margin-top:5px;font-size:0.95rem;color:#334155;">
-                ${aiData.examples.map(ex => `<li style="margin-bottom:5px;">${ex}</li>`).join('')}
-                </ul>
-                </div>`;
+                    <div style="margin-top: 15px;">
+                        <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
+                        <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
+                            ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
+                        </ul>
+                    </div>`;
             }
-
         } else {
-
-            explanation = aiData;
+            explanation = aiData; // Fallback if AI returned raw string
         }
 
         content.innerHTML = `
-        <div class="ai-mistake-context">
-        Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span>
-        vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
-        </div>
-
-        <div>
-        <span class="ai-rule-badge">Explanation</span>
-        <p class="ai-explanation-text" style="margin-top:5px;margin-bottom:15px;">
-        ${explanation}
-        </p>
-        </div>
-
-        <div>
-        <span class="ai-rule-badge" style="background:#fef08a;color:#854d0e;">Rule</span>
-        <p class="ai-explanation-text" style="margin-top:5px;margin-bottom:15px;">
-        ${rule}
-        </p>
-        </div>
-
-        ${examplesHtml}
+            <div class="ai-mistake-context">
+                Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
+            </div>
+            <div>
+                <span class="ai-rule-badge">Explanation</span>
+                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
+            </div>
+            <div>
+                <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
+                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
+            </div>
+            ${examplesHtml}
         `;
     }
 };
 // =========================================================================
+
 </script>
 </body>
 </html>
-
