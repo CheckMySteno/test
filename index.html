@@ -1,3 +1,4 @@
+--- START OF FILE index (1).html ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,8 +8,12 @@
   <meta name="google-site-verification" content="v5mi-j_OwV6XOree_PN-xt_UIPcR7FiUTQaEGpq2Bmg" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script> <!-- Added Firebase Auth -->
   <script src="https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore-compat.js"></script>
+  
   <style>
     /* --- THEME DEFINITIONS --- */
     :root, body[data-theme="default"] {
@@ -78,63 +83,27 @@
         align-items: center;
         justify-content: center;
         gap: 3%;
-        padding: 2rem 4% 120px; /* MODIFICATION: Added 120px bottom padding to create space for the dock */
+        padding: 2rem 4% 120px;
         box-sizing: border-box;
         opacity: 0;
         animation: fadeIn 1s forwards;
     }
     @keyframes fadeIn { to { opacity: 1; } }
 
-    .intro-slide--welcome {
-        flex-direction: column;
-        text-align: center;
-    }
-    .welcome-content {
-        max-width: 850px;
-    }
-    .welcome-content h1 {
-        font-size: 5rem;
-        font-weight: 900;
-        margin: 0 0 1rem 0;
-        line-height: 1.2;
-    }
-    .welcome-content p {
-        font-size: 1.3rem;
-        color: var(--secondary-text-color);
-        margin-bottom: 2.5rem;
-    }
-    .welcome-content .cta-button {
-        padding: 1rem 3rem;
-        font-size: 1.2rem;
-        border-radius: 12px;
-    }
-
-    .intro-slide .text-content {
-        flex: 1;
-        max-width: 500px;
-    }
-    .intro-slide .visual-content {
-        flex: 1.5;
-        max-width: 900px;
-    }
-    .intro-slide h2 {
-        font-size: 3.5rem;
-        font-weight: 900;
-        margin: 0 0 1.2rem 0;
-    }
-    .intro-slide p {
-        font-size: 1.2rem;
-        line-height: 1.7;
-        color: var(--secondary-text-color);
-    }
-
-    .intro-navigation {
-        display: none;
-    }
+    .intro-slide--welcome { flex-direction: column; text-align: center; }
+    .welcome-content { max-width: 850px; }
+    .welcome-content h1 { font-size: 5rem; font-weight: 900; margin: 0 0 1rem 0; line-height: 1.2; }
+    .welcome-content p { font-size: 1.3rem; color: var(--secondary-text-color); margin-bottom: 2.5rem; }
+    .welcome-content .cta-button { padding: 1rem 3rem; font-size: 1.2rem; border-radius: 12px; }
+    .intro-slide .text-content { flex: 1; max-width: 500px; }
+    .intro-slide .visual-content { flex: 1.5; max-width: 900px; }
+    .intro-slide h2 { font-size: 3.5rem; font-weight: 900; margin: 0 0 1.2rem 0; }
+    .intro-slide p { font-size: 1.2rem; line-height: 1.7; color: var(--secondary-text-color); }
+    .intro-navigation { display: none; }
 
     .scroll-down-prompt {
         position: absolute;
-        bottom: 15vh; /* MODIFICATION: Moved up significantly to be above the dock */
+        bottom: 15vh;
         left: 50%; transform: translateX(-50%);
         font-weight: 600; color: var(--secondary-text-color);
         opacity: 0; transition: opacity 0.5s;
@@ -158,10 +127,8 @@
     .toolbar-title { color: var(--secondary-text-color); font-weight: 600; margin: 0 auto; }
     .analyzer-body { padding: 1.5rem 2rem; font-family: 'Courier New', Courier, monospace; font-size: 1.1rem; line-height: 1.8; position: relative; min-height: 150px; }
     .analyzer-body pre { margin: 0; white-space: pre-wrap; }
-    
     .typing-cursor { display: inline-block; width: 10px; height: 1.2rem; background-color: var(--text-color); margin-left: 2px; animation: blink 1s step-end infinite; }
     @keyframes blink { 50% { opacity: 0; } }
-    
     .highlight { transition: background-color 0.5s ease; border-radius: 4px; position: relative; }
     .highlight-ssc { background-color: rgba(239, 68, 68, 0.2); animation: pulse-red 1.5s ease-out; }
     .highlight-match { background-color: rgba(245, 158, 11, 0.2); animation: pulse-yellow 1.5s ease-out; }
@@ -169,7 +136,6 @@
     @keyframes pulse-red { 0% { background-color: rgba(239, 68, 68, 0.2); } 50% { background-color: rgba(239, 68, 68, 0.5); } 100% { background-color: rgba(239, 68, 68, 0.2); } }
     @keyframes pulse-yellow { 0% { background-color: rgba(245, 158, 11, 0.2); } 50% { background-color: rgba(245, 158, 11, 0.5); } 100% { background-color: rgba(245, 158, 11, 0.2); } }
     @keyframes pulse-green { 0% { background-color: rgba(34, 197, 94, 0.2); } 50% { background-color: rgba(34, 197, 94, 0.5); } 100% { background-color: rgba(34, 197, 94, 0.2); } }
-
     .feature-callout {
         position: absolute; background: var(--text-color); color: var(--card-bg); padding: 0.5rem 1rem;
         border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600;
@@ -184,7 +150,6 @@
     #callout-4 { top: 50%; left: 50%; transform: translate(-50%,-50%); }
     .analyzer-footer { padding: 1rem; border-top: 1px solid var(--card-border); background: var(--primary-bg); font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.1rem; }
     .score-text { opacity: 0; transition: opacity 0.5s ease; } .score-text.is-active { opacity: 1; }
-
 
     /* --- STANDARD PAGE SECTION STYLES --- */
     .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); background-color: transparent; }
@@ -204,7 +169,7 @@
 
     .launch-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; color: var(--primary-bg); background: var(--text-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
     .launch-button:hover:not(.locked) { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 25px var(--button-gradient-start); }
-    .launch-button.locked { background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; box-shadow: 0 5px 15px rgba(234, 179, 8, 0.4); }
+    .launch-button.locked { background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; box-shadow: 0 5px 15px rgba(234, 179, 8, 0.4); cursor: not-allowed; }
     .launch-button::before {
         content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
         background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
@@ -248,15 +213,14 @@
     .notification-item { 
         padding: 1rem; border-bottom: 1px solid var(--card-border); 
         font-size: 0.9rem; line-height: 1.5; color: var(--text-color); 
-        font-weight: 600; /* Bolder text */
-        transition: background-color 0.2s; 
+        font-weight: 600; transition: background-color 0.2s; 
     }
     .notification-item a { text-decoration: none; color: inherit; display: block; } 
     .notification-item:hover { background-color: var(--primary-bg); } 
     .notification-item:last-child { border-bottom: none; } 
     .notification-item small { 
         display: block; margin-top: 0.5rem; font-weight: 600; 
-        color: var(--secondary-text-color); /* Keep date less prominent */
+        color: var(--secondary-text-color); 
     }
     .poll-toast { position: fixed; bottom: 100px; right: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 5px 20px var(--card-shadow); padding: 1.5rem; z-index: 2050; width: 320px; max-width: 90%; opacity: 0; transform: translateY(20px); transition: opacity 0.3s, transform 0.3s; pointer-events: none; } .poll-toast.visible { opacity: 1; transform: translateY(0); pointer-events: auto; } .poll-toast h4 { margin: 0 0 1rem 0; font-size: 1.1rem; } .poll-options button { width: 100%; background: var(--primary-bg); color: var(--text-color); border: 1px solid var(--card-border); padding: 0.75rem; text-align: left; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer; } .poll-options button:hover { border-color: var(--button-gradient-start); }
     .ticket-list-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; } .ticket-list-item:hover { border-color: var(--button-gradient-start); box-shadow: 0 3px 10px var(--card-shadow); } .ticket-status { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; } .status-open { background-color: #dcfce7; color: #166534; } .status-closed { background-color: #f3f4f6; color: #4b5563; } .status-Awaiting-Reply { background-color: #fef9c3; color: #854d0e; }
@@ -269,43 +233,24 @@
         .intro-slide h2 { font-size: 2.8rem; }
         .page-section h2 { font-size: 2.5rem; }
     }
-
     @media only screen and (max-width: 768px) {
-        /* --- General Layout & Text --- */
-        .main-header { padding: 1rem 3%; }
-        .logo { font-size: 1.5rem; }
+        .main-header { padding: 1rem 3%; } .logo { font-size: 1.5rem; }
         .page-section { padding: 3rem 5%; min-height: auto; }
         .section-content, .page-section:nth-child(even) .section-content { flex-direction: column; gap: 2rem; }
         .section-content .graphic-content { margin-top: 2rem; }
         .section-content .text-content, .section-content .graphic-content { flex: none; width: 100%; text-align: center; }
-        .page-section h2 { font-size: 2.2rem; }
-        .page-section p { font-size: 1rem; }
-
-        /* --- Immersive Intro Section --- */
+        .page-section h2 { font-size: 2.2rem; } .page-section p { font-size: 1rem; }
         .intro-slide { flex-direction: column; text-align: center; gap: 2%; padding: 2rem 5% 100px; }
         .intro-slide .text-content, .intro-slide .visual-content { flex: none; width: 100%; max-width: 100%; }
-        .welcome-content h1 { font-size: 3rem; }
-        .welcome-content p { font-size: 1.1rem; }
-        .intro-slide h2 { font-size: 2rem; }
-        .intro-slide p { font-size: 1rem; }
+        .welcome-content h1 { font-size: 3rem; } .welcome-content p { font-size: 1.1rem; }
+        .intro-slide h2 { font-size: 2rem; } .intro-slide p { font-size: 1rem; }
         .interactive-analyzer { transform: scale(1); }
-        #callout-1 { top: -40px; left: 10px; }
-        #callout-2 { top: -40px; right: 10px; }
-        #callout-3 { top: 90px; left: 50%; transform: translateX(-50%); }
-
-        /* --- Header & Footer/Dock --- */
+        #callout-1 { top: -40px; left: 10px; } #callout-2 { top: -40px; right: 10px; } #callout-3 { top: 90px; left: 50%; transform: translateX(-50%); }
         #userInfo { display: none; }
         .footer { flex-direction: column; gap: 1rem; text-align: center; }
-        .dock {
-            height: 60px;
-            gap: 0.2rem;
-            padding: 0.3rem;
-            border-radius: 1rem;
-        }
+        .dock { height: 60px; gap: 0.2rem; padding: 0.3rem; border-radius: 1rem; }
         .dock-item a, .dock-item button { width: 50px; height: 50px; line-height: 50px; font-size: 1.5rem; }
         .scroll-down-prompt { bottom: 12vh; font-size: 0.9rem; }
-
-        /* --- Modals --- */
         .modal-content { width: 95%; padding: 2rem 1.5rem; }
         .major-announcement-text { padding: 1rem 1.5rem 1.5rem 1.5rem; }
         .notification-panel { width: 90%; right: 5%; top: 70px; }
@@ -389,15 +334,12 @@
                  </div>
             </div>
             
-            <div class="intro-navigation">
-                <!-- The navigation controls are now hidden via CSS -->
-            </div>
+            <div class="intro-navigation"></div>
             <div class="scroll-down-prompt" id="scroll-prompt">
                 Scroll to Explore <i class="fas fa-chevron-down"></i>
             </div>
        </section>
 
-       <!-- THE REST OF YOUR PAGE (UNCHANGED) -->
        <section id="practice" class="page-section">
            <div class="section-content anim-hidden">
                <div class="text-content">
@@ -409,7 +351,6 @@
            </div>
        </section>
 
-       <!-- === START OF ADDED DICTATIONS SECTION === -->
        <section id="dictations" class="page-section">
             <div class="section-content anim-hidden">
                 <div class="text-content">
@@ -420,7 +361,6 @@
                 <div class="graphic-content"><i class="fas fa-microphone-alt"></i></div>
             </div>
         </section>
-        <!-- === END OF ADDED DICTATIONS SECTION === -->
 
        <section id="analysis" class="page-section">
            <div class="section-content anim-hidden">
@@ -432,6 +372,7 @@
                <div class="graphic-content"><i class="fas fa-chart-line"></i></div>
            </div>
        </section>
+
        <section id="checker" class="page-section">
            <div class="section-content anim-hidden">
                <div class="text-content">
@@ -442,6 +383,7 @@
                <div class="graphic-content"><i class="fas fa-check-double"></i></div>
            </div>
        </section>
+
        <section id="about" class="page-section">
            <div class="section-content anim-hidden">
                <div class="text-content">
@@ -454,7 +396,7 @@
        </section>
        
        <footer class="footer">
-            <p class="footer-copyright">&copy; 2025 Check My Steno. All Rights Reserved.</p>
+            <p class="footer-copyright">&copy; 2026 Check My Steno. All Rights Reserved.</p>
             <div class="footer-links">
                 <button onclick="showFeedbackModal()">Feedback</button>
                 <button onclick="launchTool('status')">Platform Status</button>
@@ -466,22 +408,36 @@
     <nav class="dock">
         <div class="dock-item"><a href="#immersive-intro"><i class="fas fa-home"></i></a><span class="tooltip">Home</span></div>
         <div class="dock-item"><a href="#practice"><i class="fas fa-keyboard"></i></a><span class="tooltip">Practice KC</span></div>
-        <!-- === START OF ADDED DOCK ITEM === -->
         <div class="dock-item"><a href="#dictations"><i class="fas fa-microphone-alt"></i></a><span class="tooltip">Dictations</span></div>
-        <!-- === END OF ADDED DOCK ITEM === -->
         <div class="dock-item"><a href="#analysis"><i class="fas fa-chart-line"></i></a><span class="tooltip">Test Analysis</span></div>
         <div class="dock-item"><a href="#checker"><i class="fas fa-check-double"></i></a><span class="tooltip">Transcription Checker</span></div>
         <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
     </nav>
     
-    <!-- ===== ALL MODALS AND OVERLAYS (UNCHANGED) ===== -->
-    <div class="modal-overlay" id="choiceModal"><div class="modal-content"><button class="close-button" onclick="hideChoiceModal()">&times;</button><h2>Unlock Premium Features</h2><p>How would you like to get access?</p><div class="choice-container"><div class="choice-card" onclick="openLoginFromChoice()"><i class="fas fa-key"></i><h3>I have an Access Code</h3><p>Already subscribed? Enter your code to log in.</p></div><div class="choice-card" onclick="window.location.href='plans.html'"><i class="fas fa-gem"></i><h3>Subscribe Now</h3><p>Choose a plan to get your new access code.</p></div></div></div></div>
-    <div class="modal-overlay" id="loginModal"><div class="modal-content"><button class="close-button" onclick="hideLoginModal()">&times;</button><h2>Access Your Account</h2><input type="text" id="userName" placeholder="Enter Your Name" required /><input type="email" id="userEmail" placeholder="Enter Your Email" required /><input type="text" id="accessCode" placeholder="Enter Access Code" required /><button class="cta-button" onclick="validateAccessCode()">Unlock Tools</button><p id="loginError"></p></div></div>
+    <!-- ===== ALL MODALS AND OVERLAYS ===== -->
+    
+    <!-- Premium Request Modal (Replaced Choice/Login Modals) -->
+    <div class="modal-overlay" id="premiumModal">
+        <div class="modal-content">
+            <button class="close-button" onclick="hidePremiumModal()">&times;</button>
+            <h2>Unlock Premium Access</h2>
+            <p>Upgrade to Premium to access all dictations, analysis tools, and transcription checkers.</p>
+            <div class="choice-container" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="choice-card" onclick="submitPremiumRequest()">
+                    <i class="fas fa-crown"></i>
+                    <h3>Buy Premium Pass</h3>
+                    <p>Request manual approval for a premium subscription.</p>
+                </div>
+            </div>
+            <p id="premiumError" style="color: var(--error-color); margin-top: 15px; font-weight: 600;"></p>
+            <p id="premiumSuccess" style="color: var(--success-color); margin-top: 15px; font-weight: 600;"></p>
+        </div>
+    </div>
+
     <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button">&times;</button><img id="majorAnnouncementImage" src="" alt="Announcement" /><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
     <div id="notificationPanel" class="notification-panel"><div class="notification-header"><h3>Notifications</h3></div><div id="notificationList" class="notification-list"></div></div>
     <div class="modal-overlay" id="messageOfTheDayModal"><div class="modal-content"><button class="close-button" onclick="this.parentElement.parentElement.classList.remove('visible'); setScrollLock(false);">&times;</button><h2>A Message for You</h2><p id="motdBody"></p></div></div>
     <div class="modal-overlay" id="feedbackModal"><div class="modal-content"><button class="close-button" onclick="hideFeedbackModal()">&times;</button><h2>Submit Feedback</h2><p>We'd love to hear your thoughts!</p><select id="feedbackType"><option>Suggestion</option><option>Bug Report</option><option>Other</option></select><textarea id="feedbackMessage" rows="5" placeholder="Your message..."></textarea><button class="cta-button" onclick="submitFeedback()">Send Feedback</button><p id="feedbackStatus" style="min-height: 1em; margin-top:1rem;"></p></div></div>
-    
     <div class="modal-overlay" id="telegramModal"> <div class="modal-content"> <button class="close-button" onclick="hideTelegramModal(false)">&times;</button> <i class="fab fa-telegram-plane" style="font-size: 3rem; color: #2AABEE; margin-bottom: 1rem; display: block;"></i> <h2>Join our Telegram Group!</h2> <p>For the latest updates, announcements, and support, join our official community.</p> <a href="https://t.me/Checkmystenoo" target="_blank" rel="noopener noreferrer" class="cta-button" style="display:block; text-decoration:none; margin-top: 1.5rem;" onclick="hideTelegramModal(true)"> <i class="fab fa-telegram-plane"></i> Join Now </a> <button style="background:none; border:none; color:var(--secondary-text-color); cursor:pointer; margin-top:1.5rem; font-size: 0.9rem;" onclick="hideTelegramModal(true)">Don't show me again</button> </div> </div>
 
     <div id="toolOverlays">
@@ -492,7 +448,6 @@
         <div id="statusTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-server"></i> Platform Status</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="statusContent" class="tool-content"></div></div>
         <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-envelope"></i> Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="contactContent" class="tool-content"></div></div>
         <div id="dictationsTool" class="tool-overlay"> <header class="tool-header"> <h2><i class="fas fa-microphone-alt"></i> Dictations</h2> <button class="close-tool-btn" onclick="closeAllTools()">Close</button> </header> <div class="tool-content" style="padding:0; overflow:hidden;"> <div class="loader"></div> <iframe id="dictationsFrame" src="about:blank"></iframe> </div> </div>
-        <!-- REMOVED subscriptionTool and supportTool Overlays -->
     </div>
     
     <div id="pollToast" class="poll-toast">
@@ -502,13 +457,13 @@
     </div>
     
 <script>
-    // --- SCRIPT FOR IMMERSIVE SLIDER INTRODUCTION (UNCHANGED) ---
+    // --- SCRIPT FOR IMMERSIVE SLIDER INTRODUCTION ---
     document.addEventListener('DOMContentLoaded', () => {
         const intro = document.getElementById('immersive-intro'); if (!intro) return;
         const track = intro.querySelector('.intro-track'); const slides = Array.from(intro.querySelectorAll('.intro-slide')); const scrollPrompt = intro.querySelector('#scroll-prompt'); const discoverBtn = intro.querySelector('#discover-features-btn');
         const slideCount = slides.length; let currentIndex = 0; const slideDuration = 5000; let autoplayInterval = null; let typewriterTimeout = null;
-        const stepsData = [ { text: `The quick brown fox <span class="highlight highlight-ssc">jumps</span> over the lazy dog. This is a test...`, score: { start: 98.0, end: 98.0, prefix: `<strong>Initial Score:</strong> `, suffix: `% Accuracy`}, activeCallout: 0 }, { text: `The quick brown fox jumps over the lazy dog. This is a... <span class="highlight highlight-match">showcase</span> its features.`, score: `<strong>Word Match:</strong> "showcase" vs "show case"`, activeCallout: 1 }, { text: `The quick brown fox <span class="highlight highlight-re-eval">jumped</span> over the lazy dog. This is a test...`, score: { start: 98.0, end: 99.0, prefix: `<strong>New Score:</strong> `, suffix: `% <span style="color:var(--success-color);">(+1.0%)</span>`}, activeCallout: 2 }, { text: `<i class="fas fa-chart-line" style="font-size: 8rem; opacity: 0.5; display: block; text-align: center;"></i>`, score: `<strong>Track Your Growth Over Time</strong>`, activeCallout: 3, isHTML: true } ];
-        function runTypewriter(data, textElement) { clearTimeout(typewriterTimeout); textElement.innerHTML = ''; if (data.isHTML) { textElement.innerHTML = data.text; return; } const wordsAndTags = data.text.match(/<[^>]+>|[^<>\s]+|\s+/g) || []; let displayedHTML = ''; let i = 0; function typeWord() { if (i < wordsAndTags.length) { displayedHTML += wordsAndTags[i]; textElement.innerHTML = displayedHTML; i++; const delay = wordsAndTags[i-1].startsWith('<') ? 0 : 70; typewriterTimeout = setTimeout(typeWord, delay); } } typeWord(); }
+        const stepsData =[ { text: `The quick brown fox <span class="highlight highlight-ssc">jumps</span> over the lazy dog. This is a test...`, score: { start: 98.0, end: 98.0, prefix: `<strong>Initial Score:</strong> `, suffix: `% Accuracy`}, activeCallout: 0 }, { text: `The quick brown fox jumps over the lazy dog. This is a... <span class="highlight highlight-match">showcase</span> its features.`, score: `<strong>Word Match:</strong> "showcase" vs "show case"`, activeCallout: 1 }, { text: `The quick brown fox <span class="highlight highlight-re-eval">jumped</span> over the lazy dog. This is a test...`, score: { start: 98.0, end: 99.0, prefix: `<strong>New Score:</strong> `, suffix: `% <span style="color:var(--success-color);">(+1.0%)</span>`}, activeCallout: 2 }, { text: `<i class="fas fa-chart-line" style="font-size: 8rem; opacity: 0.5; display: block; text-align: center;"></i>`, score: `<strong>Track Your Growth Over Time</strong>`, activeCallout: 3, isHTML: true } ];
+        function runTypewriter(data, textElement) { clearTimeout(typewriterTimeout); textElement.innerHTML = ''; if (data.isHTML) { textElement.innerHTML = data.text; return; } const wordsAndTags = data.text.match(/<[^>]+>|[^<>\s]+|\s+/g) ||[]; let displayedHTML = ''; let i = 0; function typeWord() { if (i < wordsAndTags.length) { displayedHTML += wordsAndTags[i]; textElement.innerHTML = displayedHTML; i++; const delay = wordsAndTags[i-1].startsWith('<') ? 0 : 70; typewriterTimeout = setTimeout(typeWord, delay); } } typeWord(); }
         function animateValue(obj, start, end, duration, data) { let startTimestamp = null; const step = (timestamp) => { if (!startTimestamp) startTimestamp = timestamp; const progress = Math.min((timestamp - startTimestamp) / duration, 1); const currentValue = progress * (end - start) + start; if (typeof data.score === 'object') { obj.innerHTML = `${data.score.prefix}${currentValue.toFixed(1)}${data.score.suffix}`; } if (progress < 1) { window.requestAnimationFrame(step); } }; window.requestAnimationFrame(step); }
         function updateVisuals(featureIndex) { const currentSlide = slides[featureIndex + 1]; const data = stepsData[featureIndex]; const analyzerTextEl = currentSlide.querySelector('.analyzer-text-content'); const scoreTextEl = currentSlide.querySelector('.score-text'); runTypewriter(data, analyzerTextEl); const scoreData = data.score; if (typeof scoreData === 'object') { animateValue(scoreTextEl, scoreData.start, scoreData.end, 500, data); } else { scoreTextEl.innerHTML = scoreData; } scoreTextEl.classList.add('is-active'); document.querySelectorAll('.feature-callout').forEach(c => c.classList.remove('is-active')); const activeCallout = document.getElementById(`callout-${data.activeCallout + 1}`); if (activeCallout) { activeCallout.classList.add('is-active'); } }
         function moveToSlide(targetIndex) { track.style.transform = `translateX(-${targetIndex * 100}vw)`; currentIndex = targetIndex; scrollPrompt.classList.toggle('visible', targetIndex === slideCount - 1); if (targetIndex > 0) { updateVisuals(targetIndex - 1); } resetAutoplay(); }
@@ -519,19 +474,127 @@
         moveToSlide(0);
     });
 
-// --- PART 1: CONFIG & GLOBAL STATE (UNCHANGED) ---
+    // --- PART 1: CONFIG & GLOBAL STATE ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
     firebase.initializeApp(FBCONFIG);
+    
     const DB = firebase.firestore();
+    const AUTH = firebase.auth();
+    const GOOGLE_PROVIDER = new firebase.auth.GoogleAuthProvider();
+    
     const GID = id => document.getElementById(id);
-    let accessCodeUnsubscribe = null, currentUser = null;
+    let currentUser = null;
+    let userDocUnsubscribe = null;
 
-// --- PART 2: CORE FUNCTIONS (SIMPLIFIED) ---
+    // --- PART 2: AUTHENTICATION & PREMIUM LOGIC ---
+    AUTH.onAuthStateChanged(async (user) => {
+        if (user) {
+            const userRef = DB.collection('users').doc(user.uid);
+            
+            if (userDocUnsubscribe) userDocUnsubscribe();
+            userDocUnsubscribe = userRef.onSnapshot(async (docSnap) => {
+                if (!docSnap.exists) {
+                    const newUserData = {
+                        name: user.displayName,
+                        email: user.email,
+                        plan: 'free',
+                        expiry: null,
+                        created_at: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    await userRef.set(newUserData);
+                    currentUser = { uid: user.uid, ...newUserData };
+                } else {
+                    currentUser = { uid: user.uid, ...docSnap.data() };
+                }
+                updateUserUI(currentUser);
+                checkForMessageOfTheDay();
+            });
+        } else {
+            if (userDocUnsubscribe) userDocUnsubscribe();
+            currentUser = null;
+            updateUserUI(null);
+        }
+    });
+
+    function loginWithGoogle() {
+        AUTH.signInWithPopup(GOOGLE_PROVIDER).catch(err => {
+            console.error("Google Login Error:", err);
+            alert("Login failed: " + err.message);
+        });
+    }
+
+    function logout() {
+        AUTH.signOut().then(() => {
+            closeAllTools();
+            window.location.hash = '#home';
+        });
+    }
+
+    function isUserPremium(user) {
+        if (!user || user.plan !== 'premium' || !user.expiry) return false;
+        const now = new Date();
+        const expiryDate = user.expiry.toDate ? user.expiry.toDate() : new Date(user.expiry);
+        return now < expiryDate;
+    }
+
+    // --- MODALS & UI FUNCTIONS ---
     function setScrollLock(locked) { const action = locked ? 'add' : 'remove'; document.body.classList[action]('modal-open'); document.documentElement.classList[action]('modal-open'); }
+    
+    function showPremiumModal() {
+        if (!currentUser) {
+            alert("Please log in first to purchase a premium pass.");
+            loginWithGoogle();
+            return;
+        }
+        GID('premiumModal').classList.add('visible');
+        setScrollLock(true);
+    }
+    
+    function hidePremiumModal() {
+        GID('premiumModal').classList.remove('visible');
+        setScrollLock(false);
+        GID('premiumError').textContent = '';
+        GID('premiumSuccess').textContent = '';
+    }
+
+    async function submitPremiumRequest() {
+        if (!currentUser) return;
+        const errEl = GID('premiumError');
+        const succEl = GID('premiumSuccess');
+        errEl.textContent = ''; succEl.textContent = '';
+        
+        try {
+            const existingReqs = await DB.collection('payment_requests')
+                .where('uid', '==', currentUser.uid)
+                .where('status', '==', 'pending')
+                .get();
+            
+            if (!existingReqs.empty) {
+                errEl.textContent = 'You already have a pending premium request.';
+                return;
+            }
+
+            await DB.collection('payment_requests').add({
+                uid: currentUser.uid,
+                email: currentUser.email,
+                plan_requested: 'premium',
+                status: 'pending',
+                created_at: firebase.firestore.FieldValue.serverTimestamp()
+            });
+            
+            succEl.textContent = 'Premium request submitted successfully! Waiting for admin approval.';
+            setTimeout(() => {
+                hidePremiumModal();
+            }, 3000);
+        } catch (err) {
+            console.error(err);
+            errEl.textContent = 'Error submitting request. Please try again.';
+        }
+    }
+
     function launchTool(toolName) {
         const toolOverlay = GID(`${toolName}Tool`);
         if (!toolOverlay) return;
-        // Only render dynamic content if the tool needs it
         if (toolName === 'status') renderPlatformStatus();
         if (toolName === 'contact') renderContactInfo();
         
@@ -546,64 +609,68 @@
         }
         toolOverlay.classList.add('visible'); setScrollLock(true);
     }
+    
     function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(overlay => { const iframe = overlay.querySelector('iframe'); if (iframe) iframe.src = 'about:blank'; overlay.classList.remove('visible'); }); setScrollLock(false); }
-    function logout() { if (accessCodeUnsubscribe) accessCodeUnsubscribe(); localStorage.removeItem("checkMyStenoUser"); localStorage.removeItem("currentAccessCode"); localStorage.removeItem("currentSessionId"); currentUser = null; updateUserUI(false); closeAllTools(); window.location.hash = '#home'; }
-    function hideChoiceModal() { GID('choiceModal').classList.remove('visible'); setScrollLock(false); }
-    function hideLoginModal() { GID('loginModal').classList.remove('visible'); setScrollLock(false); }
-    function openLoginFromChoice() { hideChoiceModal(); setTimeout(() => GID('loginModal').classList.add('visible'), 300); }
-    function startSessionListener(code) { if (accessCodeUnsubscribe) accessCodeUnsubscribe(); const userLoginRef = DB.collection("userLogins").doc(code); accessCodeUnsubscribe = userLoginRef.onSnapshot(doc => { if (!doc.exists) { if (localStorage.getItem("currentAccessCode")) { logout(); } return; } const latestSessionId = doc.data().sessionId; const mySessionId = localStorage.getItem("currentSessionId"); if (latestSessionId && mySessionId && latestSessionId !== mySessionId) { alert("This access code has been used to log in on another device. You are being logged out."); logout(); } }); }
+    
     function applyTheme(themeName) { document.body.dataset.theme = themeName; localStorage.setItem('selectedTheme', themeName); }
     function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const [key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
     
-    // === START: FINAL CORRECTED updateUserUI FUNCTION ===
-    function updateUserUI(isLoggedIn, userName = '') {
+    function updateUserUI(userData) {
         const headerActions = GID('headerActions');
         const allLaunchButtons = document.querySelectorAll('.launch-button');
         const premiumTools = ['kc', 'test-analysis', 'transcription-checker', 'dictations'];
 
-        if (isLoggedIn) {
+        if (userData) {
+            const isPremium = isUserPremium(userData);
+            const firstName = userData.name ? userData.name.split(' ')[0] : 'User';
+
             headerActions.innerHTML = `
                 <div id="theme-switcher"><button id="theme-btn" title="Change Theme"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
-                <a href="plans.html" class="header-icon-btn" title="Subscribe"><i class="fas fa-gem"></i></a>
+                ${!isPremium ? '<button class="cta-button" onclick="showPremiumModal()" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006;">Buy Premium Pass</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium Active</span>'}
                 <button id="notificationBtn" class="header-icon-btn" title="Notifications"><i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span></button>
                 <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
                 <a href="demo.html" class="cta-button demo-button">Try Demo</a>
-                <span id="userInfo">Welcome, ${userName}!</span>
+                <span id="userInfo">Welcome, ${firstName}!</span>
                 <button id="logoutBtn" class="cta-button" onclick="logout()">Logout</button>
             `;
+
             allLaunchButtons.forEach(btn => {
-                btn.classList.remove('locked');
-                btn.innerHTML = btn.dataset.originalText;
-                btn.onclick = () => launchTool(btn.dataset.tool);
+                const tool = btn.dataset.tool;
+                if (premiumTools.includes(tool) && !isPremium) {
+                    btn.classList.add('locked');
+                    btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
+                    btn.onclick = () => showPremiumModal();
+                } else {
+                    btn.classList.remove('locked');
+                    btn.innerHTML = btn.dataset.originalText || btn.innerHTML;
+                    btn.onclick = () => launchTool(tool);
+                }
             });
         } else {
             headerActions.innerHTML = `
                 <div id="theme-switcher"><button id="theme-btn" title="Change Theme"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
-                <a href="plans.html" class="header-icon-btn" title="Subscribe"><i class="fas fa-gem"></i></a>
                 <button id="notificationBtn" class="header-icon-btn" title="Notifications"><i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span></button>
                 <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
                 <a href="demo.html" class="cta-button demo-button">Try Demo</a>
-                <button id="loginBtn" class="cta-button" onclick="GID('choiceModal').classList.add('visible'); setScrollLock(true);">Unlock Full Access</button>
+                <button id="loginBtn" class="cta-button" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login</button>
             `;
+
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
                     btn.classList.add('locked');
-                    btn.onclick = () => { GID('choiceModal').classList.add('visible'); setScrollLock(true); };
                     btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
+                    btn.onclick = () => { alert("Please login to access this tool."); loginWithGoogle(); };
                 } else {
-                    btn.onclick = () => launchTool(btn.dataset.tool);
+                    btn.onclick = () => launchTool(tool);
                 }
             });
         }
         attachThemeSwitcherListeners();
         setTimeout(handleNotifications, 100);
     }
-    // === END: FINAL CORRECTED updateUserUI FUNCTION ===
     
-    async function validateAccessCode() { const name = GID("userName").value.trim(); const email = GID("userEmail").value.trim(); const code = GID("accessCode").value.trim(); const loginError = GID("loginError"); if (!name || !email || !code) { loginError.textContent = "All fields are required."; return; } loginError.textContent = "Validating..."; const accessCodeRef = DB.collection("accessCodes").doc(code); const doc = await accessCodeRef.get(); if (doc.exists && doc.data().valid) { try { const newSessionId = `sess_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`; const userLoginRef = DB.collection("userLogins").doc(code); await userLoginRef.set({ name: name, email: email, loginTimestamp: firebase.firestore.FieldValue.serverTimestamp(), sessionId: newSessionId }); const userData = { ...doc.data(), name, email, code }; currentUser = userData; localStorage.setItem("checkMyStenoUser", JSON.stringify(userData)); localStorage.setItem("currentAccessCode", code); localStorage.setItem("currentSessionId", newSessionId); hideLoginModal(); hideChoiceModal(); updateUserUI(true, name); startSessionListener(code); checkForMessageOfTheDay(); } catch (err) { loginError.textContent = "Error creating session. Please try again."; console.error("Session creation error:", err); } } else { loginError.textContent = "Invalid or expired Access Code."; } }
-    
-// --- PART 3: FEATURE FUNCTIONS (ALL TICKET AND SUBSCRIPTION FUNCTIONS REMOVED) ---
+    // --- PART 3: OTHER SYSTEM FUNCTIONS ---
     function showTelegramModal() { if (localStorage.getItem('hideTelegramModal') !== 'true') { setTimeout(() => { GID('telegramModal').classList.add('visible'); setScrollLock(true); }, 2500); } }
     function hideTelegramModal(preventShowAgain) { if (preventShowAgain) { localStorage.setItem('hideTelegramModal', 'true'); } GID('telegramModal').classList.remove('visible'); setScrollLock(false); }
     function renderContactInfo() {
@@ -629,16 +696,10 @@
     function handleNotifications() { const btn = GID('notificationBtn'); if (!btn) return; const badge = GID('notificationBadge'), panel = GID('notificationPanel'), list = GID('notificationList'); DB.collection('notifications').orderBy('timestamp', 'desc').limit(20).get().then(snapshot => { if (snapshot.empty) { list.innerHTML = '<p style="text-align:center;color:var(--secondary-text-color);padding:1.5rem;">No new notifications.</p>'; return; } const lastSeen = localStorage.getItem('lastSeenNotificationTimestamp') || 0; const latestTimestamp = snapshot.docs[0].data().timestamp.toMillis(); let unreadCount = 0; let html = ''; snapshot.forEach(doc => { const n = doc.data(); if (n.timestamp.toMillis() > lastSeen) { unreadCount++; } const date = n.timestamp.toDate().toLocaleDateString(); let itemHtml = `<div class="notification-item">${n.message}<small>${date}</small></div>`; html += n.link ? `<a href="${n.link}" target="_blank" rel="noopener noreferrer">${itemHtml}</a>` : `<div style="cursor:default;">${itemHtml}</div>`; }); list.innerHTML = html; if (unreadCount > 0) { badge.textContent = unreadCount; badge.style.display = 'block'; } else { badge.style.display = 'none'; } btn.onclick = (e) => { e.stopPropagation(); panel.classList.toggle('visible'); badge.style.display = 'none'; localStorage.setItem('lastSeenNotificationTimestamp', latestTimestamp); }; }).catch(err => console.error("Error handling notifications:", err)); }
     function showMajorAnnouncement() { const modal = GID('majorAnnouncementModal'); const closeBtn = GID('closeMajorAnnouncement'); const imgEl = GID('majorAnnouncementImage'); const titleEl = GID('majorAnnouncementTitle'); const bodyEl = GID('majorAnnouncementBody'); const announcementRef = DB.collection('siteConfig').doc('majorAnnouncement'); announcementRef.get().then(doc => { if (doc.exists) { const data = doc.data(); if (data.isActive && data.id) { const announcementKey = `announcementClosed_${data.id}`; const hasBeenClosed = localStorage.getItem(announcementKey); if (!hasBeenClosed) { titleEl.textContent = data.title || ''; bodyEl.textContent = data.body || ''; if (data.imageUrl) { imgEl.src = data.imageUrl; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; } modal.classList.add('visible'); setScrollLock(true); closeBtn.onclick = () => { modal.classList.remove('visible'); setScrollLock(false); localStorage.setItem(announcementKey, 'true'); }; } } } }).catch(err => { console.error("Error fetching major announcement:", err); }); }
     
-// --- PART 4: MAIN EXECUTION ---
+    // --- PART 4: MAIN EXECUTION ---
     window.onload = function() {
         document.querySelectorAll('.launch-button').forEach(btn => { btn.dataset.originalText = btn.innerHTML; });
-        const userSession = localStorage.getItem("checkMyStenoUser");
-        const accessCode = localStorage.getItem("currentAccessCode");
-        if (userSession && accessCode) {
-            currentUser = JSON.parse(userSession);
-            updateUserUI(true, currentUser.name);
-            startSessionListener(accessCode);
-        } else { updateUserUI(false); }
+        
         const savedTheme = localStorage.getItem('selectedTheme') || 'default';
         applyTheme(savedTheme);
         document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('anim-visible'); entry.target.classList.remove('anim-hidden'); } }); }, { threshold: 0.1 }).observe(el));
@@ -648,14 +709,19 @@
         const dock = document.querySelector('.dock'); if (dock) { const dockItems = document.querySelectorAll('.dock-item'); const defaultItemSize = 60, maxItemSize = 90, maxDistance = 120; dock.addEventListener('mousemove', (e) => { const dockRect = dock.getBoundingClientRect(); const mouseX = e.clientX - dockRect.left; dockItems.forEach(item => { const itemRect = item.getBoundingClientRect(); const itemCenterX = itemRect.left - dockRect.left + itemRect.width / 2; const distance = Math.abs(mouseX - itemCenterX); if (distance < maxDistance) { const scale = 1 + (maxItemSize / defaultItemSize - 1) * (1 - distance / maxDistance); item.style.transform = `translateY(-${(scale-1)*20}px) scale(${scale})`; item.style.margin = `0 ${scale * 2}px`; } else { item.style.transform = 'translateY(0) scale(1)'; item.style.margin = '0'; } }); }); dock.addEventListener('mouseleave', () => { dockItems.forEach(item => { item.style.transform = 'translateY(0) scale(1)'; item.style.margin = '0'; }); }); }
         let lastScrollY = window.scrollY; const mainHeader = GID('mainHeader'); window.addEventListener('scroll', () => { if (window.scrollY > lastScrollY && window.scrollY > 100) { mainHeader.classList.add('hidden'); } else { mainHeader.classList.remove('hidden'); } lastScrollY = window.scrollY; });
     };
+    
     document.addEventListener('click', (e) => { if(!e.target.closest('#theme-switcher')) {const m = GID('theme-menu'); if(m) m.classList.remove('visible');} if(!e.target.closest('#notificationBtn') && !e.target.closest('#notificationPanel')) {const p = GID('notificationPanel'); if(p) p.classList.remove('visible');} });
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeAllTools(); GID('choiceModal').classList.remove('visible'); GID('loginModal').classList.remove('visible'); GID('telegramModal').classList.remove('visible'); const majorModal = GID('majorAnnouncementModal'); if(majorModal && majorModal.classList.contains('visible')) { majorModal.querySelector('.close-button').click(); } } });
+    
+    document.addEventListener('keydown', (e) => { 
+        if (e.key === 'Escape') { 
+            closeAllTools(); 
+            GID('premiumModal').classList.remove('visible'); 
+            GID('telegramModal').classList.remove('visible'); 
+            const majorModal = GID('majorAnnouncementModal'); 
+            if(majorModal && majorModal.classList.contains('visible')) { majorModal.querySelector('.close-button').click(); } 
+        } 
+    });
 </script>    
 </body>
 </html>
-
-
-
-
-
-
+--- END OF FILE index (1).html ---
