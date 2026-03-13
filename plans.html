@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our Plans - Check My Steno</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
+    
+    <!-- Firebase Scripts -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore-compat.js"></script>
+    <!-- QR Code Generation Library -->
+    <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-bg: #F0F2F5; --card-bg: #FFFFFF; --text-color: #1a202c; --secondary-text-color: #718096;
+            --border-color: #E2E8F0; --accent-gold: #f59e0b; --accent-silver: #4A5568; --accent-bronze: #CD7F32;
+            --success-color: #10b981; --error-color: #ef4444;
+            --color-book: #3182ce; --color-general: #38a169; --color-court: #805ad5; --color-speech: #dd6b20;
+            --color-evaluation: #d53f8c; --color-progress: #38b2ac;
+        }
+        body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); }
+        .site-banner { background: linear-gradient(90deg, #38b2ac, #5eead4); color: white; text-align: center; padding: 0.75rem 1rem; font-weight: 700; font-size: 1rem; }
+        .page-container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+        .hidden { display: none !important; }
+        
+        .header-section { text-align: center; margin-bottom: 5rem; }
+        .header-section h1 { font-size: 3.5rem; font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.05em; line-height: 1.2; }
+        .header-section .highlight { background: linear-gradient(90deg, #4A5568, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .header-section p { font-size: 1.25rem; color: var(--secondary-text-color); max-width: 700px; margin: 0 auto; }
+        
+        .features-section { margin-bottom: 5rem; }
+        .features-section h2 { text-align: center; font-size: 2.5rem; font-weight: 800; margin-bottom: 3rem; }
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .feature-item { background-color: var(--card-bg); padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.5rem; border: 2px solid var(--border-color); transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
+        .feature-icon-wrapper { flex-shrink: 0; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .feature-icon-wrapper i { font-size: 1.5rem; color: white; }
+        .feature-item .feature-text h3 { margin: 0 0 0.25rem 0; font-size: 1.1rem; font-weight: 600; }
+        .feature-item .feature-text p { margin: 0; color: var(--secondary-text-color); font-size: 0.95rem; }
+        .feature-item:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
+        .feature-item[data-color="book"] .feature-icon-wrapper { background-color: var(--color-book); }
+        .feature-item[data-color="general"] .feature-icon-wrapper { background-color: var(--color-general); }
+        .feature-item[data-color="court"] .feature-icon-wrapper { background-color: var(--color-court); }
+        .feature-item[data-color="speech"] .feature-icon-wrapper { background-color: var(--color-speech); }
+        .feature-item[data-color="evaluation"] .feature-icon-wrapper { background-color: var(--color-evaluation); }
+        .feature-item[data-color="progress"] .feature-icon-wrapper { background-color: var(--color-progress); }
+
+        .pricing-section { text-align: center; }
+        .plans-wrapper { display: flex; justify-content: center; align-items: stretch; gap: 2rem; flex-wrap: wrap; }
+        .plan-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 340px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .plan-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .plan-card h3 { font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; }
+        .plan-card .duration { font-size: 1rem; color: var(--secondary-text-color); margin-bottom: 1.5rem; font-weight: 500; }
+        .plan-card .price { font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem; }
+        .plan-card .old-price { color: var(--secondary-text-color); text-decoration: line-through; margin-bottom: 1.5rem; height: 1.5em; font-size: 1.2rem; font-weight: 600; }
+        .plan-features { list-style-type: none; padding: 0; margin: 1.5rem 0; text-align: left; flex-grow: 1; }
+        .plan-features li { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.8rem; font-size: 0.95rem; }
+        .plan-features li i { color: var(--success-color); margin-top: 4px; }
+        .plan-card .cta-button { display: block; width: 100%; padding: 1rem; border-radius: 8px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; color: white; margin-top: auto; }
+        .plan-card.bronze { border-top: 4px solid var(--accent-bronze); } .plan-card.bronze .cta-button { background: var(--accent-bronze); }
+        .plan-card.silver { border: 2px solid var(--accent-silver); transform: scale(1.05); box-shadow: 0 0 30px rgba(74, 85, 104, 0.2); } .plan-card.silver:hover { transform: scale(1.1) translateY(-10px); } .plan-card.silver .cta-button { background: var(--accent-silver); }
+        .plan-card.gold { border-top: 4px solid var(--accent-gold); } .plan-card.gold .cta-button { background: var(--accent-gold); }
+        .popular-badge { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); background: var(--accent-silver); color: white; padding: 0.5rem 1.5rem; border-radius: 20px; font-weight: 700; font-size: 0.9rem; }
+        
+        .back-button-container { text-align: center; margin-top: 4rem; }
+        .back-button { color: var(--secondary-text-color); text-decoration: none; font-weight: 600; display: inline-block; padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; }
+        .back-button:hover { background: var(--border-color); color: var(--text-color); }
+        
+        /* Modals & Status */
+        .status-container { text-align: center; padding: 4rem 1rem; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; max-width: 700px; margin: 5rem auto; }
+        .spinner { border: 5px solid var(--border-color); border-top: 5px solid var(--accent-silver); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 2rem auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .status-details { background-color: var(--primary-bg); padding: 1.5rem; border-radius: 8px; margin-top: 2rem; text-align: left; }
+        .detail-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; } .detail-row span { color: var(--secondary-text-color); } .detail-row strong { color: var(--text-color); }
+        .verification-notice { background-color: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent-gold); padding: 1rem; text-align: left; border-radius: 4px; margin: 2rem 0; color: var(--secondary-text-color); }
+        .cancel-button { background: none; border: none; color: var(--secondary-text-color); text-decoration: underline; cursor: pointer; font-size: 0.9rem; margin-top: 2rem; font-family: 'Inter', sans-serif; }
+        .status-icon { font-size: 5rem; margin-bottom: 1.5rem; } .success-icon { color: var(--success-color); } .rejected-icon { color: var(--error-color); }
+        .status-container h1 { font-size: 2.5rem; margin-bottom: 1rem; } .status-container p { color: var(--secondary-text-color); max-width: 450px; margin: 0 auto 2rem auto; }
+        .action-button { display: inline-block; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; color:white; border:none; margin-top:1.5rem; } .login-button { background: var(--success-color); } .try-again-button { background: var(--accent-gold); }
+        
+        /* Payment Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
+        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-content { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 480px; border: 1px solid var(--border-color); position: relative; max-height: 95vh; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.3s ease; }
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+        .modal-header { padding: 1rem 1.5rem; text-align: center; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
+        .modal-header .close-button { font-size: 2rem; color: var(--secondary-text-color); background: none; border: none; cursor: pointer; }
+        .modal-stepper { display: flex; justify-content: center; gap: 0.5rem; } .step { color: var(--secondary-text-color); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 20px; } .step.active { color: white; background-color: var(--accent-silver); }
+        .modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; }
+        .step-content { display: none; animation: fadeIn 0.5s ease-in-out; } .step-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .order-summary-card { background-color: var(--primary-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); }
+        .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; } .summary-row.total { font-size: 1.5rem; font-weight: 800; border-top: 1px solid var(--border-color); padding-top: 1rem; }
+        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); background-color: rgba(0,0,0,0.02); flex-shrink: 0; }
+        .modal-button { display: block; width: 100%; padding: 1rem; border-radius: 8px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; background: var(--accent-silver); color: white; }
+        .payment-options { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .payment-option { background: var(--primary-bg); border: 2px solid var(--border-color); padding: 1.5rem; border-radius: 12px; cursor: pointer; }
+        .payment-option.selected { border-color: var(--accent-silver); box-shadow: 0 0 20px rgba(74,85,104, 0.2); }
+        .payment-option-header { display: flex; align-items: center; gap: 1rem; font-size: 1.2rem; font-weight: 600; }
+        .payment-option-details { margin-top: 1.5rem; display: block; animation: fadeIn 0.5s; }
+        .unique-code-container { display: flex; align-items: center; gap: 1rem; background-color: #edf2f7; padding: 0.5rem 1rem; border-radius: 8px; border: 2px dashed var(--accent-gold); margin-top: 10px;}
+        .unique-code-text { flex-grow: 1; font-size: 1.3rem; letter-spacing: 2px; color: var(--accent-gold); text-align: center; }
+        .copy-button { background: none; border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
+        .upi-id { background-color: var(--primary-bg); padding: 0.8rem 1rem; border-radius: 8px; font-weight: 600; text-align: center; }
+        #qr-code-area { display: flex; gap: 1.5rem; align-items: center; justify-content: center; }
+        #qr-code-container { width: 150px; height: 150px; background: #fff; border-radius: 8px; display: flex; justify-content: center; align-items: center; padding: 10px; }
+        .verification-form input { width: 100%; background-color: #edf2f7; border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; box-sizing: border-box; }
+        .error-message { color: var(--error-color); text-align:center; margin-top: 1rem;}
+        
+        #loginAlert { display:none; background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; margin-bottom: 2rem; border: 1px solid #f87171; }
+    </style>
+</head>
+<body>
+    
+    <div class="site-banner">
+        📘 Invite & Earn ₹50 💸 Instantly on Every Referral 👥 | Limited Time Offers Inside!
+    </div>
+
+    <!-- PENDING / VERIFICATION STATUS AREA -->
+    <div id="status-area" class="page-container hidden">
+        <div class="status-container">
+            <!-- Pending State -->
+            <div id="pending-section">
+                <div class="spinner"></div>
+                <h1>Verification in Progress</h1>
+                <p>Your payment is being verified. This page will update automatically once the admin approves your upgrade.</p>
+                <div class="verification-notice">
+                    <p style="margin:0;"><strong>Please Note:</strong> Activation can take <strong>1 minute to 1 hour</strong>. You don't need to stay on this page. Your account will be upgraded automatically.</p>
+                </div>
+                <div class="status-details">
+                    <div class="detail-row"><span>Account Email:</span><strong id="pending-email"></strong></div>
+                    <div class="detail-row"><span>Order ID:</span><strong id="pending-code"></strong></div>
+                </div>
+                <button class="cancel-button" onclick="startOver()">Go Back</button>
+            </div>
+            
+            <!-- Success State -->
+            <div id="success-section" class="hidden">
+                <div class="status-icon success-icon"><i class="fas fa-check-circle"></i></div>
+                <h1>Premium Active!</h1>
+                <p>Your payment was verified. Your account has been upgraded and all premium features are now unlocked.</p>
+                <a href="index.html" class="action-button login-button">Go to Dashboard</a>
+            </div>
+            
+            <!-- Rejected State -->
+            <div id="rejected-section" class="hidden">
+                <div class="status-icon rejected-icon"><i class="fas fa-times-circle"></i></div>
+                <h1>Verification Failed</h1>
+                <p>Unfortunately, we couldn't verify your payment. Please contact support via Telegram if you believe this is an error.</p>
+                <button class="action-button try-again-button" onclick="startOver()">Try Again</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN PLANS AREA -->
+    <div id="main-content" class="page-container">
+        <div id="loginAlert">You must be logged in to purchase a pass. Please go back to the Home page and log in first.</div>
+        
+        <div class="header-section">
+             <h1>Unlock <span class="highlight">Every Powerful Feature.</span><br>Choose Your Access Pass.</h1>
+            <p>All plans grant 100% access to the most advanced stenography toolkit. No holding back. Just pure practice and flawless analysis.</p>
+        </div>
+
+        <div class="features-section">
+            <h2>Your All-in-One Steno Practice Library</h2>
+            <div class="features-grid">
+                 <div class="feature-item" data-color="book"><div class="feature-icon-wrapper"><i class="fa-solid fa-book-open"></i></div><div class="feature-text"><h3>📖 Master the SSC Standard</h3><p>Conquer government exams with our complete, pre-loaded library of all 24 Kailash Chandra volumes.</p></div></div>
+                 <div class="feature-item" data-color="general"><div class="feature-icon-wrapper"><i class="fa-solid fa-newspaper"></i></div><div class="feature-text"><h3>📰 Build Real-World Speed</h3><p>Practice with a massive library of current affairs and editorial content.</p></div></div>
+                 <div class="feature-item" data-color="court"><div class="feature-icon-wrapper"><i class="fa-solid fa-gavel"></i></div><div class="feature-text"><h3>⚖️ Dominate Court Exams</h3><p>Step into the courtroom with confidence using specialized legal dictations.</p></div></div>
+            </div>
+        </div>
+
+        <div class="pricing-section">
+            <h2>Get Your Pass</h2>
+            <div class="plans-wrapper">
+                <div class="plan-card bronze">
+                    <h3>Bronze Pass</h3>
+                    <p class="duration">1 Month Access</p>
+                    <div class="price">₹299</div>
+                    <ul class="plan-features">
+                        <li><i class="fa-solid fa-check"></i> Full Access to All Dictations</li>
+                        <li><i class="fa-solid fa-check"></i> Unlimited Practice</li>
+                    </ul>
+                    <button class="cta-button" onclick="selectPlan('Bronze Pass', 299)">Get Bronze</button>
+                </div>
+                <div class="plan-card silver">
+                    <div class="popular-badge">Best Value</div>
+                    <h3>Silver Pass</h3>
+                    <p class="duration">3 Months Access</p>
+                    <div class="price">₹599</div>
+                    <ul class="plan-features">
+                        <li><i class="fa-solid fa-check"></i> Full Access to All Dictations</li>
+                        <li><i class="fa-solid fa-check"></i> Save 33% overall</li>
+                    </ul>
+                    <button class="cta-button" onclick="selectPlan('Silver Pass', 599)">Get Silver</button>
+                </div>
+                <div class="plan-card gold">
+                    <h3>Gold Pass</h3>
+                    <p class="duration">6 Months Access</p>
+                    <div class="price">₹899</div>
+                    <ul class="plan-features">
+                        <li><i class="fa-solid fa-check"></i> Full Access to All Dictations</li>
+                        <li><i class="fa-solid fa-check"></i> Maximum Savings!</li>
+                    </ul>
+                    <button class="cta-button" onclick="selectPlan('Gold Pass', 899)">Get Gold</button>
+                </div>
+            </div>
+        </div>
+        <div class="back-button-container">
+            <a href="index.html" class="back-button">← Back to Home Dashboard</a>
+        </div>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div class="modal-overlay" id="paymentModal">
+        <div class="modal-content">
+             <div class="modal-header">
+                <span class="brand">Check My Steno</span>
+                <div class="modal-stepper">
+                    <div id="step-indicator-1" class="step active">1. Order</div>
+                    <div id="step-indicator-2" class="step">2. Payment</div>
+                    <div id="step-indicator-3" class="step">3. Verify</div>
+                </div>
+                <button class="close-button" onclick="hidePaymentModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- STEP 1 -->
+                <div id="step-1-order" class="step-content active">
+                    <h3>Confirm Your Order</h3>
+                    <div class="order-summary-card">
+                        <div class="summary-row"><span>Plan Selected:</span><strong id="summary-plan-name"></strong></div>
+                        <div class="summary-row total"><span>Total Amount:</span><strong id="summary-total-price"></strong></div>
+                    </div>
+                </div>
+                
+                <!-- STEP 2 -->
+                <div id="step-2-payment" class="step-content">
+                    <h3>Payment Instructions</h3>
+                    <p>Scan the QR code or use the UPI ID. <strong style="color:var(--error-color);">Important:</strong> Put your Order ID in the payment remarks/notes!</p>
+                    <div class="payment-options">
+                        <div class="payment-option selected">
+                            <div id="qr-code-area">
+                                <div id="qr-code-container"></div>
+                                <div>
+                                    <p style="margin:0 0 10px 0;"><strong>UPI ID:</strong> <br>checkmysteno@upi</p>
+                                    <p style="margin:0 0 5px 0; font-size: 0.9rem;">Your Order ID (Put in notes):</p>
+                                    <div class="unique-code-container" style="padding: 5px;">
+                                        <span class="unique-code-text" id="unique-code-display" style="font-size: 1rem;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- STEP 3 -->
+                <div id="step-3-verify" class="step-content">
+                    <h3>Verify Your Payment</h3>
+                    <p>Enter the 12-digit UTR/Transaction ID from your payment app.</p>
+                    <form id="verifyForm" onsubmit="submitVerification(event)" class="verification-form">
+                        <input type="text" id="transactionId" placeholder="UPI Transaction ID / UTR No." required>
+                        <input type="hidden" id="planNameInput">
+                        <input type="hidden" id="planPriceInput">
+                        <input type="hidden" id="uniqueCodeInput">
+                        <button type="submit" id="submit-verify-btn" class="modal-button" style="margin-top: 10px;">Submit Verification</button>
+                        <p id="form-message" class="error-message"></p>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer" id="modal-footer-nav">
+                <button id="modal-action-button" class="modal-button" onclick="navigateToStep(2)">Proceed to Payment</button>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // --- FIREBASE INIT ---
+    const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
+    if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
+    const db = firebase.firestore();
+    const auth = firebase.auth();
+    
+    let currentUser = null;
+    let currentStep = 1;
+    let paymentListener = null;
+
+    // Listen to Auth State
+    auth.onAuthStateChanged(user => {
+        if (user) {
+            currentUser = { uid: user.uid, email: user.email, name: user.displayName };
+            document.getElementById('loginAlert').style.display = 'none';
+            checkForPendingRequests(); // Check if user already paid and is waiting
+        } else {
+            currentUser = null;
+            document.getElementById('loginAlert').style.display = 'block';
+        }
+    });
+
+    async function checkForPendingRequests() {
+        if (!currentUser) return;
+        const reqs = await db.collection('paymentVerifications').where('uid', '==', currentUser.uid).where('verified', '==', false).get();
+        if (!reqs.empty) {
+            const req = reqs.docs[0];
+            showStatusScreen(req.data().uniqueCode, currentUser.email);
+        }
+    }
+
+    function selectPlan(name, price) {
+        if (!currentUser) {
+            alert("Please go back to the Home page and log in first.");
+            window.location.href = "index.html";
+            return;
+        }
+        document.getElementById('planNameInput').value = name;
+        document.getElementById('planPriceInput').value = price;
+        document.getElementById('summary-plan-name').textContent = name;
+        document.getElementById('summary-total-price').textContent = `₹${price}`;
+        
+        // Generate Unique Order ID
+        const orderId = 'ORD-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+        document.getElementById('uniqueCodeInput').value = orderId;
+        document.getElementById('unique-code-display').textContent = orderId;
+        
+        // Generate QR
+        document.getElementById('qr-code-container').innerHTML = '';
+        new QRCode(document.getElementById("qr-code-container"), {
+            text: `upi://pay?pa=checkmysteno@upi&pn=CheckMySteno&am=${price}&tn=${orderId}`,
+            width: 130, height: 130
+        });
+
+        document.getElementById('paymentModal').classList.add('visible');
+        navigateToStep(1);
+    }
+
+    function navigateToStep(step) {
+        currentStep = step;
+        document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        
+        const stepIdMap = {1: 'order', 2: 'payment', 3: 'verify'};
+        document.getElementById(`step-${step}-${stepIdMap[step]}`).classList.add('active');
+        
+        for(let i=1; i<=step; i++) { 
+            document.getElementById(`step-indicator-${i}`).classList.add('active'); 
+        }
+        
+        const actionBtn = document.getElementById('modal-action-button');
+        const footer = document.getElementById('modal-footer-nav');
+        
+        if (step === 1) { 
+            actionBtn.textContent = "Proceed to Payment"; 
+            actionBtn.onclick = () => navigateToStep(2); 
+            footer.style.display = 'block'; 
+        }
+        else if (step === 2) { 
+            actionBtn.textContent = "I have paid, Proceed to Verify"; 
+            actionBtn.onclick = () => navigateToStep(3); 
+            footer.style.display = 'block'; 
+        }
+        else if (step === 3) { 
+            footer.style.display = 'none'; // Hide footer, use submit button inside form
+        }
+    }
+
+    function hidePaymentModal() {
+        document.getElementById('paymentModal').classList.remove('visible');
+        document.getElementById('modal-footer-nav').style.display = 'block';
+    }
+
+    async function submitVerification(e) {
+        e.preventDefault();
+        const btn = document.getElementById('submit-verify-btn');
+        btn.disabled = true; btn.textContent = "Submitting...";
+        
+        const data = {
+            uid: currentUser.uid,
+            name: currentUser.name || 'User',
+            email: currentUser.email,
+            plan: document.getElementById('planNameInput').value,
+            price: document.getElementById('planPriceInput').value,
+            transactionId: document.getElementById('transactionId').value.trim(),
+            uniqueCode: document.getElementById('uniqueCodeInput').value,
+            verified: false,
+            status: 'pending',
+            submissionTimestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+
+        try {
+            await db.collection('paymentVerifications').doc(data.uniqueCode).set(data);
+            hidePaymentModal();
+            showStatusScreen(data.uniqueCode, data.email);
+            document.getElementById('verifyForm').reset();
+        } catch (error) {
+            document.getElementById('form-message').textContent = "Error saving request. Please try again.";
+            console.error(error);
+        } finally {
+            btn.disabled = false; btn.textContent = "Submit Verification";
+        }
+    }
+
+    function showStatusScreen(orderId, email) {
+        document.getElementById('main-content').classList.add('hidden');
+        document.getElementById('status-area').classList.remove('hidden');
+        document.getElementById('pending-section').classList.remove('hidden');
+        document.getElementById('success-section').classList.add('hidden');
+        document.getElementById('rejected-section').classList.add('hidden');
+        
+        document.getElementById('pending-code').textContent = orderId;
+        document.getElementById('pending-email').textContent = email;
+        
+        if (paymentListener) paymentListener();
+        paymentListener = db.collection('paymentVerifications').doc(orderId).onSnapshot(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                if (data.verified) {
+                    document.getElementById('pending-section').classList.add('hidden');
+                    if (data.status === 'approved') {
+                        document.getElementById('success-section').classList.remove('hidden');
+                    } else {
+                        document.getElementById('rejected-section').classList.remove('hidden');
+                    }
+                    paymentListener(); // Stop listening once verified
+                }
+            }
+        });
+    }
+
+    function startOver() {
+        document.getElementById('status-area').classList.add('hidden');
+        document.getElementById('main-content').classList.remove('hidden');
+        if(paymentListener) { paymentListener(); paymentListener = null; }
+    }
+</script>
+</body>
+</html>
