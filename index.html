@@ -15,41 +15,28 @@
   
   <style>
     /* --- THEME DEFINITIONS --- */
-    :root, body[data-theme="default"] {
+    :root {
         --primary-bg: #f3f4f6; --text-color: #1e293b; --secondary-text-color: #6b7280;
         --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e2e8f0;
         --button-gradient-start: #6366f1; --button-gradient-end: #ec4899;
         --error-color: #ef4444; --gold-start: #fde047; --gold-end: #eab308;
         --success-color: #22c55e; --warning-color: #f59e0b;
     }
-    body[data-theme="galaxy"] {
-        --primary-bg: #0f172a; --text-color: #f8fafc; --secondary-text-color: #94a3b8;
-        --card-bg: #1e293b; --card-shadow: rgba(0, 0, 0, 0.25); --card-border: #334155;
-        --button-gradient-start: #22d3ee; --button-gradient-end: #a78bfa;
-    }
-    body[data-theme="sunset"] { --primary-bg: #fff1f2; --text-color: #4c1d24; --secondary-text-color: #8c2d42; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #fecdd3; --button-gradient-start: #fb923c; --button-gradient-end: #f472b6; }
-    body[data-theme="oceanic"] { --primary-bg: #f0f9ff; --text-color: #082f49; --secondary-text-color: #075985; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e0f2fe; --button-gradient-start: #22d3ee; --button-gradient-end: #0ea5e9; }
 
     /* --- GLOBAL STYLES --- */
     html { scroll-behavior: smooth; }
-    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); }
     body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; position: relative; }
     body.modal-open, html.modal-open { overflow: hidden; }
 
-    /* --- IMMERSIVE BACKGROUND --- */
-    @keyframes slow-pan { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-    body[data-theme="galaxy"]::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(250deg, #0f172a, #1e293b, #0f172a); background-size: 400% 400%; animation: slow-pan 40s ease infinite; }
-    body[data-theme="oceanic"]::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background: linear-gradient(135deg, #e0f7fa, #b2ebf2, #80deea); background-size: 400% 400%; animation: slow-pan 30s ease infinite; }
-
     /* --- LAYOUT & HEADER --- */
     main { position: relative; padding-bottom: 120px; z-index: 1; display: block; }
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s, transform 0.4s ease-out; }
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: transform 0.4s ease-out; }
     .main-header.hidden { transform: translateY(-110%); }
     .logo { font-size: 1.8rem; font-weight: 800; }
     .header-actions { display: flex; align-items: center; gap: 1rem; }
     .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
     .cta-button:hover { transform: scale(1.05); }
-    .demo-button { background: none; border: 2px solid var(--button-gradient-start); color: var(--button-gradient-start); }
     
     /* --- IMMERSIVE INTRO --- */
     #immersive-intro { height: 100vh; width: 100%; overflow: hidden; position: relative; cursor: pointer; }
@@ -114,16 +101,15 @@
 
     .footer { position: absolute; bottom: 0; left: 0; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 5%; background-color: var(--card-bg); border-top: 1px solid var(--card-border); }
     .footer-links { display: flex; gap: 1.5rem; margin: 0; } .footer-links button { background: none; border: none; color: var(--secondary-text-color); font-weight: 600; cursor: pointer; }
-    .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; display: flex; gap: 0.5rem; height: 68px; } body[data-theme="galaxy"] .dock { background: rgba(30, 41, 59, 0.6); } .dock-item { transition: transform 0.1s linear, margin 0.1s linear; will-change: transform; } .dock-item a { display: block; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 1.8rem; color: var(--text-color); text-decoration: none; } .dock-item .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: var(--card-bg); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; opacity: 0; visibility: hidden; transition: 0.2s; white-space: nowrap; } .dock-item:hover .tooltip { opacity: 1; visibility: visible; }
+    .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; display: flex; gap: 0.5rem; height: 68px; } .dock-item { transition: transform 0.1s linear, margin 0.1s linear; will-change: transform; } .dock-item a { display: block; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 1.8rem; color: var(--text-color); text-decoration: none; } .dock-item .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: var(--card-bg); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; opacity: 0; visibility: hidden; transition: 0.2s; white-space: nowrap; } .dock-item:hover .tooltip { opacity: 1; visibility: visible; }
     
     /* --- MODALS & EXTRAS --- */
     .header-icon-btn { background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; }
-    #theme-switcher { position: relative; } #theme-menu { display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px var(--card-shadow); z-index: 1100; overflow: hidden; } #theme-menu.visible { display: block; } .theme-option { padding: 0.8rem 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; } .theme-option:hover { background-color: var(--primary-bg); } .theme-option .color-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--card-border); }
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; }
     .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
-    .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; } .tool-content iframe { width: 100%; height: 100%; border: none; }
-    .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid var(--primary-bg); border-top: 6px solid var(--button-gradient-start); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; display: none; } @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-    .choice-card { padding: 1.5rem; border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s ease; } .choice-card:hover { border-color: var(--button-gradient-start); box-shadow: 0 5px 15px var(--card-shadow); transform: translateY(-5px); } .choice-card i { font-size: 1.8rem; color: var(--button-gradient-start); margin-bottom: 0.5rem; } .choice-card h3 { margin: 0; }
+    .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; position: relative; } .tool-content iframe { width: 100%; height: 100%; border: none; }
+    .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid var(--primary-bg); border-top: 6px solid var(--button-gradient-start); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; display: none; z-index: 5; } @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+    .choice-card { padding: 1.5rem; border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s ease; background: var(--primary-bg); } .choice-card:hover { border-color: var(--button-gradient-start); box-shadow: 0 5px 15px var(--card-shadow); transform: translateY(-5px); } .choice-card i { font-size: 1.8rem; color: var(--button-gradient-start); margin-bottom: 0.5rem; } .choice-card h3 { margin: 0; color: var(--text-color); }
   </style>
 </head>
 <body>
@@ -131,7 +117,7 @@
         <div class="logo">Check My Steno</div>
         <div class="header-actions" id="headerActions">
             <!-- Loading state header -->
-            <div class="loader" style="position:relative; width:20px; height:20px; border-width:3px; display:block;"></div>
+            <div class="loader" style="position:relative; width:20px; height:20px; border-width:3px; display:block; transform: none; top:0; left:0; animation: spin 1s linear infinite;"></div>
         </div>
     </header>
 
@@ -145,6 +131,7 @@
             <div class="scroll-down-prompt" id="scroll-prompt">Scroll to Explore <i class="fas fa-chevron-down"></i></div>
        </section>
 
+       <!-- TOOLS SECTIONS -->
        <section id="practice" class="page-section">
            <div class="section-content anim-hidden">
                <div class="text-content">
@@ -195,8 +182,8 @@
                <div class="text-content">
                    <h2>About Check My Steno</h2>
                    <p>Learn about our mission, the technology behind our tools, and how we help stenographers.</p>
-                   <!-- Free Tool -->
-                   <button class="launch-button" data-tool="about">Learn More</button>
+                   <!-- Free Tool (Not Locked) -->
+                   <button class="launch-button" data-tool="about" data-unlocked-text="Learn More">Learn More</button>
                </div>
                <div class="graphic-content"><i class="fas fa-book-open"></i></div>
            </div>
@@ -225,11 +212,11 @@
             <button class="close-button" onclick="hidePremiumModal()">&times;</button>
             <h2>Unlock Premium Access</h2>
             <p>Upgrade to Premium to access all dictations, analysis tools, and transcription checkers.</p>
-            <div class="choice-container" style="display: flex; flex-direction: column; gap: 1rem;">
+            <div class="choice-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
                 <div class="choice-card" onclick="submitPremiumRequest()">
                     <i class="fas fa-crown"></i>
                     <h3>Buy Premium Pass</h3>
-                    <p>Request manual approval for a premium subscription.</p>
+                    <p style="margin-top: 5px; font-size: 0.95rem;">Request manual approval for a premium subscription.</p>
                 </div>
             </div>
             <p id="premiumError" style="color: var(--error-color); margin-top: 15px; font-weight: 600;"></p>
@@ -237,12 +224,14 @@
         </div>
     </div>
 
+    <!-- Iframe Overlays for Tools -->
     <div id="toolOverlays">
         <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2>Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
         <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2>Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
         <div id="transcription-checkerTool" class="tool-overlay"><header class="tool-header"><h2>Transcription Checker</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="transcription-checkerFrame" src="about:blank"></iframe></div></div>
         <div id="aboutTool" class="tool-overlay"><header class="tool-header"><h2>About</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="aboutFrame" src="about:blank"></iframe></div></div>
         <div id="dictationsTool" class="tool-overlay"><header class="tool-header"><h2>Dictations</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="dictationsFrame" src="about:blank"></iframe></div></div>
+        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding: 2rem;"><h3>Email: checkmysteno@gmail.com</h3><p>Reach out to us on Telegram: @CheckMySteno</p></div></div>
     </div>
     
 <script>
@@ -259,7 +248,7 @@
 
     // --- FIREBASE CONFIG ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
-    firebase.initializeApp(FBCONFIG);
+    if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
     
     const DB = firebase.firestore();
     const AUTH = firebase.auth();
@@ -268,29 +257,42 @@
     let currentUser = null;
     let userDocUnsubscribe = null;
 
-    // --- AUTH & PREMIUM LOGIC ---
+    // --- AUTH & PROFILE CREATION LOGIC ---
     AUTH.onAuthStateChanged(async (user) => {
         if (user) {
-            const userRef = DB.collection('users').doc(user.uid);
-            if (userDocUnsubscribe) userDocUnsubscribe();
-            
-            userDocUnsubscribe = userRef.onSnapshot(async (docSnap) => {
-                if (!docSnap.exists) {
-                    const newUserData = {
-                        name: user.displayName,
-                        email: user.email,
-                        photoURL: user.photoURL,
-                        plan: 'free',
-                        expiry: null,
-                        created_at: firebase.firestore.FieldValue.serverTimestamp()
-                    };
-                    await userRef.set(newUserData);
-                    currentUser = { uid: user.uid, ...newUserData };
-                } else {
-                    currentUser = { uid: user.uid, ...docSnap.data() };
-                }
-                updateUserUI(currentUser);
-            });
+            try {
+                const userRef = DB.collection('users').doc(user.uid);
+                if (userDocUnsubscribe) userDocUnsubscribe();
+                
+                userDocUnsubscribe = userRef.onSnapshot(async (docSnap) => {
+                    try {
+                        if (!docSnap.exists) {
+                            // Automatically Create Profile on First Login
+                            const newUserData = {
+                                name: user.displayName || 'New User',
+                                email: user.email,
+                                photoURL: user.photoURL || 'https://www.gravatar.com/avatar/?d=mp',
+                                plan: 'free',
+                                expiry: null,
+                                created_at: firebase.firestore.FieldValue.serverTimestamp()
+                            };
+                            await userRef.set(newUserData);
+                            currentUser = { uid: user.uid, ...newUserData };
+                        } else {
+                            currentUser = { uid: user.uid, ...docSnap.data() };
+                        }
+                        updateUserUI(currentUser);
+                    } catch (err) {
+                        console.error("Error saving profile data:", err);
+                        alert("Error saving profile. Make sure Firestore Database is created and Rules are correct.");
+                        updateUserUI(null);
+                    }
+                }, (error) => {
+                    console.error("Database connection error:", error);
+                    alert("Database Error: Make sure Firestore Database is created in the Firebase Console.");
+                    updateUserUI(null);
+                });
+            } catch (err) { console.error("Error setting up DB connection:", err); }
         } else {
             if (userDocUnsubscribe) userDocUnsubscribe();
             currentUser = null;
@@ -298,8 +300,15 @@
         }
     });
 
-    function loginWithGoogle() { AUTH.signInWithPopup(GOOGLE_PROVIDER).catch(err => alert("Login failed: " + err.message)); }
-    function logout() { AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); }
+    function loginWithGoogle() { 
+        AUTH.signInWithPopup(GOOGLE_PROVIDER).catch(err => {
+            console.error(err); alert("Login failed: " + err.message);
+        }); 
+    }
+    
+    function logout() { 
+        AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
+    }
     
     function isUserPremium(user) {
         if (!user || user.plan !== 'premium' || !user.expiry) return false;
@@ -324,10 +333,21 @@
         try {
             const existingReqs = await DB.collection('payment_requests').where('uid', '==', currentUser.uid).where('status', '==', 'pending').get();
             if (!existingReqs.empty) { errEl.textContent = 'You already have a pending premium request.'; return; }
-            await DB.collection('payment_requests').add({ uid: currentUser.uid, email: currentUser.email, plan_requested: 'premium', status: 'pending', created_at: firebase.firestore.FieldValue.serverTimestamp() });
+            
+            await DB.collection('payment_requests').add({ 
+                uid: currentUser.uid, 
+                email: currentUser.email, 
+                plan_requested: 'premium', 
+                status: 'pending', 
+                created_at: firebase.firestore.FieldValue.serverTimestamp() 
+            });
+            
             succEl.textContent = 'Premium request submitted successfully! Waiting for admin approval.';
             setTimeout(hidePremiumModal, 3000);
-        } catch (err) { errEl.textContent = 'Error submitting request. Please try again.'; }
+        } catch (err) { 
+            console.error(err);
+            errEl.textContent = 'Error submitting request. Check Firestore rules.'; 
+        }
     }
 
     function launchTool(toolName) {
@@ -335,9 +355,10 @@
         if (!toolOverlay) return;
         const iframe = toolOverlay.querySelector('iframe');
         if(iframe) {
-            const loader = toolOverlay.querySelector('.loader'); loader.style.display = 'block';
+            const loader = toolOverlay.querySelector('.loader'); 
+            if(loader) loader.style.display = 'block';
             iframe.src = 'about:blank'; iframe.style.opacity = '0';
-            iframe.onload = () => { loader.style.display = 'none'; iframe.style.opacity = '1'; };
+            iframe.onload = () => { if(loader) loader.style.display = 'none'; iframe.style.opacity = '1'; };
             iframe.src = `${toolName}.html`;
         }
         toolOverlay.classList.add('visible'); setScrollLock(true);
@@ -353,7 +374,7 @@
         if (userData) {
             const isPremium = isUserPremium(userData);
             const planText = isPremium ? `<span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-crown"></i> Premium Active</span>` : `<span style="color:var(--secondary-text-color); font-weight:bold;">Free Plan</span>`;
-            const expiryText = isPremium && userData.expiry ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${userData.expiry.toDate().toLocaleDateString()}</small>` : '';
+            const expiryText = isPremium && userData.expiry ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${userData.expiry.toDate ? userData.expiry.toDate().toLocaleDateString() : new Date(userData.expiry).toLocaleDateString()}</small>` : '';
             const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
             headerActions.innerHTML = `
@@ -406,7 +427,7 @@
 
         } else {
             // Not Logged In
-            headerActions.innerHTML = `<button id="loginBtn" class="cta-button" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login with Google</button>`;
+            headerActions.innerHTML = `<button id="loginBtn" class="cta-button" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login</button>`;
 
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
@@ -421,7 +442,7 @@
         }
     }
     
-    // --- MAIN EXECUTION ---
+    // --- INIT ---
     window.onload = function() {
         document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('anim-visible'); entry.target.classList.remove('anim-hidden'); } }); }, { threshold: 0.1 }).observe(el));
         
