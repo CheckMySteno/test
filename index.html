@@ -109,7 +109,6 @@
     .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
     .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; position: relative; } .tool-content iframe { width: 100%; height: 100%; border: none; }
     .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid var(--primary-bg); border-top: 6px solid var(--button-gradient-start); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; display: none; z-index: 5; } @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
-    .choice-card { padding: 1.5rem; border: 1px solid var(--card-border); border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.2s ease; background: var(--primary-bg); } .choice-card:hover { border-color: var(--button-gradient-start); box-shadow: 0 5px 15px var(--card-shadow); transform: translateY(-5px); } .choice-card i { font-size: 1.8rem; color: var(--button-gradient-start); margin-bottom: 0.5rem; } .choice-card h3 { margin: 0; color: var(--text-color); }
   </style>
 </head>
 <body>
@@ -205,24 +204,6 @@
         <div class="dock-item"><a href="#checker"><i class="fas fa-check-double"></i></a><span class="tooltip">Transcription Checker</span></div>
         <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
     </nav>
-    
-    <!-- Premium Request Modal -->
-    <div class="modal-overlay" id="premiumModal">
-        <div class="modal-content">
-            <button class="close-button" onclick="hidePremiumModal()">&times;</button>
-            <h2>Unlock Premium Access</h2>
-            <p>Upgrade to Premium to access all dictations, analysis tools, and transcription checkers.</p>
-            <div class="choice-container" style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1.5rem;">
-                <div class="choice-card" onclick="submitPremiumRequest()">
-                    <i class="fas fa-crown"></i>
-                    <h3>Buy Premium Pass</h3>
-                    <p style="margin-top: 5px; font-size: 0.95rem;">Request manual approval for a premium subscription.</p>
-                </div>
-            </div>
-            <p id="premiumError" style="color: var(--error-color); margin-top: 15px; font-weight: 600;"></p>
-            <p id="premiumSuccess" style="color: var(--success-color); margin-top: 15px; font-weight: 600;"></p>
-        </div>
-    </div>
 
     <!-- Iframe Overlays for Tools -->
     <div id="toolOverlays">
@@ -231,7 +212,7 @@
         <div id="transcription-checkerTool" class="tool-overlay"><header class="tool-header"><h2>Transcription Checker</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="transcription-checkerFrame" src="about:blank"></iframe></div></div>
         <div id="aboutTool" class="tool-overlay"><header class="tool-header"><h2>About</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="aboutFrame" src="about:blank"></iframe></div></div>
         <div id="dictationsTool" class="tool-overlay"><header class="tool-header"><h2>Dictations</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="dictationsFrame" src="about:blank"></iframe></div></div>
-        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding: 2rem;"><h3>Email: checkmysteno@gmail.com</h3><p>Reach out to us on Telegram: @CheckMySteno</p></div></div>
+        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding: 2rem; text-align: center;"><h3>Email: checkmysteno@gmail.com</h3><p>Reach out to us on Telegram: <a href="https://t.me/CheckMySteno" target="_blank">@CheckMySteno</a></p></div></div>
     </div>
     
 <script>
@@ -317,39 +298,9 @@
         return now < expiryDate;
     }
 
-    // --- MODALS & TOOLS ---
+    // --- TOOLS ---
     function setScrollLock(locked) { document.body.classList[locked ? 'add' : 'remove']('modal-open'); }
-    function showPremiumModal() {
-        if (!currentUser) { alert("Please log in first."); loginWithGoogle(); return; }
-        GID('profile-dropdown').style.display = 'none'; // Close profile menu
-        GID('premiumModal').classList.add('visible'); setScrollLock(true);
-    }
-    function hidePremiumModal() { GID('premiumModal').classList.remove('visible'); setScrollLock(false); GID('premiumError').textContent = ''; GID('premiumSuccess').textContent = ''; }
     
-    async function submitPremiumRequest() {
-        if (!currentUser) return;
-        const errEl = GID('premiumError'), succEl = GID('premiumSuccess');
-        errEl.textContent = ''; succEl.textContent = '';
-        try {
-            const existingReqs = await DB.collection('payment_requests').where('uid', '==', currentUser.uid).where('status', '==', 'pending').get();
-            if (!existingReqs.empty) { errEl.textContent = 'You already have a pending premium request.'; return; }
-            
-            await DB.collection('payment_requests').add({ 
-                uid: currentUser.uid, 
-                email: currentUser.email, 
-                plan_requested: 'premium', 
-                status: 'pending', 
-                created_at: firebase.firestore.FieldValue.serverTimestamp() 
-            });
-            
-            succEl.textContent = 'Premium request submitted successfully! Waiting for admin approval.';
-            setTimeout(hidePremiumModal, 3000);
-        } catch (err) { 
-            console.error(err);
-            errEl.textContent = 'Error submitting request. Check Firestore rules.'; 
-        }
-    }
-
     function launchTool(toolName) {
         const toolOverlay = GID(`${toolName}Tool`);
         if (!toolOverlay) return;
@@ -365,11 +316,11 @@
     }
     function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { const i = o.querySelector('iframe'); if (i) i.src = 'about:blank'; o.classList.remove('visible'); }); setScrollLock(false); }
 
-    // --- UI UPDATER (WITH PROFILE MENU) ---
+    // --- UI UPDATER (WITH REDIRECT TO PLANS.HTML) ---
     function updateUserUI(userData) {
         const headerActions = GID('headerActions');
         const allLaunchButtons = document.querySelectorAll('.launch-button');
-        const premiumTools = ['kc', 'test-analysis', 'transcription-checker', 'dictations'];
+        const premiumTools =['kc', 'test-analysis', 'transcription-checker', 'dictations'];
 
         if (userData) {
             const isPremium = isUserPremium(userData);
@@ -378,7 +329,7 @@
             const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
             headerActions.innerHTML = `
-                ${!isPremium ? '<button class="cta-button" onclick="showPremiumModal()" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium Member</span>'}
+                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium Member</span>'}
                 
                 <div id="profile-menu-container" style="position:relative;">
                     <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:45px; height:45px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
@@ -394,7 +345,7 @@
                             ${expiryText}
                         </div>
                         
-                        ${!isPremium ? `<button class="cta-button" style="width:100%; margin-bottom:10px; padding:0.8rem;" onclick="showPremiumModal()">Get Premium Pass</button>` : ''}
+                        ${!isPremium ? `<button class="cta-button" style="width:100%; margin-bottom:10px; padding:0.8rem;" onclick="window.location.href='plans.html'">Get Premium Pass</button>` : ''}
                         <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     </div>
                 </div>
@@ -418,7 +369,8 @@
                     } else {
                         btn.classList.add('locked');
                         btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
-                        btn.onclick = () => showPremiumModal();
+                        // Redirect free users to plans page
+                        btn.onclick = () => { window.location.href = 'plans.html'; };
                     }
                 } else {
                     btn.onclick = () => launchTool(tool);
@@ -427,7 +379,7 @@
 
         } else {
             // Not Logged In
-            headerActions.innerHTML = `<button id="loginBtn" class="cta-button" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login</button>`;
+            headerActions.innerHTML = `<button id="loginBtn" class="cta-button" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login with Google</button>`;
 
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
@@ -452,7 +404,7 @@
                 const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none';
             }
         });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeAllTools(); hidePremiumModal(); } });
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeAllTools(); } });
     };
 </script>    
 </body>
