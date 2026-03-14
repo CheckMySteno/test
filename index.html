@@ -13,6 +13,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore-compat.js"></script>
   
+  <!-- Shared Wallet Script -->
+  <script src="common.js"></script>
+  
   <style>
     /* --- THEME DEFINITIONS --- */
     :root {
@@ -247,9 +250,10 @@
                 
                 userDocUnsubscribe = userRef.onSnapshot(async (docSnap) => {
                     try {
+                        let userData;
                         if (!docSnap.exists) {
                             // Automatically Create Profile on First Login
-                            const newUserData = {
+                            userData = {
                                 name: user.displayName || 'New User',
                                 email: user.email,
                                 photoURL: user.photoURL || 'https://www.gravatar.com/avatar/?d=mp',
@@ -257,12 +261,14 @@
                                 expiry: null,
                                 created_at: firebase.firestore.FieldValue.serverTimestamp()
                             };
-                            await userRef.set(newUserData);
-                            currentUser = { uid: user.uid, ...newUserData };
+                            await userRef.set(userData);
                         } else {
-                            currentUser = { uid: user.uid, ...docSnap.data() };
+                            userData = { uid: user.uid, ...docSnap.data() };
                         }
-                        updateUserUI(currentUser);
+                        
+                        // SYNC TO WALLET (common.js)
+                        syncAuthToStorage(userData);
+                        updateUserUI(userData);
                     } catch (err) {
                         console.error("Error saving profile data:", err);
                         alert("Error saving profile. Make sure Firestore Database is created and Rules are correct.");
@@ -276,7 +282,7 @@
             } catch (err) { console.error("Error setting up DB connection:", err); }
         } else {
             if (userDocUnsubscribe) userDocUnsubscribe();
-            currentUser = null;
+            syncAuthToStorage(null); // Clear Wallet
             updateUserUI(null);
         }
     });
@@ -289,13 +295,6 @@
     
     function logout() { 
         AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
-    }
-    
-    function isUserPremium(user) {
-        if (!user || user.plan !== 'premium' || !user.expiry) return false;
-        const now = new Date();
-        const expiryDate = user.expiry.toDate ? user.expiry.toDate() : new Date(user.expiry);
-        return now < expiryDate;
     }
 
     // --- TOOLS ---
@@ -323,9 +322,7 @@
         const premiumTools =['kc', 'test-analysis', 'transcription-checker', 'dictations'];
 
         if (userData) {
-            const isPremium = isUserPremium(userData);
-            const planText = isPremium ? `<span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-crown"></i> Premium Active</span>` : `<span style="color:var(--secondary-text-color); font-weight:bold;">Free Plan</span>`;
-            const expiryText = isPremium && userData.expiry ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${userData.expiry.toDate ? userData.expiry.toDate().toLocaleDateString() : new Date(userData.expiry).toLocaleDateString()}</small>` : '';
+            const isPremium = isUserPremium(); // Logic from common.js
             const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
             headerActions.innerHTML = `
@@ -339,13 +336,6 @@
                     <div id="profile-dropdown" style="display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left;">
                         <h3 style="margin:0 0 5px 0; font-size:1.1rem; color:var(--text-color);">${userData.name}</h3>
                         <p style="margin:0 0 15px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
-                        
-                        <div style="background:var(--primary-bg); padding:12px; border-radius:8px; margin-bottom:15px; text-align:center;">
-                            ${planText}
-                            ${expiryText}
-                        </div>
-                        
-                        ${!isPremium ? `<button class="cta-button" style="width:100%; margin-bottom:10px; padding:0.8rem;" onclick="window.location.href='plans.html'">Get Premium Pass</button>` : ''}
                         <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     </div>
                 </div>
