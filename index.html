@@ -70,9 +70,6 @@
     .highlight-ssc { background-color: rgba(239, 68, 68, 0.2); animation: pulse-red 1.5s ease-out; }
     .highlight-match { background-color: rgba(245, 158, 11, 0.2); animation: pulse-yellow 1.5s ease-out; }
     .highlight-re-eval { background-color: rgba(34, 197, 94, 0.2); animation: pulse-green 1.5s ease-out; }
-    @keyframes pulse-red { 0% { background-color: rgba(239, 68, 68, 0.2); } 50% { background-color: rgba(239, 68, 68, 0.5); } 100% { background-color: rgba(239, 68, 68, 0.2); } }
-    @keyframes pulse-yellow { 0% { background-color: rgba(245, 158, 11, 0.2); } 50% { background-color: rgba(245, 158, 11, 0.5); } 100% { background-color: rgba(245, 158, 11, 0.2); } }
-    @keyframes pulse-green { 0% { background-color: rgba(34, 197, 94, 0.2); } 50% { background-color: rgba(34, 197, 94, 0.5); } 100% { background-color: rgba(34, 197, 94, 0.2); } }
     .feature-callout { position: absolute; background: var(--text-color); color: var(--card-bg); padding: 0.5rem 1rem; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; opacity: 0; transform: scale(0.95) translateY(10px); pointer-events: none; white-space: nowrap; z-index: 10; transition: opacity 0.4s ease, transform 0.4s ease; }
     .feature-callout.is-active { opacity: 1; transform: scale(1) translateY(0); }
     .feature-callout::after { content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: var(--text-color); }
@@ -112,6 +109,12 @@
     .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
     .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; position: relative; } .tool-content iframe { width: 100%; height: 100%; border: none; }
     .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid var(--primary-bg); border-top: 6px solid var(--button-gradient-start); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; display: none; z-index: 5; } @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* Custom Profile Dropdown Styles */
+    #profile-menu-container { position:relative; }
+    #profile-btn { border-radius:50%; background:var(--primary-bg); width:45px; height:45px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden; cursor:pointer; }
+    #profile-btn img { width:100%; height:100%; object-fit:cover; }
+    #profile-dropdown { display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left; }
   </style>
 </head>
 <body>
@@ -139,7 +142,6 @@
                <div class="text-content">
                    <h2>Practice KC</h2>
                    <p>Hone your muscle memory with our interactive keyboard drills. Designed to build both speed and accuracy.</p>
-                   <!-- SECURE BY DEFAULT: Button locked in HTML -->
                    <button class="launch-button locked" data-tool="kc" data-unlocked-text="Launch Practice Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
                </div>
                <div class="graphic-content"><i class="fas fa-keyboard"></i></div>
@@ -184,7 +186,6 @@
                <div class="text-content">
                    <h2>About Check My Steno</h2>
                    <p>Learn about our mission, the technology behind our tools, and how we help stenographers.</p>
-                   <!-- Free Tool (Not Locked) -->
                    <button class="launch-button" data-tool="about" data-unlocked-text="Learn More">Learn More</button>
                </div>
                <div class="graphic-content"><i class="fas fa-book-open"></i></div>
@@ -208,7 +209,6 @@
         <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
     </nav>
 
-    <!-- Iframe Overlays for Tools -->
     <div id="toolOverlays">
         <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2>Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
         <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2>Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
@@ -252,7 +252,6 @@
                     try {
                         let userData;
                         if (!docSnap.exists) {
-                            // Automatically Create Profile on First Login
                             userData = {
                                 name: user.displayName || 'New User',
                                 email: user.email,
@@ -266,23 +265,18 @@
                             userData = { uid: user.uid, ...docSnap.data() };
                         }
                         
-                        // SYNC TO WALLET (common.js)
-                        syncAuthToStorage(userData);
+                        syncAuthToStorage(userData); // Sync to common.js wallet
                         updateUserUI(userData);
                     } catch (err) {
                         console.error("Error saving profile data:", err);
-                        alert("Error saving profile. Make sure Firestore Database is created and Rules are correct.");
+                        alert("Error saving profile.");
                         updateUserUI(null);
                     }
-                }, (error) => {
-                    console.error("Database connection error:", error);
-                    alert("Database Error: Make sure Firestore Database is created in the Firebase Console.");
-                    updateUserUI(null);
                 });
             } catch (err) { console.error("Error setting up DB connection:", err); }
         } else {
             if (userDocUnsubscribe) userDocUnsubscribe();
-            syncAuthToStorage(null); // Clear Wallet
+            syncAuthToStorage(null);
             updateUserUI(null);
         }
     });
@@ -315,71 +309,68 @@
     }
     function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { const i = o.querySelector('iframe'); if (i) i.src = 'about:blank'; o.classList.remove('visible'); }); setScrollLock(false); }
 
-    // --- UI UPDATER (WITH REDIRECT TO PLANS.HTML) ---
+    // --- UI UPDATER (PHOTCOPY VERSION WITH VALIDITY INFO) ---
     function updateUserUI(userData) {
         const headerActions = GID('headerActions');
         const allLaunchButtons = document.querySelectorAll('.launch-button');
         const premiumTools =['kc', 'test-analysis', 'transcription-checker', 'dictations'];
 
         if (userData) {
-            const isPremium = isUserPremium(); // Logic from common.js
+            const isPremium = isUserPremium(); 
+            const planText = isPremium ? `<span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-crown"></i> Premium Active</span>` : `<span style="color:var(--secondary-text-color); font-weight:bold;">Free Plan</span>`;
+            
+            // Format Expiry Date
+            let expiryDateStr = 'N/A';
+            if (isPremium && userData.expiry) {
+                const dateObj = userData.expiry.toDate ? userData.expiry.toDate() : new Date(userData.expiry);
+                expiryDateStr = dateObj.toLocaleDateString();
+            }
+            const expiryText = isPremium ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${expiryDateStr}</small>` : '';
             const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
             headerActions.innerHTML = `
                 ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium Member</span>'}
                 
-                <div id="profile-menu-container" style="position:relative;">
-                    <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:45px; height:45px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
-                        <img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;" alt="Profile">
+                <div id="profile-menu-container">
+                    <button id="profile-btn" onclick="const pd=GID('profile-dropdown'); pd.style.display=pd.style.display==='block'?'none':'block';">
+                        <img src="${photoUrl}" alt="Profile">
                     </button>
                     
-                    <div id="profile-dropdown" style="display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left;">
-                        <h3 style="margin:0 0 5px 0; font-size:1.1rem; color:var(--text-color);">${userData.name}</h3>
-                        <p style="margin:0 0 15px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
-                        <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    <div id="profile-dropdown">
+                        <h3 style="margin:0 0 5px 0;">${userData.name}</h3>
+                        <p style="margin:0 0 10px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
+                        
+                        <div style="background:var(--primary-bg); padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; border:1px solid var(--card-border);">
+                            ${planText}
+                            ${expiryText}
+                        </div>
+                        
+                        <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()">Logout</button>
                     </div>
                 </div>
             `;
 
-            // Profile Click Logic
-            GID('profile-btn').onclick = (e) => {
-                e.stopPropagation();
-                const pd = GID('profile-dropdown');
-                pd.style.display = pd.style.display === 'none' ? 'block' : 'none';
-            };
-
-            // Setup Launch Buttons
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
                     if (isPremium) {
                         btn.classList.remove('locked');
-                        btn.innerHTML = btn.dataset.unlockedText;
                         btn.onclick = () => launchTool(tool);
                     } else {
                         btn.classList.add('locked');
-                        btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
-                        // Redirect free users to plans page
                         btn.onclick = () => { window.location.href = 'plans.html'; };
                     }
-                } else {
-                    btn.onclick = () => launchTool(tool);
-                }
+                } else { btn.onclick = () => launchTool(tool); }
             });
 
         } else {
             // Not Logged In
-            headerActions.innerHTML = `<button id="loginBtn" class="cta-button" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login with Google</button>`;
-
+            headerActions.innerHTML = `<button class="cta-button" onclick="loginWithGoogle()">Login</button>`;
             allLaunchButtons.forEach(btn => {
-                const tool = btn.dataset.tool;
-                if (premiumTools.includes(tool)) {
+                if (premiumTools.includes(btn.dataset.tool)) {
                     btn.classList.add('locked');
-                    btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
-                    btn.onclick = () => { alert("Please login to access this tool."); loginWithGoogle(); };
-                } else {
-                    btn.onclick = () => launchTool(tool);
-                }
+                    btn.onclick = () => loginWithGoogle();
+                } else { btn.onclick = () => launchTool(btn.dataset.tool); }
             });
         }
     }
@@ -388,7 +379,6 @@
     window.onload = function() {
         document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('anim-visible'); entry.target.classList.remove('anim-hidden'); } }); }, { threshold: 0.1 }).observe(el));
         
-        // Hide profile menu when clicking outside
         document.addEventListener('click', (e) => {
             if(!e.target.closest('#profile-menu-container')) {
                 const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none';
