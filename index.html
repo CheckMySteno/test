@@ -13,30 +13,20 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore-compat.js"></script>
   
-  <!-- Shared Wallet Script -->
-  <script src="common.js"></script>
-  
   <style>
     /* --- THEME DEFINITIONS --- */
-    :root, body[data-theme="default"] {
+    :root {
         --primary-bg: #f3f4f6; --text-color: #1e293b; --secondary-text-color: #6b7280;
         --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e2e8f0;
         --button-gradient-start: #6366f1; --button-gradient-end: #ec4899;
         --error-color: #ef4444; --gold-start: #fde047; --gold-end: #eab308;
         --success-color: #22c55e; --warning-color: #f59e0b;
     }
-    body[data-theme="galaxy"] {
-        --primary-bg: #0f172a; --text-color: #f8fafc; --secondary-text-color: #94a3b8;
-        --card-bg: #1e293b; --card-shadow: rgba(0, 0, 0, 0.25); --card-border: #334155;
-        --button-gradient-start: #22d3ee; --button-gradient-end: #a78bfa;
-    }
-    body[data-theme="sunset"] { --primary-bg: #fff1f2; --text-color: #4c1d24; --secondary-text-color: #8c2d42; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #fecdd3; --button-gradient-start: #fb923c; --button-gradient-end: #f472b6; }
-    body[data-theme="oceanic"] { --primary-bg: #f0f9ff; --text-color: #082f49; --secondary-text-color: #075985; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e0f2fe; --button-gradient-start: #22d3ee; --button-gradient-end: #0ea5e9; }
 
     /* --- GLOBAL STYLES --- */
     html { scroll-behavior: smooth; }
-    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
-    body { -webkit-user-select: none; user-select: none; position: relative; }
+    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); }
+    body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; position: relative; }
     body.modal-open, html.modal-open { overflow: hidden; }
 
     /* --- LAYOUT & HEADER --- */
@@ -45,34 +35,24 @@
     .main-header.hidden { transform: translateY(-110%); }
     .logo { font-size: 1.8rem; font-weight: 800; }
     .header-actions { display: flex; align-items: center; gap: 1rem; }
-    .header-icon-btn { position: relative; background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; text-decoration: none; }
-    .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; display: inline-block; text-align: center; }
+    .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
     .cta-button:hover { transform: scale(1.05); }
-
-    /* PROFILE UI */
-    #profile-menu-container { position:relative; }
-    #profile-btn { border-radius:50%; width:45px; height:45px; border:2px solid var(--button-gradient-start); padding:0; overflow:hidden; cursor:pointer; background: var(--card-bg); }
-    #profile-btn img { width:100%; height:100%; object-fit:cover; }
-    #profile-dropdown { display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left; }
-    #profile-dropdown h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
-    #profile-dropdown p { margin: 0 0 15px 0; font-size: 0.85rem; color: var(--secondary-text-color); word-break: break-all; }
-
-    /* THEME MENU */
-    #theme-switcher { position: relative; }
-    #theme-menu { display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px var(--card-shadow); z-index: 1100; overflow: hidden; min-width: 150px; }
-    #theme-menu.visible { display: block; }
-    .theme-option { padding: 0.8rem 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; }
-    .theme-option:hover { background-color: var(--primary-bg); }
     
     /* --- IMMERSIVE INTRO --- */
     #immersive-intro { height: 100vh; width: 100%; overflow: hidden; position: relative; cursor: pointer; }
     .intro-track { display: flex; height: 100%; width: 500%; transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
     .intro-slide { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; gap: 3%; padding: 2rem 4% 120px; box-sizing: border-box; opacity: 0; animation: fadeIn 1s forwards; }
     @keyframes fadeIn { to { opacity: 1; } }
+    .intro-slide--welcome { flex-direction: column; text-align: center; }
+    .welcome-content { max-width: 850px; }
     .welcome-content h1 { font-size: 5rem; font-weight: 900; margin: 0 0 1rem 0; line-height: 1.2; }
     .welcome-content p { font-size: 1.3rem; color: var(--secondary-text-color); margin-bottom: 2.5rem; }
+    .welcome-content .cta-button { padding: 1rem 3rem; font-size: 1.2rem; border-radius: 12px; }
+    .intro-slide .text-content { flex: 1; max-width: 500px; }
+    .intro-slide .visual-content { flex: 1.5; max-width: 900px; }
     .intro-slide h2 { font-size: 3.5rem; font-weight: 900; margin: 0 0 1.2rem 0; }
-    .scroll-down-prompt { position: absolute; bottom: 15vh; left: 50%; transform: translateX(-50%); font-weight: 600; color: var(--secondary-text-color); opacity: 0; animation: bounce 2s infinite; z-index: 5; }
+    .intro-slide p { font-size: 1.2rem; line-height: 1.7; color: var(--secondary-text-color); }
+    .scroll-down-prompt { position: absolute; bottom: 15vh; left: 50%; transform: translateX(-50%); font-weight: 600; color: var(--secondary-text-color); opacity: 0; transition: opacity 0.5s; animation: bounce 2s infinite; z-index: 5; }
     .scroll-down-prompt.visible { opacity: 1; }
     @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); } 40% { transform: translate(-50%, -15px); } 60% { transform: translate(-50%, -5px); } }
 
@@ -80,20 +60,27 @@
     .interactive-analyzer { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: 0 20px 40px var(--card-shadow); text-align: left; position: relative; overflow: hidden; transform: scale(1.05); }
     .analyzer-toolbar { display: flex; align-items: center; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--card-border); background: var(--primary-bg); }
     .toolbar-dots { display: flex; gap: 0.5rem; } .dot { width: 12px; height: 12px; border-radius: 50%; } .dot.red { background: #ff5f56; } .dot.yellow { background: #ffbd2e; } .dot.green { background: #27c93f; }
+    .toolbar-title { color: var(--secondary-text-color); font-weight: 600; margin: 0 auto; }
     .analyzer-body { padding: 1.5rem 2rem; font-family: 'Courier New', Courier, monospace; font-size: 1.1rem; line-height: 1.8; position: relative; min-height: 150px; }
     .analyzer-body pre { margin: 0; white-space: pre-wrap; }
     .highlight { transition: background-color 0.5s ease; border-radius: 4px; position: relative; }
     .highlight-ssc { background-color: rgba(239, 68, 68, 0.2); animation: pulse-red 1.5s ease-out; }
+    .highlight-match { background-color: rgba(245, 158, 11, 0.2); animation: pulse-yellow 1.5s ease-out; }
+    .highlight-re-eval { background-color: rgba(34, 197, 94, 0.2); animation: pulse-green 1.5s ease-out; }
+    @keyframes pulse-red { 0% { background-color: rgba(239, 68, 68, 0.2); } 50% { background-color: rgba(239, 68, 68, 0.5); } 100% { background-color: rgba(239, 68, 68, 0.2); } }
+    @keyframes pulse-yellow { 0% { background-color: rgba(245, 158, 11, 0.2); } 50% { background-color: rgba(245, 158, 11, 0.5); } 100% { background-color: rgba(245, 158, 11, 0.2); } }
+    @keyframes pulse-green { 0% { background-color: rgba(34, 197, 94, 0.2); } 50% { background-color: rgba(34, 197, 94, 0.5); } 100% { background-color: rgba(34, 197, 94, 0.2); } }
     .feature-callout { position: absolute; background: var(--text-color); color: var(--card-bg); padding: 0.5rem 1rem; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; opacity: 0; transform: scale(0.95) translateY(10px); pointer-events: none; white-space: nowrap; z-index: 10; transition: opacity 0.4s ease, transform 0.4s ease; }
     .feature-callout.is-active { opacity: 1; transform: scale(1) translateY(0); }
+    .feature-callout::after { content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: var(--text-color); }
     #callout-1 { top: -40px; left: 180px; } #callout-2 { top: -40px; right: 80px; } #callout-3 { top: 90px; left: 350px; } #callout-4 { top: 50%; left: 50%; transform: translate(-50%,-50%); }
     .analyzer-footer { padding: 1rem; border-top: 1px solid var(--card-border); background: var(--primary-bg); font-weight: 700; font-size: 1.1rem; }
     .score-text { opacity: 0; transition: opacity 0.5s ease; } .score-text.is-active { opacity: 1; }
 
     /* --- PAGE SECTIONS --- */
-    .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); background-color: transparent; }
+    .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
     .page-section:last-of-type { border-bottom: none; }
-    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; width: 100%; }
+    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; }
     .section-content .text-content, .section-content .graphic-content { flex: 1; }
     .section-content .graphic-content { text-align: center; position: relative; }
     .section-content .graphic-content i { font-size: 12rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.7; }
@@ -116,9 +103,8 @@
     .footer-links { display: flex; gap: 1.5rem; margin: 0; } .footer-links button { background: none; border: none; color: var(--secondary-text-color); font-weight: 600; cursor: pointer; }
     .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; display: flex; gap: 0.5rem; height: 68px; } .dock-item { transition: transform 0.1s linear, margin 0.1s linear; will-change: transform; } .dock-item a { display: block; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 1.8rem; color: var(--text-color); text-decoration: none; } .dock-item .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: var(--card-bg); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; opacity: 0; visibility: hidden; transition: 0.2s; white-space: nowrap; } .dock-item:hover .tooltip { opacity: 1; visibility: visible; }
     
-    /* --- MODALS --- */
-    .notification-panel { display: none; position: fixed; top: 80px; right: 5%; width: 350px; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: 0 10px 30px var(--card-shadow); z-index: 1050; overflow: hidden; } .notification-panel.visible { display: block; }
-    .notification-item { padding: 1rem; border-bottom: 1px solid var(--card-border); font-size: 0.9rem; line-height: 1.5; color: var(--text-color); font-weight: 600; }
+    /* --- MODALS & EXTRAS --- */
+    .header-icon-btn { background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; }
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; }
     .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
     .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; position: relative; } .tool-content iframe { width: 100%; height: 100%; border: none; }
@@ -129,7 +115,8 @@
     <header class="main-header" id="mainHeader">
         <div class="logo">Check My Steno</div>
         <div class="header-actions" id="headerActions">
-            <div class="loader-spin" style="width:20px; height:20px; border:3px solid #ccc; border-top-color:#6366f1; border-radius:50%; animation: spin 1s linear infinite;"></div>
+            <!-- Loading state header -->
+            <div class="loader" style="position:relative; width:20px; height:20px; border-width:3px; display:block; transform: none; top:0; left:0; animation: spin 1s linear infinite;"></div>
         </div>
     </header>
 
@@ -149,6 +136,7 @@
                <div class="text-content">
                    <h2>Practice KC</h2>
                    <p>Hone your muscle memory with our interactive keyboard drills. Designed to build both speed and accuracy.</p>
+                   <!-- SECURE BY DEFAULT: Button locked in HTML -->
                    <button class="launch-button locked" data-tool="kc" data-unlocked-text="Launch Practice Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
                </div>
                <div class="graphic-content"><i class="fas fa-keyboard"></i></div>
@@ -203,8 +191,6 @@
        <footer class="footer">
             <p class="footer-copyright">&copy; 2026 Check My Steno. All Rights Reserved.</p>
             <div class="footer-links">
-                <button onclick="showFeedbackModal()">Feedback</button>
-                <button onclick="launchTool('status')">Status</button>
                 <button onclick="launchTool('contact')">Contact Support</button>
             </div>
        </footer>
@@ -219,25 +205,29 @@
         <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
     </nav>
 
-    <!-- Modals (Photo-copy original versions) -->
-    <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button" style="position:absolute; right:10px; top:10px;">&times;</button><img id="majorAnnouncementImage" src="" style="width:100%"><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
-    <div id="notificationPanel" class="notification-panel"><div class="notification-header" style="padding:1rem; border-bottom:1px solid #eee;">Notifications</div><div id="notificationList" class="notification-list"></div></div>
-    <div class="modal-overlay" id="feedbackModal"><div class="modal-content"><button class="close-button" onclick="hideFeedbackModal()">&times;</button><h2>Feedback</h2><textarea id="feedbackMessage" rows="5" style="width:100%; border:1px solid #ddd; border-radius:8px; padding:10px;"></textarea><button class="cta-button" onclick="submitFeedback()" style="width:100%; margin-top:15px;">Send Feedback</button><p id="feedbackStatus"></p></div></div>
-    <div class="modal-overlay" id="telegramModal"><div class="modal-content"><h2>Join Telegram</h2><p>For updates and support, join our community.</p><a href="https://t.me/Checkmystenoo" target="_blank" class="cta-button" style="display:block; text-decoration:none;">Join Now</a><button onclick="localStorage.setItem('hideTelegram', 'true'); hideTelegramModal();" style="margin-top:15px; background:none; border:none; cursor:pointer;">Don't show again</button></div></div>
-
-    <!-- Tool Overlays -->
+    <!-- Iframe Overlays for Tools -->
     <div id="toolOverlays">
         <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2>Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
         <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2>Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
         <div id="transcription-checkerTool" class="tool-overlay"><header class="tool-header"><h2>Transcription Checker</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="transcription-checkerFrame" src="about:blank"></iframe></div></div>
         <div id="aboutTool" class="tool-overlay"><header class="tool-header"><h2>About</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="aboutFrame" src="about:blank"></iframe></div></div>
         <div id="dictationsTool" class="tool-overlay"><header class="tool-header"><h2>Dictations</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="dictationsFrame" src="about:blank"></iframe></div></div>
-        <div id="statusTool" class="tool-overlay"><header class="tool-header"><h2>Status</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="statusContent" class="tool-content" style="padding: 2rem;"></div></div>
-        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="contactContent" class="tool-content" style="padding: 2rem; text-align: center;"><h3>Email: checkmysteno@gmail.com</h3></div></div>
+        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding: 2rem; text-align: center;"><h3>Email: checkmysteno@gmail.com</h3><p>Reach out to us on Telegram: <a href="https://t.me/CheckMySteno" target="_blank">@CheckMySteno</a></p></div></div>
     </div>
     
 <script>
-    // --- PART 1: CONFIG & FIREBASE ---
+    // --- ANIMATIONS ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const intro = document.getElementById('immersive-intro'); if (!intro) return;
+        const track = intro.querySelector('.intro-track');
+        let currentIndex = 0; const slideDuration = 4000; let autoplayInterval = null;
+        function moveToSlide(targetIndex) { track.style.transform = `translateX(-${targetIndex * 100}vw)`; currentIndex = targetIndex; }
+        function resetAutoplay() { clearInterval(autoplayInterval); autoplayInterval = setInterval(() => { const nextIndex = (currentIndex + 1) % 2; moveToSlide(nextIndex); }, slideDuration); }
+        intro.querySelector('#discover-features-btn').addEventListener('click', () => { moveToSlide(1); });
+        resetAutoplay();
+    });
+
+    // --- FIREBASE CONFIG ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
     if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
     
@@ -245,9 +235,10 @@
     const AUTH = firebase.auth();
     const GOOGLE_PROVIDER = new firebase.auth.GoogleAuthProvider();
     const GID = id => document.getElementById(id);
+    let currentUser = null;
     let userDocUnsubscribe = null;
 
-    // --- AUTH & WALLET SYNC ---
+    // --- AUTH & PROFILE CREATION LOGIC ---
     AUTH.onAuthStateChanged(async (user) => {
         if (user) {
             try {
@@ -256,9 +247,9 @@
                 
                 userDocUnsubscribe = userRef.onSnapshot(async (docSnap) => {
                     try {
-                        let userData;
                         if (!docSnap.exists) {
-                            userData = {
+                            // Automatically Create Profile on First Login
+                            const newUserData = {
                                 name: user.displayName || 'New User',
                                 email: user.email,
                                 photoURL: user.photoURL || 'https://www.gravatar.com/avatar/?d=mp',
@@ -266,22 +257,26 @@
                                 expiry: null,
                                 created_at: firebase.firestore.FieldValue.serverTimestamp()
                             };
-                            await userRef.set(userData);
+                            await userRef.set(newUserData);
+                            currentUser = { uid: user.uid, ...newUserData };
                         } else {
-                            userData = { uid: user.uid, ...docSnap.data() };
+                            currentUser = { uid: user.uid, ...docSnap.data() };
                         }
-                        
-                        // SYNC TO CENTRAL "WALLET" (common.js)
-                        syncAuthToStorage(userData);
-                        updateUserUI(userData);
-                        handleNotifications();
-                        showMajorAnnouncement();
-                    } catch (err) { console.error("Error saving profile data:", err); }
+                        updateUserUI(currentUser);
+                    } catch (err) {
+                        console.error("Error saving profile data:", err);
+                        alert("Error saving profile. Make sure Firestore Database is created and Rules are correct.");
+                        updateUserUI(null);
+                    }
+                }, (error) => {
+                    console.error("Database connection error:", error);
+                    alert("Database Error: Make sure Firestore Database is created in the Firebase Console.");
+                    updateUserUI(null);
                 });
             } catch (err) { console.error("Error setting up DB connection:", err); }
         } else {
             if (userDocUnsubscribe) userDocUnsubscribe();
-            syncAuthToStorage(null); // Clear Wallet
+            currentUser = null;
             updateUserUI(null);
         }
     });
@@ -295,53 +290,75 @@
     function logout() { 
         AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
     }
+    
+    function isUserPremium(user) {
+        if (!user || user.plan !== 'premium' || !user.expiry) return false;
+        const now = new Date();
+        const expiryDate = user.expiry.toDate ? user.expiry.toDate() : new Date(user.expiry);
+        return now < expiryDate;
+    }
 
-    // --- UI UPDATER ---
+    // --- TOOLS ---
+    function setScrollLock(locked) { document.body.classList[locked ? 'add' : 'remove']('modal-open'); }
+    
+    function launchTool(toolName) {
+        const toolOverlay = GID(`${toolName}Tool`);
+        if (!toolOverlay) return;
+        const iframe = toolOverlay.querySelector('iframe');
+        if(iframe) {
+            const loader = toolOverlay.querySelector('.loader'); 
+            if(loader) loader.style.display = 'block';
+            iframe.src = 'about:blank'; iframe.style.opacity = '0';
+            iframe.onload = () => { if(loader) loader.style.display = 'none'; iframe.style.opacity = '1'; };
+            iframe.src = `${toolName}.html`;
+        }
+        toolOverlay.classList.add('visible'); setScrollLock(true);
+    }
+    function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { const i = o.querySelector('iframe'); if (i) i.src = 'about:blank'; o.classList.remove('visible'); }); setScrollLock(false); }
+
+    // --- UI UPDATER (WITH REDIRECT TO PLANS.HTML) ---
     function updateUserUI(userData) {
         const headerActions = GID('headerActions');
         const allLaunchButtons = document.querySelectorAll('.launch-button');
         const premiumTools =['kc', 'test-analysis', 'transcription-checker', 'dictations'];
 
         if (userData) {
-            const isPremium = isUserPremium(); // Logic from common.js
-            const photoUrl = userData.photoURL || '';
-            
-            // Format Expiry
-            let expiryDateStr = 'N/A';
-            if (isPremium && userData.expiry) {
-                const dateObj = userData.expiry.toDate ? userData.expiry.toDate() : new Date(userData.expiry);
-                expiryDateStr = dateObj.toLocaleDateString();
-            }
+            const isPremium = isUserPremium(userData);
+            const planText = isPremium ? `<span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-crown"></i> Premium Active</span>` : `<span style="color:var(--secondary-text-color); font-weight:bold;">Free Plan</span>`;
+            const expiryText = isPremium && userData.expiry ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${userData.expiry.toDate ? userData.expiry.toDate().toLocaleDateString() : new Date(userData.expiry).toLocaleDateString()}</small>` : '';
+            const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
             headerActions.innerHTML = `
-                <div id="theme-switcher"><button id="theme-btn" class="header-icon-btn" onclick="GID('theme-menu').classList.toggle('visible')"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
-                <button id="notificationBtn" class="header-icon-btn" onclick="GID('notificationPanel').classList.toggle('visible')"><i class="fas fa-bell"></i></button>
-                <button class="header-icon-btn" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
-
-                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="margin-right: 10px;">Upgrade</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 10px;"><i class="fas fa-crown"></i> Premium</span>'}
+                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium Member</span>'}
                 
                 <div id="profile-menu-container" style="position:relative;">
-                    <button id="profile-btn" onclick="const pd=GID('profile-dropdown'); pd.style.display=pd.style.display==='block'?'none':'block';">
-                        <img src="${photoUrl}" alt="Profile">
+                    <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:45px; height:45px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
+                        <img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;" alt="Profile">
                     </button>
                     
-                    <div id="profile-dropdown">
-                        <h3 style="margin:0 0 5px 0;">${userData.name}</h3>
-                        <p style="margin:0 0 10px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
+                    <div id="profile-dropdown" style="display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left;">
+                        <h3 style="margin:0 0 5px 0; font-size:1.1rem; color:var(--text-color);">${userData.name}</h3>
+                        <p style="margin:0 0 15px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
                         
-                        <div style="background:var(--primary-bg); padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; border:1px solid var(--card-border);">
-                            <b style="color:${isPremium ? 'var(--success-color)' : 'var(--secondary-text-color)'}">${isPremium ? 'Premium Active' : 'Free Plan'}</b><br>
-                            ${isPremium ? '<small>Valid till: ' + expiryDateStr + '</small>' : ''}
+                        <div style="background:var(--primary-bg); padding:12px; border-radius:8px; margin-bottom:15px; text-align:center;">
+                            ${planText}
+                            ${expiryText}
                         </div>
                         
-                        <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()">Logout</button>
+                        ${!isPremium ? `<button class="cta-button" style="width:100%; margin-bottom:10px; padding:0.8rem;" onclick="window.location.href='plans.html'">Get Premium Pass</button>` : ''}
+                        <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     </div>
                 </div>
             `;
 
-            attachThemeMenu();
+            // Profile Click Logic
+            GID('profile-btn').onclick = (e) => {
+                e.stopPropagation();
+                const pd = GID('profile-dropdown');
+                pd.style.display = pd.style.display === 'none' ? 'block' : 'none';
+            };
 
-            // Unlocking Buttons Logic
+            // Setup Launch Buttons
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
@@ -352,118 +369,43 @@
                     } else {
                         btn.classList.add('locked');
                         btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
+                        // Redirect free users to plans page
                         btn.onclick = () => { window.location.href = 'plans.html'; };
                     }
-                } else { btn.onclick = () => launchTool(tool); }
+                } else {
+                    btn.onclick = () => launchTool(tool);
+                }
             });
 
         } else {
             // Not Logged In
-            headerActions.innerHTML = `
-                <div id="theme-switcher"><button id="theme-btn" class="header-icon-btn" onclick="GID('theme-menu').classList.toggle('visible')"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
-                <button class="header-icon-btn" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
-                <button id="loginBtn" class="cta-button" onclick="loginWithGoogle()">Login</button>
-            `;
-            attachThemeMenu();
+            headerActions.innerHTML = `<button id="loginBtn" class="cta-button" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login with Google</button>`;
+
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
                     btn.classList.add('locked');
                     btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
-                    btn.onclick = () => loginWithGoogle();
-                } else { btn.onclick = () => launchTool(tool); }
+                    btn.onclick = () => { alert("Please login to access this tool."); loginWithGoogle(); };
+                } else {
+                    btn.onclick = () => launchTool(tool);
+                }
             });
         }
     }
-
-    // --- PART 2: ANIMATIONS & SLIDER ---
-    document.addEventListener('DOMContentLoaded', () => {
-        const intro = document.getElementById('immersive-intro'); if (!intro) return;
-        const track = intro.querySelector('.intro-track');
-        let idx = 0;
-        setInterval(() => { idx = (idx + 1) % 2; track.style.transform = `translateX(-${idx * 100}vw)`; }, 5000);
-    });
-
-    // --- PART 3: UTILITIES ---
-    function setScrollLock(l) { document.body.classList[l?'add':'remove']('modal-open'); }
-    function launchTool(t) {
-        const o = GID(`${t}Tool`), f = GID(`${t}Frame`); if (!o) return;
-        if (t === 'status') renderPlatformStatus();
-        if (f) f.src = `${t}.html`; o.classList.add('visible'); setScrollLock(true);
-    }
-    function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { o.classList.remove('visible'); const f = o.querySelector('iframe'); if(f) f.src='about:blank'; }); setScrollLock(false); }
-    function hideFeedbackModal() { GID('feedbackModal').classList.remove('visible'); setScrollLock(false); }
-    function showFeedbackModal() { GID('feedbackModal').classList.add('visible'); setScrollLock(true); }
-    function hideTelegramModal() { GID('telegramModal').classList.remove('visible'); setScrollLock(false); }
-
-    function attachThemeMenu() {
-        const m = GID('theme-menu'), themes = {'default':'Default','galaxy':'Galaxy','sunset':'Sunset','oceanic':'Oceanic'};
-        let h = ''; for (let k in themes) h += `<div class="theme-option" onclick="applyTheme('${k}')">${themes[k]}</div>`;
-        if(m) m.innerHTML = h;
-    }
-    window.applyTheme = (t) => { document.body.dataset.theme = t; localStorage.setItem('selectedTheme', t); if(GID('theme-menu')) GID('theme-menu').classList.remove('visible'); };
-
-    async function submitFeedback() {
-        const m = GID('feedbackMessage').value, s = GID('feedbackStatus'); if(!m) return;
-        try {
-            await DB.collection('feedback').add({ message: m, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-            s.innerText = "Sent!"; setTimeout(hideFeedbackModal, 2000);
-        } catch(e) { s.innerText = "Error!"; }
-    }
-
-    function showMajorAnnouncement() {
-        DB.collection('siteConfig').doc('majorAnnouncement').get().then(doc => {
-            if (doc.exists && doc.data().isActive) {
-                const d = doc.data(); 
-                GID('majorAnnouncementTitle').innerText = d.title; 
-                GID('majorAnnouncementBody').innerText = d.body;
-                GID('majorAnnouncementImage').src = d.imageUrl; 
-                GID('majorAnnouncementModal').classList.add('visible'); 
-                setScrollLock(true);
+    
+    // --- INIT ---
+    window.onload = function() {
+        document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('anim-visible'); entry.target.classList.remove('anim-hidden'); } }); }, { threshold: 0.1 }).observe(el));
+        
+        // Hide profile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('#profile-menu-container')) {
+                const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none';
             }
         });
-    }
-    GID('closeMajorAnnouncement').onclick = () => { GID('majorAnnouncementModal').classList.remove('visible'); setScrollLock(false); };
-
-    function handleNotifications() {
-        DB.collection('notifications').orderBy('timestamp', 'desc').limit(5).get().then(snap => {
-            let h = ''; snap.forEach(d => h += `<div class="notification-item">${d.data().message}</div>`);
-            GID('notificationList').innerHTML = h || 'No new alerts';
-        });
-    }
-
-    // --- DOCK INTERACTION ---
-    const dock = document.querySelector('.dock'), items = document.querySelectorAll('.dock-item');
-    if(dock){
-        dock.addEventListener('mousemove', (e) => {
-            const r = dock.getBoundingClientRect(), x = e.clientX - r.left;
-            items.forEach(i => {
-                const ir = i.getBoundingClientRect(), ic = ir.left - r.left + ir.width/2, d = Math.abs(x - ic);
-                if (d < 120) { const s = 1 + (90/60 - 1) * (1 - d/120); i.style.transform = `translateY(-${(s-1)*20}px) scale(${s})`; i.style.margin = `0 ${s*2}px`; }
-                else { i.style.transform = 'scale(1)'; i.style.margin = '0'; }
-            });
-        });
-        dock.addEventListener('mouseleave', () => items.forEach(i => { i.style.transform = 'scale(1)'; i.style.margin = '0'; }));
-    }
-
-    window.onload = function() {
-        document.querySelectorAll('.launch-button').forEach(btn => btn.dataset.unlockedText = btn.innerHTML);
-        applyTheme(localStorage.getItem('selectedTheme') || 'default');
-        if (localStorage.getItem('hideTelegram') !== 'true') setTimeout(() => GID('telegramModal').classList.add('visible'), 3000);
-        
-        let lastY = window.scrollY;
-        window.addEventListener('scroll', () => {
-            const h = GID('mainHeader');
-            if (window.scrollY > lastY && window.scrollY > 100) h.classList.add('hidden');
-            else h.classList.remove('hidden'); lastY = window.scrollY;
-        });
-
-        document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => {
-            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('anim-visible'); });
-        }, { threshold: 0.1 }).observe(el));
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeAllTools(); } });
     };
-
-    function renderPlatformStatus() { GID('statusContent').innerHTML = `<p>All systems active <span style="color:green">●</span></p>`; }
-</script>
+</script>    
 </body>
 </html>
