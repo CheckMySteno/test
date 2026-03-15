@@ -209,6 +209,18 @@
     .history-item-price { font-weight: 700; color: var(--success-color); font-size: 1.1rem;}
     .form-group label { text-align: left; display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--secondary-text-color); }
 
+    /* PASS & SETTINGS STYLES */
+    .pass-card { background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); padding: 1.5rem; border-radius: 12px; color: #422006; margin-bottom: 1.5rem; text-align: left; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3); }
+    .pass-card.free { background: var(--primary-bg); color: var(--text-color); border: 1px solid var(--card-border); box-shadow: none; }
+    .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--card-border); }
+    .setting-item:last-child { border-bottom: none; }
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--secondary-text-color); transition: .3s; border-radius: 34px; }
+    .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .toggle-slider { background-color: var(--button-gradient-start); }
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
+
     /* RESPONSIVE UPDATES FOR NEW DOCK */
     @media only screen and (max-width: 1024px) {
         .welcome-content h1 { font-size: 4rem; }
@@ -338,7 +350,7 @@
        </footer>
     </main>
 
-    <!-- NEW LEFT VERTICAL DOCK -->
+    <!-- LEFT VERTICAL DOCK -->
     <nav class="dock">
         <a href="#immersive-intro" class="dock-item"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="#practice" class="dock-item"><i class="fas fa-keyboard"></i><span>Practice</span></a>
@@ -375,7 +387,7 @@
     <div class="modal-overlay" id="telegramModal"> <div class="modal-content"> <button class="close-button" onclick="hideTelegramModal(false)">&times;</button> <i class="fab fa-telegram-plane" style="font-size: 3rem; color: #2AABEE; margin-bottom: 1rem; display: block;"></i> <h2>Join our Telegram Group!</h2> <p>For the latest updates, announcements, and support, join our official community.</p> <a href="https://t.me/Checkmystenoo" target="_blank" rel="noopener noreferrer" class="cta-button" style="display:block; text-decoration:none; margin-top: 1.5rem;" onclick="hideTelegramModal(true)"> <i class="fab fa-telegram-plane"></i> Join Now </a> <button style="background:none; border:none; color:var(--secondary-text-color); cursor:pointer; margin-top:1.5rem; font-size: 0.9rem;" onclick="hideTelegramModal(true)">Don't show me again</button> </div> </div>
     <div id="pollToast" class="poll-toast"><button class="close-button" style="top: 10px; right: 10px;" onclick="this.parentElement.classList.remove('visible')">&times;</button><h4 id="pollQuestion"></h4><div id="pollOptions" class="poll-options"></div></div>
 
-    <!-- NEW LOGIN/SIGNUP MODAL -->
+    <!-- LOGIN/SIGNUP MODAL -->
     <div class="modal-overlay" id="authModal">
         <div class="modal-content" style="max-width: 400px; padding: 2.5rem 2rem;">
             <button class="close-button" onclick="hideAuthModal()">&times;</button>
@@ -383,98 +395,97 @@
             <!-- Login View -->
             <div id="loginView">
                 <h2 style="margin-bottom: 1.5rem;">Welcome Back</h2>
-                
-                <button class="cta-button google-btn" onclick="loginWithGoogle()">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px;" alt="Google" /> Continue with Google
-                </button>
-                
-                <div class="auth-divider">
-                    <hr><span style="padding: 0 10px; font-size: 0.9rem;">OR EMAIL</span><hr>
-                </div>
-                
+                <button class="cta-button google-btn" onclick="loginWithGoogle()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px;" alt="Google" /> Continue with Google</button>
+                <div class="auth-divider"><hr><span style="padding: 0 10px; font-size: 0.9rem;">OR EMAIL</span><hr></div>
                 <input type="email" id="loginEmail" placeholder="Email Address" required />
                 <input type="password" id="loginPassword" placeholder="Password" required />
-                
-                <div style="text-align: right; margin-bottom: 1.2rem;">
-                    <span style="font-size: 0.85rem;" class="auth-link" onclick="forgotPassword()">Forgot Password?</span>
-                </div>
-                
+                <div style="text-align: right; margin-bottom: 1.2rem;"><span style="font-size: 0.85rem;" class="auth-link" onclick="forgotPassword()">Forgot Password?</span></div>
                 <button class="cta-button" onclick="handleEmailLogin()" style="width: 100%;">Log In</button>
-                
                 <p style="margin-top: 1.5rem; font-size: 0.9rem;">Don't have an account? <span class="auth-link" onclick="toggleAuthView('signup')">Sign Up</span></p>
             </div>
 
             <!-- Sign Up View -->
             <div id="signupView" style="display: none;">
                 <h2 style="margin-bottom: 1.5rem;">Create Account</h2>
-                
-                <button class="cta-button google-btn" onclick="loginWithGoogle()">
-                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px;" alt="Google" /> Sign up with Google
-                </button>
-                
-                <div class="auth-divider">
-                    <hr><span style="padding: 0 10px; font-size: 0.9rem;">OR EMAIL</span><hr>
-                </div>
-                
+                <button class="cta-button google-btn" onclick="loginWithGoogle()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px;" alt="Google" /> Sign up with Google</button>
+                <div class="auth-divider"><hr><span style="padding: 0 10px; font-size: 0.9rem;">OR EMAIL</span><hr></div>
                 <input type="text" id="signupName" placeholder="Full Name" required />
                 <input type="email" id="signupEmail" placeholder="Email Address" required />
                 <input type="password" id="signupPassword" placeholder="Password (min. 6 chars)" required />
-                
                 <button class="cta-button" onclick="handleEmailSignUp()" style="width: 100%; margin-top: 0.5rem;">Create Account</button>
-                
                 <p style="margin-top: 1.5rem; font-size: 0.9rem;">Already have an account? <span class="auth-link" onclick="toggleAuthView('login')">Log In</span></p>
             </div>
-            
             <p id="authErrorMessage" style="color: var(--error-color); font-size: 0.9rem; margin-top: 1rem; display: none;"></p>
         </div>
     </div>
 
-    <!-- NEW FULL PROFILE & HISTORY MODAL (UPGRADED) -->
+    <!-- FULL PROFILE & HISTORY MODAL -->
     <div class="modal-overlay" id="profileModal">
         <div class="modal-content" style="max-width: 550px; padding: 2.5rem 2rem; text-align: left;">
-            
-            <!-- Cover Photo & Avatar Overlap -->
-            <div class="profile-cover">
-                <button class="close-button" onclick="hideProfileModal()" style="color: white; top: 15px; right: 15px;">&times;</button>
-            </div>
-            
+            <div class="profile-cover"><button class="close-button" onclick="hideProfileModal()" style="color: white; top: 15px; right: 15px;">&times;</button></div>
             <div style="position: relative; margin-top: -45px; text-align: center; margin-bottom: 1.5rem;">
                 <img id="profileModalAvatar" src="" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.1); background-color: var(--card-bg);" alt="Profile" />
                 <h2 id="profileModalName" style="margin: 10px 0 0 0; font-size: 1.5rem; font-weight: 800; color: var(--text-color);"></h2>
                 <p id="profileModalEmail" style="margin: 0; color: var(--secondary-text-color); font-weight: 600; font-size: 0.9rem;"></p>
             </div>
-
-            <!-- Modern Pill Tabs -->
             <div class="profile-tabs">
                 <button class="tab-btn active" onclick="switchProfileTab('edit')"><i class="fas fa-user-edit"></i> Edit Details</button>
                 <button class="tab-btn" onclick="switchProfileTab('history')"><i class="fas fa-history"></i> Purchase History</button>
             </div>
-
-            <!-- Edit Details Tab -->
             <div id="profileEditView">
-                <div class="form-group">
-                    <label>Full Name</label>
-                    <input type="text" id="editProfileName" placeholder="Enter your full name" />
-                </div>
-                <div class="form-group">
-                    <label>Phone Number</label>
-                    <input type="tel" id="editProfilePhone" placeholder="e.g. +91 9876543210" />
-                </div>
-                <div class="form-group">
-                    <label>State / City</label>
-                    <input type="text" id="editProfileLocation" placeholder="e.g. New Delhi" />
-                </div>
-                
+                <div class="form-group"><label>Full Name</label><input type="text" id="editProfileName" placeholder="Enter your full name" /></div>
+                <div class="form-group"><label>Phone Number</label><input type="tel" id="editProfilePhone" placeholder="e.g. +91 9876543210" /></div>
+                <div class="form-group"><label>State / City</label><input type="text" id="editProfileLocation" placeholder="e.g. New Delhi" /></div>
                 <button class="cta-button" onclick="saveProfileDetails()" style="width: 100%; margin-top: 1rem;"><i class="fas fa-save"></i> Save Changes</button>
                 <p id="profileSaveStatus" style="text-align: center; margin-top: 1rem; font-weight: 600; display: none;"></p>
             </div>
-
-            <!-- Purchase History Tab -->
             <div id="profileHistoryView" style="display: none; max-height: 350px; overflow-y: auto;">
-                <div id="historyListContainer">
-                    <!-- Loaded dynamically via JS -->
-                </div>
+                <div id="historyListContainer"></div>
             </div>
+        </div>
+    </div>
+
+    <!-- NEW PASS MODAL -->
+    <div class="modal-overlay" id="passModal">
+        <div class="modal-content" style="max-width: 450px; padding: 2.5rem 2rem;">
+            <button class="close-button" onclick="hidePassModal()">&times;</button>
+            <h2 style="margin-bottom: 1.5rem;">My Pass</h2>
+            <div id="passDetailsContainer"></div>
+            <button class="cta-button" style="width: 100%; margin-top: 1rem;" onclick="window.location.href='plans.html'">View All Plans</button>
+        </div>
+    </div>
+
+    <!-- NEW SETTINGS MODAL -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content" style="max-width: 450px; padding: 2.5rem 2rem; text-align: left;">
+            <button class="close-button" onclick="hideSettingsModal()">&times;</button>
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">Settings</h2>
+            
+            <div class="setting-item">
+                <div>
+                    <strong style="display:block; color:var(--text-color);">Email Notifications</strong>
+                    <small style="color:var(--secondary-text-color);">Receive updates and offers</small>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" id="set-email-notif" checked><span class="toggle-slider"></span></label>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <strong style="display:block; color:var(--text-color);">Auto-Save Progress</strong>
+                    <small style="color:var(--secondary-text-color);">Automatically save dictations</small>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" id="set-autosave" checked><span class="toggle-slider"></span></label>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <strong style="display:block; color:var(--text-color);">High Contrast</strong>
+                    <small style="color:var(--secondary-text-color);">Improve visual readability</small>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" id="set-contrast"><span class="toggle-slider"></span></label>
+            </div>
+            
+            <button class="cta-button" style="width: 100%; margin-top: 2rem;" onclick="saveSettings()">Save Settings</button>
         </div>
     </div>
     
@@ -645,6 +656,63 @@
     }
     function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { const i = o.querySelector('iframe'); if (i) i.src = 'about:blank'; o.classList.remove('visible'); }); setScrollLock(false); }
 
+    // --- NEW PASS & SETTINGS LOGIC ---
+    function showPassModal() {
+        if (!currentUser) {
+            showAuthModal();
+            return;
+        }
+        const isPremium = isUserPremium(currentUser);
+        const container = GID('passDetailsContainer');
+        
+        if (isPremium) {
+            const expiryDate = currentUser.expiry.toDate ? currentUser.expiry.toDate().toLocaleDateString() : new Date(currentUser.expiry).toLocaleDateString();
+            container.innerHTML = `
+                <div class="pass-card">
+                    <i class="fas fa-crown" style="font-size: 2rem; opacity: 0.8; position: absolute; right: -10px; bottom: -10px; transform: rotate(-20deg) scale(3);"></i>
+                    <h3 style="margin: 0 0 5px 0;">Premium Pass</h3>
+                    <p style="margin: 0; font-weight: 600;">Status: Active</p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Valid until: ${expiryDate}</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="pass-card free">
+                    <i class="fas fa-ticket-alt" style="font-size: 2rem; opacity: 0.1; position: absolute; right: 10px; bottom: 10px; transform: rotate(-20deg) scale(3);"></i>
+                    <h3 style="margin: 0 0 5px 0;">Free Tier</h3>
+                    <p style="margin: 0; color: var(--secondary-text-color);">You don't have an active premium pass.</p>
+                </div>
+            `;
+        }
+        
+        GID('passModal').classList.add('visible');
+        setScrollLock(true);
+    }
+    function hidePassModal() { GID('passModal').classList.remove('visible'); setScrollLock(false); }
+
+    function showSettingsModal() { 
+        GID('set-email-notif').checked = localStorage.getItem('setEmailNotif') !== 'false';
+        GID('set-autosave').checked = localStorage.getItem('setAutosave') !== 'false';
+        GID('set-contrast').checked = localStorage.getItem('setContrast') === 'true';
+        
+        GID('settingsModal').classList.add('visible'); 
+        setScrollLock(true); 
+    }
+    function hideSettingsModal() { GID('settingsModal').classList.remove('visible'); setScrollLock(false); }
+    function saveSettings() {
+        localStorage.setItem('setEmailNotif', GID('set-email-notif').checked);
+        localStorage.setItem('setAutosave', GID('set-autosave').checked);
+        localStorage.setItem('setContrast', GID('set-contrast').checked);
+        
+        if(GID('set-contrast').checked) {
+            document.body.style.filter = "contrast(115%)";
+        } else {
+            document.body.style.filter = "none";
+        }
+        
+        hideSettingsModal();
+    }
+
     // --- BACKEND SYSTEM FUNCTIONS (Theme, Notifications, Polls, Status) ---
     function applyTheme(themeName) { document.body.dataset.theme = themeName; localStorage.setItem('selectedTheme', themeName); }
     function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const [key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
@@ -801,7 +869,7 @@
         const allLaunchButtons = document.querySelectorAll('.launch-button');
         const premiumTools =['kc', 'test-analysis', 'transcription-checker', 'dictations'];
 
-        // Tightly grouped Toolbar
+        // Tightly grouped Toolbar with Pass and Settings added
         const headerIconsHTML = `
             <div class="header-icons-toolbar">
                 <div id="theme-switcher">
@@ -811,8 +879,8 @@
                 <button id="notificationBtn" class="header-icon-btn" title="Notifications">
                     <i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span>
                 </button>
-                <a href="plans.html" class="header-icon-btn" title="Subscribe"><i class="fas fa-gem"></i></a>
-                <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
+                <button class="header-icon-btn" title="My Pass" onclick="showPassModal()"><i class="fas fa-ticket-alt"></i></button>
+                <button class="header-icon-btn" title="Settings" onclick="showSettingsModal()"><i class="fas fa-cog"></i></button>
             </div>
         `;
 
@@ -829,7 +897,6 @@
 
             headerActions.innerHTML = `
                 ${headerIconsHTML}
-                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold;"><i class="fas fa-crown"></i> Premium Member</span>'}
                 
                 <div id="profile-menu-container" style="position:relative; margin-left: 0.5rem;">
                     <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:42px; height:42px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
@@ -912,6 +979,9 @@
         showTelegramModal();
         checkForMessageOfTheDay();
 
+        // Apply contrast setting if previously saved
+        if(localStorage.getItem('setContrast') === 'true') document.body.style.filter = "contrast(115%)";
+
         // Hide profile, theme, dictation and notification menus when clicking outside
         document.addEventListener('click', (e) => {
             if(!e.target.closest('#profile-menu-container') && !e.target.closest('#profileModal')) { const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none'; }
@@ -924,6 +994,8 @@
                 closeAllTools(); 
                 hideAuthModal();
                 hideProfileModal();
+                hidePassModal();
+                hideSettingsModal();
                 const telModal = GID('telegramModal'); if(telModal) telModal.classList.remove('visible');
                 const majorModal = GID('majorAnnouncementModal'); if(majorModal && majorModal.classList.contains('visible')) { majorModal.querySelector('.close-button').click(); }
             } 
