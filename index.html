@@ -53,12 +53,13 @@
 
     /* --- LAYOUT & HEADER --- */
     main { position: relative; padding-bottom: 120px; z-index: 1; display: block; }
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: transform 0.4s ease-out; }
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s, transform 0.4s ease-out; }
     .main-header.hidden { transform: translateY(-110%); }
     .logo { font-size: 1.8rem; font-weight: 800; }
     .header-actions { display: flex; align-items: center; gap: 1rem; }
     .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
     .cta-button:hover { transform: scale(1.05); }
+    .demo-button { background: none; border: 2px solid var(--button-gradient-start); color: var(--button-gradient-start); }
     
     /* --- IMMERSIVE INTRO --- */
     #immersive-intro { height: 100vh; width: 100%; overflow: hidden; position: relative; cursor: pointer; }
@@ -163,10 +164,18 @@
     .ticket-list-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; } .ticket-list-item:hover { border-color: var(--button-gradient-start); box-shadow: 0 3px 10px var(--card-shadow); } .ticket-status { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; } .status-open { background-color: #dcfce7; color: #166534; } .status-closed { background-color: #f3f4f6; color: #4b5563; } .status-Awaiting-Reply { background-color: #fef9c3; color: #854d0e; }
     .modal-content input, .modal-content textarea, .modal-content select { width: calc(100% - 2.2rem); margin-bottom: 1.2rem; padding: 0.8rem 1rem; border: 1px solid var(--card-border); border-radius: 8px; font-size: 1rem; background-color: var(--primary-bg); color: var(--text-color); box-sizing: border-box; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; }
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; z-index: 10; }
     .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
     .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; position: relative; } .tool-content iframe { width: 100%; height: 100%; border: none; }
     .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid var(--primary-bg); border-top: 6px solid var(--button-gradient-start); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; display: none; z-index: 5; } @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* AUTH MODAL STYLES */
+    .google-btn { width: 100%; background: white; color: #333; border: 1px solid #ddd; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; }
+    .google-btn:hover { background: #f9f9f9; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .auth-divider { display: flex; align-items: center; text-align: center; margin: 1.5rem 0; color: var(--secondary-text-color); }
+    .auth-divider hr { flex: 1; border: none; border-top: 1px solid var(--card-border); }
+    .auth-link { color: var(--button-gradient-start); font-weight: 700; cursor: pointer; }
+    .auth-link:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -283,6 +292,60 @@
     <div class="modal-overlay" id="feedbackModal"><div class="modal-content"><button class="close-button" onclick="hideFeedbackModal()">&times;</button><h2>Submit Feedback</h2><p>We'd love to hear your thoughts!</p><select id="feedbackType"><option>Suggestion</option><option>Bug Report</option><option>Other</option></select><textarea id="feedbackMessage" rows="5" placeholder="Your message..."></textarea><button class="cta-button" style="width: 100%; margin-top: 1rem;" onclick="submitFeedback()">Send Feedback</button><p id="feedbackStatus" style="min-height: 1em; margin-top:1rem;"></p></div></div>
     <div class="modal-overlay" id="telegramModal"> <div class="modal-content"> <button class="close-button" onclick="hideTelegramModal(false)">&times;</button> <i class="fab fa-telegram-plane" style="font-size: 3rem; color: #2AABEE; margin-bottom: 1rem; display: block;"></i> <h2>Join our Telegram Group!</h2> <p>For the latest updates, announcements, and support, join our official community.</p> <a href="https://t.me/Checkmystenoo" target="_blank" rel="noopener noreferrer" class="cta-button" style="display:block; text-decoration:none; margin-top: 1.5rem;" onclick="hideTelegramModal(true)"> <i class="fab fa-telegram-plane"></i> Join Now </a> <button style="background:none; border:none; color:var(--secondary-text-color); cursor:pointer; margin-top:1.5rem; font-size: 0.9rem;" onclick="hideTelegramModal(true)">Don't show me again</button> </div> </div>
     <div id="pollToast" class="poll-toast"><button class="close-button" style="top: 10px; right: 10px;" onclick="this.parentElement.classList.remove('visible')">&times;</button><h4 id="pollQuestion"></h4><div id="pollOptions" class="poll-options"></div></div>
+
+    <!-- NEW LOGIN/SIGNUP MODAL -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-content" style="max-width: 400px; padding: 2.5rem 2rem;">
+            <button class="close-button" onclick="hideAuthModal()">&times;</button>
+            
+            <!-- Login View -->
+            <div id="loginView">
+                <h2 style="margin-bottom: 1.5rem;">Welcome Back</h2>
+                
+                <button class="cta-button google-btn" onclick="loginWithGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px;" alt="Google" /> Continue with Google
+                </button>
+                
+                <div class="auth-divider">
+                    <hr><span style="padding: 0 10px; font-size: 0.9rem;">OR EMAIL</span><hr>
+                </div>
+                
+                <input type="email" id="loginEmail" placeholder="Email Address" required />
+                <input type="password" id="loginPassword" placeholder="Password" required />
+                
+                <div style="text-align: right; margin-bottom: 1.2rem;">
+                    <span style="font-size: 0.85rem;" class="auth-link" onclick="forgotPassword()">Forgot Password?</span>
+                </div>
+                
+                <button class="cta-button" onclick="handleEmailLogin()" style="width: 100%;">Log In</button>
+                
+                <p style="margin-top: 1.5rem; font-size: 0.9rem;">Don't have an account? <span class="auth-link" onclick="toggleAuthView('signup')">Sign Up</span></p>
+            </div>
+
+            <!-- Sign Up View -->
+            <div id="signupView" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">Create Account</h2>
+                
+                <button class="cta-button google-btn" onclick="loginWithGoogle()">
+                    <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px;" alt="Google" /> Sign up with Google
+                </button>
+                
+                <div class="auth-divider">
+                    <hr><span style="padding: 0 10px; font-size: 0.9rem;">OR EMAIL</span><hr>
+                </div>
+                
+                <input type="text" id="signupName" placeholder="Full Name" required />
+                <input type="email" id="signupEmail" placeholder="Email Address" required />
+                <input type="password" id="signupPassword" placeholder="Password (min. 6 chars)" required />
+                
+                <button class="cta-button" onclick="handleEmailSignUp()" style="width: 100%; margin-top: 0.5rem;">Create Account</button>
+                
+                <p style="margin-top: 1.5rem; font-size: 0.9rem;">Already have an account? <span class="auth-link" onclick="toggleAuthView('login')">Log In</span></p>
+            </div>
+            
+            <p id="authErrorMessage" style="color: var(--error-color); font-size: 0.9rem; margin-top: 1rem; display: none;"></p>
+        </div>
+    </div>
     
 <script>
     // --- ANIMATIONS ---
@@ -306,6 +369,77 @@
     const GID = id => document.getElementById(id);
     let currentUser = null;
     let userDocUnsubscribe = null;
+    let pendingSignupName = null; // Used to pass name from signup form to Firestore
+
+    // --- AUTH MODAL LOGIC ---
+    function showAuthModal() { GID('authModal').classList.add('visible'); setScrollLock(true); toggleAuthView('login'); }
+    function hideAuthModal() { GID('authModal').classList.remove('visible'); setScrollLock(false); GID('authErrorMessage').style.display = 'none'; }
+    function toggleAuthView(view) { GID('loginView').style.display = view === 'login' ? 'block' : 'none'; GID('signupView').style.display = view === 'signup' ? 'block' : 'none'; GID('authErrorMessage').style.display = 'none'; }
+    function showAuthError(msg, isSuccess = false) { const errEl = GID('authErrorMessage'); errEl.textContent = msg; errEl.style.color = isSuccess ? 'var(--success-color)' : 'var(--error-color)'; errEl.style.display = 'block'; }
+
+    async function handleEmailSignUp() {
+        const name = GID('signupName').value.trim();
+        const email = GID('signupEmail').value.trim();
+        const password = GID('signupPassword').value;
+        if(!name || !email || !password) return showAuthError("All fields are required.");
+        if(password.length < 6) return showAuthError("Password must be at least 6 characters.");
+        
+        pendingSignupName = name;
+        try {
+            showAuthError("Creating account...", true);
+            const userCredential = await AUTH.createUserWithEmailAndPassword(email, password);
+            await userCredential.user.updateProfile({ displayName: name });
+            hideAuthModal();
+        } catch (error) {
+            let msg = error.message;
+            if(error.code === 'auth/email-already-in-use') msg = "Email is already registered. Please login.";
+            showAuthError(msg);
+        }
+    }
+
+    async function handleEmailLogin() {
+        const email = GID('loginEmail').value.trim();
+        const password = GID('loginPassword').value;
+        if(!email || !password) return showAuthError("Please enter email and password.");
+        
+        try {
+            showAuthError("Logging in...", true);
+            await AUTH.signInWithEmailAndPassword(email, password);
+            hideAuthModal();
+        } catch (error) {
+            showAuthError("Invalid email or password.");
+        }
+    }
+
+    async function forgotPassword() {
+        const email = GID('loginEmail').value.trim();
+        if(!email) return showAuthError("Please enter your email address first to reset your password.");
+        try {
+            await AUTH.sendPasswordResetEmail(email);
+            showAuthError("Password reset email sent! Check your inbox.", true);
+        } catch (error) {
+            showAuthError(error.message);
+        }
+    }
+
+    function loginWithGoogle() { 
+        AUTH.signInWithPopup(GOOGLE_PROVIDER).then(() => {
+            hideAuthModal();
+        }).catch(err => {
+            console.error(err); showAuthError("Login failed: " + err.message);
+        }); 
+    }
+    
+    function logout() { 
+        AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
+    }
+    
+    function isUserPremium(user) {
+        if (!user || user.plan !== 'premium' || !user.expiry) return false;
+        const now = new Date();
+        const expiryDate = user.expiry.toDate ? user.expiry.toDate() : new Date(user.expiry);
+        return now < expiryDate;
+    }
 
     // --- AUTH & PROFILE CREATION LOGIC ---
     AUTH.onAuthStateChanged(async (user) => {
@@ -317,9 +451,9 @@
                 userDocUnsubscribe = userRef.onSnapshot(async (docSnap) => {
                     try {
                         if (!docSnap.exists) {
-                            // Automatically Create Profile on First Login
+                            // Automatically Create Profile on First Login or Signup
                             const newUserData = {
-                                name: user.displayName || 'New User',
+                                name: user.displayName || pendingSignupName || 'New User',
                                 email: user.email,
                                 photoURL: user.photoURL || 'https://www.gravatar.com/avatar/?d=mp',
                                 plan: 'free',
@@ -328,6 +462,7 @@
                             };
                             await userRef.set(newUserData);
                             currentUser = { uid: user.uid, ...newUserData };
+                            pendingSignupName = null; // Reset
                         } else {
                             currentUser = { uid: user.uid, ...docSnap.data() };
                         }
@@ -349,23 +484,6 @@
             updateUserUI(null);
         }
     });
-
-    function loginWithGoogle() { 
-        AUTH.signInWithPopup(GOOGLE_PROVIDER).catch(err => {
-            console.error(err); alert("Login failed: " + err.message);
-        }); 
-    }
-    
-    function logout() { 
-        AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
-    }
-    
-    function isUserPremium(user) {
-        if (!user || user.plan !== 'premium' || !user.expiry) return false;
-        const now = new Date();
-        const expiryDate = user.expiry.toDate ? user.expiry.toDate() : new Date(user.expiry);
-        return now < expiryDate;
-    }
 
     // --- TOOLS ---
     function setScrollLock(locked) { document.body.classList[locked ? 'add' : 'remove']('modal-open'); }
@@ -471,7 +589,7 @@
                 if (premiumTools.includes(tool)) {
                     if (isPremium) {
                         btn.classList.remove('locked');
-                        btn.innerHTML = btn.dataset.unlockedText;
+                        if (btn.dataset.unlockedText) btn.innerHTML = btn.dataset.unlockedText;
                         btn.onclick = () => launchTool(tool);
                     } else {
                         btn.classList.add('locked');
@@ -488,7 +606,7 @@
             // Not Logged In
             headerActions.innerHTML = `
                 ${headerIconsHTML}
-                <button id="loginBtn" class="cta-button" onclick="loginWithGoogle()" style="margin-left: 10px;"><i class="fab fa-google"></i> Login with Google</button>
+                <button id="loginBtn" class="cta-button" onclick="showAuthModal()" style="margin-left: 10px;">Login / Sign Up</button>
             `;
 
             allLaunchButtons.forEach(btn => {
@@ -496,7 +614,7 @@
                 if (premiumTools.includes(tool)) {
                     btn.classList.add('locked');
                     btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
-                    btn.onclick = () => { alert("Please login to access this tool."); loginWithGoogle(); };
+                    btn.onclick = () => { showAuthModal(); };
                 } else {
                     btn.onclick = () => launchTool(tool);
                 }
@@ -518,7 +636,7 @@
         showTelegramModal();
         checkForMessageOfTheDay();
 
-        // Hide profile & theme menus when clicking outside
+        // Hide profile, theme, and notification menus when clicking outside
         document.addEventListener('click', (e) => {
             if(!e.target.closest('#profile-menu-container')) { const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none'; }
             if(!e.target.closest('#theme-switcher')) { const tm = GID('theme-menu'); if(tm) tm.classList.remove('visible'); }
@@ -527,6 +645,7 @@
         document.addEventListener('keydown', (e) => { 
             if (e.key === 'Escape') { 
                 closeAllTools(); 
+                hideAuthModal();
                 const telModal = GID('telegramModal'); if(telModal) telModal.classList.remove('visible');
                 const majorModal = GID('majorAnnouncementModal'); if(majorModal && majorModal.classList.contains('visible')) { majorModal.querySelector('.close-button').click(); }
             } 
