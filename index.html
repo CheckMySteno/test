@@ -320,8 +320,25 @@
     <header class="main-header" id="mainHeader">
         <div class="logo">Check My Steno</div>
         <div class="header-actions" id="headerActions">
-            <!-- Loading state header -->
-            <div class="loader" style="position:relative; width:20px; height:20px; border-width:3px; display:block; transform: none; top:0; left:0; animation: spin 1s linear infinite;"></div>
+            <!-- Header actions that will be populated by JavaScript based on login status -->
+            <div id="theme-switcher">
+                <button id="theme-btn" title="Change Theme" class="header-icon-btn">
+                    <i class="fas fa-palette"></i>
+                </button>
+                <div id="theme-menu" style="display: none;"></div>
+            </div>
+            <a href="plans.html" class="header-icon-btn" title="Subscribe">
+                <i class="fas fa-gem"></i>
+            </a>
+            <button id="notificationBtn" class="header-icon-btn" title="Notifications">
+                <i class="fas fa-bell"></i>
+                <span id="notificationBadge" class="notification-badge" style="display: none;"></span>
+            </button>
+            <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')">
+                <i class="fas fa-headset"></i>
+            </button>
+            <a href="demo.html" class="cta-button demo-button">Try Demo</a>
+            <button id="loginBtn" class="cta-button" onclick="GID('choiceModal').classList.add('visible'); setScrollLock(true);">Unlock Full Access</button>
         </div>
     </header>
 
@@ -329,79 +346,10 @@
        <!-- IMMERSIVE HORIZONTAL SLIDER INTRODUCTION -->
        <section id="immersive-intro">
             <div class="intro-track">
-                <!-- Slide 1 (Welcome) -->
-                <div class="intro-slide intro-slide--welcome">
-                    <div class="welcome-content">
-                        <h1>Precision Analysis for Stenographers</h1>
-                        <p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p>
-                        <button class="cta-button" id="discover-features-btn">Discover Features</button>
-                    </div>
-                </div>
-
-                <!-- Slide 2 (Feature 1) -->
-                <div class="intro-slide" data-step="0">
-                    <div class="text-content">
-                        <h2>SSC Level Mistake Analysis</h2>
-                        <p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 3 (Feature 2) -->
-                <div class="intro-slide" data-step="1">
-                    <div class="text-content">
-                        <h2>One-Click Word Match</h2>
-                        <p>Never get lost in the text again. Instantly highlight and compare any word with the original source, making verification faster and more accurate than ever.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-2" class="feature-callout">Source Text Match</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 4 (Feature 3) -->
-                <div class="intro-slide" data-step="2">
-                    <div class="text-content">
-                        <h2>Re-evaluate Your Score</h2>
-                        <p>Don't wait to see how corrections affect your score. Our tool dynamically re-evaluates your accuracy in real-time, providing immediate feedback on your improvements.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-3" class="feature-callout">Real-time Score Update</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 5 (Feature 4) -->
-                 <div class="intro-slide" data-step="3">
-                     <div class="text-content">
-                         <h2>Performance Analytics</h2>
-                         <p>Track your growth over time. Our dashboard visualizes your accuracy, common errors, and speed, turning your practice data into a clear path for improvement.</p>
-                     </div>
-                     <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-4" class="feature-callout">View Progress Chart</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                 </div>
+                <div class="intro-slide intro-slide--welcome"><div class="welcome-content"><h1>Precision Analysis for Stenographers</h1><p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p><button class="cta-button" id="discover-features-btn">Discover Features</button></div></div>
+                <div class="intro-slide" data-step="0"><div class="text-content"><h2>SSC Level Mistake Analysis</h2><p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p></div><div class="visual-content"><div class="interactive-analyzer"><div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div><div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div><div class="analyzer-footer"><div class="score-text"></div></div></div></div></div>
             </div>
-            
-            <div class="intro-navigation">
-                <!-- The navigation controls are now hidden via CSS -->
-            </div>
-            <div class="scroll-down-prompt" id="scroll-prompt">
-                Scroll to Explore <i class="fas fa-chevron-down"></i>
-            </div>
+            <div class="scroll-down-prompt" id="scroll-prompt">Scroll to Explore <i class="fas fa-chevron-down"></i></div>
        </section>
 
        <!-- TOOLS SECTIONS -->
@@ -409,63 +357,63 @@
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>Practice KC</h2>
-                   <p>Hone your muscle memory with our interactive keyboard drills. Designed to build both speed and accuracy, this is your personal training ground for stenographic excellence.</p>
-                   <button class="launch-button" data-tool="kc">Launch Practice Tool</button>
+                   <p>Hone your muscle memory with our interactive keyboard drills. Designed to build both speed and accuracy.</p>
+                   <!-- SECURE BY DEFAULT: Button locked in HTML -->
+                   <button class="launch-button locked" data-tool="kc" data-unlocked-text="Launch Practice Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
                </div>
                <div class="graphic-content"><i class="fas fa-keyboard"></i></div>
            </div>
        </section>
 
-       <!-- === START OF ADDED DICTATIONS SECTION === -->
        <section id="dictations" class="page-section">
             <div class="section-content anim-hidden">
                 <div class="text-content">
                     <h2>Practice Dictations</h2>
-                    <p>Listen to professionally recorded audio passages and transcribe them in real-time. Our dictation tool is perfect for improving your listening skills and shorthand speed for exams.</p>
-                    <button class="launch-button" data-tool="dictations">Launch Dictations Tool</button>
+                    <p>Listen to professionally recorded audio passages and transcribe them in real-time. Improve your shorthand speed.</p>
+                    <button class="launch-button locked" data-tool="dictations" data-unlocked-text="Launch Dictations Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
                 </div>
                 <div class="graphic-content"><i class="fas fa-microphone-alt"></i></div>
             </div>
         </section>
-        <!-- === END OF ADDED DICTATIONS SECTION === -->
 
        <section id="analysis" class="page-section">
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>Test Analysis</h2>
-                   <p>Go beyond simple scores. Upload your tests to receive a detailed breakdown of your performance, identify common errors, and gain actionable insights to improve faster.</p>
-                   <button class="launch-button" data-tool="test-analysis">Launch Analysis Tool</button>
+                   <p>Upload your tests to receive a detailed breakdown of your performance, identify common errors, and gain insights.</p>
+                   <button class="launch-button locked" data-tool="test-analysis" data-unlocked-text="Launch Analysis Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
                </div>
                <div class="graphic-content"><i class="fas fa-chart-line"></i></div>
            </div>
        </section>
+
        <section id="checker" class="page-section">
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>Transcription Checker</h2>
-                   <p>Ensure flawless results. Our checker instantly verifies your transcriptions against the source audio or text, highlighting discrepancies with precision so you can deliver perfect work, every time.</p>
-                   <button class="launch-button" data-tool="transcription-checker">Launch Checker Tool</button>
+                   <p>Instantly verify your transcriptions against the source text, highlighting discrepancies with precision.</p>
+                   <button class="launch-button locked" data-tool="transcription-checker" data-unlocked-text="Launch Checker Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
                </div>
                <div class="graphic-content"><i class="fas fa-check-double"></i></div>
            </div>
        </section>
+
        <section id="about" class="page-section">
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>About Check My Steno</h2>
-                   <p>Learn about our mission, the technology behind our tools, and how we're dedicated to helping stenographers at every stage of their career achieve their full potential.</p>
-                   <button class="launch-button" data-tool="about">Learn More</button>
+                   <p>Learn about our mission, the technology behind our tools, and how we help stenographers.</p>
+                   <!-- Free Tool (Not Locked) -->
+                   <button class="launch-button" data-tool="about" data-unlocked-text="Learn More">Learn More</button>
                </div>
                <div class="graphic-content"><i class="fas fa-book-open"></i></div>
            </div>
        </section>
        
        <footer class="footer">
-            <p class="footer-copyright">&copy; 2025 Check My Steno. All Rights Reserved.</p>
+            <p class="footer-copyright">&copy; 2026 Check My Steno. All Rights Reserved.</p>
             <div class="footer-links">
-                <button onclick="showFeedbackModal()">Feedback</button>
-                <button onclick="launchTool('status')">Platform Status</button>
-                <button onclick="launchTool('contact')">Contact</button>
+                <button onclick="launchTool('contact')">Contact Support</button>
             </div>
        </footer>
     </main>
@@ -473,35 +421,32 @@
     <nav class="dock">
         <div class="dock-item"><a href="#immersive-intro"><i class="fas fa-home"></i></a><span class="tooltip">Home</span></div>
         <div class="dock-item"><a href="#practice"><i class="fas fa-keyboard"></i></a><span class="tooltip">Practice KC</span></div>
-        <!-- === START OF ADDED DOCK ITEM === -->
         <div class="dock-item"><a href="#dictations"><i class="fas fa-microphone-alt"></i></a><span class="tooltip">Dictations</span></div>
-        <!-- === END OF ADDED DOCK ITEM === -->
         <div class="dock-item"><a href="#analysis"><i class="fas fa-chart-line"></i></a><span class="tooltip">Test Analysis</span></div>
         <div class="dock-item"><a href="#checker"><i class="fas fa-check-double"></i></a><span class="tooltip">Transcription Checker</span></div>
         <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
     </nav>
+
+    <!-- Iframe Overlays for Tools -->
+    <div id="toolOverlays">
+        <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-keyboard"></i> Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
+        <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-chart-line"></i> Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
+        <div id="transcription-checkerTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-check-double"></i> Transcription Checker</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="transcription-checkerFrame" src="about:blank"></iframe></div></div>
+        <div id="aboutTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-book-open"></i> About</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="aboutFrame" src="about:blank"></iframe></div></div>
+        <div id="statusTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-server"></i> Platform Status</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="statusContent" class="tool-content"></div></div>
+        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-envelope"></i> Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="contactContent" class="tool-content"></div></div>
+        <div id="dictationsTool" class="tool-overlay"> <header class="tool-header"> <h2><i class="fas fa-microphone-alt"></i> Dictations</h2> <button class="close-tool-btn" onclick="closeAllTools()">Close</button> </header> <div class="tool-content"><div class="loader"></div> <iframe id="dictationsFrame" src="about:blank"></iframe> </div> </div>
+        <!-- REMOVED subscriptionTool and supportTool Overlays -->
+    </div>
     
-    <!-- ===== ALL MODALS AND OVERLAYS (UNCHANGED) ===== -->
+    <!-- Modals -->
     <div class="modal-overlay" id="choiceModal"><div class="modal-content"><button class="close-button" onclick="hideChoiceModal()">&times;</button><h2>Unlock Premium Features</h2><p>How would you like to get access?</p><div class="choice-container"><div class="choice-card" onclick="openLoginFromChoice()"><i class="fas fa-key"></i><h3>I have an Access Code</h3><p>Already subscribed? Enter your code to log in.</p></div><div class="choice-card" onclick="window.location.href='plans.html'"><i class="fas fa-gem"></i><h3>Subscribe Now</h3><p>Choose a plan to get your new access code.</p></div></div></div></div>
     <div class="modal-overlay" id="loginModal"><div class="modal-content"><button class="close-button" onclick="hideLoginModal()">&times;</button><h2>Access Your Account</h2><input type="text" id="userName" placeholder="Enter Your Name" required /><input type="email" id="userEmail" placeholder="Enter Your Email" required /><input type="text" id="accessCode" placeholder="Enter Access Code" required /><button class="cta-button" onclick="validateAccessCode()">Unlock Tools</button><p id="loginError"></p></div></div>
     <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button">&times;</button><img id="majorAnnouncementImage" src="" alt="Announcement" /><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
     <div id="notificationPanel" class="notification-panel"><div class="notification-header"><h3>Notifications</h3></div><div id="notificationList" class="notification-list"></div></div>
     <div class="modal-overlay" id="messageOfTheDayModal"><div class="modal-content"><button class="close-button" onclick="this.parentElement.parentElement.classList.remove('visible'); setScrollLock(false);">&times;</button><h2>A Message for You</h2><p id="motdBody"></p></div></div>
     <div class="modal-overlay" id="feedbackModal"><div class="modal-content"><button class="close-button" onclick="hideFeedbackModal()">&times;</button><h2>Submit Feedback</h2><p>We'd love to hear your thoughts!</p><select id="feedbackType"><option>Suggestion</option><option>Bug Report</option><option>Other</option></select><textarea id="feedbackMessage" rows="5" placeholder="Your message..."></textarea><button class="cta-button" onclick="submitFeedback()">Send Feedback</button><p id="feedbackStatus" style="min-height: 1em; margin-top:1rem;"></p></div></div>
-    
     <div class="modal-overlay" id="telegramModal"> <div class="modal-content"> <button class="close-button" onclick="hideTelegramModal(false)">&times;</button> <i class="fab fa-telegram-plane" style="font-size: 3rem; color: #2AABEE; margin-bottom: 1rem; display: block;"></i> <h2>Join our Telegram Group!</h2> <p>For the latest updates, announcements, and support, join our official community.</p> <a href="https://t.me/Checkmystenoo" target="_blank" rel="noopener noreferrer" class="cta-button" style="display:block; text-decoration:none; margin-top: 1.5rem;" onclick="hideTelegramModal(true)"> <i class="fab fa-telegram-plane"></i> Join Now </a> <button style="background:none; border:none; color:var(--secondary-text-color); cursor:pointer; margin-top:1.5rem; font-size: 0.9rem;" onclick="hideTelegramModal(true)">Don't show me again</button> </div> </div>
-
-    <div id="toolOverlays">
-        <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-keyboard"></i> Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding:0; overflow:hidden;"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
-        <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-chart-line"></i> Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding:0; overflow:hidden;"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
-        <div id="transcription-checkerTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-check-double"></i> Transcription Checker</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding:0; overflow:hidden;"><div class="loader"></div><iframe id="transcription-checkerFrame" src="about:blank"></iframe></div></div>
-        <div id="aboutTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-book-open"></i> About</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding:0; overflow:hidden;"><div class="loader"></div><iframe id="aboutFrame" src="about:blank"></iframe></div></div>
-        <div id="statusTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-server"></i> Platform Status</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="statusContent" class="tool-content"></div></div>
-        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2><i class="fas fa-envelope"></i> Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="contactContent" class="tool-content"></div></div>
-        <div id="dictationsTool" class="tool-overlay"> <header class="tool-header"> <h2><i class="fas fa-microphone-alt"></i> Dictations</h2> <button class="close-tool-btn" onclick="closeAllTools()">Close</button> </header> <div class="tool-content" style="padding:0; overflow:hidden;"> <div class="loader"></div> <iframe id="dictationsFrame" src="about:blank"></iframe> </div> </div>
-        <!-- REMOVED subscriptionTool and supportTool Overlays -->
-    </div>
-    
     <div id="pollToast" class="poll-toast">
         <button class="close-button" style="top: 10px; right: 10px;" onclick="this.parentElement.classList.remove('visible')">&times;</button>
         <h4 id="pollQuestion"></h4>
@@ -570,10 +515,22 @@
 
         if (isLoggedIn) {
             headerActions.innerHTML = `
-                <div id="theme-switcher"><button id="theme-btn" title="Change Theme"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
-                <a href="plans.html" class="header-icon-btn" title="Subscribe"><i class="fas fa-gem"></i></a>
-                <button id="notificationBtn" class="header-icon-btn" title="Notifications"><i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span></button>
-                <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
+                <div id="theme-switcher">
+                    <button id="theme-btn" title="Change Theme" class="header-icon-btn">
+                        <i class="fas fa-palette"></i>
+                    </button>
+                    <div id="theme-menu" style="display: none;"></div>
+                </div>
+                <a href="plans.html" class="header-icon-btn" title="Subscribe">
+                    <i class="fas fa-gem"></i>
+                </a>
+                <button id="notificationBtn" class="header-icon-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationBadge" class="notification-badge" style="display: none;"></span>
+                </button>
+                <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')">
+                    <i class="fas fa-headset"></i>
+                </button>
                 <a href="demo.html" class="cta-button demo-button">Try Demo</a>
                 <span id="userInfo">Welcome, ${userName}!</span>
                 <button id="logoutBtn" class="cta-button" onclick="logout()">Logout</button>
@@ -585,10 +542,22 @@
             });
         } else {
             headerActions.innerHTML = `
-                <div id="theme-switcher"><button id="theme-btn" title="Change Theme"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
-                <a href="plans.html" class="header-icon-btn" title="Subscribe"><i class="fas fa-gem"></i></a>
-                <button id="notificationBtn" class="header-icon-btn" title="Notifications"><i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span></button>
-                <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
+                <div id="theme-switcher">
+                    <button id="theme-btn" title="Change Theme" class="header-icon-btn">
+                        <i class="fas fa-palette"></i>
+                    </button>
+                    <div id="theme-menu" style="display: none;"></div>
+                </div>
+                <a href="plans.html" class="header-icon-btn" title="Subscribe">
+                    <i class="fas fa-gem"></i>
+                </a>
+                <button id="notificationBtn" class="header-icon-btn" title="Notifications">
+                    <i class="fas fa-bell"></i>
+                    <span id="notificationBadge" class="notification-badge" style="display: none;"></span>
+                </button>
+                <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')">
+                    <i class="fas fa-headset"></i>
+                </button>
                 <a href="demo.html" class="cta-button demo-button">Try Demo</a>
                 <button id="loginBtn" class="cta-button" onclick="GID('choiceModal').classList.add('visible'); setScrollLock(true);">Unlock Full Access</button>
             `;
@@ -642,7 +611,7 @@
         const userSession = localStorage.getItem("checkMyStenoUser");
         const accessCode = localStorage.getItem("currentAccessCode");
         if (userSession && accessCode) {
-            currentUser = JSON.JSON.parse(userSession); // Corrected from JSON.parse
+            currentUser = JSON.parse(userSession);
             updateUserUI(true, currentUser.name);
             startSessionListener(accessCode);
         } else { updateUserUI(false); }
