@@ -18,37 +18,37 @@
   
   <style>
     /* --- THEME DEFINITIONS --- */
-    :root {
+    :root, body[data-theme="default"] {
         --primary-bg: #f3f4f6; --text-color: #1e293b; --secondary-text-color: #6b7280;
         --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e2e8f0;
         --button-gradient-start: #6366f1; --button-gradient-end: #ec4899;
         --error-color: #ef4444; --gold-start: #fde047; --gold-end: #eab308;
         --success-color: #22c55e; --warning-color: #f59e0b;
     }
+    body[data-theme="galaxy"] {
+        --primary-bg: #0f172a; --text-color: #f8fafc; --secondary-text-color: #94a3b8;
+        --card-bg: #1e293b; --card-shadow: rgba(0, 0, 0, 0.25); --card-border: #334155;
+        --button-gradient-start: #22d3ee; --button-gradient-end: #a78bfa;
+    }
+    body[data-theme="sunset"] { --primary-bg: #fff1f2; --text-color: #4c1d24; --secondary-text-color: #8c2d42; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #fecdd3; --button-gradient-start: #fb923c; --button-gradient-end: #f472b6; }
+    body[data-theme="oceanic"] { --primary-bg: #f0f9ff; --text-color: #082f49; --secondary-text-color: #075985; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e0f2fe; --button-gradient-start: #22d3ee; --button-gradient-end: #0ea5e9; }
 
     /* --- GLOBAL STYLES --- */
     html { scroll-behavior: smooth; }
-    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); }
+    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
     body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; position: relative; }
     body.modal-open, html.modal-open { overflow: hidden; }
 
     /* --- LAYOUT & HEADER --- */
     main { position: relative; padding-bottom: 120px; z-index: 1; display: block; }
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: transform 0.4s ease-out; }
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s, transform 0.4s ease-out; }
     .main-header.hidden { transform: translateY(-110%); }
     .logo { font-size: 1.8rem; font-weight: 800; }
     .header-actions { display: flex; align-items: center; gap: 1rem; }
     .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; display: inline-block; text-align: center; }
     .cta-button:hover { transform: scale(1.05); }
+    .demo-button { background: none; border: 2px solid var(--button-gradient-start); color: var(--button-gradient-start); }
     
-    /* PROFILE UI */
-    #profile-menu-container { position:relative; }
-    #profile-btn { border-radius:50%; width:45px; height:45px; border:2px solid var(--button-gradient-start); padding:0; overflow:hidden; cursor:pointer; background: var(--card-bg); }
-    #profile-btn img { width:100%; height:100%; object-fit:cover; }
-    #profile-dropdown { display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left; }
-    #profile-dropdown h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
-    #profile-dropdown p { margin: 0 0 15px 0; font-size: 0.85rem; color: var(--secondary-text-color); word-break: break-all; }
-
     /* --- IMMERSIVE INTRO --- */
     #immersive-intro { height: 100vh; width: 100%; overflow: hidden; position: relative; cursor: pointer; }
     .intro-track { display: flex; height: 100%; width: 500%; transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
@@ -88,7 +88,7 @@
     /* --- PAGE SECTIONS --- */
     .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
     .page-section:last-of-type { border-bottom: none; }
-    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; }
+    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; width: 100%; }
     .section-content .text-content, .section-content .graphic-content { flex: 1; }
     .section-content .graphic-content { text-align: center; position: relative; }
     .section-content .graphic-content i { font-size: 12rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.7; }
@@ -132,77 +132,10 @@
        <!-- IMMERSIVE HORIZONTAL SLIDER INTRODUCTION -->
        <section id="immersive-intro">
             <div class="intro-track">
-                <!-- Slide 1 (Welcome) -->
-                <div class="intro-slide intro-slide--welcome">
-                    <div class="welcome-content">
-                        <h1>Precision Analysis for Stenographers</h1>
-                        <p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p>
-                        <button class="cta-button" id="discover-features-btn">Discover Features</button>
-                    </div>
-                </div>
-
-                <!-- Slide 2 (Feature 1) -->
-                <div class="intro-slide" data-step="0">
-                    <div class="text-content">
-                        <h2>SSC Level Mistake Analysis</h2>
-                        <p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 3 (Feature 2) -->
-                <div class="intro-slide" data-step="1">
-                    <div class="text-content">
-                        <h2>One-Click Word Match</h2>
-                        <p>Never get lost in the text again. Instantly highlight and compare any word with the original source, making verification faster and more accurate than ever.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-2" class="feature-callout">Source Text Match</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 4 (Feature 3) -->
-                <div class="intro-slide" data-step="2">
-                    <div class="text-content">
-                        <h2>Re-evaluate Your Score</h2>
-                        <p>Don't wait to see how corrections affect your score. Our tool dynamically re-evaluates your accuracy in real-time, providing immediate feedback on your improvements.</p>
-                    </div>
-                    <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-3" class="feature-callout">Real-time Score Update</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Slide 5 (Feature 4) -->
-                 <div class="intro-slide" data-step="3">
-                     <div class="text-content">
-                         <h2>Performance Analytics</h2>
-                         <p>Track your growth over time. Our dashboard visualizes your accuracy, common errors, and speed, turning your practice data into a clear path for improvement.</p>
-                     </div>
-                     <div class="visual-content">
-                        <div class="interactive-analyzer">
-                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
-                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-4" class="feature-callout">View Progress Chart</div></div>
-                            <div class="analyzer-footer"><div class="score-text"></div></div>
-                        </div>
-                    </div>
-                 </div>
+                <div class="intro-slide intro-slide--welcome"><div class="welcome-content"><h1>Precision Analysis for Stenographers</h1><p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p><button class="cta-button" id="discover-features-btn">Discover Features</button></div></div>
+                <div class="intro-slide" data-step="0"><div class="text-content"><h2>SSC Level Mistake Analysis</h2><p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p></div><div class="visual-content"><div class="interactive-analyzer"><div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div><div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div><div class="analyzer-footer"><div class="score-text"></div></div></div></div></div>
             </div>
-            
-            <div class="intro-navigation"></div>
-            <div class="scroll-down-prompt" id="scroll-prompt">
-                Scroll to Explore <i class="fas fa-chevron-down"></i>
-            </div>
+            <div class="scroll-down-prompt" id="scroll-prompt">Scroll to Explore <i class="fas fa-chevron-down"></i></div>
        </section>
 
        <!-- TOOLS SECTIONS -->
@@ -221,7 +154,7 @@
             <div class="section-content anim-hidden">
                 <div class="text-content">
                     <h2>Practice Dictations</h2>
-                    <p>Listen to professionally recorded audio passages and transcribe them in real-time. Our dictation tool is perfect for improving your listening skills and shorthand speed for exams.</p>
+                    <p>Listen to professionally recorded audio passages and transcribe them in real-time. Improve your shorthand speed.</p>
                     <button class="launch-button" data-tool="dictations">Launch Dictations Tool</button>
                 </div>
                 <div class="graphic-content"><i class="fas fa-microphone-alt"></i></div>
@@ -232,7 +165,7 @@
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>Test Analysis</h2>
-                   <p>Upload your tests to receive a detailed breakdown of your performance, identify common errors, and gain actionable insights.</p>
+                   <p>Upload your tests to receive a detailed breakdown of your performance, identify common errors, and gain insights.</p>
                    <button class="launch-button" data-tool="test-analysis">Launch Analysis Tool</button>
                </div>
                <div class="graphic-content"><i class="fas fa-chart-line"></i></div>
@@ -243,7 +176,7 @@
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>Transcription Checker</h2>
-                   <p>Ensure flawless results. Our checker instantly verifies your transcriptions against the source audio or text, highlighting discrepancies with precision.</p>
+                   <p>Instantly verify your transcriptions against the source text, highlighting discrepancies with precision.</p>
                    <button class="launch-button" data-tool="transcription-checker">Launch Checker Tool</button>
                </div>
                <div class="graphic-content"><i class="fas fa-check-double"></i></div>
@@ -254,7 +187,7 @@
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>About Check My Steno</h2>
-                   <p>Learn about our mission, the technology behind our tools, and how we're dedicated to helping stenographers.</p>
+                   <p>Learn about our mission, the technology behind our tools, and how we help stenographers.</p>
                    <button class="launch-button" data-tool="about">Learn More</button>
                </div>
                <div class="graphic-content"><i class="fas fa-book-open"></i></div>
@@ -265,7 +198,7 @@
             <p class="footer-copyright">&copy; 2026 Check My Steno. All Rights Reserved.</p>
             <div class="footer-links">
                 <button onclick="showFeedbackModal()">Feedback</button>
-                <button onclick="launchTool('status')">Platform Status</button>
+                <button onclick="launchTool('status')">Status</button>
                 <button onclick="launchTool('contact')">Contact Support</button>
             </div>
        </footer>
@@ -281,7 +214,7 @@
     </nav>
 
     <!-- Modals -->
-    <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button" style="position:absolute; right:10px; top:10px;">&times;</button><img id="majorAnnouncementImage" src="" style="width:100%"><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
+    <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button">&times;</button><img id="majorAnnouncementImage" src="" alt="Announcement" /><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
     
     <div id="notificationPanel" class="notification-panel"><div class="notification-header"><h3>Notifications</h3></div><div id="notificationList" class="notification-list"></div></div>
     
@@ -302,6 +235,17 @@
     </div>
     
 <script>
+    // --- ANIMATIONS ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const intro = document.getElementById('immersive-intro'); if (!intro) return;
+        const track = intro.querySelector('.intro-track');
+        let currentIndex = 0; const slideDuration = 4000; let autoplayInterval = null;
+        function moveToSlide(targetIndex) { track.style.transform = `translateX(-${targetIndex * 100}vw)`; currentIndex = targetIndex; }
+        function resetAutoplay() { clearInterval(autoplayInterval); autoplayInterval = setInterval(() => { const nextIndex = (currentIndex + 1) % 2; moveToSlide(nextIndex); }, slideDuration); }
+        intro.querySelector('#discover-features-btn').addEventListener('click', () => { moveToSlide(1); });
+        resetAutoplay();
+    });
+
     // --- FIREBASE CONFIG ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
     if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
@@ -324,7 +268,6 @@
                     try {
                         let userData;
                         if (!docSnap.exists) {
-                            // Automatically Create Profile on First Login
                             userData = {
                                 name: user.displayName || 'New User',
                                 email: user.email,
@@ -364,7 +307,7 @@
         AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
     }
     
-    function isUserPremium(user) { // Using user data from currentUser variable
+    function isUserPremium(user) { // Using userData from updateUserUI
         if (!currentUser || currentUser.plan !== 'premium' || !currentUser.expiry) return false;
         const now = new Date();
         const expiryDate = typeof currentUser.expiry.toDate === 'function' ? currentUser.expiry.toDate() : new Date(currentUser.expiry);
