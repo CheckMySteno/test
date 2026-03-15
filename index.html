@@ -18,37 +18,37 @@
   
   <style>
     /* --- THEME DEFINITIONS --- */
-    :root, body[data-theme="default"] {
+    :root {
         --primary-bg: #f3f4f6; --text-color: #1e293b; --secondary-text-color: #6b7280;
         --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e2e8f0;
         --button-gradient-start: #6366f1; --button-gradient-end: #ec4899;
         --error-color: #ef4444; --gold-start: #fde047; --gold-end: #eab308;
         --success-color: #22c55e; --warning-color: #f59e0b;
     }
-    body[data-theme="galaxy"] {
-        --primary-bg: #0f172a; --text-color: #f8fafc; --secondary-text-color: #94a3b8;
-        --card-bg: #1e293b; --card-shadow: rgba(0, 0, 0, 0.25); --card-border: #334155;
-        --button-gradient-start: #22d3ee; --button-gradient-end: #a78bfa;
-    }
-    body[data-theme="sunset"] { --primary-bg: #fff1f2; --text-color: #4c1d24; --secondary-text-color: #8c2d42; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #fecdd3; --button-gradient-start: #fb923c; --button-gradient-end: #f472b6; }
-    body[data-theme="oceanic"] { --primary-bg: #f0f9ff; --text-color: #082f49; --secondary-text-color: #075985; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e0f2fe; --button-gradient-start: #22d3ee; --button-gradient-end: #0ea5e9; }
 
     /* --- GLOBAL STYLES --- */
     html { scroll-behavior: smooth; }
-    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); }
     body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; position: relative; }
     body.modal-open, html.modal-open { overflow: hidden; }
 
     /* --- LAYOUT & HEADER --- */
     main { position: relative; padding-bottom: 120px; z-index: 1; display: block; }
-    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s, transform 0.4s ease-out; }
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: transform 0.4s ease-out; }
     .main-header.hidden { transform: translateY(-110%); }
     .logo { font-size: 1.8rem; font-weight: 800; }
     .header-actions { display: flex; align-items: center; gap: 1rem; }
     .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; display: inline-block; text-align: center; }
     .cta-button:hover { transform: scale(1.05); }
-    .demo-button { background: none; border: 2px solid var(--button-gradient-start); color: var(--button-gradient-start); }
     
+    /* PROFILE UI */
+    #profile-menu-container { position:relative; }
+    #profile-btn { border-radius:50%; width:45px; height:45px; border:2px solid var(--button-gradient-start); padding:0; overflow:hidden; cursor:pointer; background: var(--card-bg); }
+    #profile-btn img { width:100%; height:100%; object-fit:cover; }
+    #profile-dropdown { display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left; }
+    #profile-dropdown h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
+    #profile-dropdown p { margin: 0 0 15px 0; font-size: 0.85rem; color: var(--secondary-text-color); word-break: break-all; }
+
     /* --- IMMERSIVE INTRO --- */
     #immersive-intro { height: 100vh; width: 100%; overflow: hidden; position: relative; cursor: pointer; }
     .intro-track { display: flex; height: 100%; width: 500%; transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
@@ -113,7 +113,6 @@
     .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; display: flex; gap: 0.5rem; height: 68px; } .dock-item { transition: transform 0.1s linear, margin 0.1s linear; will-change: transform; } .dock-item a { display: block; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 1.8rem; color: var(--text-color); text-decoration: none; } .dock-item .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: var(--card-bg); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; opacity: 0; visibility: hidden; transition: 0.2s; white-space: nowrap; } .dock-item:hover .tooltip { opacity: 1; visibility: visible; }
     
     /* --- MODALS & EXTRAS --- */
-    .header-icon-btn { background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; }
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; }
     .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
     .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; position: relative; } .tool-content iframe { width: 100%; height: 100%; border: none; }
@@ -133,10 +132,77 @@
        <!-- IMMERSIVE HORIZONTAL SLIDER INTRODUCTION -->
        <section id="immersive-intro">
             <div class="intro-track">
-                <div class="intro-slide intro-slide--welcome"><div class="welcome-content"><h1>Precision Analysis for Stenographers</h1><p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p><button class="cta-button" id="discover-features-btn">Discover Features</button></div></div>
-                <div class="intro-slide" data-step="0"><div class="text-content"><h2>SSC Level Mistake Analysis</h2><p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p></div><div class="visual-content"><div class="interactive-analyzer"><div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div><div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div><div class="analyzer-footer"><div class="score-text"></div></div></div></div></div>
+                <!-- Slide 1 (Welcome) -->
+                <div class="intro-slide intro-slide--welcome">
+                    <div class="welcome-content">
+                        <h1>Precision Analysis for Stenographers</h1>
+                        <p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p>
+                        <button class="cta-button" id="discover-features-btn">Discover Features</button>
+                    </div>
+                </div>
+
+                <!-- Slide 2 (Feature 1) -->
+                <div class="intro-slide" data-step="0">
+                    <div class="text-content">
+                        <h2>SSC Level Mistake Analysis</h2>
+                        <p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p>
+                    </div>
+                    <div class="visual-content">
+                        <div class="interactive-analyzer">
+                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
+                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div>
+                            <div class="analyzer-footer"><div class="score-text"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slide 3 (Feature 2) -->
+                <div class="intro-slide" data-step="1">
+                    <div class="text-content">
+                        <h2>One-Click Word Match</h2>
+                        <p>Never get lost in the text again. Instantly highlight and compare any word with the original source, making verification faster and more accurate than ever.</p>
+                    </div>
+                    <div class="visual-content">
+                        <div class="interactive-analyzer">
+                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
+                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-2" class="feature-callout">Source Text Match</div></div>
+                            <div class="analyzer-footer"><div class="score-text"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slide 4 (Feature 3) -->
+                <div class="intro-slide" data-step="2">
+                    <div class="text-content">
+                        <h2>Re-evaluate Your Score</h2>
+                        <p>Don't wait to see how corrections affect your score. Our tool dynamically re-evaluates your accuracy in real-time, providing immediate feedback on your improvements.</p>
+                    </div>
+                    <div class="visual-content">
+                        <div class="interactive-analyzer">
+                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
+                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-3" class="feature-callout">Real-time Score Update</div></div>
+                            <div class="analyzer-footer"><div class="score-text"></div></div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Slide 5 (Feature 4) -->
+                 <div class="intro-slide" data-step="3">
+                     <div class="text-content">
+                         <h2>Performance Analytics</h2>
+                         <p>Track your growth over time. Our dashboard visualizes your accuracy, common errors, and speed, turning your practice data into a clear path for improvement.</p>
+                     </div>
+                     <div class="visual-content">
+                        <div class="interactive-analyzer">
+                            <div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div>
+                            <div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-4" class="feature-callout">View Progress Chart</div></div>
+                            <div class="analyzer-footer"><div class="score-text"></div></div>
+                        </div>
+                    </div>
+                 </div>
             </div>
-            <div class="scroll-down-prompt" id="scroll-prompt">Scroll to Explore <i class="fas fa-chevron-down"></i></div>
+            
+            <div class="intro-navigation"></div>
+            <div class="scroll-down-prompt" id="scroll-prompt">
+                Scroll to Explore <i class="fas fa-chevron-down"></i>
+            </div>
        </section>
 
        <!-- TOOLS SECTIONS -->
@@ -145,7 +211,7 @@
                <div class="text-content">
                    <h2>Practice KC</h2>
                    <p>Hone your muscle memory with our interactive keyboard drills. Designed to build both speed and accuracy.</p>
-                   <button class="launch-button locked" data-tool="kc" data-unlocked-text="Launch Practice Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
+                   <button class="launch-button" data-tool="kc">Launch Practice Tool</button>
                </div>
                <div class="graphic-content"><i class="fas fa-keyboard"></i></div>
            </div>
@@ -155,8 +221,8 @@
             <div class="section-content anim-hidden">
                 <div class="text-content">
                     <h2>Practice Dictations</h2>
-                    <p>Listen to professionally recorded audio passages and transcribe them in real-time. Improve your shorthand speed.</p>
-                    <button class="launch-button locked" data-tool="dictations" data-unlocked-text="Launch Dictations Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
+                    <p>Listen to professionally recorded audio passages and transcribe them in real-time. Our dictation tool is perfect for improving your listening skills and shorthand speed for exams.</p>
+                    <button class="launch-button" data-tool="dictations">Launch Dictations Tool</button>
                 </div>
                 <div class="graphic-content"><i class="fas fa-microphone-alt"></i></div>
             </div>
@@ -166,8 +232,8 @@
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>Test Analysis</h2>
-                   <p>Upload your tests to receive a detailed breakdown of your performance, identify common errors, and gain insights.</p>
-                   <button class="launch-button locked" data-tool="test-analysis" data-unlocked-text="Launch Analysis Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
+                   <p>Upload your tests to receive a detailed breakdown of your performance, identify common errors, and gain actionable insights.</p>
+                   <button class="launch-button" data-tool="test-analysis">Launch Analysis Tool</button>
                </div>
                <div class="graphic-content"><i class="fas fa-chart-line"></i></div>
            </div>
@@ -177,8 +243,8 @@
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>Transcription Checker</h2>
-                   <p>Instantly verify your transcriptions against the source text, highlighting discrepancies with precision.</p>
-                   <button class="launch-button locked" data-tool="transcription-checker" data-unlocked-text="Launch Checker Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
+                   <p>Ensure flawless results. Our checker instantly verifies your transcriptions against the source audio or text, highlighting discrepancies with precision.</p>
+                   <button class="launch-button" data-tool="transcription-checker">Launch Checker Tool</button>
                </div>
                <div class="graphic-content"><i class="fas fa-check-double"></i></div>
            </div>
@@ -188,9 +254,8 @@
            <div class="section-content anim-hidden">
                <div class="text-content">
                    <h2>About Check My Steno</h2>
-                   <p>Learn about our mission, the technology behind our tools, and how we help stenographers.</p>
-                   <!-- Free Tool (Not Locked) -->
-                   <button class="launch-button" data-tool="about" data-unlocked-text="Learn More">Learn More</button>
+                   <p>Learn about our mission, the technology behind our tools, and how we're dedicated to helping stenographers.</p>
+                   <button class="launch-button" data-tool="about">Learn More</button>
                </div>
                <div class="graphic-content"><i class="fas fa-book-open"></i></div>
            </div>
@@ -200,7 +265,7 @@
             <p class="footer-copyright">&copy; 2026 Check My Steno. All Rights Reserved.</p>
             <div class="footer-links">
                 <button onclick="showFeedbackModal()">Feedback</button>
-                <button onclick="launchTool('status')">Status</button>
+                <button onclick="launchTool('status')">Platform Status</button>
                 <button onclick="launchTool('contact')">Contact Support</button>
             </div>
        </footer>
@@ -216,7 +281,7 @@
     </nav>
 
     <!-- Modals -->
-    <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button">&times;</button><img id="majorAnnouncementImage" src="" alt="Announcement" /><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
+    <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button" style="position:absolute; right:10px; top:10px;">&times;</button><img id="majorAnnouncementImage" src="" style="width:100%"><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
     
     <div id="notificationPanel" class="notification-panel"><div class="notification-header"><h3>Notifications</h3></div><div id="notificationList" class="notification-list"></div></div>
     
@@ -236,12 +301,6 @@
         <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding: 2rem; text-align: center;"><h3>Email: checkmysteno@gmail.com</h3><p>Reach out to us on Telegram: <a href="https://t.me/CheckMySteno" target="_blank">@CheckMySteno</a></p></div></div>
     </div>
     
-    <div id="pollToast" class="poll-toast">
-        <button class="close-button" style="top: 10px; right: 10px;" onclick="this.parentElement.classList.remove('visible')">&times;</button>
-        <h4 id="pollQuestion"></h4>
-        <div id="pollOptions" class="poll-options"></div>
-    </div>
-    
 <script>
     // --- FIREBASE CONFIG ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
@@ -251,6 +310,7 @@
     const AUTH = firebase.auth();
     const GOOGLE_PROVIDER = new firebase.auth.GoogleAuthProvider();
     const GID = id => document.getElementById(id);
+    let currentUser = null;
     let userDocUnsubscribe = null;
 
     // --- AUTH & PROFILE CREATION LOGIC ---
@@ -264,6 +324,7 @@
                     try {
                         let userData;
                         if (!docSnap.exists) {
+                            // Automatically Create Profile on First Login
                             userData = {
                                 name: user.displayName || 'New User',
                                 email: user.email,
@@ -303,32 +364,14 @@
         AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
     }
     
-    function isUserPremium(user) { // Assuming user is passed or available globally
+    function isUserPremium(user) { // Using user data from currentUser variable
         if (!currentUser || currentUser.plan !== 'premium' || !currentUser.expiry) return false;
         const now = new Date();
-        const expiryDate = currentUser.expiry.toDate ? currentUser.expiry.toDate() : new Date(currentUser.expiry);
+        const expiryDate = typeof currentUser.expiry.toDate === 'function' ? currentUser.expiry.toDate() : new Date(currentUser.expiry);
         return now < expiryDate;
     }
 
-    // --- TOOLS ---
-    function setScrollLock(locked) { document.body.classList[locked ? 'add' : 'remove']('modal-open'); }
-    
-    function launchTool(toolName) {
-        const toolOverlay = GID(`${toolName}Tool`);
-        if (!toolOverlay) return;
-        const iframe = toolOverlay.querySelector('iframe');
-        if(iframe) {
-            const loader = toolOverlay.querySelector('.loader'); 
-            if(loader) loader.style.display = 'block';
-            iframe.src = 'about:blank'; iframe.style.opacity = '0';
-            iframe.onload = () => { if(loader) loader.style.display = 'none'; iframe.style.opacity = '1'; };
-            iframe.src = `${toolName}.html`;
-        }
-        toolOverlay.classList.add('visible'); setScrollLock(true);
-    }
-    function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { const i = o.querySelector('iframe'); if (i) i.src = 'about:blank'; o.classList.remove('visible'); }); setScrollLock(false); }
-
-    // --- UI UPDATER (WITH PROFILE MENU & LOCKING) ---
+    // --- UI UPDATER (WITH PROFILE MENU & LOCKED BUTTONS) ---
     function updateUserUI(userData) {
         const headerActions = GID('headerActions');
         const allLaunchButtons = document.querySelectorAll('.launch-button');
@@ -337,13 +380,19 @@
         if (userData) {
             const isPremium = isUserPremium(userData);
             const planText = isPremium ? `<span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-crown"></i> Premium Active</span>` : `<span style="color:var(--secondary-text-color); font-weight:bold;">Free Plan</span>`;
-            const expiryText = isPremium && userData.expiry ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${userData.expiry.toDate ? userData.expiry.toDate().toLocaleDateString() : new Date(userData.expiry).toLocaleDateString()}</small>` : '';
+            
+            let expiryDateStr = 'N/A';
+            if (isPremium && userData.expiry) {
+                const dateObj = userData.expiry.toDate ? userData.expiry.toDate() : new Date(userData.expiry);
+                expiryDateStr = dateObj.toLocaleDateString();
+            }
+            const expiryText = isPremium ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${expiryDateStr}</small>` : '';
             const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
             headerActions.innerHTML = `
                 ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium Member</span>'}
                 
-                <div id="profile-menu-container">
+                <div id="profile-menu-container" style="position:relative;">
                     <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:45px; height:45px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
                         <img src="${photoUrl}" alt="Profile">
                     </button>
@@ -381,6 +430,7 @@
                     } else {
                         btn.classList.add('locked');
                         btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
+                        // Redirect free users to plans page
                         btn.onclick = () => { window.location.href = 'plans.html'; };
                     }
                 } else {
@@ -390,13 +440,14 @@
 
         } else {
             // Not Logged In
-            headerActions.innerHTML = `<button class="cta-button" onclick="loginWithGoogle()">Login</button>`;
+            headerActions.innerHTML = `<button id="loginBtn" class="cta-button" onclick="loginWithGoogle()"><i class="fab fa-google"></i> Login with Google</button>`;
+
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
                     btn.classList.add('locked');
                     btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
-                    btn.onclick = () => loginWithGoogle();
+                    btn.onclick = () => { alert("Please login to access this tool."); loginWithGoogle(); };
                 } else {
                     btn.onclick = () => launchTool(tool);
                 }
