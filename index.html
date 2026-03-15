@@ -65,50 +65,35 @@
     
     .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s, box-shadow 0.2s; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
     .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
-    
-    /* --- IMMERSIVE INTRO --- */
-    #immersive-intro { height: 100vh; width: 100%; overflow: hidden; position: relative; cursor: pointer; }
-    .intro-track { display: flex; height: 100%; width: 500%; transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
-    .intro-slide { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; gap: 3%; padding: 2rem 4% 120px; box-sizing: border-box; opacity: 0; animation: fadeIn 1s forwards; }
-    @keyframes fadeIn { to { opacity: 1; } }
-    .intro-slide--welcome { flex-direction: column; text-align: center; }
-    .welcome-content { max-width: 850px; }
-    .welcome-content h1 { font-size: 5rem; font-weight: 900; margin: 0 0 1rem 0; line-height: 1.2; }
-    .welcome-content p { font-size: 1.3rem; color: var(--secondary-text-color); margin-bottom: 2.5rem; }
-    .welcome-content .cta-button { padding: 1rem 3rem; font-size: 1.2rem; border-radius: 12px; }
-    .intro-slide .text-content { flex: 1; max-width: 500px; }
-    .intro-slide .visual-content { flex: 1.5; max-width: 900px; }
-    .intro-slide h2 { font-size: 3.5rem; font-weight: 900; margin: 0 0 1.2rem 0; }
-    .intro-slide p { font-size: 1.2rem; line-height: 1.7; color: var(--secondary-text-color); }
-    .scroll-down-prompt { position: absolute; bottom: 15vh; left: 50%; transform: translateX(-50%); font-weight: 600; color: var(--secondary-text-color); opacity: 0; transition: opacity 0.5s; animation: bounce 2s infinite; z-index: 5; }
-    .scroll-down-prompt.visible { opacity: 1; }
-    @keyframes bounce { 0%, 20%, 50%, 80%, 100% { transform: translate(-50%, 0); } 40% { transform: translate(-50%, -15px); } 60% { transform: translate(-50%, -5px); } }
+
+    /* --- STATIC HERO SECTION --- */
+    .hero-section { min-height: 90vh; display: flex; justify-content: center; align-items: center; padding: 6rem 5% 4rem; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
+    .hero-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; width: 100%; }
+    .hero-text { flex: 1; max-width: 600px; }
+    .hero-text h1 { font-size: 4.5rem; font-weight: 900; margin: 0 0 1.5rem 0; line-height: 1.1; }
+    .hero-text p { font-size: 1.25rem; color: var(--secondary-text-color); margin-bottom: 2.5rem; line-height: 1.6; }
+    .hero-visual { flex: 1; }
 
     /* --- INTERACTIVE ANALYZER --- */
     .interactive-analyzer { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: 0 20px 40px var(--card-shadow); text-align: left; position: relative; overflow: hidden; transform: scale(1.05); }
     .analyzer-toolbar { display: flex; align-items: center; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--card-border); background: var(--primary-bg); }
     .toolbar-dots { display: flex; gap: 0.5rem; } .dot { width: 12px; height: 12px; border-radius: 50%; } .dot.red { background: #ff5f56; } .dot.yellow { background: #ffbd2e; } .dot.green { background: #27c93f; }
-    .toolbar-title { color: var(--secondary-text-color); font-weight: 600; margin: 0 auto; }
+    .toolbar-title { color: var(--secondary-text-color); font-weight: 600; margin: 0 auto; font-size: 0.9rem; }
     .analyzer-body { padding: 1.5rem 2rem; font-family: 'Courier New', Courier, monospace; font-size: 1.1rem; line-height: 1.8; position: relative; min-height: 150px; }
     .analyzer-body pre { margin: 0; white-space: pre-wrap; }
-    .highlight { transition: background-color 0.5s ease; border-radius: 4px; position: relative; }
-    .highlight-ssc { background-color: rgba(239, 68, 68, 0.2); animation: pulse-red 1.5s ease-out; }
-    .highlight-match { background-color: rgba(245, 158, 11, 0.2); animation: pulse-yellow 1.5s ease-out; }
-    .highlight-re-eval { background-color: rgba(34, 197, 94, 0.2); animation: pulse-green 1.5s ease-out; }
-    @keyframes pulse-red { 0% { background-color: rgba(239, 68, 68, 0.2); } 50% { background-color: rgba(239, 68, 68, 0.5); } 100% { background-color: rgba(239, 68, 68, 0.2); } }
-    @keyframes pulse-yellow { 0% { background-color: rgba(245, 158, 11, 0.2); } 50% { background-color: rgba(245, 158, 11, 0.5); } 100% { background-color: rgba(245, 158, 11, 0.2); } }
-    @keyframes pulse-green { 0% { background-color: rgba(34, 197, 94, 0.2); } 50% { background-color: rgba(34, 197, 94, 0.5); } 100% { background-color: rgba(34, 197, 94, 0.2); } }
-    .feature-callout { position: absolute; background: var(--text-color); color: var(--card-bg); padding: 0.5rem 1rem; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.9rem; font-weight: 600; opacity: 0; transform: scale(0.95) translateY(10px); pointer-events: none; white-space: nowrap; z-index: 10; transition: opacity 0.4s ease, transform 0.4s ease; }
-    .feature-callout.is-active { opacity: 1; transform: scale(1) translateY(0); }
+    .highlight-ssc { background-color: rgba(239, 68, 68, 0.2); border-bottom: 2px solid #ef4444;}
+    .highlight-match { background-color: rgba(245, 158, 11, 0.2); border-bottom: 2px solid #f59e0b;}
+    .highlight-re-eval { background-color: rgba(34, 197, 94, 0.2); border-bottom: 2px solid #22c55e;}
+    .feature-callout { position: absolute; background: var(--text-color); color: var(--card-bg); padding: 0.5rem 1rem; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; white-space: nowrap; z-index: 10; animation: floatCallout 3s ease-in-out infinite; }
     .feature-callout::after { content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: var(--text-color); }
-    #callout-1 { top: -40px; left: 180px; } #callout-2 { top: -40px; right: 80px; } #callout-3 { top: 90px; left: 350px; } #callout-4 { top: 50%; left: 50%; transform: translate(-50%,-50%); }
-    .analyzer-footer { padding: 1rem; border-top: 1px solid var(--card-border); background: var(--primary-bg); font-weight: 700; font-size: 1.1rem; }
-    .score-text { opacity: 0; transition: opacity 0.5s ease; } .score-text.is-active { opacity: 1; }
+    @keyframes floatCallout { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+    #callout-1 { top: 10px; right: 20px; }
+    .analyzer-footer { padding: 1rem; border-top: 1px solid var(--card-border); background: var(--primary-bg); font-weight: 700; font-size: 1rem; display: flex; justify-content: space-between; }
 
     /* --- PAGE SECTIONS --- */
     .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
     .page-section:last-of-type { border-bottom: none; }
-    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; }
+    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; width: 100%; }
     .section-content .text-content, .section-content .graphic-content { flex: 1; }
     .section-content .graphic-content { text-align: center; position: relative; }
     .section-content .graphic-content i { font-size: 12rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.7; }
@@ -237,41 +222,39 @@
 
     /* RESPONSIVE UPDATES FOR NEW DOCK AND BANNER */
     @media only screen and (max-width: 1024px) {
-        .welcome-content h1 { font-size: 4rem; }
-        .intro-slide h2 { font-size: 2.8rem; }
+        .hero-text h1 { font-size: 3.5rem; }
+        .promo-banner { flex-direction: column; text-align: center; }
+        .promo-banner-visual { justify-content: center; }
         .page-section h2 { font-size: 2.5rem; }
     }
 
     @media only screen and (max-width: 768px) {
         .main-header { padding: 1rem 3%; }
         .logo { font-size: 1.5rem; }
+        .hero-section { padding: 4rem 5%; min-height: auto; }
+        .hero-content { flex-direction: column; text-align: center; gap: 2rem; }
+        .hero-text h1 { font-size: 2.8rem; }
+        .hero-text p { font-size: 1.1rem; }
         .page-section { padding: 3rem 5%; min-height: auto; }
         .section-content, .page-section:nth-child(even) .section-content { flex-direction: column; gap: 2rem; }
         .section-content .graphic-content { margin-top: 2rem; }
         .section-content .text-content, .section-content .graphic-content { flex: none; width: 100%; text-align: center; }
         .page-section h2 { font-size: 2.2rem; }
         .page-section p { font-size: 1rem; }
-        .intro-slide { flex-direction: column; text-align: center; gap: 2%; padding: 2rem 5% 100px; }
-        .intro-slide .text-content, .intro-slide .visual-content { flex: none; width: 100%; max-width: 100%; }
-        .welcome-content h1 { font-size: 3rem; }
-        .welcome-content p { font-size: 1.1rem; }
-        .intro-slide h2 { font-size: 2rem; }
-        .intro-slide p { font-size: 1rem; }
         .interactive-analyzer { transform: scale(1); }
-        #callout-1 { top: -40px; left: 10px; }
-        #callout-2 { top: -40px; right: 10px; }
-        #callout-3 { top: 90px; left: 50%; transform: translateX(-50%); }
+        
+        #callout-1 { top: 10px; right: 10px; }
+        
         #userInfo { display: none; }
         .footer { flex-direction: column; gap: 1rem; text-align: center; padding-bottom: 100px; } /* Space for mobile dock */
-        .scroll-down-prompt { bottom: 12vh; font-size: 0.9rem; }
         .modal-content { width: 95%; padding: 2rem 1.5rem; }
         .major-announcement-text { padding: 1rem 1.5rem 1.5rem 1.5rem; }
         .notification-panel { width: 90%; right: 5%; top: 70px; }
 
         /* Banner mobile adjustments */
-        .promo-banner { flex-direction: column; padding: 2rem; text-align: center; }
+        .promo-banner-wrapper { padding: 2rem 5%; min-height: auto;}
+        .promo-banner { padding: 2rem; }
         .promo-banner-content h2 { font-size: 2rem; }
-        .promo-banner-visual { justify-content: center; margin-top: 1.5rem; }
         .promo-banner::after { display: none; }
 
         /* Update dock for mobile so it doesn't block screen */
@@ -293,13 +276,32 @@
     </header>
 
     <main id="mainContent">
-       <!-- IMMERSIVE HORIZONTAL SLIDER INTRODUCTION -->
-       <section id="immersive-intro">
-            <div class="intro-track">
-                <div class="intro-slide intro-slide--welcome"><div class="welcome-content"><h1>Precision Analysis for Stenographers</h1><p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p><button class="cta-button" id="discover-features-btn">Discover Features</button></div></div>
-                <div class="intro-slide" data-step="0"><div class="text-content"><h2>SSC Level Mistake Analysis</h2><p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p></div><div class="visual-content"><div class="interactive-analyzer"><div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div><div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div><div class="analyzer-footer"><div class="score-text"></div></div></div></div></div>
-            </div>
-            <div class="scroll-down-prompt" id="scroll-prompt">Scroll to Explore <i class="fas fa-chevron-down"></i></div>
+       <!-- STATIC HERO SECTION -->
+       <section id="hero-section" class="hero-section">
+           <div class="hero-content">
+               <div class="hero-text">
+                   <h1>Precision Analysis<br>for Stenographers</h1>
+                   <p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p>
+                   <button class="cta-button" onclick="showAuthModal()" style="padding: 1rem 3rem; font-size: 1.2rem; border-radius: 12px;">Get Started Now</button>
+               </div>
+               <div class="hero-visual">
+                   <div class="interactive-analyzer">
+                       <div class="analyzer-toolbar">
+                           <div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
+                           <div class="toolbar-title">transcript_test_01.txt</div>
+                       </div>
+                       <div class="analyzer-body">
+                           <pre>The quick brown fox <span class="highlight-ssc">jumps</span> over the lazy dog. 
+This is a <span class="highlight-match">showcase</span> of its features.</pre>
+                           <div id="callout-1" class="feature-callout">SSC Mistake Rule</div>
+                       </div>
+                       <div class="analyzer-footer">
+                           <div>Score: <strong>98.5% Accuracy</strong></div>
+                           <div style="color: var(--success-color);">Ready for Evaluation</div>
+                       </div>
+                   </div>
+               </div>
+           </div>
        </section>
 
        <!-- PROMOTIONAL BANNER SECTION (HALF SCREEN) -->
@@ -388,7 +390,7 @@
 
     <!-- LEFT VERTICAL DOCK -->
     <nav class="dock">
-        <a href="#immersive-intro" class="dock-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="#hero-section" class="dock-item"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="#practice" class="dock-item"><i class="fas fa-keyboard"></i><span>Practice</span></a>
         <div class="dock-item" onclick="toggleDictationPopup(event)"><i class="fas fa-microphone-alt"></i><span>Dictations</span></div>
         <a href="#analysis" class="dock-item"><i class="fas fa-chart-line"></i><span>Analysis</span></a>
@@ -526,17 +528,6 @@
     </div>
     
 <script>
-    // --- ANIMATIONS ---
-    document.addEventListener('DOMContentLoaded', () => {
-        const intro = document.getElementById('immersive-intro'); if (!intro) return;
-        const track = intro.querySelector('.intro-track');
-        let currentIndex = 0; const slideDuration = 4000; let autoplayInterval = null;
-        function moveToSlide(targetIndex) { track.style.transform = `translateX(-${targetIndex * 100}vw)`; currentIndex = targetIndex; }
-        function resetAutoplay() { clearInterval(autoplayInterval); autoplayInterval = setInterval(() => { const nextIndex = (currentIndex + 1) % 2; moveToSlide(nextIndex); }, slideDuration); }
-        intro.querySelector('#discover-features-btn').addEventListener('click', () => { moveToSlide(1); });
-        resetAutoplay();
-    });
-
     // --- FIREBASE CONFIG ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
     if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
@@ -616,7 +607,7 @@
     }
     
     function logout() { 
-        AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
+        AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#hero-section'; }); 
     }
     
     function isUserPremium(user) {
@@ -751,7 +742,7 @@
 
     // --- BACKEND SYSTEM FUNCTIONS (Theme, Notifications, Polls, Status) ---
     function applyTheme(themeName) { document.body.dataset.theme = themeName; localStorage.setItem('selectedTheme', themeName); }
-    function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const[key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
+    function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const [key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
     
     function showTelegramModal() { if (localStorage.getItem('hideTelegramModal') !== 'true') { setTimeout(() => { const tm = GID('telegramModal'); if(tm) { tm.classList.add('visible'); setScrollLock(true); } }, 2500); } }
     function hideTelegramModal(preventShowAgain) { if (preventShowAgain) { localStorage.setItem('hideTelegramModal', 'true'); } const tm = GID('telegramModal'); if(tm) { tm.classList.remove('visible'); setScrollLock(false); } }
