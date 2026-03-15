@@ -176,6 +176,16 @@
     .auth-divider hr { flex: 1; border: none; border-top: 1px solid var(--card-border); }
     .auth-link { color: var(--button-gradient-start); font-weight: 700; cursor: pointer; }
     .auth-link:hover { text-decoration: underline; }
+
+    /* PROFILE MODAL STYLES */
+    .profile-tabs { display: flex; gap: 1rem; border-bottom: 1px solid var(--card-border); margin-bottom: 1.5rem; }
+    .profile-tabs .tab-btn { background: none; border: none; padding: 0.5rem 1rem; font-weight: 600; font-size: 1rem; color: var(--secondary-text-color); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
+    .profile-tabs .tab-btn.active { color: var(--button-gradient-start); border-bottom-color: var(--button-gradient-start); }
+    .history-item { padding: 1rem; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; background: var(--primary-bg); }
+    .history-item-title { font-weight: 700; margin: 0 0 0.25rem 0; font-size: 1.05rem;}
+    .history-item-date { font-size: 0.85rem; color: var(--secondary-text-color); margin: 0; }
+    .history-item-price { font-weight: 700; color: var(--success-color); font-size: 1.1rem;}
+    .form-group label { text-align: left; display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--secondary-text-color); }
   </style>
 </head>
 <body>
@@ -346,6 +356,54 @@
             <p id="authErrorMessage" style="color: var(--error-color); font-size: 0.9rem; margin-top: 1rem; display: none;"></p>
         </div>
     </div>
+
+    <!-- NEW FULL PROFILE & HISTORY MODAL -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal-content" style="max-width: 550px; padding: 2rem; text-align: left;">
+            <button class="close-button" onclick="hideProfileModal()">&times;</button>
+            
+            <!-- Profile Header -->
+            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
+                <img id="profileModalAvatar" src="https://www.gravatar.com/avatar/?d=mp" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--button-gradient-start);" alt="Profile" />
+                <div>
+                    <h2 id="profileModalName" style="margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-color);"></h2>
+                    <p id="profileModalEmail" style="margin: 5px 0 0 0; color: var(--secondary-text-color); font-weight: 600;"></p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="profile-tabs">
+                <button class="tab-btn active" onclick="switchProfileTab('edit')"><i class="fas fa-user-edit"></i> Edit Profile</button>
+                <button class="tab-btn" onclick="switchProfileTab('history')"><i class="fas fa-history"></i> Purchase History</button>
+            </div>
+
+            <!-- Edit Details Tab -->
+            <div id="profileEditView">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="editProfileName" placeholder="Enter your full name" />
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="editProfilePhone" placeholder="e.g. +91 9876543210" />
+                </div>
+                <div class="form-group">
+                    <label>State / City</label>
+                    <input type="text" id="editProfileLocation" placeholder="e.g. New Delhi" />
+                </div>
+                
+                <button class="cta-button" onclick="saveProfileDetails()" style="width: 100%; margin-top: 1rem;"><i class="fas fa-save"></i> Save Changes</button>
+                <p id="profileSaveStatus" style="text-align: center; margin-top: 1rem; font-weight: 600; display: none;"></p>
+            </div>
+
+            <!-- Purchase History Tab -->
+            <div id="profileHistoryView" style="display: none; max-height: 350px; overflow-y: auto;">
+                <div id="historyListContainer">
+                    <!-- Loaded dynamically via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
     
 <script>
     // --- ANIMATIONS ---
@@ -369,7 +427,7 @@
     const GID = id => document.getElementById(id);
     let currentUser = null;
     let userDocUnsubscribe = null;
-    let pendingSignupName = null; // Used to pass name from signup form to Firestore
+    let pendingSignupName = null; 
 
     // --- AUTH MODAL LOGIC ---
     function showAuthModal() { GID('authModal').classList.add('visible'); setScrollLock(true); toggleAuthView('login'); }
@@ -451,18 +509,19 @@
                 userDocUnsubscribe = userRef.onSnapshot(async (docSnap) => {
                     try {
                         if (!docSnap.exists) {
-                            // Automatically Create Profile on First Login or Signup
                             const newUserData = {
                                 name: user.displayName || pendingSignupName || 'New User',
                                 email: user.email,
                                 photoURL: user.photoURL || 'https://www.gravatar.com/avatar/?d=mp',
                                 plan: 'free',
+                                phone: '',
+                                location: '',
                                 expiry: null,
                                 created_at: firebase.firestore.FieldValue.serverTimestamp()
                             };
                             await userRef.set(newUserData);
                             currentUser = { uid: user.uid, ...newUserData };
-                            pendingSignupName = null; // Reset
+                            pendingSignupName = null; 
                         } else {
                             currentUser = { uid: user.uid, ...docSnap.data() };
                         }
@@ -528,6 +587,123 @@
     
     function showMajorAnnouncement() { const modal = GID('majorAnnouncementModal'); const closeBtn = GID('closeMajorAnnouncement'); const imgEl = GID('majorAnnouncementImage'); const titleEl = GID('majorAnnouncementTitle'); const bodyEl = GID('majorAnnouncementBody'); const announcementRef = DB.collection('siteConfig').doc('majorAnnouncement'); announcementRef.get().then(doc => { if (doc.exists) { const data = doc.data(); if (data.isActive && data.id) { const announcementKey = `announcementClosed_${data.id}`; const hasBeenClosed = localStorage.getItem(announcementKey); if (!hasBeenClosed) { titleEl.textContent = data.title || ''; bodyEl.textContent = data.body || ''; if (data.imageUrl) { imgEl.src = data.imageUrl; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; } modal.classList.add('visible'); setScrollLock(true); closeBtn.onclick = () => { modal.classList.remove('visible'); setScrollLock(false); localStorage.setItem(announcementKey, 'true'); }; } } } }).catch(err => { console.error("Error fetching major announcement:", err); }); }
 
+    // --- FULL PROFILE MODAL SYSTEM ---
+    function showProfileModal() {
+        if (!currentUser) return;
+        GID('profile-dropdown').style.display = 'none'; // Close header dropdown
+        
+        GID('profileModalAvatar').src = currentUser.photoURL || 'https://www.gravatar.com/avatar/?d=mp';
+        GID('profileModalName').textContent = currentUser.name || 'User';
+        GID('profileModalEmail').textContent = currentUser.email || '';
+        
+        GID('editProfileName').value = currentUser.name || '';
+        GID('editProfilePhone').value = currentUser.phone || '';
+        GID('editProfileLocation').value = currentUser.location || '';
+        
+        GID('profileModal').classList.add('visible');
+        setScrollLock(true);
+        switchProfileTab('edit');
+    }
+
+    function hideProfileModal() {
+        GID('profileModal').classList.remove('visible');
+        setScrollLock(false);
+        GID('profileSaveStatus').style.display = 'none';
+    }
+
+    function switchProfileTab(tab) {
+        const editBtn = document.querySelectorAll('.profile-tabs .tab-btn')[0];
+        const histBtn = document.querySelectorAll('.profile-tabs .tab-btn')[1];
+        
+        if (tab === 'edit') {
+            GID('profileEditView').style.display = 'block';
+            GID('profileHistoryView').style.display = 'none';
+            editBtn.classList.add('active');
+            histBtn.classList.remove('active');
+        } else {
+            GID('profileEditView').style.display = 'none';
+            GID('profileHistoryView').style.display = 'block';
+            editBtn.classList.remove('active');
+            histBtn.classList.add('active');
+            loadPurchaseHistory();
+        }
+    }
+
+    async function saveProfileDetails() {
+        if (!currentUser) return;
+        
+        const newName = GID('editProfileName').value.trim();
+        const newPhone = GID('editProfilePhone').value.trim();
+        const newLocation = GID('editProfileLocation').value.trim();
+        
+        const statusEl = GID('profileSaveStatus');
+        statusEl.style.display = 'block';
+        statusEl.style.color = 'var(--text-color)';
+        statusEl.textContent = 'Saving details...';
+        
+        try {
+            // Update Firestore
+            await DB.collection('users').doc(currentUser.uid).update({
+                name: newName,
+                phone: newPhone,
+                location: newLocation
+            });
+            
+            // Update Firebase Auth Profile if name changed
+            if (newName && newName !== currentUser.name && AUTH.currentUser) {
+                await AUTH.currentUser.updateProfile({ displayName: newName });
+            }
+            
+            statusEl.style.color = 'var(--success-color)';
+            statusEl.textContent = 'Profile updated successfully!';
+            GID('profileModalName').textContent = newName || 'User';
+            
+            setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+        } catch (err) {
+            console.error("Error updating profile:", err);
+            statusEl.style.color = 'var(--error-color)';
+            statusEl.textContent = 'Failed to update profile. Try again.';
+        }
+    }
+
+    async function loadPurchaseHistory() {
+        const container = GID('historyListContainer');
+        container.innerHTML = '<div class="loader" style="display: block; position: relative; margin: 2rem auto;"></div>';
+        
+        try {
+            // Fetching from a 'payments' subcollection
+            const snapshot = await DB.collection('users').doc(currentUser.uid).collection('payments').orderBy('timestamp', 'desc').get();
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<p style="text-align: center; color: var(--secondary-text-color); margin-top: 2rem;">No recent purchases found.</p>';
+                return;
+            }
+            
+            let html = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleDateString() : 'N/A';
+                const amount = data.amount || 0;
+                const planName = data.planName || 'Premium Subscription';
+                const status = data.status || 'Success';
+                
+                html += `
+                    <div class="history-item">
+                        <div>
+                            <h4 class="history-item-title">${planName}</h4>
+                            <p class="history-item-date">${dateStr} &bull; <span style="text-transform: capitalize;">${status}</span></p>
+                        </div>
+                        <div class="history-item-price">₹${amount}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (err) {
+            console.error("Error loading history:", err);
+            container.innerHTML = '<p style="text-align: center; color: var(--error-color); margin-top: 2rem;">Could not load purchase history.</p>';
+        }
+    }
+
     // --- UI UPDATER ---
     function updateUserUI(userData) {
         const headerActions = GID('headerActions');
@@ -570,6 +746,7 @@
                             ${expiryText}
                         </div>
                         
+                        <button class="cta-button" style="width:100%; margin-bottom:10px; padding:0.8rem; background: var(--button-gradient-start);" onclick="showProfileModal()"><i class="fas fa-user-edit"></i> Manage Profile</button>
                         ${!isPremium ? `<button class="cta-button" style="width:100%; margin-bottom:10px; padding:0.8rem;" onclick="window.location.href='plans.html'">Get Premium Pass</button>` : ''}
                         <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
                     </div>
@@ -638,7 +815,7 @@
 
         // Hide profile, theme, and notification menus when clicking outside
         document.addEventListener('click', (e) => {
-            if(!e.target.closest('#profile-menu-container')) { const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none'; }
+            if(!e.target.closest('#profile-menu-container') && !e.target.closest('#profileModal')) { const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none'; }
             if(!e.target.closest('#theme-switcher')) { const tm = GID('theme-menu'); if(tm) tm.classList.remove('visible'); }
             if(!e.target.closest('#notificationBtn') && !e.target.closest('#notificationPanel')) { const np = GID('notificationPanel'); if(np) np.classList.remove('visible'); }
         });
@@ -646,6 +823,7 @@
             if (e.key === 'Escape') { 
                 closeAllTools(); 
                 hideAuthModal();
+                hideProfileModal();
                 const telModal = GID('telegramModal'); if(telModal) telModal.classList.remove('visible');
                 const majorModal = GID('majorAnnouncementModal'); if(majorModal && majorModal.classList.contains('visible')) { majorModal.querySelector('.close-button').click(); }
             } 
