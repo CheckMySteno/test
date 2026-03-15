@@ -120,7 +120,7 @@
     #checker .graphic-content i { animation: icon-pulse 3.5s ease-in-out infinite 0.5s; }
     .page-section:nth-child(even) .section-content { flex-direction: row-reverse; }
 
-    /* --- BUTTONS & DOCK --- */
+    /* --- BUTTONS & NEW VERTICAL DOCK --- */
     .launch-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; color: var(--primary-bg); background: var(--text-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
     .launch-button:hover:not(.locked) { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 25px var(--button-gradient-start); }
     .launch-button.locked { background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; box-shadow: 0 5px 15px rgba(234, 179, 8, 0.4); cursor: pointer; }
@@ -129,9 +129,28 @@
 
     .footer { position: absolute; bottom: 0; left: 0; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 5%; background-color: var(--card-bg); border-top: 1px solid var(--card-border); }
     .footer-links { display: flex; gap: 1.5rem; margin: 0; } .footer-links button { background: none; border: none; color: var(--secondary-text-color); font-weight: 600; cursor: pointer; }
-    .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; display: flex; gap: 0.5rem; height: 68px; } .dock-item { transition: transform 0.1s linear, margin 0.1s linear; will-change: transform; } .dock-item a { display: block; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 1.8rem; color: var(--text-color); text-decoration: none; } .dock-item .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: var(--card-bg); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; opacity: 0; visibility: hidden; transition: 0.2s; white-space: nowrap; } .dock-item:hover .tooltip { opacity: 1; visibility: visible; }
     
-    /* --- MODALS & EXTRAS --- */
+    /* LEFT SIDE VERTICAL DOCK */
+    .dock { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; transition: background-color 0.3s; }
+    body[data-theme="galaxy"] .dock { background: rgba(30, 41, 59, 0.6); }
+    .dock-item { width: 70px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; cursor: pointer; transition: 0.2s; text-decoration: none; background: transparent; border: none; color: var(--text-color); }
+    .dock-item i { font-size: 20px; margin-bottom: 4px; color: var(--text-color); transition: color 0.3s; }
+    .dock-item span { font-size: 10px; color: var(--secondary-text-color); font-weight: 600; transition: color 0.3s; }
+    .dock-item:hover { background: rgba(0,0,0,0.05); transform: scale(1.05); }
+    body[data-theme="galaxy"] .dock-item:hover { background: rgba(255,255,255,0.1); }
+
+    /* DICTATION POPUP MENU */
+    .dictation-popup { position: fixed; left: 110px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: 10px; padding: 15px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border: 1px solid var(--card-border); border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000; }
+    body[data-theme="galaxy"] .dictation-popup { background: rgba(30, 41, 59, 0.85); }
+    .dictation-popup.visible { display: flex; animation: fadeInPopup 0.2s ease-out; }
+    @keyframes fadeInPopup { from { opacity: 0; transform: translateY(-50%) translateX(-10px); } to { opacity: 1; transform: translateY(-50%) translateX(0); } }
+    .dictation-btn { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 14px; color: var(--text-color); font-weight: 600; text-decoration: none; border: none; background: transparent; text-align: left; }
+    .dictation-btn:hover { background: rgba(0,0,0,0.06); color: var(--button-gradient-start); }
+    body[data-theme="galaxy"] .dictation-btn:hover { background: rgba(255,255,255,0.1); }
+
+    /* --- MODALS & EXTRAS (Integrated from Backend) --- */
+    .header-icon-btn { position: relative; background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; text-decoration: none; }
+    
     #theme-switcher { position: relative; display: inline-flex; align-items: center; } 
     #theme-menu { display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px var(--card-shadow); z-index: 1100; overflow: hidden; white-space: nowrap; } 
     #theme-menu.visible { display: block; } 
@@ -184,13 +203,52 @@
     .profile-tabs { display: flex; gap: 0.5rem; justify-content: center; background: var(--primary-bg); padding: 0.3rem; border-radius: 12px; margin-bottom: 1.5rem; }
     .profile-tabs .tab-btn { flex: 1; padding: 0.6rem; border-radius: 8px; color: var(--secondary-text-color); font-weight: 700; font-size: 0.95rem; border: none; background: transparent; cursor: pointer; transition: all 0.3s; }
     .profile-tabs .tab-btn.active { background: var(--card-bg); color: var(--text-color); box-shadow: 0 2px 8px var(--card-shadow); }
-    
     .history-item { padding: 1rem; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; background: var(--primary-bg); }
     .history-item-title { font-weight: 700; margin: 0 0 0.25rem 0; font-size: 1.05rem;}
     .history-item-date { font-size: 0.85rem; color: var(--secondary-text-color); margin: 0; }
     .history-item-price { font-weight: 700; color: var(--success-color); font-size: 1.1rem;}
-    
     .form-group label { text-align: left; display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--secondary-text-color); }
+
+    /* RESPONSIVE UPDATES FOR NEW DOCK */
+    @media only screen and (max-width: 1024px) {
+        .welcome-content h1 { font-size: 4rem; }
+        .intro-slide h2 { font-size: 2.8rem; }
+        .page-section h2 { font-size: 2.5rem; }
+    }
+
+    @media only screen and (max-width: 768px) {
+        .main-header { padding: 1rem 3%; }
+        .logo { font-size: 1.5rem; }
+        .page-section { padding: 3rem 5%; min-height: auto; }
+        .section-content, .page-section:nth-child(even) .section-content { flex-direction: column; gap: 2rem; }
+        .section-content .graphic-content { margin-top: 2rem; }
+        .section-content .text-content, .section-content .graphic-content { flex: none; width: 100%; text-align: center; }
+        .page-section h2 { font-size: 2.2rem; }
+        .page-section p { font-size: 1rem; }
+        .intro-slide { flex-direction: column; text-align: center; gap: 2%; padding: 2rem 5% 100px; }
+        .intro-slide .text-content, .intro-slide .visual-content { flex: none; width: 100%; max-width: 100%; }
+        .welcome-content h1 { font-size: 3rem; }
+        .welcome-content p { font-size: 1.1rem; }
+        .intro-slide h2 { font-size: 2rem; }
+        .intro-slide p { font-size: 1rem; }
+        .interactive-analyzer { transform: scale(1); }
+        #callout-1 { top: -40px; left: 10px; }
+        #callout-2 { top: -40px; right: 10px; }
+        #callout-3 { top: 90px; left: 50%; transform: translateX(-50%); }
+        #userInfo { display: none; }
+        .footer { flex-direction: column; gap: 1rem; text-align: center; padding-bottom: 100px; } /* Space for mobile dock */
+        .scroll-down-prompt { bottom: 12vh; font-size: 0.9rem; }
+        .modal-content { width: 95%; padding: 2rem 1.5rem; }
+        .major-announcement-text { padding: 1rem 1.5rem 1.5rem 1.5rem; }
+        .notification-panel { width: 90%; right: 5%; top: 70px; }
+
+        /* Update dock for mobile so it doesn't block screen */
+        .dock { left: 50%; top: auto; bottom: 20px; transform: translateX(-50%); flex-direction: row; padding: 5px; height: 60px; width: 90%; justify-content: space-around; }
+        .dock-item { width: 50px; height: 50px; }
+        .dock-item span { display: none; } /* Hide text on mobile to save space */
+        .dictation-popup { left: 50%; top: auto; bottom: 90px; transform: translateX(-50%); width: 200px; }
+        @keyframes fadeInPopup { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    }
   </style>
 </head>
 <body>
@@ -280,14 +338,23 @@
        </footer>
     </main>
 
+    <!-- NEW LEFT VERTICAL DOCK -->
     <nav class="dock">
-        <div class="dock-item"><a href="#immersive-intro"><i class="fas fa-home"></i></a><span class="tooltip">Home</span></div>
-        <div class="dock-item"><a href="#practice"><i class="fas fa-keyboard"></i></a><span class="tooltip">Practice KC</span></div>
-        <div class="dock-item"><a href="#dictations"><i class="fas fa-microphone-alt"></i></a><span class="tooltip">Dictations</span></div>
-        <div class="dock-item"><a href="#analysis"><i class="fas fa-chart-line"></i></a><span class="tooltip">Test Analysis</span></div>
-        <div class="dock-item"><a href="#checker"><i class="fas fa-check-double"></i></a><span class="tooltip">Transcription Checker</span></div>
-        <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
+        <a href="#immersive-intro" class="dock-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="#practice" class="dock-item"><i class="fas fa-keyboard"></i><span>Practice</span></a>
+        <div class="dock-item" onclick="toggleDictationPopup(event)"><i class="fas fa-microphone-alt"></i><span>Dictations</span></div>
+        <a href="#analysis" class="dock-item"><i class="fas fa-chart-line"></i><span>Analysis</span></a>
+        <a href="#checker" class="dock-item"><i class="fas fa-check-double"></i><span>Checker</span></a>
+        <a href="#about" class="dock-item"><i class="fas fa-book-open"></i><span>About</span></a>
     </nav>
+
+    <!-- DICTATIONS POPUP MENU -->
+    <div class="dictation-popup" id="dictationMenu">
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-book-open"></i> Kailash Chandra</button>
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-chart-line"></i> Progressive</button>
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-landmark"></i> President Speech</button>
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-history"></i> Previous Year</button>
+    </div>
 
     <!-- Iframe Overlays for Tools -->
     <div id="toolOverlays">
@@ -434,6 +501,13 @@
     let currentUser = null;
     let userDocUnsubscribe = null;
     let pendingSignupName = null; 
+
+    // --- DICTATION POPUP LOGIC ---
+    function toggleDictationPopup(e) {
+        if(e) e.stopPropagation();
+        const menu = GID("dictationMenu");
+        if(menu) menu.classList.toggle("visible");
+    }
 
     // --- AUTH MODAL LOGIC ---
     function showAuthModal() { GID('authModal').classList.add('visible'); setScrollLock(true); toggleAuthView('login'); }
@@ -838,11 +912,12 @@
         showTelegramModal();
         checkForMessageOfTheDay();
 
-        // Hide profile, theme, and notification menus when clicking outside
+        // Hide profile, theme, dictation and notification menus when clicking outside
         document.addEventListener('click', (e) => {
             if(!e.target.closest('#profile-menu-container') && !e.target.closest('#profileModal')) { const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none'; }
             if(!e.target.closest('#theme-switcher')) { const tm = GID('theme-menu'); if(tm) tm.classList.remove('visible'); }
             if(!e.target.closest('#notificationBtn') && !e.target.closest('#notificationPanel')) { const np = GID('notificationPanel'); if(np) np.classList.remove('visible'); }
+            if(!e.target.closest('#dictationMenu') && !e.target.closest('.dock-item[onclick]')) { const dm = GID('dictationMenu'); if(dm) dm.classList.remove('visible'); }
         });
         document.addEventListener('keydown', (e) => { 
             if (e.key === 'Escape') { 
