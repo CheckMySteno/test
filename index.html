@@ -38,6 +38,7 @@
     .main-header.hidden { transform: translateY(-110%); }
     .logo { font-size: 1.8rem; font-weight: 800; }
     .header-actions { display: flex; align-items: center; gap: 1rem; }
+    .header-icon-btn { position: relative; background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; text-decoration: none; } 
     .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; display: inline-block; text-align: center; }
     .cta-button:hover { transform: scale(1.05); }
 
@@ -46,9 +47,14 @@
     #profile-btn { border-radius:50%; width:45px; height:45px; border:2px solid var(--button-gradient-start); padding:0; overflow:hidden; cursor:pointer; background: var(--card-bg); }
     #profile-btn img { width:100%; height:100%; object-fit:cover; }
     #profile-dropdown { display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left; }
-    #profile-dropdown h3 { margin: 0 0 5px 0; font-size: 1.1rem; }
-    #profile-dropdown p { margin: 0 0 15px 0; font-size: 0.85rem; color: var(--secondary-text-color); word-break: break-all; }
-    
+
+    /* THEME MENU */
+    #theme-switcher { position: relative; }
+    #theme-menu { display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px var(--card-shadow); z-index: 1100; overflow: hidden; min-width: 150px;}
+    #theme-menu.visible { display: block; }
+    .theme-option { padding: 0.8rem 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; }
+    .theme-option:hover { background-color: var(--primary-bg); }
+
     /* --- IMMERSIVE INTRO --- */
     #immersive-intro { height: 100vh; width: 100%; overflow: hidden; position: relative; cursor: pointer; }
     .intro-track { display: flex; height: 100%; width: 500%; transition: transform 0.8s cubic-bezier(0.76, 0, 0.24, 1); }
@@ -88,7 +94,7 @@
     /* --- PAGE SECTIONS --- */
     .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
     .page-section:last-of-type { border-bottom: none; }
-    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; }
+    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; width: 100%; }
     .section-content .text-content, .section-content .graphic-content { flex: 1; }
     .section-content .graphic-content { text-align: center; position: relative; }
     .section-content .graphic-content i { font-size: 12rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.7; }
@@ -112,7 +118,11 @@
     .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; display: flex; gap: 0.5rem; height: 68px; } .dock-item { transition: transform 0.1s linear, margin 0.1s linear; will-change: transform; } .dock-item a { display: block; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 1.8rem; color: var(--text-color); text-decoration: none; } .dock-item .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: var(--card-bg); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; opacity: 0; visibility: hidden; transition: 0.2s; white-space: nowrap; } .dock-item:hover .tooltip { opacity: 1; visibility: visible; }
     
     /* --- MODALS & EXTRAS --- */
-    .header-icon-btn { background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; }
+    .notification-panel { display: none; position: fixed; top: 80px; right: 5%; width: 350px; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: 0 10px 30px var(--card-shadow); z-index: 1050; overflow: hidden; } .notification-panel.visible { display: block; }
+    .notification-header { padding: 1rem; border-bottom: 1px solid var(--card-border); font-weight: 700; }
+    .notification-list { max-height: 400px; overflow-y: auto; }
+    .notification-item { padding: 1rem; border-bottom: 1px solid var(--card-border); font-size: 0.9rem; line-height: 1.5; color: var(--text-color); font-weight: 600; }
+    
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; }
     .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
     .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; position: relative; } .tool-content iframe { width: 100%; height: 100%; border: none; }
@@ -214,16 +224,15 @@
         <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
     </nav>
 
-    <!-- Modals (Photo-copy original versions) -->
+    <!-- Modals -->
     <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button" style="position:absolute; right:10px; top:10px;">&times;</button><img id="majorAnnouncementImage" src="" style="width:100%"><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
     
-    <div id="notificationPanel" class="notification-panel" style="display:none; position:fixed; right:5%; top:80px; background:white; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:320px; z-index:2000; padding:1rem; border:1px solid #eee;"><div id="notificationList"></div></div>
+    <div id="notificationPanel" class="notification-panel"><div class="notification-header">Notifications</div><div id="notificationList" class="notification-list"></div></div>
     
     <div class="modal-overlay" id="feedbackModal"><div class="modal-content"><button class="close-button" onclick="hideFeedbackModal()">&times;</button><h2>Feedback</h2><textarea id="feedbackMessage" rows="5" style="width:100%; border:1px solid #ddd; border-radius:8px; padding:10px;"></textarea><button class="cta-button" onclick="submitFeedback()" style="width:100%; margin-top:15px;">Send Feedback</button><p id="feedbackStatus"></p></div></div>
     
-    <div class="modal-overlay" id="telegramModal"><div class="modal-content"><h2>Join Telegram</h2><p>For updates and support, join our official community.</p><a href="https://t.me/Checkmystenoo" target="_blank" class="cta-button" style="display:block; text-decoration:none;">Join Now</a><button onclick="localStorage.setItem('hideTelegram', 'true'); hideTelegramModal();" style="margin-top:15px; background:none; border:none; cursor:pointer; color:var(--secondary-text-color);">Don't show again</button></div></div>
+    <div class="modal-overlay" id="telegramModal"><div class="modal-content"><h2>Join Telegram</h2><p>For updates and support, join our community.</p><a href="https://t.me/Checkmystenoo" target="_blank" class="cta-button" style="display:block; text-decoration:none;">Join Now</a><button onclick="localStorage.setItem('hideTelegram', 'true'); hideTelegramModal();" style="margin-top:15px; background:none; border:none; cursor:pointer;">Don't show again</button></div></div>
 
-    <!-- Tool Overlays -->
     <div id="toolOverlays">
         <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2>Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
         <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2>Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
@@ -273,6 +282,7 @@
                         syncAuthToStorage(userData);
                         updateUserUI(userData);
                         handleNotifications();
+                        showMajorAnnouncement();
                     } catch (err) { console.error("Error saving profile data:", err); }
                 });
             } catch (err) { console.error("Error setting up DB connection:", err); }
@@ -293,7 +303,7 @@
         AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
     }
 
-    // --- UI UPDATER ---
+    // --- UI UPDATER (WITH NOTIFICATIONS, THEME, AND PASS VALIDITY) ---
     function updateUserUI(userData) {
         const headerActions = GID('headerActions');
         const allLaunchButtons = document.querySelectorAll('.launch-button');
@@ -301,7 +311,7 @@
 
         if (userData) {
             const isPremium = isUserPremium(); // Logic from common.js
-            const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+            const photoUrl = userData.photoURL || '';
             
             // Format Expiry
             let expiryDateStr = 'N/A';
@@ -311,7 +321,11 @@
             }
 
             headerActions.innerHTML = `
-                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium</span>'}
+                <div id="theme-switcher"><button id="theme-btn" class="header-icon-btn" onclick="GID('theme-menu').classList.toggle('visible')"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
+                <button id="notificationBtn" class="header-icon-btn" onclick="GID('notificationPanel').classList.toggle('visible')"><i class="fas fa-bell"></i></button>
+                <button class="header-icon-btn" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
+
+                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 10px;">Upgrade</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 10px;"><i class="fas fa-crown"></i> Premium</span>'}
                 
                 <div id="profile-menu-container" style="position:relative;">
                     <button id="profile-btn" onclick="const pd=GID('profile-dropdown'); pd.style.display=pd.style.display==='block'?'none':'block';">
@@ -323,7 +337,7 @@
                         <p style="margin:0 0 10px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
                         
                         <div style="background:var(--primary-bg); padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; border:1px solid var(--card-border);">
-                            <b>${isPremium ? 'Premium Active' : 'Free Plan'}</b><br>
+                            <b style="color:${isPremium ? 'var(--success-color)' : 'var(--secondary-text-color)'}">${isPremium ? 'Premium Active' : 'Free Plan'}</b><br>
                             ${isPremium ? '<small>Valid till: ' + expiryDateStr + '</small>' : ''}
                         </div>
                         
@@ -332,7 +346,9 @@
                 </div>
             `;
 
-            // Unlocking Buttons
+            attachThemeMenu();
+
+            // Unlocking Buttons Logic
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
@@ -350,26 +366,32 @@
 
         } else {
             // Not Logged In
-            headerActions.innerHTML = `<button id="loginBtn" class="cta-button" onclick="loginWithGoogle()">Login</button>`;
+            headerActions.innerHTML = `
+                <div id="theme-switcher"><button id="theme-btn" class="header-icon-btn" onclick="GID('theme-menu').classList.toggle('visible')"><i class="fas fa-palette"></i></button><div id="theme-menu"></div></div>
+                <button class="header-icon-btn" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
+                <button id="loginBtn" class="cta-button" onclick="loginWithGoogle()">Login</button>
+            `;
+            attachThemeMenu();
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
                     btn.classList.add('locked');
+                    btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
                     btn.onclick = () => loginWithGoogle();
                 } else { btn.onclick = () => launchTool(tool); }
             });
         }
     }
 
-    // --- PART 2: SLIDER LOGIC ---
+    // --- PART 2: ANIMATIONS & SLIDER ---
     document.addEventListener('DOMContentLoaded', () => {
-        const intro = GID('immersive-intro'); if (!intro) return;
+        const intro = document.getElementById('immersive-intro'); if (!intro) return;
         const track = intro.querySelector('.intro-track');
         let idx = 0;
         setInterval(() => { idx = (idx + 1) % 2; track.style.transform = `translateX(-${idx * 100}vw)`; }, 5000);
     });
 
-    // --- PART 3: ORIGINAL FUNCTIONS REPLICATED ---
+    // --- PART 3: REPLICATED UTILITIES ---
     function setScrollLock(l) { document.body.classList[l?'add':'remove']('modal-open'); }
     function launchTool(t) {
         const o = GID(`${t}Tool`), f = GID(`${t}Frame`); if (!o) return;
@@ -380,6 +402,13 @@
     function hideFeedbackModal() { GID('feedbackModal').classList.remove('visible'); setScrollLock(false); }
     function showFeedbackModal() { GID('feedbackModal').classList.add('visible'); setScrollLock(true); }
     function hideTelegramModal() { GID('telegramModal').classList.remove('visible'); setScrollLock(false); }
+
+    function attachThemeMenu() {
+        const m = GID('theme-menu'), themes = {'default':'Default','galaxy':'Galaxy','sunset':'Sunset','oceanic':'Oceanic'};
+        let h = ''; for (let k in themes) h += `<div class="theme-option" onclick="applyTheme('${k}')">${themes[k]}</div>`;
+        m.innerHTML = h;
+    }
+    window.applyTheme = (t) => { document.body.dataset.theme = t; localStorage.setItem('selectedTheme', t); GID('theme-menu').classList.remove('visible'); };
 
     async function submitFeedback() {
         const m = GID('feedbackMessage').value, s = GID('feedbackStatus'); if(!m) return;
@@ -406,7 +435,7 @@
     function handleNotifications() {
         DB.collection('notifications').orderBy('timestamp', 'desc').limit(5).get().then(snap => {
             let h = ''; snap.forEach(d => h += `<div class="notification-item">${d.data().message}</div>`);
-            GID('notificationList').innerHTML = h || 'No notifications';
+            GID('notificationList').innerHTML = h || 'No new alerts';
         });
     }
 
@@ -424,7 +453,7 @@
 
     window.onload = function() {
         document.querySelectorAll('.launch-button').forEach(btn => btn.dataset.unlockedText = btn.innerHTML);
-        showMajorAnnouncement();
+        applyTheme(localStorage.getItem('selectedTheme') || 'default');
         if (localStorage.getItem('hideTelegram') !== 'true') setTimeout(() => GID('telegramModal').classList.add('visible'), 3000);
         
         let lastY = window.scrollY;
@@ -440,8 +469,6 @@
     };
 
     function renderPlatformStatus() { GID('statusContent').innerHTML = `<p>All systems active <span style="color:green">●</span></p>`; }
-
 </script>
-<style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
 </body>
 </html>
