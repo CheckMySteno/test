@@ -120,6 +120,20 @@
     #checker .graphic-content i { animation: icon-pulse 3.5s ease-in-out infinite 0.5s; }
     .page-section:nth-child(even) .section-content { flex-direction: row-reverse; }
 
+    /* --- PERMANENT BANNER SECTION --- */
+    .promo-banner-wrapper { display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; min-height: 50vh; border-bottom: 1px solid var(--card-border); }
+    .promo-banner { width: 100%; max-width: 1200px; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 24px; padding: 3.5rem 4rem; display: flex; align-items: center; justify-content: space-between; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.15); gap: 2rem; position: relative; overflow: hidden; }
+    .promo-banner-content { flex: 1; z-index: 2; }
+    .promo-banner-content .tag { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.2rem; display: inline-block; backdrop-filter: blur(5px); }
+    .promo-banner-content h2 { font-size: 2.8rem; font-weight: 900; margin-top: 0; margin-bottom: 1rem; line-height: 1.2; color: white; }
+    .promo-banner-content p { font-size: 1.15rem; margin-bottom: 2.5rem; opacity: 0.95; line-height: 1.6; max-width: 500px; color: white; }
+    .promo-banner-content .cta-button.alt { background: white; color: var(--button-gradient-start); font-size: 1.1rem; padding: 0.8rem 2rem; box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+    .promo-banner-content .cta-button.alt:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(0,0,0,0.2); }
+    .promo-banner-visual { flex: 1; display: flex; justify-content: flex-end; z-index: 2; }
+    .promo-banner-visual img { max-width: 100%; width: 450px; height: auto; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); object-fit: cover; aspect-ratio: 4/3; transition: transform 0.5s ease; }
+    .promo-banner:hover .promo-banner-visual img { transform: scale(1.02) rotate(1deg); }
+    .promo-banner::after { content: ''; position: absolute; right: -10%; top: -20%; width: 50%; height: 150%; background: rgba(255,255,255,0.1); transform: rotate(15deg); z-index: 1; pointer-events: none; }
+
     /* --- BUTTONS & NEW VERTICAL DOCK --- */
     .launch-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; color: var(--primary-bg); background: var(--text-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
     .launch-button:hover:not(.locked) { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 25px var(--button-gradient-start); }
@@ -221,7 +235,7 @@
     input:checked + .toggle-slider { background-color: var(--button-gradient-start); }
     input:checked + .toggle-slider:before { transform: translateX(20px); }
 
-    /* RESPONSIVE UPDATES FOR NEW DOCK */
+    /* RESPONSIVE UPDATES FOR NEW DOCK AND BANNER */
     @media only screen and (max-width: 1024px) {
         .welcome-content h1 { font-size: 4rem; }
         .intro-slide h2 { font-size: 2.8rem; }
@@ -254,6 +268,12 @@
         .major-announcement-text { padding: 1rem 1.5rem 1.5rem 1.5rem; }
         .notification-panel { width: 90%; right: 5%; top: 70px; }
 
+        /* Banner mobile adjustments */
+        .promo-banner { flex-direction: column; padding: 2rem; text-align: center; }
+        .promo-banner-content h2 { font-size: 2rem; }
+        .promo-banner-visual { justify-content: center; margin-top: 1.5rem; }
+        .promo-banner::after { display: none; }
+
         /* Update dock for mobile so it doesn't block screen */
         .dock { left: 50%; top: auto; bottom: 20px; transform: translateX(-50%); flex-direction: row; padding: 5px; height: 60px; width: 90%; justify-content: space-around; }
         .dock-item { width: 50px; height: 50px; }
@@ -280,6 +300,22 @@
                 <div class="intro-slide" data-step="0"><div class="text-content"><h2>SSC Level Mistake Analysis</h2><p>Go beyond basic error checking. Our engine analyzes mistakes based on official exam criteria, distinguishing between full and half mistakes so you know exactly where you stand.</p></div><div class="visual-content"><div class="interactive-analyzer"><div class="analyzer-toolbar"><div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div><div class="toolbar-title">transcript_test_01.txt</div></div><div class="analyzer-body"><pre class="analyzer-text-content"></pre><div id="callout-1" class="feature-callout">Full vs. Half Mistake</div></div><div class="analyzer-footer"><div class="score-text"></div></div></div></div></div>
             </div>
             <div class="scroll-down-prompt" id="scroll-prompt">Scroll to Explore <i class="fas fa-chevron-down"></i></div>
+       </section>
+
+       <!-- PROMOTIONAL BANNER SECTION (HALF SCREEN) -->
+       <section id="promo-banner-section" class="promo-banner-wrapper anim-hidden">
+           <div class="promo-banner" id="dynamicPromoBanner">
+               <div class="promo-banner-content">
+                   <span class="tag">Limited Time Offer</span>
+                   <h2>Unlock Your True Steno Potential</h2>
+                   <p>Get 50% off on our Annual Premium Pass. Access all dictations, test analysis, and interactive practice tools instantly. Don't miss out on mastering your craft!</p>
+                   <button class="cta-button alt" onclick="window.location.href='plans.html'">Claim Offer Now</button>
+               </div>
+               <div class="promo-banner-visual">
+                   <!-- Dummy image placeholder, easily changeable via backend later -->
+                   <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Special Offer">
+               </div>
+           </div>
        </section>
 
        <!-- TOOLS SECTIONS -->
@@ -715,7 +751,7 @@
 
     // --- BACKEND SYSTEM FUNCTIONS (Theme, Notifications, Polls, Status) ---
     function applyTheme(themeName) { document.body.dataset.theme = themeName; localStorage.setItem('selectedTheme', themeName); }
-    function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const [key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
+    function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const[key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
     
     function showTelegramModal() { if (localStorage.getItem('hideTelegramModal') !== 'true') { setTimeout(() => { const tm = GID('telegramModal'); if(tm) { tm.classList.add('visible'); setScrollLock(true); } }, 2500); } }
     function hideTelegramModal(preventShowAgain) { if (preventShowAgain) { localStorage.setItem('hideTelegramModal', 'true'); } const tm = GID('telegramModal'); if(tm) { tm.classList.remove('visible'); setScrollLock(false); } }
@@ -897,6 +933,7 @@
 
             headerActions.innerHTML = `
                 ${headerIconsHTML}
+                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-left: 0.5rem;">Upgrade</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-left: 0.5rem;"><i class="fas fa-crown"></i> Pro</span>'}
                 
                 <div id="profile-menu-container" style="position:relative; margin-left: 0.5rem;">
                     <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:42px; height:42px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
