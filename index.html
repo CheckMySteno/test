@@ -123,7 +123,8 @@
     <header class="main-header" id="mainHeader">
         <div class="logo">Check My Steno</div>
         <div class="header-actions" id="headerActions">
-            <div class="loader" style="position:relative; width:20px; height:20px; border-width:3px; display:block; transform: none; top:0; left:0; animation: spin 1s linear infinite;"></div>
+            <!-- Loading state header -->
+            <div class="loader-spin" style="width:20px; height:20px; border:3px solid #ccc; border-top-color:#6366f1; border-radius:50%; animation: spin 1s linear infinite;"></div>
         </div>
     </header>
 
@@ -187,6 +188,7 @@
                <div class="text-content">
                    <h2>About Check My Steno</h2>
                    <p>Learn about our mission, the technology behind our tools, and how we help stenographers.</p>
+                   <!-- Free Tool (Not Locked) -->
                    <button class="launch-button" data-tool="about" data-unlocked-text="Learn More">Learn More</button>
                </div>
                <div class="graphic-content"><i class="fas fa-book-open"></i></div>
@@ -196,6 +198,8 @@
        <footer class="footer">
             <p class="footer-copyright">&copy; 2026 Check My Steno. All Rights Reserved.</p>
             <div class="footer-links">
+                <button onclick="showFeedbackModal()">Feedback</button>
+                <button onclick="launchTool('status')">Status</button>
                 <button onclick="launchTool('contact')">Contact Support</button>
             </div>
        </footer>
@@ -210,28 +214,28 @@
         <div class="dock-item"><a href="#about"><i class="fas fa-book-open"></i></a><span class="tooltip">About</span></div>
     </nav>
 
+    <!-- Modals (Photo-copy original versions) -->
+    <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button" style="position:absolute; right:10px; top:10px;">&times;</button><img id="majorAnnouncementImage" src="" style="width:100%"><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
+    
+    <div id="notificationPanel" class="notification-panel" style="display:none; position:fixed; right:5%; top:80px; background:white; border-radius:12px; box-shadow:0 10px 30px rgba(0,0,0,0.1); width:320px; z-index:2000; padding:1rem; border:1px solid #eee;"><div id="notificationList"></div></div>
+    
+    <div class="modal-overlay" id="feedbackModal"><div class="modal-content"><button class="close-button" onclick="hideFeedbackModal()">&times;</button><h2>Feedback</h2><textarea id="feedbackMessage" rows="5" style="width:100%; border:1px solid #ddd; border-radius:8px; padding:10px;"></textarea><button class="cta-button" onclick="submitFeedback()" style="width:100%; margin-top:15px;">Send Feedback</button><p id="feedbackStatus"></p></div></div>
+    
+    <div class="modal-overlay" id="telegramModal"><div class="modal-content"><h2>Join Telegram</h2><p>For updates and support, join our official community.</p><a href="https://t.me/Checkmystenoo" target="_blank" class="cta-button" style="display:block; text-decoration:none;">Join Now</a><button onclick="localStorage.setItem('hideTelegram', 'true'); hideTelegramModal();" style="margin-top:15px; background:none; border:none; cursor:pointer; color:var(--secondary-text-color);">Don't show again</button></div></div>
+
+    <!-- Tool Overlays -->
     <div id="toolOverlays">
         <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2>Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
         <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2>Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
         <div id="transcription-checkerTool" class="tool-overlay"><header class="tool-header"><h2>Transcription Checker</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="transcription-checkerFrame" src="about:blank"></iframe></div></div>
         <div id="aboutTool" class="tool-overlay"><header class="tool-header"><h2>About</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="aboutFrame" src="about:blank"></iframe></div></div>
         <div id="dictationsTool" class="tool-overlay"><header class="tool-header"><h2>Dictations</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="dictationsFrame" src="about:blank"></iframe></div></div>
-        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" style="padding: 2rem; text-align: center;"><h3>Email: checkmysteno@gmail.com</h3><p>Reach out to us on Telegram: <a href="https://t.me/CheckMySteno" target="_blank">@CheckMySteno</a></p></div></div>
+        <div id="statusTool" class="tool-overlay"><header class="tool-header"><h2>Status</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="statusContent" class="tool-content" style="padding: 2rem;"></div></div>
+        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="contactContent" class="tool-content" style="padding: 2rem; text-align: center;"><h3>Email: checkmysteno@gmail.com</h3></div></div>
     </div>
     
 <script>
-    // --- ANIMATIONS ---
-    document.addEventListener('DOMContentLoaded', () => {
-        const intro = document.getElementById('immersive-intro'); if (!intro) return;
-        const track = intro.querySelector('.intro-track');
-        let currentIndex = 0; const slideDuration = 4000; let autoplayInterval = null;
-        function moveToSlide(targetIndex) { track.style.transform = `translateX(-${targetIndex * 100}vw)`; currentIndex = targetIndex; }
-        function resetAutoplay() { clearInterval(autoplayInterval); autoplayInterval = setInterval(() => { const nextIndex = (currentIndex + 1) % 2; moveToSlide(nextIndex); }, slideDuration); }
-        intro.querySelector('#discover-features-btn').addEventListener('click', () => { moveToSlide(1); });
-        resetAutoplay();
-    });
-
-    // --- FIREBASE CONFIG ---
+    // --- PART 1: CONFIG & FIREBASE ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
     if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
     
@@ -239,10 +243,9 @@
     const AUTH = firebase.auth();
     const GOOGLE_PROVIDER = new firebase.auth.GoogleAuthProvider();
     const GID = id => document.getElementById(id);
-    let currentUser = null;
     let userDocUnsubscribe = null;
 
-    // --- AUTH & PROFILE CREATION LOGIC ---
+    // --- AUTH & WALLET SYNC ---
     AUTH.onAuthStateChanged(async (user) => {
         if (user) {
             try {
@@ -266,18 +269,16 @@
                             userData = { uid: user.uid, ...docSnap.data() };
                         }
                         
-                        syncAuthToStorage(userData); // Sync to common.js wallet
+                        // SYNC TO CENTRAL "WALLET" (common.js)
+                        syncAuthToStorage(userData);
                         updateUserUI(userData);
-                    } catch (err) {
-                        console.error("Error saving profile data:", err);
-                        alert("Error saving profile.");
-                        updateUserUI(null);
-                    }
+                        handleNotifications();
+                    } catch (err) { console.error("Error saving profile data:", err); }
                 });
             } catch (err) { console.error("Error setting up DB connection:", err); }
         } else {
             if (userDocUnsubscribe) userDocUnsubscribe();
-            syncAuthToStorage(null);
+            syncAuthToStorage(null); // Clear Wallet
             updateUserUI(null);
         }
     });
@@ -292,25 +293,7 @@
         AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
     }
 
-    // --- TOOLS ---
-    function setScrollLock(locked) { document.body.classList[locked ? 'add' : 'remove']('modal-open'); }
-    
-    function launchTool(toolName) {
-        const toolOverlay = GID(`${toolName}Tool`);
-        if (!toolOverlay) return;
-        const iframe = toolOverlay.querySelector('iframe');
-        if(iframe) {
-            const loader = toolOverlay.querySelector('.loader'); 
-            if(loader) loader.style.display = 'block';
-            iframe.src = 'about:blank'; iframe.style.opacity = '0';
-            iframe.onload = () => { if(loader) loader.style.display = 'none'; iframe.style.opacity = '1'; };
-            iframe.src = `${toolName}.html`;
-        }
-        toolOverlay.classList.add('visible'); setScrollLock(true);
-    }
-    function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { const i = o.querySelector('iframe'); if (i) i.src = 'about:blank'; o.classList.remove('visible'); }); setScrollLock(false); }
-
-    // --- UI UPDATER (WITH UNLOCK LOGIC) ---
+    // --- UI UPDATER ---
     function updateUserUI(userData) {
         const headerActions = GID('headerActions');
         const allLaunchButtons = document.querySelectorAll('.launch-button');
@@ -318,21 +301,19 @@
 
         if (userData) {
             const isPremium = isUserPremium(); // Logic from common.js
-            const planText = isPremium ? `<span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-crown"></i> Premium Active</span>` : `<span style="color:var(--secondary-text-color); font-weight:bold;">Free Plan</span>`;
+            const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
             
-            // Format Expiry Date
+            // Format Expiry
             let expiryDateStr = 'N/A';
             if (isPremium && userData.expiry) {
                 const dateObj = userData.expiry.toDate ? userData.expiry.toDate() : new Date(userData.expiry);
                 expiryDateStr = dateObj.toLocaleDateString();
             }
-            const expiryText = isPremium ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${expiryDateStr}</small>` : '';
-            const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
 
             headerActions.innerHTML = `
-                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium Member</span>'}
+                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium</span>'}
                 
-                <div id="profile-menu-container">
+                <div id="profile-menu-container" style="position:relative;">
                     <button id="profile-btn" onclick="const pd=GID('profile-dropdown'); pd.style.display=pd.style.display==='block'?'none':'block';">
                         <img src="${photoUrl}" alt="Profile">
                     </button>
@@ -342,8 +323,8 @@
                         <p style="margin:0 0 10px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
                         
                         <div style="background:var(--primary-bg); padding:10px; border-radius:8px; margin-bottom:15px; text-align:center; border:1px solid var(--card-border);">
-                            ${planText}
-                            ${expiryText}
+                            <b>${isPremium ? 'Premium Active' : 'Free Plan'}</b><br>
+                            ${isPremium ? '<small>Valid till: ' + expiryDateStr + '</small>' : ''}
                         </div>
                         
                         <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()">Logout</button>
@@ -351,7 +332,7 @@
                 </div>
             `;
 
-            // --- RE-BIND BUTTONS BASED ON PREMIUM STATUS ---
+            // Unlocking Buttons
             allLaunchButtons.forEach(btn => {
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
@@ -364,11 +345,7 @@
                         btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
                         btn.onclick = () => { window.location.href = 'plans.html'; };
                     }
-                } else {
-                    btn.classList.remove('locked');
-                    btn.innerHTML = btn.dataset.unlockedText || btn.innerHTML;
-                    btn.onclick = () => launchTool(tool);
-                }
+                } else { btn.onclick = () => launchTool(tool); }
             });
 
         } else {
@@ -378,33 +355,93 @@
                 const tool = btn.dataset.tool;
                 if (premiumTools.includes(tool)) {
                     btn.classList.add('locked');
-                    btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
                     btn.onclick = () => loginWithGoogle();
-                } else {
-                    btn.onclick = () => launchTool(tool);
-                }
+                } else { btn.onclick = () => launchTool(tool); }
             });
         }
     }
-    
-    // --- INIT ---
-    window.onload = function() {
-        // First save the original text of all buttons so they can be restored later
-        document.querySelectorAll('.launch-button').forEach(btn => {
-            if (!btn.dataset.unlockedText) {
-                btn.dataset.unlockedText = btn.innerHTML;
+
+    // --- PART 2: SLIDER LOGIC ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const intro = GID('immersive-intro'); if (!intro) return;
+        const track = intro.querySelector('.intro-track');
+        let idx = 0;
+        setInterval(() => { idx = (idx + 1) % 2; track.style.transform = `translateX(-${idx * 100}vw)`; }, 5000);
+    });
+
+    // --- PART 3: ORIGINAL FUNCTIONS REPLICATED ---
+    function setScrollLock(l) { document.body.classList[l?'add':'remove']('modal-open'); }
+    function launchTool(t) {
+        const o = GID(`${t}Tool`), f = GID(`${t}Frame`); if (!o) return;
+        if (t === 'status') renderPlatformStatus();
+        if (f) f.src = `${t}.html`; o.classList.add('visible'); setScrollLock(true);
+    }
+    function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { o.classList.remove('visible'); const f = o.querySelector('iframe'); if(f) f.src='about:blank'; }); setScrollLock(false); }
+    function hideFeedbackModal() { GID('feedbackModal').classList.remove('visible'); setScrollLock(false); }
+    function showFeedbackModal() { GID('feedbackModal').classList.add('visible'); setScrollLock(true); }
+    function hideTelegramModal() { GID('telegramModal').classList.remove('visible'); setScrollLock(false); }
+
+    async function submitFeedback() {
+        const m = GID('feedbackMessage').value, s = GID('feedbackStatus'); if(!m) return;
+        try {
+            await DB.collection('feedback').add({ message: m, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            s.innerText = "Sent!"; setTimeout(hideFeedbackModal, 2000);
+        } catch(e) { s.innerText = "Error!"; }
+    }
+
+    function showMajorAnnouncement() {
+        DB.collection('siteConfig').doc('majorAnnouncement').get().then(doc => {
+            if (doc.exists && doc.data().isActive) {
+                const d = doc.data(); 
+                GID('majorAnnouncementTitle').innerText = d.title; 
+                GID('majorAnnouncementBody').innerText = d.body;
+                GID('majorAnnouncementImage').src = d.imageUrl; 
+                GID('majorAnnouncementModal').classList.add('visible'); 
+                setScrollLock(true);
             }
+        });
+    }
+    GID('closeMajorAnnouncement').onclick = () => { GID('majorAnnouncementModal').classList.remove('visible'); setScrollLock(false); };
+
+    function handleNotifications() {
+        DB.collection('notifications').orderBy('timestamp', 'desc').limit(5).get().then(snap => {
+            let h = ''; snap.forEach(d => h += `<div class="notification-item">${d.data().message}</div>`);
+            GID('notificationList').innerHTML = h || 'No notifications';
+        });
+    }
+
+    // --- DOCK INTERACTION ---
+    const dock = document.querySelector('.dock'), items = document.querySelectorAll('.dock-item');
+    dock.addEventListener('mousemove', (e) => {
+        const r = dock.getBoundingClientRect(), x = e.clientX - r.left;
+        items.forEach(i => {
+            const ir = i.getBoundingClientRect(), ic = ir.left - r.left + ir.width/2, d = Math.abs(x - ic);
+            if (d < 120) { const s = 1 + (90/60 - 1) * (1 - d/120); i.style.transform = `translateY(-${(s-1)*20}px) scale(${s})`; i.style.margin = `0 ${s*2}px`; }
+            else { i.style.transform = 'scale(1)'; i.style.margin = '0'; }
+        });
+    });
+    dock.addEventListener('mouseleave', () => items.forEach(i => { i.style.transform = 'scale(1)'; i.style.margin = '0'; }));
+
+    window.onload = function() {
+        document.querySelectorAll('.launch-button').forEach(btn => btn.dataset.unlockedText = btn.innerHTML);
+        showMajorAnnouncement();
+        if (localStorage.getItem('hideTelegram') !== 'true') setTimeout(() => GID('telegramModal').classList.add('visible'), 3000);
+        
+        let lastY = window.scrollY;
+        window.addEventListener('scroll', () => {
+            const h = GID('mainHeader');
+            if (window.scrollY > lastY && window.scrollY > 100) h.classList.add('hidden');
+            else h.classList.remove('hidden'); lastY = window.scrollY;
         });
 
-        document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('anim-visible'); entry.target.classList.remove('anim-hidden'); } }); }, { threshold: 0.1 }).observe(el));
-        
-        document.addEventListener('click', (e) => {
-            if(!e.target.closest('#profile-menu-container')) {
-                const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none';
-            }
-        });
-        document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeAllTools(); } });
+        document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => {
+            entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('anim-visible'); });
+        }, { threshold: 0.1 }).observe(el));
     };
-</script>    
+
+    function renderPlatformStatus() { GID('statusContent').innerHTML = `<p>All systems active <span style="color:green">●</span></p>`; }
+
+</script>
+<style> @keyframes spin { 100% { transform: rotate(360deg); } } </style>
 </body>
 </html>
