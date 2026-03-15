@@ -56,10 +56,15 @@
     .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s, transform 0.4s ease-out; }
     .main-header.hidden { transform: translateY(-110%); }
     .logo { font-size: 1.8rem; font-weight: 800; }
-    .header-actions { display: flex; align-items: center; gap: 1rem; }
-    .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
-    .cta-button:hover { transform: scale(1.05); }
-    .demo-button { background: none; border: 2px solid var(--button-gradient-start); color: var(--button-gradient-start); }
+    .header-actions { display: flex; align-items: center; gap: 0.8rem; }
+    
+    /* UPPER BAR TOOLBAR GROUPING */
+    .header-icons-toolbar { display: flex; align-items: center; gap: 0.3rem; background: var(--primary-bg); padding: 0.3rem 0.6rem; border-radius: 2rem; border: 1px solid var(--card-border); }
+    .header-icons-toolbar .header-icon-btn { margin: 0; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--secondary-text-color); font-size: 1.2rem; cursor: pointer; background: transparent; border: none; transition: all 0.2s; position: relative; text-decoration: none;}
+    .header-icons-toolbar .header-icon-btn:hover { background: var(--card-bg); color: var(--button-gradient-start); box-shadow: 0 2px 8px var(--card-shadow); }
+    
+    .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s, box-shadow 0.2s; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
+    .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
     
     /* --- IMMERSIVE INTRO --- */
     #immersive-intro { height: 100vh; width: 100%; overflow: hidden; position: relative; cursor: pointer; }
@@ -126,9 +131,7 @@
     .footer-links { display: flex; gap: 1.5rem; margin: 0; } .footer-links button { background: none; border: none; color: var(--secondary-text-color); font-weight: 600; cursor: pointer; }
     .dock { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 0.5rem; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 1.2rem; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; display: flex; gap: 0.5rem; height: 68px; } .dock-item { transition: transform 0.1s linear, margin 0.1s linear; will-change: transform; } .dock-item a { display: block; width: 60px; height: 60px; line-height: 60px; text-align: center; font-size: 1.8rem; color: var(--text-color); text-decoration: none; } .dock-item .tooltip { position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%); background-color: var(--text-color); color: var(--card-bg); padding: 0.4rem 0.8rem; border-radius: 6px; font-size: 0.9rem; font-weight: 600; opacity: 0; visibility: hidden; transition: 0.2s; white-space: nowrap; } .dock-item:hover .tooltip { opacity: 1; visibility: visible; }
     
-    /* --- MODALS & EXTRAS (Integrated from Backend) --- */
-    .header-icon-btn { position: relative; background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; text-decoration: none; }
-    
+    /* --- MODALS & EXTRAS --- */
     #theme-switcher { position: relative; display: inline-flex; align-items: center; } 
     #theme-menu { display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px var(--card-shadow); z-index: 1100; overflow: hidden; white-space: nowrap; } 
     #theme-menu.visible { display: block; } 
@@ -136,7 +139,7 @@
     .theme-option:hover { background-color: var(--primary-bg); } 
     .theme-option .color-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--card-border); }
 
-    .notification-badge { position: absolute; top: 0px; right: 0px; min-width: 18px; height: 18px; background-color: var(--error-color); color: white; border-radius: 9px; pointer-events: none; font-size: 12px; font-weight: 700; line-height: 18px; text-align: center; padding: 0 4px; }
+    .notification-badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; background-color: var(--error-color); color: white; border-radius: 9px; pointer-events: none; font-size: 12px; font-weight: 700; line-height: 18px; text-align: center; padding: 0 4px; border: 2px solid var(--card-bg); }
     .notification-panel { display: none; position: fixed; top: 80px; right: 5%; width: 350px; max-width: 90%; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: 0 10px 30px var(--card-shadow); z-index: 1050; overflow: hidden; text-align: left; } 
     .notification-panel.visible { display: block; } 
     .notification-header { padding: 1rem; border-bottom: 1px solid var(--card-border); } 
@@ -161,7 +164,6 @@
     .poll-options button { width: 100%; background: var(--primary-bg); color: var(--text-color); border: 1px solid var(--card-border); padding: 0.75rem; text-align: left; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;} 
     .poll-options button:hover { border-color: var(--button-gradient-start); }
 
-    .ticket-list-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 1rem; cursor: pointer; transition: all 0.2s; } .ticket-list-item:hover { border-color: var(--button-gradient-start); box-shadow: 0 3px 10px var(--card-shadow); } .ticket-status { padding: 0.25rem 0.75rem; border-radius: 12px; font-size: 0.8rem; font-weight: 600; text-transform: uppercase; } .status-open { background-color: #dcfce7; color: #166534; } .status-closed { background-color: #f3f4f6; color: #4b5563; } .status-Awaiting-Reply { background-color: #fef9c3; color: #854d0e; }
     .modal-content input, .modal-content textarea, .modal-content select { width: calc(100% - 2.2rem); margin-bottom: 1.2rem; padding: 0.8rem 1rem; border: 1px solid var(--card-border); border-radius: 8px; font-size: 1rem; background-color: var(--primary-bg); color: var(--text-color); box-sizing: border-box; }
 
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; z-index: 10; }
@@ -177,14 +179,17 @@
     .auth-link { color: var(--button-gradient-start); font-weight: 700; cursor: pointer; }
     .auth-link:hover { text-decoration: underline; }
 
-    /* PROFILE MODAL STYLES */
-    .profile-tabs { display: flex; gap: 1rem; border-bottom: 1px solid var(--card-border); margin-bottom: 1.5rem; }
-    .profile-tabs .tab-btn { background: none; border: none; padding: 0.5rem 1rem; font-weight: 600; font-size: 1rem; color: var(--secondary-text-color); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.2s; }
-    .profile-tabs .tab-btn.active { color: var(--button-gradient-start); border-bottom-color: var(--button-gradient-start); }
+    /* PROFILE MODAL UPGRADES */
+    .profile-cover { height: 120px; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 20px 20px 0 0; margin: -2.5rem -2rem 0 -2rem; position: relative;}
+    .profile-tabs { display: flex; gap: 0.5rem; justify-content: center; background: var(--primary-bg); padding: 0.3rem; border-radius: 12px; margin-bottom: 1.5rem; }
+    .profile-tabs .tab-btn { flex: 1; padding: 0.6rem; border-radius: 8px; color: var(--secondary-text-color); font-weight: 700; font-size: 0.95rem; border: none; background: transparent; cursor: pointer; transition: all 0.3s; }
+    .profile-tabs .tab-btn.active { background: var(--card-bg); color: var(--text-color); box-shadow: 0 2px 8px var(--card-shadow); }
+    
     .history-item { padding: 1rem; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; background: var(--primary-bg); }
     .history-item-title { font-weight: 700; margin: 0 0 0.25rem 0; font-size: 1.05rem;}
     .history-item-date { font-size: 0.85rem; color: var(--secondary-text-color); margin: 0; }
     .history-item-price { font-weight: 700; color: var(--success-color); font-size: 1.1rem;}
+    
     .form-group label { text-align: left; display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--secondary-text-color); }
   </style>
 </head>
@@ -357,23 +362,24 @@
         </div>
     </div>
 
-    <!-- NEW FULL PROFILE & HISTORY MODAL -->
+    <!-- NEW FULL PROFILE & HISTORY MODAL (UPGRADED) -->
     <div class="modal-overlay" id="profileModal">
-        <div class="modal-content" style="max-width: 550px; padding: 2rem; text-align: left;">
-            <button class="close-button" onclick="hideProfileModal()">&times;</button>
+        <div class="modal-content" style="max-width: 550px; padding: 2.5rem 2rem; text-align: left;">
             
-            <!-- Profile Header -->
-            <div style="display: flex; align-items: center; gap: 1.5rem; margin-bottom: 2rem;">
-                <img id="profileModalAvatar" src="https://www.gravatar.com/avatar/?d=mp" style="width: 80px; height: 80px; border-radius: 50%; object-fit: cover; border: 3px solid var(--button-gradient-start);" alt="Profile" />
-                <div>
-                    <h2 id="profileModalName" style="margin: 0; font-size: 1.8rem; font-weight: 800; color: var(--text-color);"></h2>
-                    <p id="profileModalEmail" style="margin: 5px 0 0 0; color: var(--secondary-text-color); font-weight: 600;"></p>
-                </div>
+            <!-- Cover Photo & Avatar Overlap -->
+            <div class="profile-cover">
+                <button class="close-button" onclick="hideProfileModal()" style="color: white; top: 15px; right: 15px;">&times;</button>
+            </div>
+            
+            <div style="position: relative; margin-top: -45px; text-align: center; margin-bottom: 1.5rem;">
+                <img id="profileModalAvatar" src="" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.1); background-color: var(--card-bg);" alt="Profile" />
+                <h2 id="profileModalName" style="margin: 10px 0 0 0; font-size: 1.5rem; font-weight: 800; color: var(--text-color);"></h2>
+                <p id="profileModalEmail" style="margin: 0; color: var(--secondary-text-color); font-weight: 600; font-size: 0.9rem;"></p>
             </div>
 
-            <!-- Tabs -->
+            <!-- Modern Pill Tabs -->
             <div class="profile-tabs">
-                <button class="tab-btn active" onclick="switchProfileTab('edit')"><i class="fas fa-user-edit"></i> Edit Profile</button>
+                <button class="tab-btn active" onclick="switchProfileTab('edit')"><i class="fas fa-user-edit"></i> Edit Details</button>
                 <button class="tab-btn" onclick="switchProfileTab('history')"><i class="fas fa-history"></i> Purchase History</button>
             </div>
 
@@ -512,7 +518,7 @@
                             const newUserData = {
                                 name: user.displayName || pendingSignupName || 'New User',
                                 email: user.email,
-                                photoURL: user.photoURL || 'https://www.gravatar.com/avatar/?d=mp',
+                                photoURL: user.photoURL || '',
                                 plan: 'free',
                                 phone: '',
                                 location: '',
@@ -592,7 +598,12 @@
         if (!currentUser) return;
         GID('profile-dropdown').style.display = 'none'; // Close header dropdown
         
-        GID('profileModalAvatar').src = currentUser.photoURL || 'https://www.gravatar.com/avatar/?d=mp';
+        let displayAvatar = currentUser.photoURL;
+        if (!displayAvatar || displayAvatar.includes('gravatar') || displayAvatar === '') {
+            displayAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name || 'User')}&background=6366f1&color=fff&bold=true&rounded=true&size=128`;
+        }
+
+        GID('profileModalAvatar').src = displayAvatar;
         GID('profileModalName').textContent = currentUser.name || 'User';
         GID('profileModalEmail').textContent = currentUser.email || '';
         
@@ -658,6 +669,12 @@
             statusEl.textContent = 'Profile updated successfully!';
             GID('profileModalName').textContent = newName || 'User';
             
+            // Update Avatar if name changed
+            let displayAvatar = currentUser.photoURL;
+            if (!displayAvatar || displayAvatar.includes('gravatar') || displayAvatar === '') {
+                GID('profileModalAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName || 'User')}&background=6366f1&color=fff&bold=true&rounded=true&size=128`;
+            }
+            
             setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
         } catch (err) {
             console.error("Error updating profile:", err);
@@ -710,31 +727,39 @@
         const allLaunchButtons = document.querySelectorAll('.launch-button');
         const premiumTools =['kc', 'test-analysis', 'transcription-checker', 'dictations'];
 
+        // Tightly grouped Toolbar
         const headerIconsHTML = `
-            <div id="theme-switcher" style="display:inline-flex; align-items:center; margin-right: 15px;">
-                <button id="theme-btn" title="Change Theme" class="header-icon-btn"><i class="fas fa-palette"></i></button>
-                <div id="theme-menu"></div>
+            <div class="header-icons-toolbar">
+                <div id="theme-switcher">
+                    <button id="theme-btn" title="Change Theme" class="header-icon-btn"><i class="fas fa-palette"></i></button>
+                    <div id="theme-menu"></div>
+                </div>
+                <button id="notificationBtn" class="header-icon-btn" title="Notifications">
+                    <i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span>
+                </button>
+                <a href="plans.html" class="header-icon-btn" title="Subscribe"><i class="fas fa-gem"></i></a>
+                <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')"><i class="fas fa-headset"></i></button>
             </div>
-            <button id="notificationBtn" class="header-icon-btn" title="Notifications" style="position:relative; margin-right: 15px;">
-                <i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span>
-            </button>
-            <a href="plans.html" class="header-icon-btn" title="Subscribe" style="margin-right: 15px;"><i class="fas fa-gem"></i></a>
-            <button class="header-icon-btn" title="Contact Us" onclick="launchTool('contact')" style="margin-right: 15px;"><i class="fas fa-headset"></i></button>
         `;
 
         if (userData) {
             const isPremium = isUserPremium(userData);
             const planText = isPremium ? `<span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-crown"></i> Premium Active</span>` : `<span style="color:var(--secondary-text-color); font-weight:bold;">Free Plan</span>`;
             const expiryText = isPremium && userData.expiry ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${userData.expiry.toDate ? userData.expiry.toDate().toLocaleDateString() : new Date(userData.expiry).toLocaleDateString()}</small>` : '';
-            const photoUrl = userData.photoURL || 'https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y';
+            
+            // Dynamic Avatar Logic
+            let displayAvatar = userData.photoURL;
+            if (!displayAvatar || displayAvatar.includes('gravatar') || displayAvatar === '') {
+                displayAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name || 'User')}&background=6366f1&color=fff&bold=true&rounded=true`;
+            }
 
             headerActions.innerHTML = `
                 ${headerIconsHTML}
-                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-right: 15px;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-right: 15px;"><i class="fas fa-crown"></i> Premium Member</span>'}
+                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006;">Upgrade to Premium</button>' : '<span style="color: var(--gold-start); font-weight: bold;"><i class="fas fa-crown"></i> Premium Member</span>'}
                 
-                <div id="profile-menu-container" style="position:relative;">
-                    <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:45px; height:45px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
-                        <img src="${photoUrl}" style="width:100%; height:100%; object-fit:cover;" alt="Profile">
+                <div id="profile-menu-container" style="position:relative; margin-left: 0.5rem;">
+                    <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:42px; height:42px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
+                        <img src="${displayAvatar}" style="width:100%; height:100%; object-fit:cover; background-color: var(--card-bg);" alt="Profile">
                     </button>
                     
                     <div id="profile-dropdown" style="display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left;">
@@ -783,7 +808,7 @@
             // Not Logged In
             headerActions.innerHTML = `
                 ${headerIconsHTML}
-                <button id="loginBtn" class="cta-button" onclick="showAuthModal()" style="margin-left: 10px;">Login / Sign Up</button>
+                <button id="loginBtn" class="cta-button" onclick="showAuthModal()" style="margin-left: 0.5rem;">Login / Sign Up</button>
             `;
 
             allLaunchButtons.forEach(btn => {
