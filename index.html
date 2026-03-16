@@ -66,29 +66,31 @@
     .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s, box-shadow 0.2s; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
     .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
 
-    /* --- STATIC HERO SECTION --- */
-    .hero-section { min-height: 90vh; display: flex; justify-content: center; align-items: center; padding: 6rem 5% 4rem; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
-    .hero-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; width: 100%; }
-    .hero-text { flex: 1; max-width: 600px; }
-    .hero-text h1 { font-size: 4.5rem; font-weight: 900; margin: 0 0 1.5rem 0; line-height: 1.1; }
-    .hero-text p { font-size: 1.25rem; color: var(--secondary-text-color); margin-bottom: 2.5rem; line-height: 1.6; }
-    .hero-visual { flex: 1; }
+    /* --- HOME DASHBOARD (Banner + Shortcuts) --- */
+    .home-dashboard { min-height: 90vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5% 2rem; flex-direction: column; border-bottom: 1px solid var(--card-border); }
+    .dashboard-content { width: 100%; max-width: 1000px; display: flex; flex-direction: column; gap: 2.5rem; }
 
-    /* --- INTERACTIVE ANALYZER --- */
-    .interactive-analyzer { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; box-shadow: 0 20px 40px var(--card-shadow); text-align: left; position: relative; overflow: hidden; transform: scale(1.05); }
-    .analyzer-toolbar { display: flex; align-items: center; padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--card-border); background: var(--primary-bg); }
-    .toolbar-dots { display: flex; gap: 0.5rem; } .dot { width: 12px; height: 12px; border-radius: 50%; } .dot.red { background: #ff5f56; } .dot.yellow { background: #ffbd2e; } .dot.green { background: #27c93f; }
-    .toolbar-title { color: var(--secondary-text-color); font-weight: 600; margin: 0 auto; font-size: 0.9rem; }
-    .analyzer-body { padding: 1.5rem 2rem; font-family: 'Courier New', Courier, monospace; font-size: 1.1rem; line-height: 1.8; position: relative; min-height: 150px; }
-    .analyzer-body pre { margin: 0; white-space: pre-wrap; }
-    .highlight-ssc { background-color: rgba(239, 68, 68, 0.2); border-bottom: 2px solid #ef4444;}
-    .highlight-match { background-color: rgba(245, 158, 11, 0.2); border-bottom: 2px solid #f59e0b;}
-    .highlight-re-eval { background-color: rgba(34, 197, 94, 0.2); border-bottom: 2px solid #22c55e;}
-    .feature-callout { position: absolute; background: var(--text-color); color: var(--card-bg); padding: 0.5rem 1rem; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 0.85rem; font-weight: 600; white-space: nowrap; z-index: 10; animation: floatCallout 3s ease-in-out infinite; }
-    .feature-callout::after { content: ''; position: absolute; left: 50%; bottom: -5px; transform: translateX(-50%) rotate(45deg); width: 10px; height: 10px; background: var(--text-color); }
-    @keyframes floatCallout { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-    #callout-1 { top: 10px; right: 20px; }
-    .analyzer-footer { padding: 1rem; border-top: 1px solid var(--card-border); background: var(--primary-bg); font-weight: 700; font-size: 1rem; display: flex; justify-content: space-between; }
+    /* FIREBASE PROMO BANNER */
+    .promo-banner { width: 100%; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 20px; padding: 2rem 3rem; display: none; align-items: center; justify-content: space-between; color: white; box-shadow: 0 15px 30px rgba(0,0,0,0.15); gap: 2rem; position: relative; overflow: hidden; }
+    .promo-banner-content { flex: 1.5; z-index: 2; }
+    .promo-banner-content .tag { background: rgba(255,255,255,0.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; display: inline-block; backdrop-filter: blur(5px); }
+    .promo-banner-content h2 { font-size: 2rem; font-weight: 900; margin-top: 0; margin-bottom: 0.8rem; line-height: 1.2; color: white; }
+    .promo-banner-content p { font-size: 1rem; margin-bottom: 1.5rem; opacity: 0.95; line-height: 1.5; max-width: 500px; color: white; }
+    .promo-banner-content .cta-button.alt { background: white; color: var(--button-gradient-start); font-size: 1rem; padding: 0.7rem 1.5rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .promo-banner-content .cta-button.alt:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+    .promo-banner-visual { flex: 1; display: flex; justify-content: flex-end; z-index: 2; }
+    .promo-banner-visual img { max-width: 100%; width: 280px; height: auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); object-fit: cover; aspect-ratio: 16/9; transition: transform 0.5s ease; }
+    .promo-banner:hover .promo-banner-visual img { transform: scale(1.02) rotate(1deg); }
+    .promo-banner::after { content: ''; position: absolute; right: -10%; top: -20%; width: 50%; height: 150%; background: rgba(255,255,255,0.1); transform: rotate(15deg); z-index: 1; pointer-events: none; }
+
+    /* QUICK SHORTCUTS */
+    .shortcuts-title { margin: 0; font-size: 1.4rem; color: var(--text-color); font-weight: 800; text-align: left; }
+    .quick-shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem; }
+    .shortcut-card { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.5rem; text-align: left; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 10px 20px var(--card-shadow); display: block; width: 100%; box-sizing: border-box; }
+    .shortcut-card:hover { transform: translateY(-5px); border-color: var(--button-gradient-start); box-shadow: 0 15px 30px var(--card-shadow); }
+    .shortcut-card .icon-wrap { width: 50px; height: 50px; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.5rem; margin-bottom: 1rem; }
+    .shortcut-card h4 { margin: 0 0 0.5rem 0; font-size: 1.1rem; color: var(--text-color); font-weight: 800; }
+    .shortcut-card p { margin: 0; font-size: 0.9rem; color: var(--secondary-text-color); line-height: 1.4; }
 
     /* --- PAGE SECTIONS --- */
     .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
@@ -104,20 +106,6 @@
     #analysis .graphic-content i { animation: icon-pulse 3s ease-in-out infinite; }
     #checker .graphic-content i { animation: icon-pulse 3.5s ease-in-out infinite 0.5s; }
     .page-section:nth-child(even) .section-content { flex-direction: row-reverse; }
-
-    /* --- PERMANENT BANNER SECTION (SMALLER & BACKEND CONNECTED) --- */
-    .promo-banner-wrapper { display: none; justify-content: center; align-items: center; padding: 2rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
-    .promo-banner { width: 100%; max-width: 1000px; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 20px; padding: 2rem 3rem; display: flex; align-items: center; justify-content: space-between; color: white; box-shadow: 0 15px 30px rgba(0,0,0,0.15); gap: 2rem; position: relative; overflow: hidden; }
-    .promo-banner-content { flex: 1.5; z-index: 2; }
-    .promo-banner-content .tag { background: rgba(255,255,255,0.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1rem; display: inline-block; backdrop-filter: blur(5px); }
-    .promo-banner-content h2 { font-size: 2rem; font-weight: 900; margin-top: 0; margin-bottom: 0.8rem; line-height: 1.2; color: white; }
-    .promo-banner-content p { font-size: 1rem; margin-bottom: 1.5rem; opacity: 0.95; line-height: 1.5; max-width: 500px; color: white; }
-    .promo-banner-content .cta-button.alt { background: white; color: var(--button-gradient-start); font-size: 1rem; padding: 0.7rem 1.5rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-    .promo-banner-content .cta-button.alt:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-    .promo-banner-visual { flex: 1; display: flex; justify-content: flex-end; z-index: 2; }
-    .promo-banner-visual img { max-width: 100%; width: 280px; height: auto; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); object-fit: cover; aspect-ratio: 16/9; transition: transform 0.5s ease; }
-    .promo-banner:hover .promo-banner-visual img { transform: scale(1.02) rotate(1deg); }
-    .promo-banner::after { content: ''; position: absolute; right: -10%; top: -20%; width: 50%; height: 150%; background: rgba(255,255,255,0.1); transform: rotate(15deg); z-index: 1; pointer-events: none; }
 
     /* --- BUTTONS & NEW VERTICAL DOCK --- */
     .launch-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; color: var(--primary-bg); background: var(--text-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
@@ -147,7 +135,7 @@
     .dictation-btn:hover { background: rgba(0,0,0,0.06); color: var(--button-gradient-start); }
     body[data-theme="galaxy"] .dictation-btn:hover { background: rgba(255,255,255,0.1); }
 
-    /* --- MODALS & EXTRAS --- */
+    /* --- MODALS & EXTRAS (Integrated from Backend) --- */
     .header-icon-btn { position: relative; background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; text-decoration: none; }
     
     #theme-switcher { position: relative; display: inline-flex; align-items: center; } 
@@ -222,7 +210,6 @@
 
     /* RESPONSIVE UPDATES FOR NEW DOCK AND BANNER */
     @media only screen and (max-width: 1024px) {
-        .hero-text h1 { font-size: 3.5rem; }
         .promo-banner { padding: 2rem; gap: 1rem; }
         .promo-banner-content h2 { font-size: 1.8rem; }
         .promo-banner-visual img { width: 220px; }
@@ -232,19 +219,15 @@
     @media only screen and (max-width: 768px) {
         .main-header { padding: 1rem 3%; }
         .logo { font-size: 1.5rem; }
-        .hero-section { padding: 4rem 5%; min-height: auto; }
-        .hero-content { flex-direction: column; text-align: center; gap: 2rem; }
-        .hero-text h1 { font-size: 2.8rem; }
-        .hero-text p { font-size: 1.1rem; }
+        
+        .home-dashboard { padding: 3rem 5%; min-height: auto; }
+        
         .page-section { padding: 3rem 5%; min-height: auto; }
         .section-content, .page-section:nth-child(even) .section-content { flex-direction: column; gap: 2rem; }
         .section-content .graphic-content { margin-top: 2rem; }
         .section-content .text-content, .section-content .graphic-content { flex: none; width: 100%; text-align: center; }
         .page-section h2 { font-size: 2.2rem; }
         .page-section p { font-size: 1rem; }
-        .interactive-analyzer { transform: scale(1); }
-        
-        #callout-1 { top: 10px; right: 10px; }
         
         #userInfo { display: none; }
         .footer { flex-direction: column; gap: 1rem; text-align: center; padding-bottom: 100px; } /* Space for mobile dock */
@@ -253,8 +236,11 @@
         .notification-panel { width: 90%; right: 5%; top: 70px; }
 
         /* Banner mobile adjustments */
-        .promo-banner-wrapper { padding: 1.5rem 5%; }
-        .promo-banner { flex-direction: column; padding: 1.5rem; text-align: center; }
+        .promo-banner { 
+            flex-direction: column; 
+            padding: 2rem; 
+            text-align: center; 
+        }
         .promo-banner-content h2 { font-size: 1.6rem; }
         .promo-banner-visual { justify-content: center; margin-top: 1rem; }
         .promo-banner-visual img { max-width: 100%; width: 200px; }
@@ -279,46 +265,55 @@
     </header>
 
     <main id="mainContent">
-       <!-- STATIC HERO SECTION -->
-       <section id="hero-section" class="hero-section">
-           <div class="hero-content">
-               <div class="hero-text">
-                   <h1>Precision Analysis<br>for Stenographers</h1>
-                   <p>The ultimate toolkit for SSC exam preparation and professional transcription. Master your craft with unparalleled accuracy and insight.</p>
-                   <button class="cta-button" onclick="showAuthModal()" style="padding: 1rem 3rem; font-size: 1.2rem; border-radius: 12px;">Get Started Now</button>
-               </div>
-               <div class="hero-visual">
-                   <div class="interactive-analyzer">
-                       <div class="analyzer-toolbar">
-                           <div class="toolbar-dots"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
-                           <div class="toolbar-title">transcript_test_01.txt</div>
-                       </div>
-                       <div class="analyzer-body">
-                           <pre>The quick brown fox <span class="highlight-ssc">jumps</span> over the lazy dog. 
-This is a <span class="highlight-match">showcase</span> of its features.</pre>
-                           <div id="callout-1" class="feature-callout">SSC Mistake Rule</div>
-                       </div>
-                       <div class="analyzer-footer">
-                           <div>Score: <strong>98.5% Accuracy</strong></div>
-                           <div style="color: var(--success-color);">Ready for Evaluation</div>
-                       </div>
+       <!-- STATIC HOME DASHBOARD (Banner + Shortcuts) -->
+       <section id="home" class="home-dashboard">
+           <div class="dashboard-content">
+               
+               <!-- Firebase Controlled Promo Banner (Hidden by default) -->
+               <div class="promo-banner" id="dynamicPromoBanner">
+                   <div class="promo-banner-content">
+                       <span class="tag" id="promoBannerTag"></span>
+                       <h2 id="promoBannerTitle"></h2>
+                       <p id="promoBannerBody"></p>
+                       <button class="cta-button alt" id="promoBannerBtn"></button>
+                   </div>
+                   <div class="promo-banner-visual">
+                       <img id="promoBannerImg" src="" alt="Promo">
                    </div>
                </div>
-           </div>
-       </section>
 
-       <!-- PERMANENT PROMO BANNER SECTION (BACKEND CONTROLLED) -->
-       <section id="promo-banner-section" class="promo-banner-wrapper">
-           <div class="promo-banner">
-               <div class="promo-banner-content">
-                   <span class="tag" id="promoBannerTag">Limited Time Offer</span>
-                   <h2 id="promoBannerTitle">Unlock Your True Steno Potential</h2>
-                   <p id="promoBannerBody">Get 50% off on our Annual Premium Pass. Access all dictations, test analysis, and interactive practice tools instantly. Don't miss out on mastering your craft!</p>
-                   <button class="cta-button alt" id="promoBannerBtn" onclick="window.location.href='plans.html'">Claim Offer Now</button>
+               <!-- Quick Action Shortcuts -->
+               <div>
+                   <h3 class="shortcuts-title">Quick Actions</h3>
+                   <div class="quick-shortcuts">
+                       
+                       <button class="shortcut-card" onclick="launchTool('kc')">
+                           <div class="icon-wrap" style="color: #6366f1; background: rgba(99, 102, 241, 0.1);">
+                               <i class="fas fa-keyboard"></i>
+                           </div>
+                           <h4>Practice KC</h4>
+                           <p>Start your typing practice instantly</p>
+                       </button>
+
+                       <button class="shortcut-card" onclick="launchTool('dictations')">
+                           <div class="icon-wrap" style="color: #ec4899; background: rgba(236, 72, 153, 0.1);">
+                               <i class="fas fa-headphones-alt"></i>
+                           </div>
+                           <h4>Prev SSC</h4>
+                           <p>Listen to SSC exam dictations</p>
+                       </button>
+
+                       <button class="shortcut-card" onclick="launchTool('dictations')">
+                           <div class="icon-wrap" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);">
+                               <i class="fas fa-history"></i>
+                           </div>
+                           <h4>Previous Year Dictation</h4>
+                           <p>Transcribe past exam audio files</p>
+                       </button>
+
+                   </div>
                </div>
-               <div class="promo-banner-visual">
-                   <img id="promoBannerImg" src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="Special Offer">
-               </div>
+
            </div>
        </section>
 
@@ -392,7 +387,7 @@ This is a <span class="highlight-match">showcase</span> of its features.</pre>
 
     <!-- LEFT VERTICAL DOCK -->
     <nav class="dock">
-        <a href="#hero-section" class="dock-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="#home" class="dock-item"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="#practice" class="dock-item"><i class="fas fa-keyboard"></i><span>Practice</span></a>
         <div class="dock-item" onclick="toggleDictationPopup(event)"><i class="fas fa-microphone-alt"></i><span>Dictations</span></div>
         <a href="#analysis" class="dock-item"><i class="fas fa-chart-line"></i><span>Analysis</span></a>
@@ -544,7 +539,7 @@ This is a <span class="highlight-match">showcase</span> of its features.</pre>
 
     // --- PROMO BANNER BACKEND CONNECTION ---
     function loadPromoBanner() {
-        const bannerSection = GID('promo-banner-section');
+        const bannerContainer = GID('dynamicPromoBanner');
         const tagEl = GID('promoBannerTag');
         const titleEl = GID('promoBannerTitle');
         const bodyEl = GID('promoBannerBody');
@@ -552,34 +547,28 @@ This is a <span class="highlight-match">showcase</span> of its features.</pre>
         const imgEl = GID('promoBannerImg');
 
         DB.collection('siteConfig').doc('promoBanner').get().then(doc => {
-            if (doc.exists) {
+            if (doc.exists && doc.data().isActive) {
                 const data = doc.data();
-                if (data.isActive) {
-                    tagEl.textContent = data.tag || 'Update';
-                    tagEl.style.display = data.tag ? 'inline-block' : 'none';
-                    titleEl.textContent = data.title || '';
-                    bodyEl.textContent = data.body || '';
-                    btnEl.textContent = data.buttonText || 'Click Here';
-                    btnEl.onclick = () => { if(data.buttonLink) window.location.href = data.buttonLink; };
-                    
-                    if (data.imageUrl) { 
-                        imgEl.src = data.imageUrl; 
-                        imgEl.style.display = 'block'; 
-                    } else { 
-                        imgEl.style.display = 'none'; 
-                    }
-                    bannerSection.style.display = 'flex';
-                } else {
-                    bannerSection.style.display = 'none';
+                tagEl.textContent = data.tag || '';
+                tagEl.style.display = data.tag ? 'inline-block' : 'none';
+                titleEl.textContent = data.title || '';
+                bodyEl.textContent = data.body || '';
+                btnEl.textContent = data.buttonText || 'Click Here';
+                btnEl.onclick = () => { if(data.buttonLink) window.location.href = data.buttonLink; };
+                
+                if (data.imageUrl) { 
+                    imgEl.src = data.imageUrl; 
+                    imgEl.style.display = 'block'; 
+                } else { 
+                    imgEl.style.display = 'none'; 
                 }
+                bannerContainer.style.display = 'flex';
             } else {
-                // Dummy fallback so user can see it before configuring backend
-                bannerSection.style.display = 'flex';
+                bannerContainer.style.display = 'none';
             }
         }).catch(err => {
             console.error("Error loading promo banner:", err);
-            // Show dummy on error for preview purposes
-            bannerSection.style.display = 'flex'; 
+            bannerContainer.style.display = 'none';
         });
     }
 
@@ -650,7 +639,7 @@ This is a <span class="highlight-match">showcase</span> of its features.</pre>
     }
     
     function logout() { 
-        AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#hero-section'; }); 
+        AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
     }
     
     function isUserPremium(user) {
@@ -799,7 +788,7 @@ This is a <span class="highlight-match">showcase</span> of its features.</pre>
     function renderPlatformStatus() { const content = GID('statusContent'); if(!content) return; content.innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; DB.collection('platformStatus').orderBy('timestamp', 'desc').limit(10).get().then(snapshot => { let html = '<div style="padding: 2rem;">'; if (snapshot.empty) { html += '<p>No recent status updates. All systems are operational.</p>'; } else { snapshot.forEach(doc => { const item = doc.data(); const date = item.timestamp.toDate().toLocaleString(); const statusClass = item.status === 'Resolved' ? 'status-open' : item.status === 'Investigating' ? 'status-Awaiting-Reply' : 'status-closed'; html += `<div class="card" style="margin-bottom:1.5rem; border:1px solid var(--card-border); padding:1rem; border-radius:8px;"><h3>${item.title} <span class="ticket-status ${statusClass}" style="float:right;">${item.status}</span></h3><p>${item.details}</p><small style="opacity:0.7;">${date}</small></div>`; }); } html += '</div>'; content.innerHTML = html; }).catch(err => { content.innerHTML = '<div style="padding: 2rem;"><h2>Error</h2><p>Could not load platform status.</p></div>'; }); }
     
     function checkForPoll() { const pollRef = DB.collection('siteConfig').doc('activePoll'); pollRef.get().then(doc => { if (doc.exists && doc.data().isActive) { const poll = doc.data(); const seenKey = `votedPoll_${poll.id}`; if (!localStorage.getItem(seenKey)) { GID('pollQuestion').textContent = poll.question; const optionsContainer = GID('pollOptions'); optionsContainer.innerHTML = ''; poll.options.forEach(option => { optionsContainer.innerHTML += `<button onclick="submitPollVote('${poll.id}', '${option.replace(/'/g, "\\'")}')">${option}</button>`; }); GID('pollToast').classList.add('visible'); } } }); }
-    async function submitPollVote(pollId, option) { GID('pollToast').classList.remove('visible'); const resultsRef = DB.collection('pollResults').doc(pollId); const increment = firebase.firestore.FieldValue.increment(1); try { await resultsRef.set({ results: { [option]: increment } }, { merge: true }); localStorage.setItem(`votedPoll_${pollId}`, 'true'); } catch (e) { console.error("Error submitting vote:", e); } }
+    async function submitPollVote(pollId, option) { GID('pollToast').classList.remove('visible'); const resultsRef = DB.collection('pollResults').doc(pollId); const increment = firebase.firestore.FieldValue.increment(1); try { await resultsRef.set({ results: {[option]: increment } }, { merge: true }); localStorage.setItem(`votedPoll_${pollId}`, 'true'); } catch (e) { console.error("Error submitting vote:", e); } }
     
     function handleNotifications() { const btn = GID('notificationBtn'); if (!btn) return; const badge = GID('notificationBadge'), panel = GID('notificationPanel'), list = GID('notificationList'); DB.collection('notifications').orderBy('timestamp', 'desc').limit(20).get().then(snapshot => { if (snapshot.empty) { list.innerHTML = '<p style="text-align:center;color:var(--secondary-text-color);padding:1.5rem;">No new notifications.</p>'; return; } const lastSeen = localStorage.getItem('lastSeenNotificationTimestamp') || 0; const latestTimestamp = snapshot.docs[0].data().timestamp.toMillis(); let unreadCount = 0; let html = ''; snapshot.forEach(doc => { const n = doc.data(); if (n.timestamp.toMillis() > lastSeen) { unreadCount++; } const date = n.timestamp.toDate().toLocaleDateString(); let itemHtml = `<div class="notification-item">${n.message}<small>${date}</small></div>`; html += n.link ? `<a href="${n.link}" target="_blank" rel="noopener noreferrer">${itemHtml}</a>` : `<div style="cursor:default;">${itemHtml}</div>`; }); list.innerHTML = html; if (unreadCount > 0) { badge.textContent = unreadCount; badge.style.display = 'block'; } else { badge.style.display = 'none'; } btn.onclick = (e) => { e.stopPropagation(); panel.classList.toggle('visible'); badge.style.display = 'none'; localStorage.setItem('lastSeenNotificationTimestamp', latestTimestamp); }; }).catch(err => console.error("Error handling notifications:", err)); }
     
@@ -1049,6 +1038,8 @@ This is a <span class="highlight-match">showcase</span> of its features.</pre>
         checkForPoll();
         showTelegramModal();
         checkForMessageOfTheDay();
+        
+        // LOAD FIREBASE BANNER
         loadPromoBanner();
 
         // Apply contrast setting if previously saved
