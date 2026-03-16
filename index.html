@@ -68,7 +68,7 @@
 
     /* --- HOME DASHBOARD (Banner + Shortcuts) --- */
     .home-dashboard { 
-        min-height: 65vh; /* Medium sizing */
+        min-height: 60vh; 
         display: flex; 
         justify-content: center; 
         align-items: center; 
@@ -76,13 +76,13 @@
         flex-direction: column; 
         border-bottom: 1px solid var(--card-border); 
     }
-    .dashboard-content { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 3.5rem; }
+    .dashboard-content { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 3rem; }
 
-    /* FIREBASE PROMO BANNER (Spacious & Premium Ratio) */
+    /* FIREBASE PROMO BANNER */
     .promo-banner { width: 100%; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 24px; padding: 3rem 4rem; display: none; align-items: center; justify-content: space-between; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.15); gap: 3rem; position: relative; overflow: hidden; }
     .promo-banner-content { flex: 1; z-index: 2; min-width: 250px; } 
     .promo-banner-content .tag { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.2rem; display: inline-block; backdrop-filter: blur(5px); }
-    .promo-banner-content h2 { font-size: 2.6rem; font-weight: 900; margin-top: 0; margin-bottom: 1rem; line-height: 1.2; color: white; }
+    .promo-banner-content h2 { font-size: 2.5rem; font-weight: 900; margin-top: 0; margin-bottom: 1rem; line-height: 1.2; color: white; }
     .promo-banner-content p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.95; line-height: 1.6; color: white; }
     .promo-banner-content .cta-button.alt { background: white; color: var(--button-gradient-start); font-size: 1.05rem; padding: 0.8rem 1.8rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     .promo-banner-content .cta-button.alt:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
@@ -93,8 +93,8 @@
     
     .promo-banner::after { content: ''; position: absolute; right: -10%; top: -20%; width: 50%; height: 150%; background: rgba(255,255,255,0.1); transform: rotate(15deg); z-index: 1; pointer-events: none; }
 
-    /* QUICK SHORTCUTS (Elongated / Horizontal format) */
-    .shortcuts-title { margin: 0 0 1.2rem 0; font-size: 1.4rem; color: var(--text-color); font-weight: 800; text-align: left; }
+    /* QUICK SHORTCUTS */
+    .shortcuts-title { margin: 0 0 1rem 0; font-size: 1.3rem; color: var(--text-color); font-weight: 800; text-align: left; }
     .quick-shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
     .shortcut-card { display: flex; align-items: center; gap: 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.5rem; text-align: left; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px var(--card-shadow); width: 100%; box-sizing: border-box; }
     .shortcut-card:hover { transform: translateY(-3px); border-color: var(--button-gradient-start); box-shadow: 0 10px 25px var(--card-shadow); }
@@ -272,7 +272,7 @@
     </header>
 
     <main id="mainContent">
-       <!-- STATIC HOME DASHBOARD (Banner + Shortcuts) -->
+       <!-- STATIC HOME DASHBOARD (Banner + Dynamic Shortcuts) -->
        <section id="home" class="home-dashboard">
            <div class="dashboard-content">
                
@@ -289,11 +289,11 @@
                    </div>
                </div>
 
-               <!-- Quick Action Shortcuts -->
+               <!-- Quick Action Shortcuts (Loaded Dynamically) -->
                <div>
                    <h3 class="shortcuts-title">Quick Actions</h3>
-                   <div class="quick-shortcuts">
-                       
+                   <div class="quick-shortcuts" id="quickShortcutsContainer">
+                       <!-- Default Fallback Cards (will be replaced by Firebase if data exists) -->
                        <button class="shortcut-card" onclick="launchTool('kc')">
                            <div class="icon-wrap" style="color: #6366f1; background: rgba(99, 102, 241, 0.1);">
                                <i class="fas fa-keyboard"></i>
@@ -323,7 +323,6 @@
                                <p>Transcribe past exam audio files</p>
                            </div>
                        </button>
-
                    </div>
                </div>
 
@@ -585,6 +584,39 @@
         });
     }
 
+    // --- QUICK ACTIONS BACKEND CONNECTION ---
+    function loadQuickActions() {
+        const container = GID('quickShortcutsContainer');
+        
+        DB.collection('siteConfig').doc('quickActions').get().then(doc => {
+            if (doc.exists && doc.data().actions && doc.data().actions.length > 0) {
+                const actions = doc.data().actions;
+                let html = '';
+                
+                actions.forEach(action => {
+                    const isUrl = action.target.includes('.html') || action.target.includes('http');
+                    const clickHandler = isUrl ? `window.location.href='${action.target}'` : `launchTool('${action.target}')`;
+                    const color = action.color || '#6366f1';
+                    
+                    html += `
+                        <button class="shortcut-card" onclick="${clickHandler}">
+                            <div class="icon-wrap" style="color: ${color}; background: ${color}1A;">
+                                <i class="${action.icon || 'fas fa-star'}"></i>
+                            </div>
+                            <div class="shortcut-text-wrap">
+                                <h4>${action.title}</h4>
+                                <p>${action.desc}</p>
+                            </div>
+                        </button>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+        }).catch(err => {
+            console.error("Error loading quick actions:", err);
+        });
+    }
+
     // --- DICTATION POPUP LOGIC ---
     function toggleDictationPopup(e) {
         if(e) e.stopPropagation();
@@ -801,7 +833,7 @@
     function renderPlatformStatus() { const content = GID('statusContent'); if(!content) return; content.innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; DB.collection('platformStatus').orderBy('timestamp', 'desc').limit(10).get().then(snapshot => { let html = '<div style="padding: 2rem;">'; if (snapshot.empty) { html += '<p>No recent status updates. All systems are operational.</p>'; } else { snapshot.forEach(doc => { const item = doc.data(); const date = item.timestamp.toDate().toLocaleString(); const statusClass = item.status === 'Resolved' ? 'status-open' : item.status === 'Investigating' ? 'status-Awaiting-Reply' : 'status-closed'; html += `<div class="card" style="margin-bottom:1.5rem; border:1px solid var(--card-border); padding:1rem; border-radius:8px;"><h3>${item.title} <span class="ticket-status ${statusClass}" style="float:right;">${item.status}</span></h3><p>${item.details}</p><small style="opacity:0.7;">${date}</small></div>`; }); } html += '</div>'; content.innerHTML = html; }).catch(err => { content.innerHTML = '<div style="padding: 2rem;"><h2>Error</h2><p>Could not load platform status.</p></div>'; }); }
     
     function checkForPoll() { const pollRef = DB.collection('siteConfig').doc('activePoll'); pollRef.get().then(doc => { if (doc.exists && doc.data().isActive) { const poll = doc.data(); const seenKey = `votedPoll_${poll.id}`; if (!localStorage.getItem(seenKey)) { GID('pollQuestion').textContent = poll.question; const optionsContainer = GID('pollOptions'); optionsContainer.innerHTML = ''; poll.options.forEach(option => { optionsContainer.innerHTML += `<button onclick="submitPollVote('${poll.id}', '${option.replace(/'/g, "\\'")}')">${option}</button>`; }); GID('pollToast').classList.add('visible'); } } }); }
-    async function submitPollVote(pollId, option) { GID('pollToast').classList.remove('visible'); const resultsRef = DB.collection('pollResults').doc(pollId); const increment = firebase.firestore.FieldValue.increment(1); try { await resultsRef.set({ results: {[option]: increment } }, { merge: true }); localStorage.setItem(`votedPoll_${pollId}`, 'true'); } catch (e) { console.error("Error submitting vote:", e); } }
+    async function submitPollVote(pollId, option) { GID('pollToast').classList.remove('visible'); const resultsRef = DB.collection('pollResults').doc(pollId); const increment = firebase.firestore.FieldValue.increment(1); try { await resultsRef.set({ results: { [option]: increment } }, { merge: true }); localStorage.setItem(`votedPoll_${pollId}`, 'true'); } catch (e) { console.error("Error submitting vote:", e); } }
     
     function handleNotifications() { const btn = GID('notificationBtn'); if (!btn) return; const badge = GID('notificationBadge'), panel = GID('notificationPanel'), list = GID('notificationList'); DB.collection('notifications').orderBy('timestamp', 'desc').limit(20).get().then(snapshot => { if (snapshot.empty) { list.innerHTML = '<p style="text-align:center;color:var(--secondary-text-color);padding:1.5rem;">No new notifications.</p>'; return; } const lastSeen = localStorage.getItem('lastSeenNotificationTimestamp') || 0; const latestTimestamp = snapshot.docs[0].data().timestamp.toMillis(); let unreadCount = 0; let html = ''; snapshot.forEach(doc => { const n = doc.data(); if (n.timestamp.toMillis() > lastSeen) { unreadCount++; } const date = n.timestamp.toDate().toLocaleDateString(); let itemHtml = `<div class="notification-item">${n.message}<small>${date}</small></div>`; html += n.link ? `<a href="${n.link}" target="_blank" rel="noopener noreferrer">${itemHtml}</a>` : `<div style="cursor:default;">${itemHtml}</div>`; }); list.innerHTML = html; if (unreadCount > 0) { badge.textContent = unreadCount; badge.style.display = 'block'; } else { badge.style.display = 'none'; } btn.onclick = (e) => { e.stopPropagation(); panel.classList.toggle('visible'); badge.style.display = 'none'; localStorage.setItem('lastSeenNotificationTimestamp', latestTimestamp); }; }).catch(err => console.error("Error handling notifications:", err)); }
     
@@ -1052,8 +1084,9 @@
         showTelegramModal();
         checkForMessageOfTheDay();
         
-        // LOAD FIREBASE BANNER
+        // LOAD FIREBASE DATA
         loadPromoBanner();
+        loadQuickActions();
 
         // Apply contrast setting if previously saved
         if(localStorage.getItem('setContrast') === 'true') document.body.style.filter = "contrast(115%)";
