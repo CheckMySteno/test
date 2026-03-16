@@ -68,40 +68,40 @@
 
     /* --- HOME DASHBOARD (Banner + Shortcuts) --- */
     .home-dashboard { 
-        min-height: calc(100vh - 75px); 
+        min-height: 65vh; /* Medium sizing */
         display: flex; 
-        justify-content: flex-start; /* Start from top */
+        justify-content: center; 
         align-items: center; 
-        padding: 2rem 5% 2rem 100px; /* Extra left padding to clear the dock */
+        padding: 4rem 5% 4rem 100px; /* 100px left padding prevents overlap with dock */
         flex-direction: column; 
         border-bottom: 1px solid var(--card-border); 
     }
-    .dashboard-content { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 1.5rem; margin-top: 1rem; }
+    .dashboard-content { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 3.5rem; }
 
-    /* FIREBASE PROMO BANNER (Compact & 2/3 IMAGE RATIO) */
-    .promo-banner { width: 100%; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 20px; padding: 1.5rem 2.5rem; display: none; align-items: center; justify-content: space-between; color: white; box-shadow: 0 15px 30px rgba(0,0,0,0.15); gap: 2rem; position: relative; overflow: hidden; }
+    /* FIREBASE PROMO BANNER (Spacious & Premium Ratio) */
+    .promo-banner { width: 100%; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 24px; padding: 3rem 4rem; display: none; align-items: center; justify-content: space-between; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.15); gap: 3rem; position: relative; overflow: hidden; }
     .promo-banner-content { flex: 1; z-index: 2; min-width: 250px; } 
-    .promo-banner-content .tag { background: rgba(255,255,255,0.2); padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.8rem; display: inline-block; backdrop-filter: blur(5px); }
-    .promo-banner-content h2 { font-size: 2rem; font-weight: 900; margin-top: 0; margin-bottom: 0.6rem; line-height: 1.2; color: white; }
-    .promo-banner-content p { font-size: 0.95rem; margin-bottom: 1.2rem; opacity: 0.95; line-height: 1.5; color: white; }
-    .promo-banner-content .cta-button.alt { background: white; color: var(--button-gradient-start); font-size: 0.95rem; padding: 0.7rem 1.5rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .promo-banner-content .tag { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.2rem; display: inline-block; backdrop-filter: blur(5px); }
+    .promo-banner-content h2 { font-size: 2.6rem; font-weight: 900; margin-top: 0; margin-bottom: 1rem; line-height: 1.2; color: white; }
+    .promo-banner-content p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.95; line-height: 1.6; color: white; }
+    .promo-banner-content .cta-button.alt { background: white; color: var(--button-gradient-start); font-size: 1.05rem; padding: 0.8rem 1.8rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
     .promo-banner-content .cta-button.alt:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
     
-    .promo-banner-visual { flex: 2; display: flex; justify-content: flex-end; align-items: center; z-index: 2; } 
-    .promo-banner-visual img { width: 100%; max-width: 600px; max-height: 260px; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); object-fit: contain; transition: transform 0.5s ease; }
+    .promo-banner-visual { flex: 1.2; display: flex; justify-content: flex-end; align-items: center; z-index: 2; } 
+    .promo-banner-visual img { width: 100%; max-width: 550px; max-height: 300px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); object-fit: contain; transition: transform 0.5s ease; }
     .promo-banner:hover .promo-banner-visual img { transform: scale(1.02) rotate(1deg); }
     
     .promo-banner::after { content: ''; position: absolute; right: -10%; top: -20%; width: 50%; height: 150%; background: rgba(255,255,255,0.1); transform: rotate(15deg); z-index: 1; pointer-events: none; }
 
     /* QUICK SHORTCUTS (Elongated / Horizontal format) */
-    .shortcuts-title { margin: 0 0 1rem 0; font-size: 1.2rem; color: var(--text-color); font-weight: 800; text-align: left; }
-    .quick-shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; }
-    .shortcut-card { display: flex; align-items: center; gap: 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.2rem; text-align: left; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px var(--card-shadow); width: 100%; box-sizing: border-box; }
+    .shortcuts-title { margin: 0 0 1.2rem 0; font-size: 1.4rem; color: var(--text-color); font-weight: 800; text-align: left; }
+    .quick-shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .shortcut-card { display: flex; align-items: center; gap: 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.5rem; text-align: left; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px var(--card-shadow); width: 100%; box-sizing: border-box; }
     .shortcut-card:hover { transform: translateY(-3px); border-color: var(--button-gradient-start); box-shadow: 0 10px 25px var(--card-shadow); }
     .shortcut-card .icon-wrap { width: 55px; height: 55px; flex-shrink: 0; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; }
     .shortcut-text-wrap { display: flex; flex-direction: column; justify-content: center; }
-    .shortcut-card h4 { margin: 0 0 0.2rem 0; font-size: 1.05rem; color: var(--text-color); font-weight: 800; }
-    .shortcut-card p { margin: 0; font-size: 0.85rem; color: var(--secondary-text-color); line-height: 1.3; }
+    .shortcut-card h4 { margin: 0 0 0.3rem 0; font-size: 1.1rem; color: var(--text-color); font-weight: 800; }
+    .shortcut-card p { margin: 0; font-size: 0.9rem; color: var(--secondary-text-color); line-height: 1.4; }
 
     /* --- PAGE SECTIONS --- */
     .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
@@ -221,9 +221,9 @@
 
     /* RESPONSIVE UPDATES FOR NEW DOCK AND BANNER */
     @media only screen and (max-width: 1024px) {
-        .promo-banner { padding: 1.5rem 2rem; gap: 1.5rem; }
-        .promo-banner-content h2 { font-size: 1.8rem; }
-        .promo-banner-visual img { width: 400px; }
+        .promo-banner { padding: 2rem 3rem; gap: 2rem; }
+        .promo-banner-content h2 { font-size: 2rem; }
+        .promo-banner-visual img { width: 100%; max-width: 400px; }
         .page-section h2 { font-size: 2.5rem; }
     }
 
@@ -247,10 +247,10 @@
         .notification-panel { width: 90%; right: 5%; top: 70px; }
 
         /* Banner mobile adjustments */
-        .promo-banner { flex-direction: column; padding: 1.5rem; text-align: center; }
-        .promo-banner-content h2 { font-size: 1.6rem; }
+        .promo-banner { flex-direction: column; padding: 2rem; text-align: center; }
+        .promo-banner-content h2 { font-size: 1.8rem; }
         .promo-banner-visual { justify-content: center; margin-top: 1rem; width: 100%; }
-        .promo-banner-visual img { max-width: 100%; width: 250px; max-height: 180px;}
+        .promo-banner-visual img { max-width: 100%; width: 300px; max-height: 200px;}
         .promo-banner::after { display: none; }
 
         /* Update dock for mobile so it doesn't block screen */
@@ -801,7 +801,7 @@
     function renderPlatformStatus() { const content = GID('statusContent'); if(!content) return; content.innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; DB.collection('platformStatus').orderBy('timestamp', 'desc').limit(10).get().then(snapshot => { let html = '<div style="padding: 2rem;">'; if (snapshot.empty) { html += '<p>No recent status updates. All systems are operational.</p>'; } else { snapshot.forEach(doc => { const item = doc.data(); const date = item.timestamp.toDate().toLocaleString(); const statusClass = item.status === 'Resolved' ? 'status-open' : item.status === 'Investigating' ? 'status-Awaiting-Reply' : 'status-closed'; html += `<div class="card" style="margin-bottom:1.5rem; border:1px solid var(--card-border); padding:1rem; border-radius:8px;"><h3>${item.title} <span class="ticket-status ${statusClass}" style="float:right;">${item.status}</span></h3><p>${item.details}</p><small style="opacity:0.7;">${date}</small></div>`; }); } html += '</div>'; content.innerHTML = html; }).catch(err => { content.innerHTML = '<div style="padding: 2rem;"><h2>Error</h2><p>Could not load platform status.</p></div>'; }); }
     
     function checkForPoll() { const pollRef = DB.collection('siteConfig').doc('activePoll'); pollRef.get().then(doc => { if (doc.exists && doc.data().isActive) { const poll = doc.data(); const seenKey = `votedPoll_${poll.id}`; if (!localStorage.getItem(seenKey)) { GID('pollQuestion').textContent = poll.question; const optionsContainer = GID('pollOptions'); optionsContainer.innerHTML = ''; poll.options.forEach(option => { optionsContainer.innerHTML += `<button onclick="submitPollVote('${poll.id}', '${option.replace(/'/g, "\\'")}')">${option}</button>`; }); GID('pollToast').classList.add('visible'); } } }); }
-    async function submitPollVote(pollId, option) { GID('pollToast').classList.remove('visible'); const resultsRef = DB.collection('pollResults').doc(pollId); const increment = firebase.firestore.FieldValue.increment(1); try { await resultsRef.set({ results: { [option]: increment } }, { merge: true }); localStorage.setItem(`votedPoll_${pollId}`, 'true'); } catch (e) { console.error("Error submitting vote:", e); } }
+    async function submitPollVote(pollId, option) { GID('pollToast').classList.remove('visible'); const resultsRef = DB.collection('pollResults').doc(pollId); const increment = firebase.firestore.FieldValue.increment(1); try { await resultsRef.set({ results: {[option]: increment } }, { merge: true }); localStorage.setItem(`votedPoll_${pollId}`, 'true'); } catch (e) { console.error("Error submitting vote:", e); } }
     
     function handleNotifications() { const btn = GID('notificationBtn'); if (!btn) return; const badge = GID('notificationBadge'), panel = GID('notificationPanel'), list = GID('notificationList'); DB.collection('notifications').orderBy('timestamp', 'desc').limit(20).get().then(snapshot => { if (snapshot.empty) { list.innerHTML = '<p style="text-align:center;color:var(--secondary-text-color);padding:1.5rem;">No new notifications.</p>'; return; } const lastSeen = localStorage.getItem('lastSeenNotificationTimestamp') || 0; const latestTimestamp = snapshot.docs[0].data().timestamp.toMillis(); let unreadCount = 0; let html = ''; snapshot.forEach(doc => { const n = doc.data(); if (n.timestamp.toMillis() > lastSeen) { unreadCount++; } const date = n.timestamp.toDate().toLocaleDateString(); let itemHtml = `<div class="notification-item">${n.message}<small>${date}</small></div>`; html += n.link ? `<a href="${n.link}" target="_blank" rel="noopener noreferrer">${itemHtml}</a>` : `<div style="cursor:default;">${itemHtml}</div>`; }); list.innerHTML = html; if (unreadCount > 0) { badge.textContent = unreadCount; badge.style.display = 'block'; } else { badge.style.display = 'none'; } btn.onclick = (e) => { e.stopPropagation(); panel.classList.toggle('visible'); badge.style.display = 'none'; localStorage.setItem('lastSeenNotificationTimestamp', latestTimestamp); }; }).catch(err => console.error("Error handling notifications:", err)); }
     
