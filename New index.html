@@ -1,0 +1,1115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Check My Steno</title>
+  <meta name="google-site-verification" content="v5mi-j_OwV6XOree_PN-xt_UIPcR7FiUTQaEGpq2Bmg" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore-compat.js"></script>
+  
+  <style>
+    /* --- THEME DEFINITIONS --- */
+    :root, body[data-theme="default"] {
+        --primary-bg: #f3f4f6; --text-color: #1e293b; --secondary-text-color: #6b7280;
+        --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e2e8f0;
+        --button-gradient-start: #6366f1; --button-gradient-end: #ec4899;
+        --error-color: #ef4444; --gold-start: #fde047; --gold-end: #eab308;
+        --success-color: #22c55e; --warning-color: #f59e0b;
+    }
+    body[data-theme="galaxy"] {
+        --primary-bg: #0f172a; --text-color: #f8fafc; --secondary-text-color: #94a3b8;
+        --card-bg: #1e293b; --card-shadow: rgba(0, 0, 0, 0.25); --card-border: #334155;
+        --button-gradient-start: #22d3ee; --button-gradient-end: #a78bfa;
+    }
+    body[data-theme="sunset"] { --primary-bg: #fff1f2; --text-color: #4c1d24; --secondary-text-color: #8c2d42; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #fecdd3; --button-gradient-start: #fb923c; --button-gradient-end: #f472b6; }
+    body[data-theme="oceanic"] { --primary-bg: #f0f9ff; --text-color: #082f49; --secondary-text-color: #075985; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e0f2fe; --button-gradient-start: #22d3ee; --button-gradient-end: #0ea5e9; }
+
+    /* --- GLOBAL STYLES --- */
+    html { scroll-behavior: smooth; }
+    body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
+    body { -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none; position: relative; }
+    body.modal-open, html.modal-open { overflow: hidden; }
+
+    /* --- UI UPDATE: IMMERSIVE BACKGROUND --- */
+    @keyframes slow-pan { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+    body[data-theme="galaxy"]::before {
+        content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+        background: linear-gradient(250deg, #0f172a, #1e293b, #0f172a);
+        background-size: 400% 400%;
+        animation: slow-pan 40s ease infinite;
+    }
+    body[data-theme="oceanic"]::before {
+        content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1;
+        background: linear-gradient(135deg, #e0f7fa, #b2ebf2, #80deea);
+        background-size: 400% 400%;
+        animation: slow-pan 30s ease infinite;
+    }
+
+    /* --- LAYOUT & HEADER --- */
+    main { position: relative; padding-bottom: 120px; z-index: 1; display: block; }
+    .main-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); position: sticky; top: 0; z-index: 1000; transition: background-color 0.3s, transform 0.4s ease-out; }
+    .main-header.hidden { transform: translateY(-110%); }
+    .logo { font-size: 1.8rem; font-weight: 800; }
+    .header-actions { display: flex; align-items: center; gap: 0.8rem; }
+    
+    /* UPPER BAR TOOLBAR GROUPING */
+    .header-icons-toolbar { display: flex; align-items: center; gap: 0.3rem; background: var(--primary-bg); padding: 0.3rem 0.6rem; border-radius: 2rem; border: 1px solid var(--card-border); }
+    .header-icons-toolbar .header-icon-btn { margin: 0; padding: 0; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border-radius: 50%; color: var(--secondary-text-color); font-size: 1.2rem; cursor: pointer; background: transparent; border: none; transition: all 0.2s; position: relative; text-decoration: none;}
+    .header-icons-toolbar .header-icon-btn:hover { background: var(--card-bg); color: var(--button-gradient-start); box-shadow: 0 2px 8px var(--card-shadow); }
+    
+    .cta-button { padding: 0.7rem 1.5rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); color: white; border: none; border-radius: 8px; font-weight: 700; cursor: pointer; transition: transform 0.2s, background 0.3s, box-shadow 0.2s; text-decoration: none; display: inline-block; text-align: center; box-sizing: border-box; }
+    .cta-button:hover { transform: translateY(-2px); box-shadow: 0 6px 15px rgba(0,0,0,0.15); }
+
+    /* --- HOME DASHBOARD (Banner + Shortcuts) --- */
+    .home-dashboard { 
+        min-height: 60vh; 
+        display: flex; 
+        justify-content: center; 
+        align-items: center; 
+        padding: 4rem 5% 4rem 100px; /* 100px left padding prevents overlap with dock */
+        flex-direction: column; 
+        border-bottom: 1px solid var(--card-border); 
+    }
+    .dashboard-content { width: 100%; max-width: 1100px; display: flex; flex-direction: column; gap: 3rem; }
+
+    /* FIREBASE PROMO BANNER */
+    .promo-banner { width: 100%; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 24px; padding: 3rem 4rem; display: none; align-items: center; justify-content: space-between; color: white; box-shadow: 0 20px 40px rgba(0,0,0,0.15); gap: 3rem; position: relative; overflow: hidden; }
+    .promo-banner-content { flex: 1; z-index: 2; min-width: 250px; } 
+    .promo-banner-content .tag { background: rgba(255,255,255,0.2); padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 1.2rem; display: inline-block; backdrop-filter: blur(5px); }
+    .promo-banner-content h2 { font-size: 2.5rem; font-weight: 900; margin-top: 0; margin-bottom: 1rem; line-height: 1.2; color: white; }
+    .promo-banner-content p { font-size: 1.1rem; margin-bottom: 2rem; opacity: 0.95; line-height: 1.6; color: white; }
+    .promo-banner-content .cta-button.alt { background: white; color: var(--button-gradient-start); font-size: 1.05rem; padding: 0.8rem 1.8rem; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .promo-banner-content .cta-button.alt:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+    
+    .promo-banner-visual { flex: 1.2; display: flex; justify-content: flex-end; align-items: center; z-index: 2; } 
+    .promo-banner-visual img { width: 100%; max-width: 550px; max-height: 300px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); object-fit: contain; transition: transform 0.5s ease; }
+    .promo-banner:hover .promo-banner-visual img { transform: scale(1.02) rotate(1deg); }
+    
+    .promo-banner::after { content: ''; position: absolute; right: -10%; top: -20%; width: 50%; height: 150%; background: rgba(255,255,255,0.1); transform: rotate(15deg); z-index: 1; pointer-events: none; }
+
+    /* QUICK SHORTCUTS */
+    .shortcuts-title { margin: 0 0 1rem 0; font-size: 1.3rem; color: var(--text-color); font-weight: 800; text-align: left; }
+    .quick-shortcuts { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    .shortcut-card { display: flex; align-items: center; gap: 1.2rem; background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 16px; padding: 1.5rem; text-align: left; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 5px 15px var(--card-shadow); width: 100%; box-sizing: border-box; }
+    .shortcut-card:hover { transform: translateY(-3px); border-color: var(--button-gradient-start); box-shadow: 0 10px 25px var(--card-shadow); }
+    .shortcut-card .icon-wrap { width: 55px; height: 55px; flex-shrink: 0; border-radius: 12px; display: flex; justify-content: center; align-items: center; font-size: 1.4rem; }
+    .shortcut-text-wrap { display: flex; flex-direction: column; justify-content: center; }
+    .shortcut-card h4 { margin: 0 0 0.3rem 0; font-size: 1.1rem; color: var(--text-color); font-weight: 800; }
+    .shortcut-card p { margin: 0; font-size: 0.9rem; color: var(--secondary-text-color); line-height: 1.4; }
+
+    /* --- PAGE SECTIONS --- */
+    .page-section { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 4rem 5%; box-sizing: border-box; border-bottom: 1px solid var(--card-border); }
+    .page-section:last-of-type { border-bottom: none; }
+    .section-content { display: flex; align-items: center; gap: 4rem; max-width: 1200px; width: 100%; }
+    .section-content .text-content, .section-content .graphic-content { flex: 1; }
+    .section-content .graphic-content { text-align: center; position: relative; }
+    .section-content .graphic-content i { font-size: 12rem; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; opacity: 0.7; }
+    .page-section h2 { font-size: 3rem; font-weight: 900; margin: 0 0 1rem 0; }
+    .page-section p { font-size: 1.1rem; line-height: 1.7; color: var(--secondary-text-color); margin-bottom: 2rem; }
+    @keyframes icon-pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+    #practice .graphic-content i { animation: icon-pulse 4s ease-in-out infinite; }
+    #analysis .graphic-content i { animation: icon-pulse 3s ease-in-out infinite; }
+    #checker .graphic-content i { animation: icon-pulse 3.5s ease-in-out infinite 0.5s; }
+    .page-section:nth-child(even) .section-content { flex-direction: row-reverse; }
+
+    /* --- BUTTONS & NEW VERTICAL DOCK --- */
+    .launch-button { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 1rem 2.5rem; font-size: 1.1rem; font-weight: 700; color: var(--primary-bg); background: var(--text-color); border: none; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden; }
+    .launch-button:hover:not(.locked) { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 25px var(--button-gradient-start); }
+    .launch-button.locked { background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; box-shadow: 0 5px 15px rgba(234, 179, 8, 0.4); cursor: pointer; }
+    .launch-button::before { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent); transition: left 0.4s ease; }
+    .launch-button:hover:not(.locked)::before { left: 150%; }
+
+    .footer { position: absolute; bottom: 0; left: 0; width: 100%; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; padding: 1.5rem 5%; background-color: var(--card-bg); border-top: 1px solid var(--card-border); }
+    .footer-links { display: flex; gap: 1.5rem; margin: 0; } .footer-links button { background: none; border: none; color: var(--secondary-text-color); font-weight: 600; cursor: pointer; }
+    
+    /* LEFT SIDE VERTICAL DOCK */
+    .dock { position: fixed; left: 20px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 10px; background: rgba(255,255,255,0.6); backdrop-filter: blur(12px); border: 1px solid rgba(200, 200, 200, 0.4); border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1001; transition: background-color 0.3s; }
+    body[data-theme="galaxy"] .dock { background: rgba(30, 41, 59, 0.6); }
+    .dock-item { width: 70px; height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 12px; cursor: pointer; transition: 0.2s; text-decoration: none; background: transparent; border: none; color: var(--text-color); }
+    .dock-item i { font-size: 20px; margin-bottom: 4px; color: var(--text-color); transition: color 0.3s; }
+    .dock-item span { font-size: 10px; color: var(--secondary-text-color); font-weight: 600; transition: color 0.3s; }
+    .dock-item:hover { background: rgba(0,0,0,0.05); transform: scale(1.05); }
+    body[data-theme="galaxy"] .dock-item:hover { background: rgba(255,255,255,0.1); }
+
+    /* DICTATION POPUP MENU */
+    .dictation-popup { position: fixed; left: 110px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: 10px; padding: 15px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border: 1px solid var(--card-border); border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000; }
+    body[data-theme="galaxy"] .dictation-popup { background: rgba(30, 41, 59, 0.85); }
+    .dictation-popup.visible { display: flex; animation: fadeInPopup 0.2s ease-out; }
+    @keyframes fadeInPopup { from { opacity: 0; transform: translateY(-50%) translateX(-10px); } to { opacity: 1; transform: translateY(-50%) translateX(0); } }
+    .dictation-btn { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 14px; color: var(--text-color); font-weight: 600; text-decoration: none; border: none; background: transparent; text-align: left; }
+    .dictation-btn:hover { background: rgba(0,0,0,0.06); color: var(--button-gradient-start); }
+    body[data-theme="galaxy"] .dictation-btn:hover { background: rgba(255,255,255,0.1); }
+
+    /* --- MODALS & EXTRAS (Integrated from Backend) --- */
+    .header-icon-btn { position: relative; background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; text-decoration: none; }
+    
+    #theme-switcher { position: relative; display: inline-flex; align-items: center; } 
+    #theme-menu { display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px var(--card-shadow); z-index: 1100; overflow: hidden; white-space: nowrap; } 
+    #theme-menu.visible { display: block; } 
+    .theme-option { padding: 0.8rem 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; } 
+    .theme-option:hover { background-color: var(--primary-bg); } 
+    .theme-option .color-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--card-border); }
+
+    .notification-badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; background-color: var(--error-color); color: white; border-radius: 9px; pointer-events: none; font-size: 12px; font-weight: 700; line-height: 18px; text-align: center; padding: 0 4px; border: 2px solid var(--card-bg); }
+    .notification-panel { display: none; position: fixed; top: 80px; right: 5%; width: 350px; max-width: 90%; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: 0 10px 30px var(--card-shadow); z-index: 1050; overflow: hidden; text-align: left; } 
+    .notification-panel.visible { display: block; } 
+    .notification-header { padding: 1rem; border-bottom: 1px solid var(--card-border); } 
+    .notification-header h3 { margin: 0; font-size: 1.1rem; } 
+    .notification-list { max-height: 400px; overflow-y: auto; } 
+    .notification-item { padding: 1rem; border-bottom: 1px solid var(--card-border); font-size: 0.9rem; line-height: 1.5; color: var(--text-color); font-weight: 600; transition: background-color 0.2s; }
+    .notification-item a { text-decoration: none; color: inherit; display: block; } 
+    .notification-item:hover { background-color: var(--primary-bg); } 
+    .notification-item:last-child { border-bottom: none; } 
+    .notification-item small { display: block; margin-top: 0.5rem; font-weight: 600; color: var(--secondary-text-color); }
+    
+    .major-announcement-content { background: var(--card-bg); border-radius: 16px; width: 90%; max-width: 600px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); position: relative; padding: 0; overflow: hidden; transform: scale(0.95); transition: transform 0.3s ease; margin: auto; } 
+    .modal-overlay.visible .major-announcement-content { transform: scale(1); } 
+    #majorAnnouncementImage { width: 100%; height: auto; display: block; max-height: 300px; object-fit: cover; } 
+    .major-announcement-text { padding: 1.5rem 2rem 2rem 2rem; text-align: center; } 
+    #majorAnnouncementTitle { font-size: 2rem; margin-top: 0; margin-bottom: 0.5rem; color: var(--text-color); } 
+    #majorAnnouncementBody { color: var(--secondary-text-color); font-size: 1.1rem; line-height: 1.6; margin-bottom: 0; }
+    
+    .poll-toast { position: fixed; bottom: 100px; right: 20px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 5px 20px var(--card-shadow); padding: 1.5rem; z-index: 2050; width: 320px; max-width: 90%; opacity: 0; transform: translateY(20px); transition: opacity 0.3s, transform 0.3s; pointer-events: none; text-align: left; } 
+    .poll-toast.visible { opacity: 1; transform: translateY(0); pointer-events: auto; } 
+    .poll-toast h4 { margin: 0 0 1rem 0; font-size: 1.1rem; } 
+    .poll-options button { width: 100%; background: var(--primary-bg); color: var(--text-color); border: 1px solid var(--card-border); padding: 0.75rem; text-align: left; margin-bottom: 0.5rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease;} 
+    .poll-options button:hover { border-color: var(--button-gradient-start); }
+
+    .modal-content input, .modal-content textarea, .modal-content select { width: calc(100% - 2.2rem); margin-bottom: 1.2rem; padding: 0.8rem 1rem; border: 1px solid var(--card-border); border-radius: 8px; font-size: 1rem; background-color: var(--primary-bg); color: var(--text-color); box-sizing: border-box; }
+
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; } .modal-overlay.visible { opacity: 1; visibility: visible; } .modal-content { background: var(--card-bg); padding: 2.5rem; border-radius: 20px; width: 90%; max-width: 500px; box-shadow: 0 10px 40px rgba(0,0,0,0.2); position: relative; text-align: center; transform: scale(0.95); transition: transform 0.3s ease; } .modal-overlay.visible .modal-content { transform: scale(1); } .close-button { position: absolute; top: 15px; right: 20px; font-size: 1.8rem; color: var(--secondary-text-color); cursor: pointer; background: none; border: none; z-index: 10; }
+    .anim-hidden { opacity: 0; transform: translateY(30px); } .anim-visible { opacity: 1; transform: translateY(0); transition: opacity 0.6s ease-out, transform 0.6s ease-out; }
+    .tool-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--primary-bg); z-index: 1500; display: flex; flex-direction: column; transform: translateY(100%); opacity: 0; visibility: hidden; transition: transform 0.4s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.4s, visibility 0.4s; } .tool-overlay.visible { transform: translateY(0); opacity: 1; visibility: visible; } .tool-header { flex-shrink: 0; display: flex; justify-content: space-between; align-items: center; padding: 1rem 2.5%; background-color: var(--card-bg); box-shadow: 0 4px 15px var(--card-shadow); } .close-tool-btn { font-size: 1rem; font-weight: 700; padding: 0.6rem 1.2rem; background-color: var(--secondary-text-color); color: white; border-radius: 8px; border: none; cursor: pointer; } .tool-content { flex-grow: 1; overflow-y: auto; padding: 0; position: relative; } .tool-content iframe { width: 100%; height: 100%; border: none; }
+    .loader { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 6px solid var(--primary-bg); border-top: 6px solid var(--button-gradient-start); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; display: none; z-index: 5; } @keyframes spin { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+
+    /* AUTH MODAL STYLES */
+    .google-btn { width: 100%; background: white; color: #333; border: 1px solid #ddd; margin-bottom: 1rem; display: flex; align-items: center; justify-content: center; gap: 10px; font-weight: 600; }
+    .google-btn:hover { background: #f9f9f9; transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .auth-divider { display: flex; align-items: center; text-align: center; margin: 1.5rem 0; color: var(--secondary-text-color); }
+    .auth-divider hr { flex: 1; border: none; border-top: 1px solid var(--card-border); }
+    .auth-link { color: var(--button-gradient-start); font-weight: 700; cursor: pointer; }
+    .auth-link:hover { text-decoration: underline; }
+
+    /* PROFILE MODAL UPGRADES */
+    .profile-cover { height: 120px; background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); border-radius: 20px 20px 0 0; margin: -2.5rem -2rem 0 -2rem; position: relative;}
+    .profile-tabs { display: flex; gap: 0.5rem; justify-content: center; background: var(--primary-bg); padding: 0.3rem; border-radius: 12px; margin-bottom: 1.5rem; }
+    .profile-tabs .tab-btn { flex: 1; padding: 0.6rem; border-radius: 8px; color: var(--secondary-text-color); font-weight: 700; font-size: 0.95rem; border: none; background: transparent; cursor: pointer; transition: all 0.3s; }
+    .profile-tabs .tab-btn.active { background: var(--card-bg); color: var(--text-color); box-shadow: 0 2px 8px var(--card-shadow); }
+    .history-item { padding: 1rem; border: 1px solid var(--card-border); border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; background: var(--primary-bg); }
+    .history-item-title { font-weight: 700; margin: 0 0 0.25rem 0; font-size: 1.05rem;}
+    .history-item-date { font-size: 0.85rem; color: var(--secondary-text-color); margin: 0; }
+    .history-item-price { font-weight: 700; color: var(--success-color); font-size: 1.1rem;}
+    .form-group label { text-align: left; display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600; color: var(--secondary-text-color); }
+
+    /* PASS & SETTINGS STYLES */
+    .pass-card { background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); padding: 1.5rem; border-radius: 12px; color: #422006; margin-bottom: 1.5rem; text-align: left; position: relative; overflow: hidden; box-shadow: 0 4px 15px rgba(234, 179, 8, 0.3); }
+    .pass-card.free { background: var(--primary-bg); color: var(--text-color); border: 1px solid var(--card-border); box-shadow: none; }
+    .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 1rem 0; border-bottom: 1px solid var(--card-border); }
+    .setting-item:last-child { border-bottom: none; }
+    .toggle-switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--secondary-text-color); transition: .3s; border-radius: 34px; }
+    .toggle-slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .toggle-slider { background-color: var(--button-gradient-start); }
+    input:checked + .toggle-slider:before { transform: translateX(20px); }
+
+    /* RESPONSIVE UPDATES FOR NEW DOCK AND BANNER */
+    @media only screen and (max-width: 1024px) {
+        .promo-banner { padding: 2rem 3rem; gap: 2rem; }
+        .promo-banner-content h2 { font-size: 2rem; }
+        .promo-banner-visual img { width: 100%; max-width: 400px; }
+        .page-section h2 { font-size: 2.5rem; }
+    }
+
+    @media only screen and (max-width: 768px) {
+        .main-header { padding: 1rem 3%; }
+        .logo { font-size: 1.5rem; }
+        
+        .home-dashboard { padding: 2rem 5% 3rem 5%; min-height: auto; }
+        
+        .page-section { padding: 3rem 5%; min-height: auto; }
+        .section-content, .page-section:nth-child(even) .section-content { flex-direction: column; gap: 2rem; }
+        .section-content .graphic-content { margin-top: 2rem; }
+        .section-content .text-content, .section-content .graphic-content { flex: none; width: 100%; text-align: center; }
+        .page-section h2 { font-size: 2.2rem; }
+        .page-section p { font-size: 1rem; }
+        
+        #userInfo { display: none; }
+        .footer { flex-direction: column; gap: 1rem; text-align: center; padding-bottom: 100px; } /* Space for mobile dock */
+        .modal-content { width: 95%; padding: 2rem 1.5rem; }
+        .major-announcement-text { padding: 1rem 1.5rem 1.5rem 1.5rem; }
+        .notification-panel { width: 90%; right: 5%; top: 70px; }
+
+        /* Banner mobile adjustments */
+        .promo-banner { flex-direction: column; padding: 2rem; text-align: center; }
+        .promo-banner-content h2 { font-size: 1.8rem; }
+        .promo-banner-visual { justify-content: center; margin-top: 1rem; width: 100%; }
+        .promo-banner-visual img { max-width: 100%; width: 300px; max-height: 200px;}
+        .promo-banner::after { display: none; }
+
+        /* Update dock for mobile so it doesn't block screen */
+        .dock { left: 50%; top: auto; bottom: 20px; transform: translateX(-50%); flex-direction: row; padding: 5px; height: 60px; width: 90%; justify-content: space-around; }
+        .dock-item { width: 50px; height: 50px; }
+        .dock-item span { display: none; } /* Hide text on mobile to save space */
+        .dictation-popup { left: 50%; top: auto; bottom: 90px; transform: translateX(-50%); width: 200px; }
+        @keyframes fadeInPopup { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+    }
+  </style>
+</head>
+<body>
+    <header class="main-header" id="mainHeader">
+        <div class="logo">Check My Steno</div>
+        <div class="header-actions" id="headerActions">
+            <!-- Loading state header -->
+            <div class="loader" style="position:relative; width:20px; height:20px; border-width:3px; display:block; transform: none; top:0; left:0; animation: spin 1s linear infinite;"></div>
+        </div>
+    </header>
+
+    <main id="mainContent">
+       <!-- STATIC HOME DASHBOARD (Banner + Dynamic Shortcuts) -->
+       <section id="home" class="home-dashboard">
+           <div class="dashboard-content">
+               
+               <!-- Firebase Controlled Promo Banner (Hidden by default) -->
+               <div class="promo-banner" id="dynamicPromoBanner">
+                   <div class="promo-banner-content">
+                       <span class="tag" id="promoBannerTag"></span>
+                       <h2 id="promoBannerTitle"></h2>
+                       <p id="promoBannerBody"></p>
+                       <button class="cta-button alt" id="promoBannerBtn"></button>
+                   </div>
+                   <div class="promo-banner-visual">
+                       <img id="promoBannerImg" src="" alt="Promo">
+                   </div>
+               </div>
+
+               <!-- Quick Action Shortcuts (Loaded Dynamically) -->
+               <div>
+                   <h3 class="shortcuts-title">Quick Actions</h3>
+                   <div class="quick-shortcuts" id="quickShortcutsContainer">
+                       <!-- Default Fallback Cards (will be replaced by Firebase if data exists) -->
+                       <button class="shortcut-card" onclick="launchTool('kc')">
+                           <div class="icon-wrap" style="color: #6366f1; background: rgba(99, 102, 241, 0.1);">
+                               <i class="fas fa-keyboard"></i>
+                           </div>
+                           <div class="shortcut-text-wrap">
+                               <h4>Practice KC</h4>
+                               <p>Start your typing practice instantly</p>
+                           </div>
+                       </button>
+
+                       <button class="shortcut-card" onclick="launchTool('dictations')">
+                           <div class="icon-wrap" style="color: #ec4899; background: rgba(236, 72, 153, 0.1);">
+                               <i class="fas fa-headphones-alt"></i>
+                           </div>
+                           <div class="shortcut-text-wrap">
+                               <h4>Prev SSC</h4>
+                               <p>Listen to SSC exam dictations</p>
+                           </div>
+                       </button>
+
+                       <button class="shortcut-card" onclick="launchTool('dictations')">
+                           <div class="icon-wrap" style="color: #f59e0b; background: rgba(245, 158, 11, 0.1);">
+                               <i class="fas fa-history"></i>
+                           </div>
+                           <div class="shortcut-text-wrap">
+                               <h4>Previous Year Dictation</h4>
+                               <p>Transcribe past exam audio files</p>
+                           </div>
+                       </button>
+                   </div>
+               </div>
+
+           </div>
+       </section>
+
+       <!-- TOOLS SECTIONS -->
+       <section id="practice" class="page-section">
+           <div class="section-content anim-hidden">
+               <div class="text-content">
+                   <h2>Practice KC</h2>
+                   <p>Hone your muscle memory with our interactive keyboard drills. Designed to build both speed and accuracy.</p>
+                   <!-- SECURE BY DEFAULT: Button locked in HTML -->
+                   <button class="launch-button locked" data-tool="kc" data-unlocked-text="Launch Practice Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
+               </div>
+               <div class="graphic-content"><i class="fas fa-keyboard"></i></div>
+           </div>
+       </section>
+
+       <section id="dictations" class="page-section">
+            <div class="section-content anim-hidden">
+                <div class="text-content">
+                    <h2>Practice Dictations</h2>
+                    <p>Listen to professionally recorded audio passages and transcribe them in real-time. Improve your shorthand speed.</p>
+                    <button class="launch-button locked" data-tool="dictations" data-unlocked-text="Launch Dictations Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
+                </div>
+                <div class="graphic-content"><i class="fas fa-microphone-alt"></i></div>
+            </div>
+        </section>
+
+       <section id="analysis" class="page-section">
+           <div class="section-content anim-hidden">
+               <div class="text-content">
+                   <h2>Test Analysis</h2>
+                   <p>Upload your tests to receive a detailed breakdown of your performance, identify common errors, and gain insights.</p>
+                   <button class="launch-button locked" data-tool="test-analysis" data-unlocked-text="Launch Analysis Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
+               </div>
+               <div class="graphic-content"><i class="fas fa-chart-line"></i></div>
+           </div>
+       </section>
+
+       <section id="checker" class="page-section">
+           <div class="section-content anim-hidden">
+               <div class="text-content">
+                   <h2>Transcription Checker</h2>
+                   <p>Instantly verify your transcriptions against the source text, highlighting discrepancies with precision.</p>
+                   <button class="launch-button locked" data-tool="transcription-checker" data-unlocked-text="Launch Checker Tool"><i class="fas fa-lock"></i> Locked - Premium</button>
+               </div>
+               <div class="graphic-content"><i class="fas fa-check-double"></i></div>
+           </div>
+       </section>
+
+       <section id="about" class="page-section">
+           <div class="section-content anim-hidden">
+               <div class="text-content">
+                   <h2>About Check My Steno</h2>
+                   <p>Learn about our mission, the technology behind our tools, and how we help stenographers.</p>
+                   <!-- Free Tool (Not Locked) -->
+                   <button class="launch-button" data-tool="about" data-unlocked-text="Learn More">Learn More</button>
+               </div>
+               <div class="graphic-content"><i class="fas fa-book-open"></i></div>
+           </div>
+       </section>
+       
+       <footer class="footer">
+            <p class="footer-copyright">&copy; 2026 Check My Steno. All Rights Reserved.</p>
+            <div class="footer-links">
+                <button onclick="showFeedbackModal()">Feedback</button>
+                <button onclick="launchTool('status')">Platform Status</button>
+                <button onclick="launchTool('contact')">Contact</button>
+            </div>
+       </footer>
+    </main>
+
+    <!-- LEFT VERTICAL DOCK -->
+    <nav class="dock">
+        <a href="#home" class="dock-item"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="#practice" class="dock-item"><i class="fas fa-keyboard"></i><span>Practice</span></a>
+        <div class="dock-item" onclick="toggleDictationPopup(event)"><i class="fas fa-microphone-alt"></i><span>Dictations</span></div>
+        <a href="#analysis" class="dock-item"><i class="fas fa-chart-line"></i><span>Analysis</span></a>
+        <a href="#checker" class="dock-item"><i class="fas fa-check-double"></i><span>Checker</span></a>
+        <a href="#about" class="dock-item"><i class="fas fa-book-open"></i><span>About</span></a>
+    </nav>
+
+    <!-- DICTATIONS POPUP MENU -->
+    <div class="dictation-popup" id="dictationMenu">
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-book-open"></i> Kailash Chandra</button>
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-chart-line"></i> Progressive</button>
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-landmark"></i> President Speech</button>
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-history"></i> Previous Year</button>
+    </div>
+
+    <!-- Iframe Overlays for Tools -->
+    <div id="toolOverlays">
+        <div id="kcTool" class="tool-overlay"><header class="tool-header"><h2>Practice KC</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="kcFrame" src="about:blank"></iframe></div></div>
+        <div id="test-analysisTool" class="tool-overlay"><header class="tool-header"><h2>Test Analysis</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="test-analysisFrame" src="about:blank"></iframe></div></div>
+        <div id="transcription-checkerTool" class="tool-overlay"><header class="tool-header"><h2>Transcription Checker</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="transcription-checkerFrame" src="about:blank"></iframe></div></div>
+        <div id="aboutTool" class="tool-overlay"><header class="tool-header"><h2>About</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="aboutFrame" src="about:blank"></iframe></div></div>
+        <div id="dictationsTool" class="tool-overlay"><header class="tool-header"><h2>Dictations</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content"><div class="loader"></div><iframe id="dictationsFrame" src="about:blank"></iframe></div></div>
+        <div id="contactTool" class="tool-overlay"><header class="tool-header"><h2>Contact Us</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div class="tool-content" id="contactContent" style="padding: 2rem; text-align: center;"><h3>Email: checkmysteno@gmail.com</h3><p>Reach out to us on Telegram: <a href="https://t.me/CheckMySteno" target="_blank">@CheckMySteno</a></p></div></div>
+        <div id="statusTool" class="tool-overlay"><header class="tool-header"><h2>Platform Status</h2><button class="close-tool-btn" onclick="closeAllTools()">Close</button></header><div id="statusContent" class="tool-content"></div></div>
+    </div>
+    
+    <!-- Backend Modals & Notification Panels -->
+    <div class="modal-overlay" id="majorAnnouncementModal"><div class="major-announcement-content"><button id="closeMajorAnnouncement" class="close-button">&times;</button><img id="majorAnnouncementImage" src="" alt="Announcement" /><div class="major-announcement-text"><h2 id="majorAnnouncementTitle"></h2><p id="majorAnnouncementBody"></p></div></div></div>
+    <div id="notificationPanel" class="notification-panel"><div class="notification-header"><h3>Notifications</h3></div><div id="notificationList" class="notification-list"></div></div>
+    <div class="modal-overlay" id="messageOfTheDayModal"><div class="modal-content"><button class="close-button" onclick="this.parentElement.parentElement.classList.remove('visible'); setScrollLock(false);">&times;</button><h2>A Message for You</h2><p id="motdBody"></p></div></div>
+    <div class="modal-overlay" id="feedbackModal"><div class="modal-content"><button class="close-button" onclick="hideFeedbackModal()">&times;</button><h2>Submit Feedback</h2><p>We'd love to hear your thoughts!</p><select id="feedbackType"><option>Suggestion</option><option>Bug Report</option><option>Other</option></select><textarea id="feedbackMessage" rows="5" placeholder="Your message..."></textarea><button class="cta-button" style="width: 100%; margin-top: 1rem;" onclick="submitFeedback()">Send Feedback</button><p id="feedbackStatus" style="min-height: 1em; margin-top:1rem;"></p></div></div>
+    <div class="modal-overlay" id="telegramModal"> <div class="modal-content"> <button class="close-button" onclick="hideTelegramModal(false)">&times;</button> <i class="fab fa-telegram-plane" style="font-size: 3rem; color: #2AABEE; margin-bottom: 1rem; display: block;"></i> <h2>Join our Telegram Group!</h2> <p>For the latest updates, announcements, and support, join our official community.</p> <a href="https://t.me/Checkmystenoo" target="_blank" rel="noopener noreferrer" class="cta-button" style="display:block; text-decoration:none; margin-top: 1.5rem;" onclick="hideTelegramModal(true)"> <i class="fab fa-telegram-plane"></i> Join Now </a> <button style="background:none; border:none; color:var(--secondary-text-color); cursor:pointer; margin-top:1.5rem; font-size: 0.9rem;" onclick="hideTelegramModal(true)">Don't show me again</button> </div> </div>
+    <div id="pollToast" class="poll-toast"><button class="close-button" style="top: 10px; right: 10px;" onclick="this.parentElement.classList.remove('visible')">&times;</button><h4 id="pollQuestion"></h4><div id="pollOptions" class="poll-options"></div></div>
+
+    <!-- LOGIN/SIGNUP MODAL -->
+    <div class="modal-overlay" id="authModal">
+        <div class="modal-content" style="max-width: 400px; padding: 2.5rem 2rem;">
+            <button class="close-button" onclick="hideAuthModal()">&times;</button>
+            
+            <!-- Login View -->
+            <div id="loginView">
+                <h2 style="margin-bottom: 1.5rem;">Welcome Back</h2>
+                <button class="cta-button google-btn" onclick="loginWithGoogle()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px;" alt="Google" /> Continue with Google</button>
+                <div class="auth-divider"><hr><span style="padding: 0 10px; font-size: 0.9rem;">OR EMAIL</span><hr></div>
+                <input type="email" id="loginEmail" placeholder="Email Address" required />
+                <input type="password" id="loginPassword" placeholder="Password" required />
+                <div style="text-align: right; margin-bottom: 1.2rem;"><span style="font-size: 0.85rem;" class="auth-link" onclick="forgotPassword()">Forgot Password?</span></div>
+                <button class="cta-button" onclick="handleEmailLogin()" style="width: 100%;">Log In</button>
+                <p style="margin-top: 1.5rem; font-size: 0.9rem;">Don't have an account? <span class="auth-link" onclick="toggleAuthView('signup')">Sign Up</span></p>
+            </div>
+
+            <!-- Sign Up View -->
+            <div id="signupView" style="display: none;">
+                <h2 style="margin-bottom: 1.5rem;">Create Account</h2>
+                <button class="cta-button google-btn" onclick="loginWithGoogle()"><img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" style="width: 18px;" alt="Google" /> Sign up with Google</button>
+                <div class="auth-divider"><hr><span style="padding: 0 10px; font-size: 0.9rem;">OR EMAIL</span><hr></div>
+                <input type="text" id="signupName" placeholder="Full Name" required />
+                <input type="email" id="signupEmail" placeholder="Email Address" required />
+                <input type="password" id="signupPassword" placeholder="Password (min. 6 chars)" required />
+                <button class="cta-button" onclick="handleEmailSignUp()" style="width: 100%; margin-top: 0.5rem;">Create Account</button>
+                <p style="margin-top: 1.5rem; font-size: 0.9rem;">Already have an account? <span class="auth-link" onclick="toggleAuthView('login')">Log In</span></p>
+            </div>
+            <p id="authErrorMessage" style="color: var(--error-color); font-size: 0.9rem; margin-top: 1rem; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- FULL PROFILE & HISTORY MODAL -->
+    <div class="modal-overlay" id="profileModal">
+        <div class="modal-content" style="max-width: 550px; padding: 2.5rem 2rem; text-align: left;">
+            <div class="profile-cover"><button class="close-button" onclick="hideProfileModal()" style="color: white; top: 15px; right: 15px;">&times;</button></div>
+            <div style="position: relative; margin-top: -45px; text-align: center; margin-bottom: 1.5rem;">
+                <img id="profileModalAvatar" src="" style="width: 90px; height: 90px; border-radius: 50%; object-fit: cover; border: 4px solid var(--card-bg); box-shadow: 0 4px 10px rgba(0,0,0,0.1); background-color: var(--card-bg);" alt="Profile" />
+                <h2 id="profileModalName" style="margin: 10px 0 0 0; font-size: 1.5rem; font-weight: 800; color: var(--text-color);"></h2>
+                <p id="profileModalEmail" style="margin: 0; color: var(--secondary-text-color); font-weight: 600; font-size: 0.9rem;"></p>
+            </div>
+            <div class="profile-tabs">
+                <button class="tab-btn active" onclick="switchProfileTab('edit')"><i class="fas fa-user-edit"></i> Edit Details</button>
+                <button class="tab-btn" onclick="switchProfileTab('history')"><i class="fas fa-history"></i> Purchase History</button>
+            </div>
+            <div id="profileEditView">
+                <div class="form-group"><label>Full Name</label><input type="text" id="editProfileName" placeholder="Enter your full name" /></div>
+                <div class="form-group"><label>Phone Number</label><input type="tel" id="editProfilePhone" placeholder="e.g. +91 9876543210" /></div>
+                <div class="form-group"><label>State / City</label><input type="text" id="editProfileLocation" placeholder="e.g. New Delhi" /></div>
+                <button class="cta-button" onclick="saveProfileDetails()" style="width: 100%; margin-top: 1rem;"><i class="fas fa-save"></i> Save Changes</button>
+                <p id="profileSaveStatus" style="text-align: center; margin-top: 1rem; font-weight: 600; display: none;"></p>
+            </div>
+            <div id="profileHistoryView" style="display: none; max-height: 350px; overflow-y: auto;">
+                <div id="historyListContainer"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW PASS MODAL -->
+    <div class="modal-overlay" id="passModal">
+        <div class="modal-content" style="max-width: 450px; padding: 2.5rem 2rem;">
+            <button class="close-button" onclick="hidePassModal()">&times;</button>
+            <h2 style="margin-bottom: 1.5rem;">My Pass</h2>
+            <div id="passDetailsContainer"></div>
+            <button class="cta-button" style="width: 100%; margin-top: 1rem;" onclick="window.location.href='plans.html'">View All Plans</button>
+        </div>
+    </div>
+
+    <!-- NEW SETTINGS MODAL -->
+    <div class="modal-overlay" id="settingsModal">
+        <div class="modal-content" style="max-width: 450px; padding: 2.5rem 2rem; text-align: left;">
+            <button class="close-button" onclick="hideSettingsModal()">&times;</button>
+            <h2 style="margin-bottom: 1.5rem; text-align: center;">Settings</h2>
+            
+            <div class="setting-item">
+                <div>
+                    <strong style="display:block; color:var(--text-color);">Email Notifications</strong>
+                    <small style="color:var(--secondary-text-color);">Receive updates and offers</small>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" id="set-email-notif" checked><span class="toggle-slider"></span></label>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <strong style="display:block; color:var(--text-color);">Auto-Save Progress</strong>
+                    <small style="color:var(--secondary-text-color);">Automatically save dictations</small>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" id="set-autosave" checked><span class="toggle-slider"></span></label>
+            </div>
+            
+            <div class="setting-item">
+                <div>
+                    <strong style="display:block; color:var(--text-color);">High Contrast</strong>
+                    <small style="color:var(--secondary-text-color);">Improve visual readability</small>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" id="set-contrast"><span class="toggle-slider"></span></label>
+            </div>
+            
+            <button class="cta-button" style="width: 100%; margin-top: 2rem;" onclick="saveSettings()">Save Settings</button>
+        </div>
+    </div>
+    
+<script>
+    // --- FIREBASE CONFIG ---
+    const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
+    if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
+    
+    const DB = firebase.firestore();
+    const AUTH = firebase.auth();
+    const GOOGLE_PROVIDER = new firebase.auth.GoogleAuthProvider();
+    const GID = id => document.getElementById(id);
+    let currentUser = null;
+    let userDocUnsubscribe = null;
+    let pendingSignupName = null; 
+
+    // --- PROMO BANNER BACKEND CONNECTION ---
+    function loadPromoBanner() {
+        const bannerContainer = GID('dynamicPromoBanner');
+        const tagEl = GID('promoBannerTag');
+        const titleEl = GID('promoBannerTitle');
+        const bodyEl = GID('promoBannerBody');
+        const btnEl = GID('promoBannerBtn');
+        const imgEl = GID('promoBannerImg');
+
+        DB.collection('siteConfig').doc('promoBanner').get().then(doc => {
+            if (doc.exists && doc.data().isActive) {
+                const data = doc.data();
+                tagEl.textContent = data.tag || '';
+                tagEl.style.display = data.tag ? 'inline-block' : 'none';
+                titleEl.textContent = data.title || '';
+                bodyEl.textContent = data.body || '';
+                btnEl.textContent = data.buttonText || 'Click Here';
+                btnEl.onclick = () => { if(data.buttonLink) window.location.href = data.buttonLink; };
+                
+                if (data.imageUrl) { 
+                    imgEl.src = data.imageUrl; 
+                    imgEl.style.display = 'block'; 
+                } else { 
+                    imgEl.style.display = 'none'; 
+                }
+                bannerContainer.style.display = 'flex';
+            } else {
+                bannerContainer.style.display = 'none';
+            }
+        }).catch(err => {
+            console.error("Error loading promo banner:", err);
+            bannerContainer.style.display = 'none';
+        });
+    }
+
+    // --- QUICK ACTIONS BACKEND CONNECTION ---
+    function loadQuickActions() {
+        const container = GID('quickShortcutsContainer');
+        
+        DB.collection('siteConfig').doc('quickActions').get().then(doc => {
+            if (doc.exists && doc.data().actions && doc.data().actions.length > 0) {
+                const actions = doc.data().actions;
+                let html = '';
+                
+                actions.forEach(action => {
+                    const isUrl = action.target.includes('.html') || action.target.includes('http');
+                    const clickHandler = isUrl ? `window.location.href='${action.target}'` : `launchTool('${action.target}')`;
+                    const color = action.color || '#6366f1';
+                    
+                    html += `
+                        <button class="shortcut-card" onclick="${clickHandler}">
+                            <div class="icon-wrap" style="color: ${color}; background: ${color}1A;">
+                                <i class="${action.icon || 'fas fa-star'}"></i>
+                            </div>
+                            <div class="shortcut-text-wrap">
+                                <h4>${action.title}</h4>
+                                <p>${action.desc}</p>
+                            </div>
+                        </button>
+                    `;
+                });
+                container.innerHTML = html;
+            }
+        }).catch(err => {
+            console.error("Error loading quick actions:", err);
+        });
+    }
+
+    // --- DICTATION POPUP LOGIC ---
+    function toggleDictationPopup(e) {
+        if(e) e.stopPropagation();
+        const menu = GID("dictationMenu");
+        if(menu) menu.classList.toggle("visible");
+    }
+
+    // --- AUTH MODAL LOGIC ---
+    function showAuthModal() { GID('authModal').classList.add('visible'); setScrollLock(true); toggleAuthView('login'); }
+    function hideAuthModal() { GID('authModal').classList.remove('visible'); setScrollLock(false); GID('authErrorMessage').style.display = 'none'; }
+    function toggleAuthView(view) { GID('loginView').style.display = view === 'login' ? 'block' : 'none'; GID('signupView').style.display = view === 'signup' ? 'block' : 'none'; GID('authErrorMessage').style.display = 'none'; }
+    function showAuthError(msg, isSuccess = false) { const errEl = GID('authErrorMessage'); errEl.textContent = msg; errEl.style.color = isSuccess ? 'var(--success-color)' : 'var(--error-color)'; errEl.style.display = 'block'; }
+
+    async function handleEmailSignUp() {
+        const name = GID('signupName').value.trim();
+        const email = GID('signupEmail').value.trim();
+        const password = GID('signupPassword').value;
+        if(!name || !email || !password) return showAuthError("All fields are required.");
+        if(password.length < 6) return showAuthError("Password must be at least 6 characters.");
+        
+        pendingSignupName = name;
+        try {
+            showAuthError("Creating account...", true);
+            const userCredential = await AUTH.createUserWithEmailAndPassword(email, password);
+            await userCredential.user.updateProfile({ displayName: name });
+            hideAuthModal();
+        } catch (error) {
+            let msg = error.message;
+            if(error.code === 'auth/email-already-in-use') msg = "Email is already registered. Please login.";
+            showAuthError(msg);
+        }
+    }
+
+    async function handleEmailLogin() {
+        const email = GID('loginEmail').value.trim();
+        const password = GID('loginPassword').value;
+        if(!email || !password) return showAuthError("Please enter email and password.");
+        
+        try {
+            showAuthError("Logging in...", true);
+            await AUTH.signInWithEmailAndPassword(email, password);
+            hideAuthModal();
+        } catch (error) {
+            showAuthError("Invalid email or password.");
+        }
+    }
+
+    async function forgotPassword() {
+        const email = GID('loginEmail').value.trim();
+        if(!email) return showAuthError("Please enter your email address first to reset your password.");
+        try {
+            await AUTH.sendPasswordResetEmail(email);
+            showAuthError("Password reset email sent! Check your inbox.", true);
+        } catch (error) {
+            showAuthError(error.message);
+        }
+    }
+
+    function loginWithGoogle() { 
+        AUTH.signInWithPopup(GOOGLE_PROVIDER).then(() => {
+            hideAuthModal();
+        }).catch(err => {
+            console.error(err); showAuthError("Login failed: " + err.message);
+        }); 
+    }
+    
+    function logout() { 
+        AUTH.signOut().then(() => { closeAllTools(); window.location.hash = '#home'; }); 
+    }
+    
+    function isUserPremium(user) {
+        if (!user || user.plan !== 'premium' || !user.expiry) return false;
+        const now = new Date();
+        const expiryDate = user.expiry.toDate ? user.expiry.toDate() : new Date(user.expiry);
+        return now < expiryDate;
+    }
+
+    // --- AUTH & PROFILE CREATION LOGIC ---
+    AUTH.onAuthStateChanged(async (user) => {
+        if (user) {
+            try {
+                const userRef = DB.collection('users').doc(user.uid);
+                if (userDocUnsubscribe) userDocUnsubscribe();
+                
+                userDocUnsubscribe = userRef.onSnapshot(async (docSnap) => {
+                    try {
+                        if (!docSnap.exists) {
+                            const newUserData = {
+                                name: user.displayName || pendingSignupName || 'New User',
+                                email: user.email,
+                                photoURL: user.photoURL || '',
+                                plan: 'free',
+                                phone: '',
+                                location: '',
+                                expiry: null,
+                                created_at: firebase.firestore.FieldValue.serverTimestamp()
+                            };
+                            await userRef.set(newUserData);
+                            currentUser = { uid: user.uid, ...newUserData };
+                            pendingSignupName = null; 
+                        } else {
+                            currentUser = { uid: user.uid, ...docSnap.data() };
+                        }
+                        updateUserUI(currentUser);
+                    } catch (err) {
+                        console.error("Error saving profile data:", err);
+                        alert("Error saving profile. Make sure Firestore Database is created and Rules are correct.");
+                        updateUserUI(null);
+                    }
+                }, (error) => {
+                    console.error("Database connection error:", error);
+                    alert("Database Error: Make sure Firestore Database is created in the Firebase Console.");
+                    updateUserUI(null);
+                });
+            } catch (err) { console.error("Error setting up DB connection:", err); }
+        } else {
+            if (userDocUnsubscribe) userDocUnsubscribe();
+            currentUser = null;
+            updateUserUI(null);
+        }
+    });
+
+    // --- TOOLS ---
+    function setScrollLock(locked) { document.body.classList[locked ? 'add' : 'remove']('modal-open'); }
+    
+    function launchTool(toolName) {
+        const toolOverlay = GID(`${toolName}Tool`);
+        if (!toolOverlay) return;
+        
+        if (toolName === 'status') renderPlatformStatus();
+        
+        const iframe = toolOverlay.querySelector('iframe');
+        if(iframe) {
+            const loader = toolOverlay.querySelector('.loader'); 
+            if(loader) loader.style.display = 'block';
+            iframe.src = 'about:blank'; iframe.style.opacity = '0';
+            iframe.onload = () => { if(loader) loader.style.display = 'none'; iframe.style.opacity = '1'; };
+            iframe.src = `${toolName}.html`;
+        }
+        toolOverlay.classList.add('visible'); setScrollLock(true);
+    }
+    function closeAllTools() { document.querySelectorAll('.tool-overlay').forEach(o => { const i = o.querySelector('iframe'); if (i) i.src = 'about:blank'; o.classList.remove('visible'); }); setScrollLock(false); }
+
+    // --- NEW PASS & SETTINGS LOGIC ---
+    function showPassModal() {
+        if (!currentUser) {
+            showAuthModal();
+            return;
+        }
+        const isPremium = isUserPremium(currentUser);
+        const container = GID('passDetailsContainer');
+        
+        if (isPremium) {
+            const expiryDate = currentUser.expiry.toDate ? currentUser.expiry.toDate().toLocaleDateString() : new Date(currentUser.expiry).toLocaleDateString();
+            container.innerHTML = `
+                <div class="pass-card">
+                    <i class="fas fa-crown" style="font-size: 2rem; opacity: 0.8; position: absolute; right: -10px; bottom: -10px; transform: rotate(-20deg) scale(3);"></i>
+                    <h3 style="margin: 0 0 5px 0;">Premium Pass</h3>
+                    <p style="margin: 0; font-weight: 600;">Status: Active</p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Valid until: ${expiryDate}</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="pass-card free">
+                    <i class="fas fa-ticket-alt" style="font-size: 2rem; opacity: 0.1; position: absolute; right: 10px; bottom: 10px; transform: rotate(-20deg) scale(3);"></i>
+                    <h3 style="margin: 0 0 5px 0;">Free Tier</h3>
+                    <p style="margin: 0; color: var(--secondary-text-color);">You don't have an active premium pass.</p>
+                </div>
+            `;
+        }
+        
+        GID('passModal').classList.add('visible');
+        setScrollLock(true);
+    }
+    function hidePassModal() { GID('passModal').classList.remove('visible'); setScrollLock(false); }
+
+    function showSettingsModal() { 
+        GID('set-email-notif').checked = localStorage.getItem('setEmailNotif') !== 'false';
+        GID('set-autosave').checked = localStorage.getItem('setAutosave') !== 'false';
+        GID('set-contrast').checked = localStorage.getItem('setContrast') === 'true';
+        
+        GID('settingsModal').classList.add('visible'); 
+        setScrollLock(true); 
+    }
+    function hideSettingsModal() { GID('settingsModal').classList.remove('visible'); setScrollLock(false); }
+    function saveSettings() {
+        localStorage.setItem('setEmailNotif', GID('set-email-notif').checked);
+        localStorage.setItem('setAutosave', GID('set-autosave').checked);
+        localStorage.setItem('setContrast', GID('set-contrast').checked);
+        
+        if(GID('set-contrast').checked) {
+            document.body.style.filter = "contrast(115%)";
+        } else {
+            document.body.style.filter = "none";
+        }
+        
+        hideSettingsModal();
+    }
+
+    // --- BACKEND SYSTEM FUNCTIONS (Theme, Notifications, Polls, Status) ---
+    function applyTheme(themeName) { document.body.dataset.theme = themeName; localStorage.setItem('selectedTheme', themeName); }
+    function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const [key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
+    
+    function showTelegramModal() { if (localStorage.getItem('hideTelegramModal') !== 'true') { setTimeout(() => { const tm = GID('telegramModal'); if(tm) { tm.classList.add('visible'); setScrollLock(true); } }, 2500); } }
+    function hideTelegramModal(preventShowAgain) { if (preventShowAgain) { localStorage.setItem('hideTelegramModal', 'true'); } const tm = GID('telegramModal'); if(tm) { tm.classList.remove('visible'); setScrollLock(false); } }
+    
+    function showFeedbackModal() { const fm = GID('feedbackModal'); if(fm) { fm.classList.add('visible'); setScrollLock(true); } }
+    function hideFeedbackModal() { const fm = GID('feedbackModal'); if(fm) { fm.classList.remove('visible'); setScrollLock(false); GID('feedbackMessage').value = ''; GID('feedbackStatus').textContent = ''; } }
+    async function submitFeedback() { const type = GID('feedbackType').value, message = GID('feedbackMessage').value.trim(), statusEl = GID('feedbackStatus'); if (!message) { statusEl.textContent = "Message cannot be empty."; return; } statusEl.textContent = "Sending..."; const feedbackData = { type, message, timestamp: firebase.firestore.FieldValue.serverTimestamp(), status: 'New' }; if (currentUser) { feedbackData.userEmail = currentUser.email; feedbackData.userName = currentUser.name; } try { await DB.collection('feedback').add(feedbackData); statusEl.textContent = "Thank you! Your feedback has been sent."; setTimeout(hideFeedbackModal, 2000); } catch (e) { statusEl.textContent = "Could not send feedback. Please try again."; } }
+    
+    function checkForMessageOfTheDay() { const motdRef = DB.collection('siteConfig').doc('messageOfTheDay'); motdRef.get().then(doc => { if (doc.exists && doc.data().isActive) { const data = doc.data(); const seenKey = `seenMessage_${data.id}`; if (!localStorage.getItem(seenKey)) { GID('motdBody').textContent = data.message; GID('messageOfTheDayModal').classList.add('visible'); setScrollLock(true); localStorage.setItem(seenKey, 'true'); } } }); }
+    
+    function renderPlatformStatus() { const content = GID('statusContent'); if(!content) return; content.innerHTML = '<div class="loader" style="display:block; position:relative; top: 40%;"></div>'; DB.collection('platformStatus').orderBy('timestamp', 'desc').limit(10).get().then(snapshot => { let html = '<div style="padding: 2rem;">'; if (snapshot.empty) { html += '<p>No recent status updates. All systems are operational.</p>'; } else { snapshot.forEach(doc => { const item = doc.data(); const date = item.timestamp.toDate().toLocaleString(); const statusClass = item.status === 'Resolved' ? 'status-open' : item.status === 'Investigating' ? 'status-Awaiting-Reply' : 'status-closed'; html += `<div class="card" style="margin-bottom:1.5rem; border:1px solid var(--card-border); padding:1rem; border-radius:8px;"><h3>${item.title} <span class="ticket-status ${statusClass}" style="float:right;">${item.status}</span></h3><p>${item.details}</p><small style="opacity:0.7;">${date}</small></div>`; }); } html += '</div>'; content.innerHTML = html; }).catch(err => { content.innerHTML = '<div style="padding: 2rem;"><h2>Error</h2><p>Could not load platform status.</p></div>'; }); }
+    
+    function checkForPoll() { const pollRef = DB.collection('siteConfig').doc('activePoll'); pollRef.get().then(doc => { if (doc.exists && doc.data().isActive) { const poll = doc.data(); const seenKey = `votedPoll_${poll.id}`; if (!localStorage.getItem(seenKey)) { GID('pollQuestion').textContent = poll.question; const optionsContainer = GID('pollOptions'); optionsContainer.innerHTML = ''; poll.options.forEach(option => { optionsContainer.innerHTML += `<button onclick="submitPollVote('${poll.id}', '${option.replace(/'/g, "\\'")}')">${option}</button>`; }); GID('pollToast').classList.add('visible'); } } }); }
+    async function submitPollVote(pollId, option) { GID('pollToast').classList.remove('visible'); const resultsRef = DB.collection('pollResults').doc(pollId); const increment = firebase.firestore.FieldValue.increment(1); try { await resultsRef.set({ results: { [option]: increment } }, { merge: true }); localStorage.setItem(`votedPoll_${pollId}`, 'true'); } catch (e) { console.error("Error submitting vote:", e); } }
+    
+    function handleNotifications() { const btn = GID('notificationBtn'); if (!btn) return; const badge = GID('notificationBadge'), panel = GID('notificationPanel'), list = GID('notificationList'); DB.collection('notifications').orderBy('timestamp', 'desc').limit(20).get().then(snapshot => { if (snapshot.empty) { list.innerHTML = '<p style="text-align:center;color:var(--secondary-text-color);padding:1.5rem;">No new notifications.</p>'; return; } const lastSeen = localStorage.getItem('lastSeenNotificationTimestamp') || 0; const latestTimestamp = snapshot.docs[0].data().timestamp.toMillis(); let unreadCount = 0; let html = ''; snapshot.forEach(doc => { const n = doc.data(); if (n.timestamp.toMillis() > lastSeen) { unreadCount++; } const date = n.timestamp.toDate().toLocaleDateString(); let itemHtml = `<div class="notification-item">${n.message}<small>${date}</small></div>`; html += n.link ? `<a href="${n.link}" target="_blank" rel="noopener noreferrer">${itemHtml}</a>` : `<div style="cursor:default;">${itemHtml}</div>`; }); list.innerHTML = html; if (unreadCount > 0) { badge.textContent = unreadCount; badge.style.display = 'block'; } else { badge.style.display = 'none'; } btn.onclick = (e) => { e.stopPropagation(); panel.classList.toggle('visible'); badge.style.display = 'none'; localStorage.setItem('lastSeenNotificationTimestamp', latestTimestamp); }; }).catch(err => console.error("Error handling notifications:", err)); }
+    
+    function showMajorAnnouncement() { const modal = GID('majorAnnouncementModal'); const closeBtn = GID('closeMajorAnnouncement'); const imgEl = GID('majorAnnouncementImage'); const titleEl = GID('majorAnnouncementTitle'); const bodyEl = GID('majorAnnouncementBody'); const announcementRef = DB.collection('siteConfig').doc('majorAnnouncement'); announcementRef.get().then(doc => { if (doc.exists) { const data = doc.data(); if (data.isActive && data.id) { const announcementKey = `announcementClosed_${data.id}`; const hasBeenClosed = localStorage.getItem(announcementKey); if (!hasBeenClosed) { titleEl.textContent = data.title || ''; bodyEl.textContent = data.body || ''; if (data.imageUrl) { imgEl.src = data.imageUrl; imgEl.style.display = 'block'; } else { imgEl.style.display = 'none'; } modal.classList.add('visible'); setScrollLock(true); closeBtn.onclick = () => { modal.classList.remove('visible'); setScrollLock(false); localStorage.setItem(announcementKey, 'true'); }; } } } }).catch(err => { console.error("Error fetching major announcement:", err); }); }
+
+    // --- FULL PROFILE MODAL SYSTEM ---
+    function showProfileModal() {
+        if (!currentUser) return;
+        GID('profile-dropdown').style.display = 'none'; // Close header dropdown
+        
+        let displayAvatar = currentUser.photoURL;
+        if (!displayAvatar || displayAvatar.includes('gravatar') || displayAvatar === '') {
+            displayAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(currentUser.name || 'User')}&background=6366f1&color=fff&bold=true&rounded=true&size=128`;
+        }
+
+        GID('profileModalAvatar').src = displayAvatar;
+        GID('profileModalName').textContent = currentUser.name || 'User';
+        GID('profileModalEmail').textContent = currentUser.email || '';
+        
+        GID('editProfileName').value = currentUser.name || '';
+        GID('editProfilePhone').value = currentUser.phone || '';
+        GID('editProfileLocation').value = currentUser.location || '';
+        
+        GID('profileModal').classList.add('visible');
+        setScrollLock(true);
+        switchProfileTab('edit');
+    }
+
+    function hideProfileModal() {
+        GID('profileModal').classList.remove('visible');
+        setScrollLock(false);
+        GID('profileSaveStatus').style.display = 'none';
+    }
+
+    function switchProfileTab(tab) {
+        const editBtn = document.querySelectorAll('.profile-tabs .tab-btn')[0];
+        const histBtn = document.querySelectorAll('.profile-tabs .tab-btn')[1];
+        
+        if (tab === 'edit') {
+            GID('profileEditView').style.display = 'block';
+            GID('profileHistoryView').style.display = 'none';
+            editBtn.classList.add('active');
+            histBtn.classList.remove('active');
+        } else {
+            GID('profileEditView').style.display = 'none';
+            GID('profileHistoryView').style.display = 'block';
+            editBtn.classList.remove('active');
+            histBtn.classList.add('active');
+            loadPurchaseHistory();
+        }
+    }
+
+    async function saveProfileDetails() {
+        if (!currentUser) return;
+        
+        const newName = GID('editProfileName').value.trim();
+        const newPhone = GID('editProfilePhone').value.trim();
+        const newLocation = GID('editProfileLocation').value.trim();
+        
+        const statusEl = GID('profileSaveStatus');
+        statusEl.style.display = 'block';
+        statusEl.style.color = 'var(--text-color)';
+        statusEl.textContent = 'Saving details...';
+        
+        try {
+            // Update Firestore
+            await DB.collection('users').doc(currentUser.uid).update({
+                name: newName,
+                phone: newPhone,
+                location: newLocation
+            });
+            
+            // Update Firebase Auth Profile if name changed
+            if (newName && newName !== currentUser.name && AUTH.currentUser) {
+                await AUTH.currentUser.updateProfile({ displayName: newName });
+            }
+            
+            statusEl.style.color = 'var(--success-color)';
+            statusEl.textContent = 'Profile updated successfully!';
+            GID('profileModalName').textContent = newName || 'User';
+            
+            // Update Avatar if name changed
+            let displayAvatar = currentUser.photoURL;
+            if (!displayAvatar || displayAvatar.includes('gravatar') || displayAvatar === '') {
+                GID('profileModalAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName || 'User')}&background=6366f1&color=fff&bold=true&rounded=true&size=128`;
+            }
+            
+            setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
+        } catch (err) {
+            console.error("Error updating profile:", err);
+            statusEl.style.color = 'var(--error-color)';
+            statusEl.textContent = 'Failed to update profile. Try again.';
+        }
+    }
+
+    async function loadPurchaseHistory() {
+        const container = GID('historyListContainer');
+        container.innerHTML = '<div class="loader" style="display: block; position: relative; margin: 2rem auto;"></div>';
+        
+        try {
+            // Fetching from a 'payments' subcollection
+            const snapshot = await DB.collection('users').doc(currentUser.uid).collection('payments').orderBy('timestamp', 'desc').get();
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<p style="text-align: center; color: var(--secondary-text-color); margin-top: 2rem;">No recent purchases found.</p>';
+                return;
+            }
+            
+            let html = '';
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleDateString() : 'N/A';
+                const amount = data.amount || 0;
+                const planName = data.planName || 'Premium Subscription';
+                const status = data.status || 'Success';
+                
+                html += `
+                    <div class="history-item">
+                        <div>
+                            <h4 class="history-item-title">${planName}</h4>
+                            <p class="history-item-date">${dateStr} &bull; <span style="text-transform: capitalize;">${status}</span></p>
+                        </div>
+                        <div class="history-item-price">₹${amount}</div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        } catch (err) {
+            console.error("Error loading history:", err);
+            container.innerHTML = '<p style="text-align: center; color: var(--error-color); margin-top: 2rem;">Could not load purchase history.</p>';
+        }
+    }
+
+    // --- UI UPDATER ---
+    function updateUserUI(userData) {
+        const headerActions = GID('headerActions');
+        const allLaunchButtons = document.querySelectorAll('.launch-button');
+        const premiumTools =['kc', 'test-analysis', 'transcription-checker', 'dictations'];
+
+        // Tightly grouped Toolbar with Pass and Settings added
+        const headerIconsHTML = `
+            <div class="header-icons-toolbar">
+                <div id="theme-switcher">
+                    <button id="theme-btn" title="Change Theme" class="header-icon-btn"><i class="fas fa-palette"></i></button>
+                    <div id="theme-menu"></div>
+                </div>
+                <button id="notificationBtn" class="header-icon-btn" title="Notifications">
+                    <i class="fas fa-bell"></i><span id="notificationBadge" class="notification-badge" style="display: none;"></span>
+                </button>
+                <button class="header-icon-btn" title="My Pass" onclick="showPassModal()"><i class="fas fa-ticket-alt"></i></button>
+                <button class="header-icon-btn" title="Settings" onclick="showSettingsModal()"><i class="fas fa-cog"></i></button>
+            </div>
+        `;
+
+        if (userData) {
+            const isPremium = isUserPremium(userData);
+            const planText = isPremium ? `<span style="color:var(--success-color); font-weight:bold;"><i class="fas fa-crown"></i> Premium Active</span>` : `<span style="color:var(--secondary-text-color); font-weight:bold;">Free Plan</span>`;
+            const expiryText = isPremium && userData.expiry ? `<br><small style="font-size:0.8rem; color:var(--secondary-text-color);">Valid till: ${userData.expiry.toDate ? userData.expiry.toDate().toLocaleDateString() : new Date(userData.expiry).toLocaleDateString()}</small>` : '';
+            
+            // Dynamic Avatar Logic
+            let displayAvatar = userData.photoURL;
+            if (!displayAvatar || displayAvatar.includes('gravatar') || displayAvatar === '') {
+                displayAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(userData.name || 'User')}&background=6366f1&color=fff&bold=true&rounded=true`;
+            }
+
+            headerActions.innerHTML = `
+                ${headerIconsHTML}
+                ${!isPremium ? '<button class="cta-button" onclick="window.location.href=\'plans.html\'" style="background: linear-gradient(135deg, var(--gold-start), var(--gold-end)); color: #422006; margin-left: 0.5rem;">Upgrade</button>' : '<span style="color: var(--gold-start); font-weight: bold; margin-left: 0.5rem;"><i class="fas fa-crown"></i> Pro</span>'}
+                
+                <div id="profile-menu-container" style="position:relative; margin-left: 0.5rem;">
+                    <button id="profile-btn" class="header-icon-btn" style="border-radius:50%; background:var(--primary-bg); width:42px; height:42px; border:2px solid var(--button-gradient-start); display:flex; align-items:center; justify-content:center; padding:0; overflow:hidden;">
+                        <img src="${displayAvatar}" style="width:100%; height:100%; object-fit:cover; background-color: var(--card-bg);" alt="Profile">
+                    </button>
+                    
+                    <div id="profile-dropdown" style="display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left;">
+                        <h3 style="margin:0 0 5px 0; font-size:1.1rem; color:var(--text-color);">${userData.name}</h3>
+                        <p style="margin:0 0 15px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
+                        
+                        <div style="background:var(--primary-bg); padding:12px; border-radius:8px; margin-bottom:15px; text-align:center;">
+                            ${planText}
+                            ${expiryText}
+                        </div>
+                        
+                        <button class="cta-button" style="width:100%; margin-bottom:10px; padding:0.8rem; background: var(--button-gradient-start);" onclick="showProfileModal()"><i class="fas fa-user-edit"></i> Manage Profile</button>
+                        ${!isPremium ? `<button class="cta-button" style="width:100%; margin-bottom:10px; padding:0.8rem;" onclick="window.location.href='plans.html'">Get Premium Pass</button>` : ''}
+                        <button class="cta-button" style="width:100%; background:var(--secondary-text-color); padding:0.8rem;" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    </div>
+                </div>
+            `;
+
+            // Profile Click Logic
+            GID('profile-btn').onclick = (e) => {
+                e.stopPropagation();
+                const pd = GID('profile-dropdown');
+                pd.style.display = pd.style.display === 'none' ? 'block' : 'none';
+            };
+
+            // Setup Launch Buttons
+            allLaunchButtons.forEach(btn => {
+                const tool = btn.dataset.tool;
+                if (premiumTools.includes(tool)) {
+                    if (isPremium) {
+                        btn.classList.remove('locked');
+                        if (btn.dataset.unlockedText) btn.innerHTML = btn.dataset.unlockedText;
+                        btn.onclick = () => launchTool(tool);
+                    } else {
+                        btn.classList.add('locked');
+                        btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
+                        // Redirect free users to plans page
+                        btn.onclick = () => { window.location.href = 'plans.html'; };
+                    }
+                } else {
+                    btn.onclick = () => launchTool(tool);
+                }
+            });
+
+        } else {
+            // Not Logged In
+            headerActions.innerHTML = `
+                ${headerIconsHTML}
+                <button id="loginBtn" class="cta-button" onclick="showAuthModal()" style="margin-left: 0.5rem;">Login / Sign Up</button>
+            `;
+
+            allLaunchButtons.forEach(btn => {
+                const tool = btn.dataset.tool;
+                if (premiumTools.includes(tool)) {
+                    btn.classList.add('locked');
+                    btn.innerHTML = `<i class="fas fa-lock"></i> Locked - Premium`;
+                    btn.onclick = () => { showAuthModal(); };
+                } else {
+                    btn.onclick = () => launchTool(tool);
+                }
+            });
+        }
+        
+        attachThemeSwitcherListeners();
+        setTimeout(handleNotifications, 100);
+    }
+    
+    // --- INIT ---
+    window.onload = function() {
+        document.querySelectorAll('.anim-hidden').forEach(el => new IntersectionObserver((entries) => { entries.forEach(entry => { if (entry.isIntersecting) { entry.target.classList.add('anim-visible'); entry.target.classList.remove('anim-hidden'); } }); }, { threshold: 0.1 }).observe(el));
+        
+        const savedTheme = localStorage.getItem('selectedTheme') || 'default';
+        applyTheme(savedTheme);
+        showMajorAnnouncement();
+        checkForPoll();
+        showTelegramModal();
+        checkForMessageOfTheDay();
+        
+        // LOAD FIREBASE DATA
+        loadPromoBanner();
+        loadQuickActions();
+
+        // Apply contrast setting if previously saved
+        if(localStorage.getItem('setContrast') === 'true') document.body.style.filter = "contrast(115%)";
+
+        // Hide profile, theme, dictation and notification menus when clicking outside
+        document.addEventListener('click', (e) => {
+            if(!e.target.closest('#profile-menu-container') && !e.target.closest('#profileModal')) { const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none'; }
+            if(!e.target.closest('#theme-switcher')) { const tm = GID('theme-menu'); if(tm) tm.classList.remove('visible'); }
+            if(!e.target.closest('#notificationBtn') && !e.target.closest('#notificationPanel')) { const np = GID('notificationPanel'); if(np) np.classList.remove('visible'); }
+            if(!e.target.closest('#dictationMenu') && !e.target.closest('.dock-item[onclick]')) { const dm = GID('dictationMenu'); if(dm) dm.classList.remove('visible'); }
+        });
+        document.addEventListener('keydown', (e) => { 
+            if (e.key === 'Escape') { 
+                closeAllTools(); 
+                hideAuthModal();
+                hideProfileModal();
+                hidePassModal();
+                hideSettingsModal();
+                const telModal = GID('telegramModal'); if(telModal) telModal.classList.remove('visible');
+                const majorModal = GID('majorAnnouncementModal'); if(majorModal && majorModal.classList.contains('visible')) { majorModal.querySelector('.close-button').click(); }
+            } 
+        });
+    };
+</script>    
+</body>
+</html>
