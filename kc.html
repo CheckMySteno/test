@@ -2154,126 +2154,92 @@ const AITeacher = {
     // API FETCH LOGIC: Constructs prompt and calls backend
     // ---------------------------------------------------------------------
     fetchAnalysis: async function(data) {
-        const modal = document.getElementById('aiModal');
-        const content = document.getElementById('aiModalContent');
-        const loader = document.getElementById('aiLoadingState');
-        
-        modal.classList.add('visible');
-        
-        const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
-        
-        if (this.cache[cacheKey]) {
-            this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
-            return;
-        }
+    const modal = document.getElementById('aiModal');
+    const content = document.getElementById('aiModalContent');
+    const loader = document.getElementById('aiLoadingState');
+    
+    modal.classList.add('visible');
+    
+    const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}_${data.userContext}`;
+    
+    if (this.cache[cacheKey]) {
+        this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
+        return;
+    }
 
-        if (this.isFetching) {
-            content.style.display = 'none';
-            loader.style.display = 'block';
-            return;
-        }
-
-        this.isFetching = true;
+    if (this.isFetching) {
         content.style.display = 'none';
         loader.style.display = 'block';
+        return;
+    }
 
-        try {
-            // Highly specific prompt with pure raw text context injected
-            const promptText = `Act as an English grammar teacher for stenography students.
-A student made a transcription error. Analyze it and explain the grammar or punctuation rule.
+    this.isFetching = true;
+    content.style.display = 'none';
+    loader.style.display = 'block';
 
-Error Type: ${data.type}
-What the student ACTUALLY TYPED: "${data.typedWord}"
-What the original passage CORRECTLY HAD: "${data.originalWord}"
+    try {
+        const promptText = `You are a strict English grammar teacher for SSC stenography students.
+
+A transcription mistake has already been identified.
+
+Error Type: ${data.type} (already confirmed)
+Student Typed: "${data.typedWord}"
+Correct Text: "${data.originalWord}"
 
 --- Context ---
-Student's Raw Sentence: "... ${data.userContext} ..."
-Original Raw Sentence: "... ${data.originalContext} ..."
+Student Sentence: "... ${data.userContext} ..."
+Original Sentence: "... ${data.originalContext} ..."
 
-Explain why "${data.typedWord}" is incorrect and why "${data.originalWord}" is correct based purely on the provided context. Do not hallucinate errors.
-Respond EXACTLY in this JSON format:
+IMPORTANT:
+- Do NOT assume blindly that the correct text is always universally correct
+- Check if the rule depends on context (proper noun vs common noun)
+- If context is unclear, say "based on general usage"
+- Be precise and exam-focused
+- Do NOT over-generalize rules
+
+Respond ONLY in valid JSON:
+
 {
-  "explanation": "Clear explanation of the mistake based on the context.",
-  "rule": "The underlying grammar, spelling, or punctuation rule.",
-  "examples":["Correct example 1", "Correct example 2"]
+  "explanation": "Clear explanation based on context.",
+  "rule": "Grammar rule (mention if context dependent).",
+  "examples": ["Example 1", "Example 2"]
 }`;
 
-            const response = await fetch(this.ENDPOINT_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: "analyzeSingle",
-                    prompt: promptText 
-                })
-            });
+        const response = await fetch(this.ENDPOINT_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                action: "analyzeSingle",
+                prompt: promptText 
+            })
+        });
 
-            const result = await response.json();
-            
-            if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
-
-            // Parse response safely
-            const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
-            const aiParsedData = JSON.parse(cleanJson);
-
-            // Save to Cache
-            this.cache[cacheKey] = aiParsedData;
-
-            // Render
-            this.renderUI(aiParsedData, data.originalWord, data.typedWord);
-
-        } catch (error) {
-            console.error(error);
-            content.style.display = 'block';
-            content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
-        } finally {
-            this.isFetching = false;
-            loader.style.display = 'none';
-            content.style.display = 'block';
-        }
-    },
-
-    // ---------------------------------------------------------------------
-    // UI RENDER LOGIC: Formats the JSON into HTML
-    // ---------------------------------------------------------------------
-    renderUI: function(aiData, origWord, typedWord) {
-        const content = document.getElementById('aiModalContent');
+        const result = await response.json();
         
-        let explanation = "General error detected.";
-        let rule = "Grammar rule not identified.";
-        let examplesHtml = "";
+        if (!result.success) throw new Error("AI Backend Error");
 
-        if (typeof aiData === 'object') {
-            explanation = aiData.explanation || explanation;
-            rule = aiData.rule || rule;
-            
-            if (aiData.examples && Array.isArray(aiData.examples)) {
-                examplesHtml = `
-                    <div style="margin-top: 15px;">
-                        <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
-                        <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
-                            ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
-                        </ul>
-                    </div>`;
-            }
-        } else {
-            explanation = aiData; // Fallback if AI returned raw string
-        }
+        let cleanJson = result.reply
+            .replace(/```json/g, '')
+            .replace(/```/g, '')
+            .trim();
 
-        content.innerHTML = `
-            <div class="ai-mistake-context">
-                Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
-            </div>
-            <div>
-                <span class="ai-rule-badge">Explanation</span>
-                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
-            </div>
-            <div>
-                <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
-                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
-            </div>
-            ${examplesHtml}
-        `;
+        let aiParsedData = JSON.parse(cleanJson);
+
+        this.cache[cacheKey] = aiParsedData;
+
+        this.renderUI(aiParsedData, data.originalWord, data.typedWord);
+
+    } catch (error) {
+        console.error(error);
+        content.style.display = 'block';
+        content.innerHTML = `<p style="color:#ef4444; padding:20px;">
+            AI explanation unavailable.<br>${error.message}
+        </p>`;
+    } finally {
+        this.isFetching = false;
+        loader.style.display = 'none';
+        content.style.display = 'block';
     }
-};
+},
 // =========================================================================
 
 </script>
