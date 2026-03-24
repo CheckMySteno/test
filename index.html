@@ -13,6 +13,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore-compat.js"></script>
   
+  <!-- NEW: DigiWallet Script attached here -->
+  <script src="digiwallet.js"></script>
+  
   <style>
     /* --- THEME DEFINITIONS --- */
     :root, body[data-theme="default"] {
@@ -537,28 +540,6 @@
     </div>
     
 <script>
-    // --- 1. DIGIWALLET CORE LOGIC ---
-    const DigiWallet = {
-        _KEY: "_cms_digiwallet",
-        sync: (userData) => {
-            if (!userData) { localStorage.removeItem(DigiWallet._KEY); return; }
-            const walletData = {
-                uid: userData.uid,
-                name: userData.name || 'User',
-                email: userData.email,
-                plan: userData.plan || 'free',
-                expiry: userData.expiry?.toDate ? userData.expiry.toDate().getTime() : (userData.expiry ? new Date(userData.expiry).getTime() : null),
-                lastSync: Date.now()
-            };
-            localStorage.setItem(DigiWallet._KEY, JSON.stringify(walletData));
-        },
-        getUser: () => {
-            const data = localStorage.getItem(DigiWallet._KEY);
-            return data ? JSON.parse(data) : null;
-        },
-        clear: () => { localStorage.removeItem(DigiWallet._KEY); }
-    };
-
     // --- FIREBASE CONFIG ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
     if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
@@ -843,7 +824,7 @@
 
     // --- BACKEND SYSTEM FUNCTIONS (Theme, Notifications, Polls, Status) ---
     function applyTheme(themeName) { document.body.dataset.theme = themeName; localStorage.setItem('selectedTheme', themeName); }
-    function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const [key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
+    function attachThemeSwitcherListeners() { const themeBtn = GID('theme-btn'), themeMenu = GID('theme-menu'); if (!themeBtn || !themeMenu) return; let menuHTML = ''; const themes = {'default':{name:'Default',color:'#6366f1'},'galaxy':{name:'Galaxy',color:'#8b5cf6'},'sunset':{name:'Sunset',color:'#fb923c'},'oceanic':{name:'Oceanic',color:'#22d3ee'}}; for (const[key, theme] of Object.entries(themes)) { menuHTML += `<div class="theme-option" data-theme-id="${key}"><span class="color-swatch" style="background-color: ${theme.color};"></span>${theme.name}</div>`; } themeMenu.innerHTML = menuHTML; themeBtn.onclick = (e) => { e.stopPropagation(); themeMenu.classList.toggle('visible'); }; document.querySelectorAll('.theme-option').forEach(option => { option.onclick = () => { applyTheme(option.dataset.themeId); themeMenu.classList.remove('visible'); } }); }
     
     function showTelegramModal() { if (localStorage.getItem('hideTelegramModal') !== 'true') { setTimeout(() => { const tm = GID('telegramModal'); if(tm) { tm.classList.add('visible'); setScrollLock(true); } }, 2500); } }
     function hideTelegramModal(preventShowAgain) { if (preventShowAgain) { localStorage.setItem('hideTelegramModal', 'true'); } const tm = GID('telegramModal'); if(tm) { tm.classList.remove('visible'); setScrollLock(false); } }
