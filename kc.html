@@ -763,6 +763,20 @@
 </div>
 
 <script>
+// --- DigiWallet System ---
+const DigiWallet = {
+    _KEY: "_cms_digiwallet",
+    getUser: () => {
+        const data = localStorage.getItem(DigiWallet._KEY);
+        return data ? JSON.parse(data) : null;
+    },
+    isPremium: () => {
+        const user = DigiWallet.getUser();
+        if (!user || user.plan !== 'premium' || !user.expiry) return false;
+        return Date.now() < user.expiry;
+    }
+};
+
 // --- Dexie.js Local Database Setup ---
 const localDb = new Dexie("CheckMyStenoDB");
 localDb.version(1).stores({
@@ -826,14 +840,24 @@ function setLogoSource() {
 
 // --- Initialization ---
 async function initializePracticeKC() {
-    const accessCode = localStorage.getItem("currentAccessCode");
-    if (!accessCode) {
-        showErrorModal("Access Denied", "No access code found. Please log in first.");
-        document.body.innerHTML = '';
+    // Check DigiWallet for Access
+    const user = DigiWallet.getUser();
+    const isPremium = DigiWallet.isPremium();
+
+    if (!user || !isPremium) {
+        showErrorModal("Access Denied", "No valid Premium Pass found. Please log in and upgrade first.");
+        document.body.innerHTML = `
+            <div style="text-align:center; padding:50px; font-family:sans-serif;">
+                <h1 style="color:#ef4444;">Access Denied</h1>
+                <p>A Premium Pass is required to access the Practice KC tool.</p>
+                <button onclick="window.parent.postMessage('closeTool', '*')" style="padding:10px 20px; cursor:pointer;">Go Back</button>
+            </div>`;
         return;
     }
-    candidateId = accessCode;
-    document.getElementById('candidate-name-display').textContent = candidateId.toUpperCase();
+
+    // Connect user details
+    candidateId = user.uid; 
+    document.getElementById('candidate-name-display').textContent = (user.name || "CANDIDATE").toUpperCase();
     
     // Safely initialize Firebase reference
     if (db) {
