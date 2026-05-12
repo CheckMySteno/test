@@ -21,7 +21,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* --- 1. Global Styles (From KC.html) --- */
+    /* --- 1. Global Styles (High-Performance KC Look) --- */
     :root {
       --primary-blue: #007bff; --primary-blue-dark: #0056b3;
       --text-color: #111827; --dark-grey: #333; --medium-grey: #555;
@@ -33,172 +33,172 @@
       --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --hl-additions: #fecdd3; --hl-omissions: #d9f99d; --hl-spelling: #fde68a;      
+      --hl-capitalization: #bae6fd; --hl-punctuation: #ddd6fe;   
     }
 
     *, *::before, *::after { box-sizing: border-box; }
-    body {
+    html, body {
       font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
-      margin: 0; padding: 0; min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased;
+      margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
     }
     .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
     button { font-family: var(--font-family); cursor: pointer; border: none; }
     .view { display: none; animation: fadeIn 0.4s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* --- 2. Card Styles (Merged Older Look with Modern Feel) --- */
+    /* --- 2. SELECTION VIEW STYLES (Older Card Style with Filters) --- */
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .page-header h1 { font-size: 2rem; font-weight: 800; color: #0f172a; margin: 0; }
+
+    .filter-bar { 
+        display: flex; gap: 15px; margin-bottom: 32px; flex-wrap: wrap; 
+        background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm); align-items: center;
+    }
+    .filter-group { display: flex; align-items: center; gap: 8px; }
+    .filter-group label { font-weight: 700; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
+    .filter-bar select, .search-wrapper input {
+        padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);
+        font-size: 0.9rem; font-weight: 600; outline: none; background: #f8fafc;
+    }
+    .search-wrapper { flex-grow: 1; }
+    .search-wrapper input { width: 100%; background: #fff; }
+
     #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-    
     .passage-card {
         background: white; border: 1px solid var(--border-color); border-radius: 16px;
-        padding: 24px; transition: all 0.3s ease; display: flex; flex-direction: column;
-        justify-content: space-between; box-shadow: var(--shadow-sm); position: relative;
+        padding: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        display: flex; flex-direction: column; justify-content: space-between;
     }
     .passage-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--accent-purple); }
     
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
-    .card-title-group h3 { font-size: 1.25rem; font-weight: 800; margin: 0; color: #0f172a; }
+    .card-title-group h3 { font-size: 1.2rem; font-weight: 800; margin: 0; color: #1e293b; }
+    .status-tag { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; background: #f1f5f9; color: #64748b; }
+    .status-tag.attempted { background: #ecfdf5; color: #059669; }
     
-    .status-tag { 
-        padding: 4px 12px; border-radius: 99px; font-size: 0.75rem; font-weight: 700;
-        background: #f1f5f9; color: #64748b; text-transform: uppercase;
-    }
-    .status-tag.attempted { background: #dcfce7; color: #166534; }
-    
-    .card-meta { font-size: 0.85rem; color: #64748b; margin-bottom: 20px; display: flex; gap: 10px; }
-    .meta-item { display: flex; align-items: center; gap: 4px; }
-
+    .card-meta { display: flex; gap: 15px; margin-bottom: 20px; font-size: 0.85rem; color: #64748b; font-weight: 500; }
     .take-test-btn { 
-        width: 100%; padding: 12px; border-radius: 10px; font-weight: 700;
-        background: #f8fafc; border: 1px solid var(--border-color); color: #1e293b;
-        transition: all 0.2s;
+        width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; 
+        background: #f8fafc; color: #1e293b; border: 1px solid var(--border-color); transition: 0.2s;
     }
     .passage-card:hover .take-test-btn { background: #1e293b; color: white; border-color: #1e293b; }
 
-    /* --- 3. Filter Bar (Month/Year) --- */
-    .filter-bar { 
-        display: flex; gap: 12px; margin-bottom: 32px; flex-wrap: wrap; 
-        background: white; padding: 15px; border-radius: 12px; border: 1px solid var(--border-color);
-    }
-    .filter-group { display: flex; align-items: center; gap: 8px; }
-    .filter-bar label { font-weight: 700; font-size: 0.85rem; color: #475569; text-transform: uppercase; }
-    .filter-bar select, .search-wrapper input {
-        padding: 10px 16px; border-radius: 8px; border: 1px solid var(--border-color);
-        background: white; font-weight: 600; font-size: 0.9rem; outline: none;
-    }
-    .search-wrapper { flex-grow: 1; min-width: 250px; }
-    .search-wrapper input { width: 100%; }
-
-    /* --- 4. Player & Results (Imported from KC.html) --- */
-    /* [Styles identical to kc.html for Player, SSC Exam, Results, AI Modal, and Re-evaluate Mode go here] */
-    /* For brevity in this prompt, I am using the exact styling from the file you provided */
-    
-    /* [CSS snippet from kc.html omitted here for length, but functionally included in the code below] */
+    /* --- 3. MODERN PLAYER STYLES (From KC.html) --- */
     #player-view { max-width: 680px; margin: 20px auto; }
-    .practice-station { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0,0,0,0.04); position: relative; }
-    .player-header { background: #fff; padding: 15px 25px; border-bottom: 1px solid #f1f5f9; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-    .player-info h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+    .practice-station { background: #ffffff; border-radius: 20px; box-shadow: var(--shadow-lg); border: 1px solid rgba(0,0,0,0.04); overflow: hidden; position: relative; }
+    .player-header { background: #fff; padding: 15px 25px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
+    .player-body { padding: 30px 25px; text-align: center; }
+    .progress-bar-wrapper { width: 100%; height: 6px; background-color: #f1f5f9; border-radius: 99px; cursor: pointer; position: relative; overflow: hidden; }
+    #progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #8b5cf6, #6366f1); transition: width 0.1s linear; }
     .controls-cluster { display: flex; align-items: center; justify-content: center; gap: 16px; margin: 20px 0; }
-    .play-btn-large { width: 64px; height: 64px; background: #1e293b; color: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; }
-    .play-btn-large svg { width: 28px; height: 28px; fill: white; }
-    .test-config-area { background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 25px; border-radius: 0 0 20px 20px; }
-    .modern-select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; }
-    #startTranscriptionBtn { width: 100%; padding: 14px; background: #1e293b; color: white; border-radius: 12px; font-weight: 600; margin-top: 15px; }
+    .play-btn-large { width: 64px; height: 64px; background: #1e293b; color: white; border-radius: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(30,41,59,0.2); }
+    .play-btn-large svg { width: 28px; height: 28px; fill: currentColor; }
+    .test-config-area { background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 25px; }
+    .modern-select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; }
+    #startTranscriptionBtn { width: 100%; padding: 14px; background: #1e293b; color: white; border-radius: 12px; font-weight: 700; font-size: 1rem; }
+
+    /* --- 4. RESULTS & EVALUATION STYLES (From KC.html) --- */
+    .result-sheet-container { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 35px 45px; box-shadow: var(--shadow-md); }
+    .stat-pill { display: inline-flex; align-items: center; padding: 10px 20px; border-radius: 10px; font-weight: 600; color: white; background: #0891b2; margin-right: 10px; margin-bottom: 10px; }
+    .stat-pill.red { background: #ef4444; }
+    .stat-pill.amber { background: #f97316; }
+    .legend-container { display: flex; flex-wrap: wrap; gap: 15px; padding: 20px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin-bottom: 20px; }
+    .legend-item { display: flex; align-items: center; font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 5px 10px; border-radius: 6px; }
+    .legend-item.active { background: #f3e8ff; color: #7c3aed; }
+    .legend-color-box { width: 14px; height: 14px; border-radius: 3px; margin-right: 8px; }
     
-    /* Result Sheet Styling from KC.html */
-    .result-sheet-container { background: white; border: 1px solid #e2e8f0; border-radius: 16px; padding: 35px; max-width: 1100px; margin: auto; }
-    .stat-pill { background: #0891b2; color: white; padding: 8px 16px; border-radius: 8px; font-weight: 600; display: inline-flex; margin: 5px; }
-    .highlight { position: relative; padding: 2px 4px; border-radius: 4px; font-weight: 500; }
-    .omission { background: #d9f99d; }
-    .addition { background: #fecdd3; }
-    .ai-icon { width: 16px; height: 16px; background: #4f46e5; color: white; border-radius: 50%; font-size: 10px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; margin-left: 4px; }
+    .columns { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
+    .col { background: #f8fafc; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0; line-height: 1.8; font-size: 1.05rem; }
     
-    /* Modals */
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); display: none; justify-content: center; align-items: center; z-index: 1000; }
-    .modal-overlay.visible { display: flex; }
-    .modal-content { background: white; padding: 30px; border-radius: 12px; max-width: 600px; width: 90%; }
-    
-    /* SSC Exam View */
-    #exam-view { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; flex-direction: column; z-index: 2000; }
-    .ssc-header { background: #f0f0f0; padding: 10px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #ccc; }
-    .ssc-main-content { display: flex; flex-grow: 1; }
+    .highlight { position: relative; padding: 2px 4px; border-radius: 4px; font-weight: 500; display: inline; }
+    .extra, .substitution { background: var(--hl-additions); }
+    .omission { background: var(--hl-omissions); }
+    .spelling { background: var(--hl-spelling); }
+    .capitalization { background: var(--hl-capitalization); }
+    .punctuation { background: var(--hl-punctuation); }
+    .ai-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: #4f46e5; color: white; border-radius: 50%; font-size: 10px; font-weight: 800; cursor: pointer; margin-left: 4px; vertical-align: middle; }
+
+    /* --- 5. EXAM VIEW STYLES --- */
+    #exam-view { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; flex-direction: column; z-index: 5000; }
+    .ssc-header { display: flex; justify-content: space-between; align-items: center; background: #f0f0f0; padding: 10px 25px; border-bottom: 1px solid #ccc; }
+    .ssc-main-content { display: flex; flex-grow: 1; overflow: hidden; }
     .ssc-typing-area { flex-grow: 1; padding: 20px; display: flex; flex-direction: column; }
-    #typingBox { flex-grow: 1; font-family: monospace; font-size: 1.1rem; padding: 15px; border: 1px solid #000; }
+    #typingBox { width: 100%; flex-grow: 1; padding: 15px; font-size: 1.1rem; font-family: 'Courier New', Courier, monospace; border: 1px solid #000; resize: none; outline: none; }
     .ssc-candidate-panel { width: 280px; background: #f0f0f0; border-left: 1px solid #ccc; padding: 20px; }
+
+    /* Modals */
+    .modal-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); display:none; justify-content:center; align-items:center; z-index:9999; }
+    .modal-overlay.visible { display: flex; }
+    .modal-content { background: white; padding: 30px; border-radius: 16px; max-width: 600px; width: 90%; text-align: center; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #7c3aed; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body oncontextmenu="return false;">
 
-<div id="fullPageLoader" class="full-page-loader" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:9999; display:none; justify-content:center; align-items:center;">
-    <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #7c3aed; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite;"></div>
+<div id="fullPageLoader" style="position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.8); z-index:10000; display:none; justify-content:center; align-items:center;">
+    <div class="spinner"></div>
 </div>
 
 <div class="app-container">
-    <!-- Selection View -->
+    <!-- 1. Selection View -->
     <div id="selection-view" class="view" style="display: block;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-            <h1 style="font-weight: 800; font-size: 2rem;">Progressive Dictations</h1>
-            <button onclick="window.location.href='hub.html'" style="background: none; color: #64748b; font-weight: 600;">← Back to Hub</button>
+        <div class="page-header">
+            <h1>Progressive Dictations</h1>
+            <button onclick="window.location.href='hub.html'" style="background: none; font-weight: 700; color: #64748b;">← Back to Hub</button>
         </div>
 
         <div class="filter-bar">
             <div class="search-wrapper">
-                <input type="text" id="passageSearch" placeholder="Search by title or content...">
+                <input type="text" id="passageSearch" placeholder="Search title or year...">
             </div>
             <div class="filter-group">
                 <label>Year</label>
-                <select id="yearFilter">
-                    <option value="all">All Years</option>
-                </select>
+                <select id="yearFilter"><option value="all">All Years</option></select>
             </div>
             <div class="filter-group">
                 <label>Month</label>
                 <select id="monthFilter">
                     <option value="all">All Months</option>
-                    <option value="January">January</option>
-                    <option value="February">February</option>
-                    <option value="March">March</option>
-                    <option value="April">April</option>
-                    <option value="May">May</option>
-                    <option value="June">June</option>
-                    <option value="July">July</option>
-                    <option value="August">August</option>
-                    <option value="September">September</option>
-                    <option value="October">October</option>
-                    <option value="November">November</option>
-                    <option value="December">December</option>
+                    <option value="January">January</option><option value="February">February</option><option value="March">March</option>
+                    <option value="April">April</option><option value="May">May</option><option value="June">June</option>
+                    <option value="July">July</option><option value="August">August</option><option value="September">September</option>
+                    <option value="October">October</option><option value="November">November</option><option value="December">December</option>
                 </select>
             </div>
             <div class="filter-group">
                 <label>Status</label>
                 <select id="statusFilter">
-                    <option value="all">All</option>
+                    <option value="all">Show All</option>
                     <option value="attempted">Attempted</option>
-                    <option value="new">New</option>
+                    <option value="new">Not Attempted</option>
                 </select>
             </div>
         </div>
 
-        <div id="passage-grid">
-            <!-- Cards injected via JS -->
-        </div>
+        <div id="passage-grid"></div>
     </div>
 
-    <!-- Player View (From KC.html) -->
+    <!-- 2. Player View -->
     <div id="player-view" class="view">
-        <div id="player"></div>
+        <div id="player"></div> <!-- Hidden YT Player -->
         <div class="practice-station">
             <div class="player-header">
                 <div class="player-info">
-                    <h2 id="player-main-title">Dictation Player</h2>
-                    <p id="player-subtitle">Progressive Magazine</p>
+                    <h2 id="player-title-display">Loading...</h2>
+                    <p>Progressive Magazine Dictation</p>
                 </div>
-                <button class="take-test-btn" style="width: auto;" onclick="openTranscriptModal()">View Transcript</button>
+                <button onclick="openTranscriptModal()" style="font-weight: 700; background: #f1f5f9; padding: 8px 15px; border-radius: 8px;">Transcript</button>
             </div>
-            <div style="padding: 30px;">
-                <div id="progressBar" style="height: 6px; background: #e2e8f0; border-radius: 10px; cursor: pointer; position: relative;">
-                    <div id="progress-fill" style="height: 100%; width: 0%; background: #7c3aed; border-radius: 10px;"></div>
+            <div class="player-body">
+                <div class="progress-bar-wrapper" id="progressBar">
+                    <div id="progress-fill"></div>
                 </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 10px; color: #64748b;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 8px; color: #64748b; font-weight: 600;">
                     <span id="current-time">00:00</span>
                     <span id="total-time">00:00</span>
                 </div>
@@ -207,182 +207,187 @@
                     <button class="play-btn-large" id="pauseBtn" onclick="togglePlay()" style="display:none;"><svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
                 </div>
                 <div class="test-config-area">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left;">
                         <div>
-                            <label style="font-size: 0.7rem; font-weight: 700; color: #64748b;">TARGET WORDS</label>
+                            <label style="font-size: 0.7rem; font-weight: 800; color: #94a3b8;">TARGET WORDS</label>
                             <select id="wordCountSelect" class="modern-select" onchange="updateAutoStopSettings()"></select>
                         </div>
                         <div>
-                            <label style="font-size: 0.7rem; font-weight: 700; color: #64748b;">TIMER</label>
+                            <label style="font-size: 0.7rem; font-weight: 800; color: #94a3b8;">EXAM TIMER</label>
                             <select id="timer-select" class="modern-select">
                                 <option value="50">50 Minutes</option>
                                 <option value="40">40 Minutes</option>
                             </select>
                         </div>
                     </div>
-                    <button id="startTranscriptionBtn" onclick="showInstructions()">🚀 Start Transcription Test</button>
+                    <button id="startTranscriptionBtn" onclick="showInstructions()" style="margin-top: 20px;">🚀 Start Transcription Test</button>
                 </div>
             </div>
         </div>
-        <button onclick="goHome()" style="width: 100%; margin-top: 20px; background: none; color: #94a3b8; font-weight: 600;">Choose another dictation</button>
+        <button onclick="goHome()" style="width: 100%; margin-top: 20px; background: none; color: #94a3b8; font-weight: 600;">← Back to Selections</button>
     </div>
 
-    <!-- Results View (From KC.html) -->
+    <!-- 3. Results View -->
     <div id="results-view" class="view">
         <div id="resultSheetContainer"></div>
-        <div style="text-align: center; padding: 30px;">
+        <div style="text-align: center; margin-top: 30px;">
             <button onclick="window.print()" class="take-test-btn" style="width: 200px; background: #1e293b; color: white;">Download Report</button>
-            <button onclick="goHome()" class="take-test-btn" style="width: 200px;">Try Another</button>
+            <button onclick="goHome()" class="take-test-btn" style="width: 200px; margin-left: 10px;">Try Another</button>
         </div>
     </div>
 </div>
 
-<!-- SSC Exam View (Standalone) -->
+<!-- 4. SSC Exam Simulator -->
 <div id="exam-view">
     <header class="ssc-header">
-        <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="font-weight: 800;">STAFF SELECTION COMMISSION</div>
-        </div>
+        <div style="font-weight: 800;">STAFF SELECTION COMMISSION</div>
         <div id="typingTimerDisplay" style="font-size: 1.5rem; font-weight: 800; color: #d00;">50:00</div>
     </header>
-    <main class="ssc-main-content">
+    <div class="ssc-main-content">
         <div class="ssc-typing-area">
-            <textarea id="typingBox" placeholder="Start typing your transcription here..." spellcheck="false" autocomplete="off"></textarea>
-            <button id="submitBtn" onclick="submitTranscription()" style="padding: 10px 30px; background: #000; color: #fff; margin-top: 10px;">Submit</button>
+            <textarea id="typingBox" placeholder="Start typing here..." spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
+            <button onclick="submitTranscription()" style="width: 120px; padding: 10px; background: #000; color: #fff; border-radius: 0; margin-top: 10px;">Submit</button>
         </div>
         <aside class="ssc-candidate-panel">
             <div style="text-align: center; margin-bottom: 20px;">
-                <div style="width: 100px; height: 120px; border: 1px solid #000; margin: auto; background: #eee;"></div>
-                <div id="candidate-name" style="font-weight: 700; margin-top: 10px;">CANDIDATE</div>
+                <div style="width: 100px; height: 120px; border: 1px solid #000; margin: auto; background: #fff;"></div>
+                <div id="candidate-name-display" style="font-weight: 700; margin-top: 10px;">CANDIDATE</div>
             </div>
             <div style="font-size: 0.8rem; line-height: 2;">
                 <b>Roll No:</b> 9876543210<br>
                 <b>Exam:</b> Progressive Skill Test
             </div>
         </aside>
-    </main>
+    </div>
 </div>
 
 <!-- Modals -->
 <div id="aiModal" class="modal-overlay">
-    <div class="modal-content">
-        <h3 id="aiTitle">🧠 AI Teacher Analysis</h3>
-        <div id="aiModalContent">Loading analysis...</div>
-        <button onclick="document.getElementById('aiModal').classList.remove('visible')" style="margin-top: 20px; padding: 10px 20px; background: #eee; border-radius: 8px;">Close</button>
+    <div class="modal-content" style="text-align: left;">
+        <h3 style="color: #4f46e5;">🧠 AI Teacher Analysis</h3>
+        <div id="aiModalContent" style="margin: 20px 0; line-height: 1.6;"></div>
+        <button onclick="document.getElementById('aiModal').classList.remove('visible')" style="width: 100%; padding: 10px; background: #f1f5f9; font-weight: 700; border-radius: 8px;">Close</button>
     </div>
 </div>
 
 <div id="instructions-modal" class="modal-overlay">
     <div class="modal-content">
-        <h2>Transcription Instructions</h2>
-        <ul style="text-align: left; line-height: 2;">
-            <li>The timer starts when you type the first word.</li>
-            <li>Use 'Enter' for new paragraphs.</li>
-            <li>Click Submit only when you are finished.</li>
+        <h2>Read Carefully</h2>
+        <ul style="text-align: left; line-height: 2; margin: 20px 0;">
+            <li>Timer starts on your first character.</li>
+            <li>Use standard typing rules (one space after words).</li>
+            <li>Do not refresh the page during the exam.</li>
         </ul>
-        <button onclick="startTranscriptionTest()" style="padding: 12px 40px; background: #1e293b; color: white; border-radius: 8px;">Start Now</button>
+        <button onclick="startTranscriptionTest()" style="padding: 12px 40px; background: #1e293b; color: white; border-radius: 10px; font-weight: 700;">Continue to Exam</button>
+    </div>
+</div>
+
+<div id="transcriptModal" class="modal-overlay">
+    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
+        <h3 style="text-align: left;">Passage Transcript</h3>
+        <p id="transcriptContent" style="text-align: left; line-height: 1.8; color: #334155; white-space: pre-wrap;"></p>
+        <button onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="margin-top: 20px; padding: 10px 20px; background: #eee; border-radius: 8px;">Close</button>
     </div>
 </div>
 
 <script>
-/**
- * PROGRESSIVE DICTATION ENGINE
- * Logic Merged from kc.html + dictation.html filters
+/** 
+ * PROGRESSIVE DICTATION CORE ENGINE
  */
 
-// Global State
-let allPassageData = [];
+const firebaseConfig = {
+  apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
+  authDomain: "checkmysteno.firebaseapp.com",
+  projectId: "checkmysteno",
+  storageBucket: "checkmysteno.firebasestorage.app",
+  messagingSenderId: "719325115943",
+  appId: "1:719325115943:web:0dd50a67978816d42a8002"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+let allPassages = [];
 let currentPassage = null;
 let player, originalText, wordCount;
 let timer = null, timeLeft = 0, timerStarted = false;
+let g_lastAnalysisResult;
 let analysisWorker = new Worker('worker.js');
 let candidateId = DigiWallet.getUser()?.uid;
+let isReevaluateModeActive = false;
 
-// 1. Initialization
+// 1. App Init
 document.addEventListener("DOMContentLoaded", async () => {
     if (!DigiWallet.isPremium()) {
-        alert("Premium Access Required.");
+        alert("Premium access required.");
         window.location.href = "login.html";
         return;
     }
-    
-    document.getElementById('candidate-name').textContent = DigiWallet.getUser().name;
-    await loadProgressiveLibrary();
-    renderGrid();
+    document.getElementById('candidate-name-display').textContent = DigiWallet.getUser().name.toUpperCase();
+    await fetchProgressiveData();
     setupEventListeners();
 });
 
-// 2. Fetch Data from Firestore
-async function loadProgressiveLibrary() {
+// 2. Data Fetching
+async function fetchProgressiveData() {
     document.getElementById('fullPageLoader').style.display = 'flex';
-    const db = firebase.firestore();
-    
     try {
-        // We fetch from the 'progressive' collection
         const snapshot = await db.collection("progressive").get();
         let years = new Set();
-        
-        allPassageData = [];
-        
+        allPassages = [];
+
         for (const doc of snapshot.docs) {
-            const data = doc.data();
-            const year = data.year || "Unknown";
-            const month = data.month || "Unknown";
+            const catData = doc.data();
+            const year = catData.year || "2024";
+            const month = catData.month || "Unknown";
             years.add(year);
-            
-            // Get subcollection 'transcripts'
+
             const transcripts = await db.collection("progressive").doc(doc.id).collection("transcripts").get();
-            
             transcripts.forEach(tDoc => {
-                const tData = tDoc.data();
-                allPassageData.push({
+                const data = tDoc.data();
+                allPassages.push({
                     id: tDoc.id,
                     parentId: doc.id,
-                    title: tData.title || `Passage ${tDoc.id}`,
+                    title: data.title || `Passage ${tDoc.id}`,
                     year: year,
                     month: month,
-                    wordCount: tData.wordCount || 0,
-                    audioUrl: tData.audioUrl,
-                    originalText: tData.text
+                    text: data.text,
+                    audioUrl: data.audioUrl,
+                    wordCount: data.wordCount || 0
                 });
             });
         }
-        
-        // Populate Year Filter
+
+        // Populate Years
         const yearSelect = document.getElementById('yearFilter');
         Array.from(years).sort().forEach(y => {
-            const opt = document.createElement('option');
-            opt.value = y;
-            opt.textContent = y;
-            yearSelect.appendChild(opt);
+            yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
         });
-        
+
+        renderGrid();
     } catch (e) {
-        console.error("Error loading library:", e);
+        console.error("Fetch error:", e);
     } finally {
         document.getElementById('fullPageLoader').style.display = 'none';
     }
 }
 
-// 3. Grid Rendering (Old Card Style)
+// 3. UI Rendering
 function renderGrid() {
     const grid = document.getElementById('passage-grid');
     const search = document.getElementById('passageSearch').value.toLowerCase();
     const year = document.getElementById('yearFilter').value;
     const month = document.getElementById('monthFilter').value;
     const status = document.getElementById('statusFilter').value;
-    
     const progress = JSON.parse(localStorage.getItem(`progProgress_${candidateId}`) || '{}');
 
     grid.innerHTML = '';
     
-    const filtered = allPassageData.filter(p => {
-        const matchesSearch = p.title.toLowerCase().includes(search);
+    const filtered = allPassages.filter(p => {
+        const matchesSearch = p.title.toLowerCase().includes(search) || p.year.toString().includes(search);
         const matchesYear = year === 'all' || p.year === year;
         const matchesMonth = month === 'all' || p.month === month;
         const isAttempted = !!progress[p.id];
         const matchesStatus = status === 'all' || (status === 'attempted' && isAttempted) || (status === 'new' && !isAttempted);
-        
         return matchesSearch && matchesYear && matchesMonth && matchesStatus;
     });
 
@@ -395,98 +400,76 @@ function renderGrid() {
                 <div class="card-title-group">
                     <h3>${p.title}</h3>
                 </div>
-                <span class="status-tag ${isAttempted ? 'attempted' : ''}">${isAttempted ? progress[p.id].accuracy + '%' : 'New'}</span>
+                <span class="status-tag ${isAttempted ? 'attempted' : ''}">
+                    ${isAttempted ? progress[p.id].accuracy + '%' : 'NEW'}
+                </span>
             </div>
             <div class="card-meta">
-                <div class="meta-item">📅 ${p.month} ${p.year}</div>
-                <div class="meta-item">📝 ${p.wordCount} words</div>
+                <span>📅 ${p.month} ${p.year}</span>
+                <span>📝 ${p.wordCount} words</span>
             </div>
-            <button class="take-test-btn" onclick="startLoadingPassage('${p.id}')">Practice Now</button>
+            <button class="take-test-btn" onclick="loadPassageIntoPlayer('${p.id}')">Start Practice</button>
         `;
         grid.appendChild(card);
     });
 }
 
-// 4. Passage Loading & Player
-async function startLoadingPassage(id) {
-    currentPassage = allPassageData.find(p => p.id === id);
-    if (!currentPassage) return;
-
-    document.getElementById('fullPageLoader').style.display = 'flex';
-    
-    originalText = currentPassage.originalText;
+// 4. Passage & Player Control
+function loadPassageIntoPlayer(id) {
+    currentPassage = allPassages.find(p => p.id === id);
+    originalText = currentPassage.text;
     wordCount = currentPassage.wordCount;
+
+    document.getElementById('player-title-display').textContent = currentPassage.title;
     
-    // Setup Word Count Select
+    // Config Options
     const wcSelect = document.getElementById('wordCountSelect');
     wcSelect.innerHTML = '<option value="full">Full Passage</option>';
-    if (wordCount > 400) wcSelect.innerHTML += '<option value="400">400 Words</option>';
-    if (wordCount > 800) wcSelect.innerHTML += '<option value="800">800 Words</option>';
+    [400, 800].forEach(n => { if(wordCount > n) wcSelect.innerHTML += `<option value="${n}">${n} Words</option>`; });
 
-    // Load Video
-    loadYTVideo(currentPassage.audioUrl);
-    
-    showView('player-view');
-    document.getElementById('fullPageLoader').style.display = 'none';
-}
-
-function loadYTVideo(url) {
-    const vidId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+    const vidId = currentPassage.audioUrl.split('v=')[1]?.split('&')[0] || currentPassage.audioUrl.split('/').pop();
     if (player) {
         player.loadVideoById(vidId);
     } else {
-        player = new YT.Player('player', {
-            height: '0', width: '0', videoId: vidId,
-            events: { 'onStateChange': onPlayerStateChange }
-        });
+        player = new YT.Player('player', { height: '1', width: '1', videoId: vidId, events: { 'onStateChange': onPlayerStateChange } });
     }
+
+    showView('player-view');
 }
 
 function onPlayerStateChange(event) {
     if (event.data == YT.PlayerState.PLAYING) {
         document.getElementById('playBtn').style.display = 'none';
         document.getElementById('pauseBtn').style.display = 'flex';
-        startTrackingProgress();
+        trackProgressBar();
     } else {
         document.getElementById('playBtn').style.display = 'flex';
         document.getElementById('pauseBtn').style.display = 'none';
     }
 }
 
-function togglePlay() {
-    if (player.getPlayerState() == 1) player.pauseVideo();
-    else player.playVideo();
-}
-
-function startTrackingProgress() {
-    setInterval(() => {
-        if (!player || !player.getCurrentTime) return;
-        const curr = player.getCurrentTime();
+function trackProgressBar() {
+    const timer = setInterval(() => {
+        if (!player || player.getPlayerState() != 1) { clearInterval(timer); return; }
+        const cur = player.getCurrentTime();
         const dur = player.getDuration();
-        document.getElementById('progress-fill').style.width = (curr/dur*100) + '%';
-        document.getElementById('current-time').textContent = formatTime(curr);
+        document.getElementById('progress-fill').style.width = (cur / dur * 100) + '%';
+        document.getElementById('current-time').textContent = formatTime(cur);
         document.getElementById('total-time').textContent = formatTime(dur);
     }, 500);
 }
 
-function formatTime(s) {
-    let m = Math.floor(s/60);
-    let sec = Math.floor(s%60);
-    return `${m}:${sec < 10 ? '0' : ''}${sec}`;
-}
+function togglePlay() { player.getPlayerState() == 1 ? player.pauseVideo() : player.playVideo(); }
+function formatTime(s) { let m = Math.floor(s/60); let sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
 
-// 5. Transcription Test Logic
-function showInstructions() {
-    player.pauseVideo();
-    document.getElementById('instructions-modal').classList.add('visible');
-}
-
+// 5. Exam Logic
+function showInstructions() { player.pauseVideo(); document.getElementById('instructions-modal').classList.add('visible'); }
 function startTranscriptionTest() {
     document.getElementById('instructions-modal').classList.remove('visible');
     showView('exam-view');
     timeLeft = parseInt(document.getElementById('timer-select').value) * 60;
+    document.getElementById('typingTimerDisplay').textContent = formatTime(timeLeft);
     document.getElementById('typingBox').value = '';
-    document.getElementById('typingBox').focus();
     
     document.getElementById('typingBox').addEventListener('input', () => {
         if (!timerStarted) {
@@ -500,86 +483,132 @@ function startTranscriptionTest() {
     }, { once: true });
 }
 
-// 6. Evaluation (Worker Based)
+// 6. Analysis & Result
 function submitTranscription() {
     clearInterval(timer);
     document.getElementById('fullPageLoader').style.display = 'flex';
-    
     const typedText = document.getElementById('typingBox').value;
-    
+
     analysisWorker.postMessage({
         originalText: originalText,
         userText: typedText,
-        config: { mode: 'exam', addition:1, omission:1, spelling:0.5, capitalization:0.5, punctuation: { mode: 'fullstop-only', weight: 0.5 } }
+        config: { mode: 'exam', addition: 1, omission: 1, spelling: 0.5, capitalization: 0.5, punctuation: { mode: 'fullstop-only', weight: 0.5 } }
     });
 
     analysisWorker.onmessage = (e) => {
-        const result = e.data;
-        saveProgress(result.accuracy);
-        renderResults(result);
+        g_lastAnalysisResult = e.data;
+        saveLocalProgress(e.data.accuracy);
+        renderResultSheet(e.data);
         showView('results-view');
         document.getElementById('fullPageLoader').style.display = 'none';
+        timerStarted = false;
     };
 }
 
-function saveProgress(acc) {
-    const progress = JSON.parse(localStorage.getItem(`progProgress_${candidateId}`) || '{}');
-    if (!progress[currentPassage.id] || acc > progress[currentPassage.id].accuracy) {
-        progress[currentPassage.id] = { accuracy: acc, date: new Date().toISOString() };
-        localStorage.setItem(`progProgress_${candidateId}`, JSON.stringify(progress));
-    }
-}
-
-function renderResults(result) {
+function renderResultSheet(res) {
     const container = document.getElementById('resultSheetContainer');
+    let originalHtml = res.originalWords.map((w, i) => `<span class="word-wrapper" data-index="${i}">${w}</span>`).join(' ');
+
     container.innerHTML = `
         <div class="result-sheet-container">
-            <h1>Results: ${currentPassage.title}</h1>
-            <div class="stat-pill">Accuracy: ${result.accuracy}%</div>
-            <div class="stat-pill" style="background:#e11d48">Full Mistakes: ${result.mistakeCounters.omission + result.mistakeCounters.addition}</div>
-            <div style="margin-top: 20px; line-height: 2; border: 1px solid #eee; padding: 20px; border-radius: 12px; background: #fafafa;">
-                ${result.resultHTML}
+            <h1>Transcription Report</h1>
+            <div class="stats-row">
+                <div class="stat-pill">Accuracy: ${res.accuracy}%</div>
+                <div class="stat-pill red">Full Mistakes: ${res.mistakeCounters.omission + res.mistakeCounters.addition}</div>
+                <div class="stat-pill amber">Half Mistakes: ${res.halfBucketCount}</div>
+            </div>
+            
+            <div class="legend-container" id="interactive-legend">
+                <div class="legend-item" data-filter="omission"><span class="legend-color-box" style="background:var(--hl-omissions)"></span>Omissions</div>
+                <div class="legend-item" data-filter="addition"><span class="legend-color-box" style="background:var(--hl-additions)"></span>Additions</div>
+                <div class="legend-item" data-filter="spelling"><span class="legend-color-box" style="background:var(--hl-spelling)"></span>Spelling</div>
+            </div>
+
+            <div class="result-controls" style="margin-top:20px;">
+                <button id="toggleReevaluateBtn" class="take-test-btn" style="width:auto; padding:8px 20px;">Enter Re-evaluate Mode</button>
+                <button onclick="switchView()" class="take-test-btn" style="width:auto; padding:8px 20px;">Switch View</button>
+            </div>
+
+            <div id="comparisonColumns" class="columns view-top-bottom" style="margin-top:20px;">
+                <div class="col"><strong>Your Transcription:</strong><p id="editableTypedText">${res.resultHTML}</p></div>
+                <div class="col"><strong>Original Text:</strong><p id="editableOriginalText">${originalHtml}</p></div>
             </div>
         </div>
     `;
     
-    // Re-initialize AI Teacher after rendering
     AITeacher.init();
+    document.getElementById('toggleReevaluateBtn').onclick = toggleReevaluate;
 }
 
-// Helper: Navigation
-function showView(id) {
-    document.querySelectorAll('.view').forEach(v => v.style.display = 'none');
-    document.getElementById('exam-view').style.display = 'none';
-    document.getElementById(id).style.display = 'block';
-}
-
-function goHome() {
-    showView('selection-view');
-    if (player) player.stopVideo();
-    timerStarted = false;
-    clearInterval(timer);
-}
-
-function setupEventListeners() {
-    document.getElementById('passageSearch').addEventListener('input', renderGrid);
-    document.getElementById('yearFilter').addEventListener('change', renderGrid);
-    document.getElementById('monthFilter').addEventListener('change', renderGrid);
-    document.getElementById('statusFilter').addEventListener('change', renderGrid);
-}
-
-// AI Teacher Logic (Integrated from kc.html)
+// AI Teacher & Interaction Logic
 const AITeacher = {
     init: function() {
-        document.querySelectorAll('.ai-icon').forEach(icon => {
-            icon.onclick = (e) => {
-                const highlight = e.target.closest('.highlight');
-                alert("AI Analysis triggered for: " + highlight.textContent);
-                // Actual API call logic from kc.html would go here
-            };
+        document.getElementById('comparisonColumns').addEventListener('click', (e) => {
+            const icon = e.target.closest('.ai-icon');
+            if (!icon) return;
+            const highlight = e.target.closest('.highlight');
+            this.showAnalysis(highlight);
         });
+    },
+    showAnalysis: function(el) {
+        const modal = document.getElementById('aiModal');
+        const content = document.getElementById('aiModalContent');
+        modal.classList.add('visible');
+        content.innerHTML = `Analyzing grammar rule for: <b>${el.textContent}</b>...<br><br><i>Note: Connect your AI endpoint URL in the script to see dynamic feedback.</i>`;
     }
 };
+
+function toggleReevaluate() {
+    isReevaluateModeActive = !isReevaluateModeActive;
+    const btn = document.getElementById('toggleReevaluateBtn');
+    const typedP = document.getElementById('editableTypedText');
+    const origP = document.getElementById('editableOriginalText');
+
+    if(isReevaluateModeActive) {
+        btn.textContent = "Calculate & Exit";
+        btn.style.background = "#7c3aed";
+        btn.style.color = "#fff";
+        typedP.contentEditable = true;
+        origP.contentEditable = true;
+        alert("Mode ON: You can now edit both text boxes. Click calculate when done.");
+    } else {
+        document.getElementById('fullPageLoader').style.display = 'flex';
+        analysisWorker.postMessage({
+            originalText: origP.innerText,
+            userText: typedP.innerText,
+            config: { mode: 'exam', addition: 1, omission: 1, spelling: 0.5, capitalization: 0.5, punctuation: { mode: 'fullstop-only', weight: 0.5 } }
+        });
+        analysisWorker.onmessage = (e) => {
+            renderResultSheet(e.data);
+            document.getElementById('fullPageLoader').style.display = 'none';
+        };
+    }
+}
+
+// Helpers
+function showView(id) { document.querySelectorAll('.view').forEach(v => v.style.display = 'none'); document.getElementById('exam-view').style.display = 'none'; document.getElementById(id).style.display = 'block'; }
+function goHome() { showView('selection-view'); if(player) player.stopVideo(); timerStarted = false; clearInterval(timer); }
+function saveLocalProgress(acc) {
+    const progress = JSON.parse(localStorage.getItem(`progProgress_${candidateId}`) || '{}');
+    if (!progress[currentPassage.id] || acc > progress[currentPassage.id].accuracy) {
+        progress[currentPassage.id] = { accuracy: acc };
+        localStorage.setItem(`progProgress_${candidateId}`, JSON.stringify(progress));
+    }
+}
+function setupEventListeners() {
+    document.getElementById('passageSearch').oninput = renderGrid;
+    document.getElementById('yearFilter').onchange = renderGrid;
+    document.getElementById('monthFilter').onchange = renderGrid;
+    document.getElementById('statusFilter').onchange = renderGrid;
+    document.getElementById('progressBar').onclick = (e) => {
+        const rect = e.currentTarget.getBoundingClientRect();
+        const pos = (e.clientX - rect.left) / rect.width;
+        player.seekTo(pos * player.getDuration(), true);
+    };
+}
+function switchView() { const col = document.getElementById('comparisonColumns'); col.classList.toggle('view-side-by-side'); col.classList.toggle('view-top-bottom'); }
+function openTranscriptModal() { document.getElementById('transcriptContent').textContent = originalText; document.getElementById('transcriptModal').classList.add('visible'); }
+function updateAutoStopSettings() { /* Logic for auto-stop timestamp */ }
 
 </script>
 </body>
