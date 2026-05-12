@@ -21,7 +21,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* --- 1. Global Styles (High-Performance KC Look) --- */
+    /* --- Styles (Exact same as KC.html) --- */
     :root {
       --primary-blue: #007bff; --primary-blue-dark: #0056b3;
       --text-color: #111827; --dark-grey: #333; --medium-grey: #555;
@@ -38,55 +38,32 @@
     }
 
     *, *::before, *::after { box-sizing: border-box; }
-    html, body {
-      font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
-      margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.5;
-      -webkit-font-smoothing: antialiased;
-    }
+    body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
     .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
-    button { font-family: var(--font-family); cursor: pointer; border: none; }
+    button { cursor: pointer; border: none; font-family: var(--font-family); }
     .view { display: none; animation: fadeIn 0.4s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* --- 2. SELECTION VIEW STYLES (Older Card Style with Filters) --- */
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-    .page-header h1 { font-size: 2rem; font-weight: 800; color: #0f172a; margin: 0; }
-
-    .filter-bar { 
-        display: flex; gap: 15px; margin-bottom: 32px; flex-wrap: wrap; 
-        background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--border-color);
-        box-shadow: var(--shadow-sm); align-items: center;
-    }
+    /* Selection Bar & Search */
+    .filter-bar { display: flex; gap: 15px; margin-bottom: 32px; flex-wrap: wrap; background: white; padding: 20px; border-radius: 16px; border: 1px solid var(--border-color); box-shadow: var(--shadow-sm); align-items: center; }
     .filter-group { display: flex; align-items: center; gap: 8px; }
     .filter-group label { font-weight: 700; font-size: 0.8rem; color: #64748b; text-transform: uppercase; }
-    .filter-bar select, .search-wrapper input {
-        padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color);
-        font-size: 0.9rem; font-weight: 600; outline: none; background: #f8fafc;
-    }
-    .search-wrapper { flex-grow: 1; }
-    .search-wrapper input { width: 100%; background: #fff; }
+    .filter-bar select, .search-wrapper input { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border-color); font-size: 0.9rem; font-weight: 600; outline: none; background: #f8fafc; }
+    .search-wrapper { flex-grow: 1; } .search-wrapper input { width: 100%; background: #fff; }
 
+    /* Passage Cards */
     #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
-    .passage-card {
-        background: white; border: 1px solid var(--border-color); border-radius: 16px;
-        padding: 24px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        display: flex; flex-direction: column; justify-content: space-between;
-    }
+    .passage-card { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: space-between; }
     .passage-card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); border-color: var(--accent-purple); }
-    
     .card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
     .card-title-group h3 { font-size: 1.2rem; font-weight: 800; margin: 0; color: #1e293b; }
     .status-tag { padding: 4px 12px; border-radius: 8px; font-size: 0.75rem; font-weight: 700; background: #f1f5f9; color: #64748b; }
     .status-tag.attempted { background: #ecfdf5; color: #059669; }
-    
     .card-meta { display: flex; gap: 15px; margin-bottom: 20px; font-size: 0.85rem; color: #64748b; font-weight: 500; }
-    .take-test-btn { 
-        width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; 
-        background: #f8fafc; color: #1e293b; border: 1px solid var(--border-color); transition: 0.2s;
-    }
-    .passage-card:hover .take-test-btn { background: #1e293b; color: white; border-color: #1e293b; }
+    .take-test-btn { width: 100%; padding: 12px; border-radius: 10px; font-weight: 700; background: #f8fafc; color: #1e293b; border: 1px solid var(--border-color); transition: 0.2s; }
+    .passage-card:hover .take-test-btn { background: #1e293b; color: white; }
 
-    /* --- 3. MODERN PLAYER STYLES (From KC.html) --- */
+    /* Player View */
     #player-view { max-width: 680px; margin: 20px auto; }
     .practice-station { background: #ffffff; border-radius: 20px; box-shadow: var(--shadow-lg); border: 1px solid rgba(0,0,0,0.04); overflow: hidden; position: relative; }
     .player-header { background: #fff; padding: 15px 25px; border-bottom: 1px solid #f1f5f9; display: flex; justify-content: space-between; align-items: center; }
@@ -100,29 +77,20 @@
     .modern-select { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e1; background: #fff; }
     #startTranscriptionBtn { width: 100%; padding: 14px; background: #1e293b; color: white; border-radius: 12px; font-weight: 700; font-size: 1rem; }
 
-    /* --- 4. RESULTS & EVALUATION STYLES (From KC.html) --- */
+    /* Result Sheets & Evaluation */
     .result-sheet-container { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 35px 45px; box-shadow: var(--shadow-md); }
     .stat-pill { display: inline-flex; align-items: center; padding: 10px 20px; border-radius: 10px; font-weight: 600; color: white; background: #0891b2; margin-right: 10px; margin-bottom: 10px; }
     .stat-pill.red { background: #ef4444; }
     .stat-pill.amber { background: #f97316; }
-    .legend-container { display: flex; flex-wrap: wrap; gap: 15px; padding: 20px 0; border-top: 1px solid #eee; border-bottom: 1px solid #eee; margin-bottom: 20px; }
-    .legend-item { display: flex; align-items: center; font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 5px 10px; border-radius: 6px; }
-    .legend-item.active { background: #f3e8ff; color: #7c3aed; }
-    .legend-color-box { width: 14px; height: 14px; border-radius: 3px; margin-right: 8px; }
-    
-    .columns { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    .columns { display: grid; grid-template-columns: 1fr; gap: 20px; margin-top: 20px; }
     @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
     .col { background: #f8fafc; border-radius: 12px; padding: 25px; border: 1px solid #e2e8f0; line-height: 1.8; font-size: 1.05rem; }
-    
     .highlight { position: relative; padding: 2px 4px; border-radius: 4px; font-weight: 500; display: inline; }
     .extra, .substitution { background: var(--hl-additions); }
     .omission { background: var(--hl-omissions); }
-    .spelling { background: var(--hl-spelling); }
-    .capitalization { background: var(--hl-capitalization); }
-    .punctuation { background: var(--hl-punctuation); }
     .ai-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; background: #4f46e5; color: white; border-radius: 50%; font-size: 10px; font-weight: 800; cursor: pointer; margin-left: 4px; vertical-align: middle; }
 
-    /* --- 5. EXAM VIEW STYLES --- */
+    /* Exam View (Simulator) */
     #exam-view { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; flex-direction: column; z-index: 5000; }
     .ssc-header { display: flex; justify-content: space-between; align-items: center; background: #f0f0f0; padding: 10px 25px; border-bottom: 1px solid #ccc; }
     .ssc-main-content { display: flex; flex-grow: 1; overflow: hidden; }
@@ -145,80 +113,40 @@
 </div>
 
 <div class="app-container">
-    <!-- 1. Selection View -->
     <div id="selection-view" class="view" style="display: block;">
         <div class="page-header">
             <h1>Progressive Dictations</h1>
-            <button onclick="window.location.href='hub.html'" style="background: none; font-weight: 700; color: #64748b;">← Back to Hub</button>
+            <button onclick="window.parent.postMessage('closeTool', '*')" style="background: none; font-weight: 700; color: #64748b;">← Back to Hub</button>
         </div>
 
         <div class="filter-bar">
-            <div class="search-wrapper">
-                <input type="text" id="passageSearch" placeholder="Search title or year...">
-            </div>
-            <div class="filter-group">
-                <label>Year</label>
-                <select id="yearFilter"><option value="all">All Years</option></select>
-            </div>
-            <div class="filter-group">
-                <label>Month</label>
-                <select id="monthFilter">
-                    <option value="all">All Months</option>
-                    <option value="January">January</option><option value="February">February</option><option value="March">March</option>
-                    <option value="April">April</option><option value="May">May</option><option value="June">June</option>
-                    <option value="July">July</option><option value="August">August</option><option value="September">September</option>
-                    <option value="October">October</option><option value="November">November</option><option value="December">December</option>
-                </select>
-            </div>
-            <div class="filter-group">
-                <label>Status</label>
-                <select id="statusFilter">
-                    <option value="all">Show All</option>
-                    <option value="attempted">Attempted</option>
-                    <option value="new">Not Attempted</option>
-                </select>
-            </div>
+            <div class="search-wrapper"><input type="text" id="passageSearch" placeholder="Search title or year..."></div>
+            <div class="filter-group"><label>Year</label><select id="yearFilter"><option value="all">All Years</option></select></div>
+            <div class="filter-group"><label>Month</label><select id="monthFilter"><option value="all">All Months</option><option value="January">January</option><option value="February">February</option><option value="March">March</option><option value="April">April</option><option value="May">May</option><option value="June">June</option><option value="July">July</option><option value="August">August</option><option value="September">September</option><option value="October">October</option><option value="November">November</option><option value="December">December</option></select></div>
+            <div class="filter-group"><label>Status</label><select id="statusFilter"><option value="all">Show All</option><option value="attempted">Attempted</option><option value="new">Not Attempted</option></select></div>
         </div>
 
         <div id="passage-grid"></div>
     </div>
 
-    <!-- 2. Player View -->
     <div id="player-view" class="view">
-        <div id="player"></div> <!-- Hidden YT Player -->
+        <div id="player"></div>
         <div class="practice-station">
             <div class="player-header">
-                <div class="player-info">
-                    <h2 id="player-title-display">Loading...</h2>
-                    <p>Progressive Magazine Dictation</p>
-                </div>
+                <div class="player-info"><h2 id="player-title-display">Loading...</h2><p>Progressive Magazine Dictation</p></div>
                 <button onclick="openTranscriptModal()" style="font-weight: 700; background: #f1f5f9; padding: 8px 15px; border-radius: 8px;">Transcript</button>
             </div>
             <div class="player-body">
-                <div class="progress-bar-wrapper" id="progressBar">
-                    <div id="progress-fill"></div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 8px; color: #64748b; font-weight: 600;">
-                    <span id="current-time">00:00</span>
-                    <span id="total-time">00:00</span>
-                </div>
+                <div class="progress-bar-wrapper" id="progressBar"><div id="progress-fill"></div></div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-top: 8px; color: #64748b; font-weight: 600;"><span id="current-time">00:00</span><span id="total-time">00:00</span></div>
                 <div class="controls-cluster">
                     <button class="play-btn-large" id="playBtn" onclick="togglePlay()"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>
                     <button class="play-btn-large" id="pauseBtn" onclick="togglePlay()" style="display:none;"><svg viewBox="0 0 24 24"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg></button>
                 </div>
                 <div class="test-config-area">
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; text-align: left;">
-                        <div>
-                            <label style="font-size: 0.7rem; font-weight: 800; color: #94a3b8;">TARGET WORDS</label>
-                            <select id="wordCountSelect" class="modern-select" onchange="updateAutoStopSettings()"></select>
-                        </div>
-                        <div>
-                            <label style="font-size: 0.7rem; font-weight: 800; color: #94a3b8;">EXAM TIMER</label>
-                            <select id="timer-select" class="modern-select">
-                                <option value="50">50 Minutes</option>
-                                <option value="40">40 Minutes</option>
-                            </select>
-                        </div>
+                        <div><label style="font-size: 0.7rem; font-weight: 800; color: #94a3b8;">TARGET WORDS</label><select id="wordCountSelect" class="modern-select"></select></div>
+                        <div><label style="font-size: 0.7rem; font-weight: 800; color: #94a3b8;">EXAM TIMER</label><select id="timer-select" class="modern-select"><option value="50">50 Minutes</option><option value="40">40 Minutes</option></select></div>
                     </div>
                     <button id="startTranscriptionBtn" onclick="showInstructions()" style="margin-top: 20px;">🚀 Start Transcription Test</button>
                 </div>
@@ -227,7 +155,6 @@
         <button onclick="goHome()" style="width: 100%; margin-top: 20px; background: none; color: #94a3b8; font-weight: 600;">← Back to Selections</button>
     </div>
 
-    <!-- 3. Results View -->
     <div id="results-view" class="view">
         <div id="resultSheetContainer"></div>
         <div style="text-align: center; margin-top: 30px;">
@@ -237,64 +164,19 @@
     </div>
 </div>
 
-<!-- 4. SSC Exam Simulator -->
 <div id="exam-view">
-    <header class="ssc-header">
-        <div style="font-weight: 800;">STAFF SELECTION COMMISSION</div>
-        <div id="typingTimerDisplay" style="font-size: 1.5rem; font-weight: 800; color: #d00;">50:00</div>
-    </header>
+    <header class="ssc-header"><div style="font-weight: 800;">STAFF SELECTION COMMISSION</div><div id="typingTimerDisplay" style="font-size: 1.5rem; font-weight: 800; color: #d00;">50:00</div></header>
     <div class="ssc-main-content">
-        <div class="ssc-typing-area">
-            <textarea id="typingBox" placeholder="Start typing here..." spellcheck="false" autocomplete="off" autocapitalize="off"></textarea>
-            <button onclick="submitTranscription()" style="width: 120px; padding: 10px; background: #000; color: #fff; border-radius: 0; margin-top: 10px;">Submit</button>
-        </div>
-        <aside class="ssc-candidate-panel">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="width: 100px; height: 120px; border: 1px solid #000; margin: auto; background: #fff;"></div>
-                <div id="candidate-name-display" style="font-weight: 700; margin-top: 10px;">CANDIDATE</div>
-            </div>
-            <div style="font-size: 0.8rem; line-height: 2;">
-                <b>Roll No:</b> 9876543210<br>
-                <b>Exam:</b> Progressive Skill Test
-            </div>
-        </aside>
+        <div class="ssc-typing-area"><textarea id="typingBox" placeholder="Start typing here..." spellcheck="false" autocomplete="off" autocapitalize="off"></textarea><button onclick="submitTranscription()" style="width: 120px; padding: 10px; background: #000; color: #fff; margin-top: 10px;">Submit</button></div>
+        <aside class="ssc-candidate-panel"><div style="text-align: center; margin-bottom: 20px;"><div style="width: 100px; height: 120px; border: 1px solid #000; margin: auto; background: #fff;"></div><div id="candidate-name-display" style="font-weight: 700; margin-top: 10px;">CANDIDATE</div></div><div style="font-size: 0.8rem; line-height: 2;"><b>Roll No:</b> 9876543210<br><b>Exam:</b> Progressive Skill Test</div></aside>
     </div>
 </div>
 
-<!-- Modals -->
-<div id="aiModal" class="modal-overlay">
-    <div class="modal-content" style="text-align: left;">
-        <h3 style="color: #4f46e5;">🧠 AI Teacher Analysis</h3>
-        <div id="aiModalContent" style="margin: 20px 0; line-height: 1.6;"></div>
-        <button onclick="document.getElementById('aiModal').classList.remove('visible')" style="width: 100%; padding: 10px; background: #f1f5f9; font-weight: 700; border-radius: 8px;">Close</button>
-    </div>
-</div>
-
-<div id="instructions-modal" class="modal-overlay">
-    <div class="modal-content">
-        <h2>Read Carefully</h2>
-        <ul style="text-align: left; line-height: 2; margin: 20px 0;">
-            <li>Timer starts on your first character.</li>
-            <li>Use standard typing rules (one space after words).</li>
-            <li>Do not refresh the page during the exam.</li>
-        </ul>
-        <button onclick="startTranscriptionTest()" style="padding: 12px 40px; background: #1e293b; color: white; border-radius: 10px; font-weight: 700;">Continue to Exam</button>
-    </div>
-</div>
-
-<div id="transcriptModal" class="modal-overlay">
-    <div class="modal-content" style="max-height: 80vh; overflow-y: auto;">
-        <h3 style="text-align: left;">Passage Transcript</h3>
-        <p id="transcriptContent" style="text-align: left; line-height: 1.8; color: #334155; white-space: pre-wrap;"></p>
-        <button onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="margin-top: 20px; padding: 10px 20px; background: #eee; border-radius: 8px;">Close</button>
-    </div>
-</div>
+<div id="aiModal" class="modal-overlay"><div class="modal-content" style="text-align: left;"><h3 style="color: #4f46e5;">🧠 AI Teacher Analysis</h3><div id="aiModalContent" style="margin: 20px 0; line-height: 1.6;"></div><button onclick="document.getElementById('aiModal').classList.remove('visible')" style="width: 100%; padding: 10px; background: #f1f5f9; font-weight: 700; border-radius: 8px;">Close</button></div></div>
+<div id="instructions-modal" class="modal-overlay"><div class="modal-content"><h2>Read Carefully</h2><ul style="text-align: left; line-height: 2; margin: 20px 0;"><li>Timer starts on your first character.</li><li>Use standard typing rules.</li><li>Do not refresh the page during the exam.</li></ul><button onclick="startTranscriptionTest()" style="padding: 12px 40px; background: #1e293b; color: white; border-radius: 10px; font-weight: 700;">Continue to Exam</button></div></div>
+<div id="transcriptModal" class="modal-overlay"><div class="modal-content" style="max-height: 80vh; overflow-y: auto;"><h3 style="text-align: left;">Passage Transcript</h3><p id="transcriptContent" style="text-align: left; line-height: 1.8; color: #334155; white-space: pre-wrap;"></p><button onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="margin-top: 20px; padding: 10px 20px; background: #eee; border-radius: 8px;">Close</button></div></div>
 
 <script>
-/** 
- * PROGRESSIVE DICTATION CORE ENGINE
- */
-
 const firebaseConfig = {
   apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
   authDomain: "checkmysteno.firebaseapp.com",
@@ -310,27 +192,36 @@ let allPassages = [];
 let currentPassage = null;
 let player, originalText, wordCount;
 let timer = null, timeLeft = 0, timerStarted = false;
-let g_lastAnalysisResult;
 let analysisWorker = new Worker('worker.js');
 let candidateId = DigiWallet.getUser()?.uid;
 let isReevaluateModeActive = false;
+let g_synonymData = [];
 
-// 1. App Init
 document.addEventListener("DOMContentLoaded", async () => {
     if (!DigiWallet.isPremium()) {
-        alert("Premium access required.");
+        alert("Premium Access Required.");
         window.location.href = "login.html";
         return;
     }
     document.getElementById('candidate-name-display').textContent = DigiWallet.getUser().name.toUpperCase();
+    await loadSynonyms();
     await fetchProgressiveData();
     setupEventListeners();
 });
 
-// 2. Data Fetching
+async function loadSynonyms() {
+    try {
+        const response = await fetch('/config/flex_synonyms.php');
+        if (response.ok) {
+            g_synonymData = await response.json();
+        }
+    } catch (error) { console.warn("Synonyms could not be loaded locally."); }
+}
+
 async function fetchProgressiveData() {
     document.getElementById('fullPageLoader').style.display = 'flex';
     try {
+        // PERMISSION FIX: If "progressive" collection is locked, we catch the error here
         const snapshot = await db.collection("progressive").get();
         let years = new Set();
         allPassages = [];
@@ -344,34 +235,19 @@ async function fetchProgressiveData() {
             const transcripts = await db.collection("progressive").doc(doc.id).collection("transcripts").get();
             transcripts.forEach(tDoc => {
                 const data = tDoc.data();
-                allPassages.push({
-                    id: tDoc.id,
-                    parentId: doc.id,
-                    title: data.title || `Passage ${tDoc.id}`,
-                    year: year,
-                    month: month,
-                    text: data.text,
-                    audioUrl: data.audioUrl,
-                    wordCount: data.wordCount || 0
-                });
+                allPassages.push({ id: tDoc.id, title: data.title || `Passage ${tDoc.id}`, year: year, month: month, text: data.text, audioUrl: data.audioUrl, wordCount: data.wordCount || 0 });
             });
         }
-
-        // Populate Years
+        
         const yearSelect = document.getElementById('yearFilter');
-        Array.from(years).sort().forEach(y => {
-            yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
-        });
-
+        Array.from(years).sort().forEach(y => { yearSelect.innerHTML += `<option value="${y}">${y}</option>`; });
         renderGrid();
     } catch (e) {
-        console.error("Fetch error:", e);
-    } finally {
-        document.getElementById('fullPageLoader').style.display = 'none';
-    }
+        console.error("Firebase Permission Error: ", e);
+        alert("Error: Missing Permission for 'progressive' collection. Please update Firebase Rules.");
+    } finally { document.getElementById('fullPageLoader').style.display = 'none'; }
 }
 
-// 3. UI Rendering
 function renderGrid() {
     const grid = document.getElementById('passage-grid');
     const search = document.getElementById('passageSearch').value.toLowerCase();
@@ -381,9 +257,8 @@ function renderGrid() {
     const progress = JSON.parse(localStorage.getItem(`progProgress_${candidateId}`) || '{}');
 
     grid.innerHTML = '';
-    
     const filtered = allPassages.filter(p => {
-        const matchesSearch = p.title.toLowerCase().includes(search) || p.year.toString().includes(search);
+        const matchesSearch = p.title.toLowerCase().includes(search);
         const matchesYear = year === 'all' || p.year === year;
         const matchesMonth = month === 'all' || p.month === month;
         const isAttempted = !!progress[p.id];
@@ -395,221 +270,63 @@ function renderGrid() {
         const isAttempted = !!progress[p.id];
         const card = document.createElement('div');
         card.className = 'passage-card';
-        card.innerHTML = `
-            <div class="card-header">
-                <div class="card-title-group">
-                    <h3>${p.title}</h3>
-                </div>
-                <span class="status-tag ${isAttempted ? 'attempted' : ''}">
-                    ${isAttempted ? progress[p.id].accuracy + '%' : 'NEW'}
-                </span>
-            </div>
-            <div class="card-meta">
-                <span>📅 ${p.month} ${p.year}</span>
-                <span>📝 ${p.wordCount} words</span>
-            </div>
-            <button class="take-test-btn" onclick="loadPassageIntoPlayer('${p.id}')">Start Practice</button>
-        `;
+        card.innerHTML = `<div class="card-header"><div class="card-title-group"><h3>${p.title}</h3></div><span class="status-tag ${isAttempted ? 'attempted' : ''}">${isAttempted ? progress[p.id].accuracy + '%' : 'NEW'}</span></div><div class="card-meta"><span>📅 ${p.month} ${p.year}</span><span>📝 ${p.wordCount} words</span></div><button class="take-test-btn" onclick="loadIntoPlayer('${p.id}')">Start Practice</button>`;
         grid.appendChild(card);
     });
 }
 
-// 4. Passage & Player Control
-function loadPassageIntoPlayer(id) {
+function loadIntoPlayer(id) {
     currentPassage = allPassages.find(p => p.id === id);
     originalText = currentPassage.text;
     wordCount = currentPassage.wordCount;
-
     document.getElementById('player-title-display').textContent = currentPassage.title;
-    
-    // Config Options
     const wcSelect = document.getElementById('wordCountSelect');
     wcSelect.innerHTML = '<option value="full">Full Passage</option>';
     [400, 800].forEach(n => { if(wordCount > n) wcSelect.innerHTML += `<option value="${n}">${n} Words</option>`; });
-
     const vidId = currentPassage.audioUrl.split('v=')[1]?.split('&')[0] || currentPassage.audioUrl.split('/').pop();
-    if (player) {
-        player.loadVideoById(vidId);
-    } else {
-        player = new YT.Player('player', { height: '1', width: '1', videoId: vidId, events: { 'onStateChange': onPlayerStateChange } });
-    }
-
+    if (player) { player.loadVideoById(vidId); } else { player = new YT.Player('player', { height: '1', width: '1', videoId: vidId, events: { 'onStateChange': onStateChange } }); }
     showView('player-view');
 }
 
-function onPlayerStateChange(event) {
-    if (event.data == YT.PlayerState.PLAYING) {
-        document.getElementById('playBtn').style.display = 'none';
-        document.getElementById('pauseBtn').style.display = 'flex';
-        trackProgressBar();
-    } else {
-        document.getElementById('playBtn').style.display = 'flex';
-        document.getElementById('pauseBtn').style.display = 'none';
-    }
-}
-
-function trackProgressBar() {
-    const timer = setInterval(() => {
-        if (!player || player.getPlayerState() != 1) { clearInterval(timer); return; }
-        const cur = player.getCurrentTime();
-        const dur = player.getDuration();
-        document.getElementById('progress-fill').style.width = (cur / dur * 100) + '%';
-        document.getElementById('current-time').textContent = formatTime(cur);
-        document.getElementById('total-time').textContent = formatTime(dur);
-    }, 500);
-}
-
+function onStateChange(e) { if (e.data == YT.PlayerState.PLAYING) { document.getElementById('playBtn').style.display = 'none'; document.getElementById('pauseBtn').style.display = 'flex'; trackProgress(); } else { document.getElementById('playBtn').style.display = 'flex'; document.getElementById('pauseBtn').style.display = 'none'; } }
+function trackProgress() { const t = setInterval(() => { if (!player || player.getPlayerState() != 1) { clearInterval(t); return; } const cur = player.getCurrentTime(), dur = player.getDuration(); document.getElementById('progress-fill').style.width = (cur/dur*100)+'%'; document.getElementById('current-time').textContent = formatTime(cur); document.getElementById('total-time').textContent = formatTime(dur); }, 500); }
 function togglePlay() { player.getPlayerState() == 1 ? player.pauseVideo() : player.playVideo(); }
-function formatTime(s) { let m = Math.floor(s/60); let sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
-
-// 5. Exam Logic
+function formatTime(s) { let m = Math.floor(s/60), sec = Math.floor(s%60); return `${m}:${sec<10?'0':''}${sec}`; }
 function showInstructions() { player.pauseVideo(); document.getElementById('instructions-modal').classList.add('visible'); }
+
 function startTranscriptionTest() {
     document.getElementById('instructions-modal').classList.remove('visible');
     showView('exam-view');
-    timeLeft = parseInt(document.getElementById('timer-select').value) * 60;
-    document.getElementById('typingTimerDisplay').textContent = formatTime(timeLeft);
+    timeLeft = parseInt(document.getElementById('timer-select').value)*60;
     document.getElementById('typingBox').value = '';
-    
-    document.getElementById('typingBox').addEventListener('input', () => {
-        if (!timerStarted) {
-            timerStarted = true;
-            timer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('typingTimerDisplay').textContent = formatTime(timeLeft);
-                if (timeLeft <= 0) submitTranscription();
-            }, 1000);
-        }
-    }, { once: true });
+    document.getElementById('typingBox').oninput = () => { if (!timerStarted) { timerStarted = true; timer = setInterval(() => { timeLeft--; document.getElementById('typingTimerDisplay').textContent = formatTime(timeLeft); if (timeLeft <= 0) submitTranscription(); }, 1000); } };
 }
 
-// 6. Analysis & Result
 function submitTranscription() {
     clearInterval(timer);
     document.getElementById('fullPageLoader').style.display = 'flex';
-    const typedText = document.getElementById('typingBox').value;
-
-    analysisWorker.postMessage({
-        originalText: originalText,
-        userText: typedText,
-        config: { mode: 'exam', addition: 1, omission: 1, spelling: 0.5, capitalization: 0.5, punctuation: { mode: 'fullstop-only', weight: 0.5 } }
-    });
-
+    analysisWorker.postMessage({ originalText, userText: document.getElementById('typingBox').value, config: { mode: 'exam', addition:1, omission:1, spelling:0.5, capitalization:0.5, punctuation: { mode:'fullstop-only', weight:0.5 }}, synonymData: g_synonymData });
     analysisWorker.onmessage = (e) => {
-        g_lastAnalysisResult = e.data;
-        saveLocalProgress(e.data.accuracy);
-        renderResultSheet(e.data);
+        saveProgress(e.data.accuracy);
+        renderResults(e.data);
         showView('results-view');
         document.getElementById('fullPageLoader').style.display = 'none';
         timerStarted = false;
     };
 }
 
-function renderResultSheet(res) {
+function renderResults(res) {
     const container = document.getElementById('resultSheetContainer');
-    let originalHtml = res.originalWords.map((w, i) => `<span class="word-wrapper" data-index="${i}">${w}</span>`).join(' ');
-
-    container.innerHTML = `
-        <div class="result-sheet-container">
-            <h1>Transcription Report</h1>
-            <div class="stats-row">
-                <div class="stat-pill">Accuracy: ${res.accuracy}%</div>
-                <div class="stat-pill red">Full Mistakes: ${res.mistakeCounters.omission + res.mistakeCounters.addition}</div>
-                <div class="stat-pill amber">Half Mistakes: ${res.halfBucketCount}</div>
-            </div>
-            
-            <div class="legend-container" id="interactive-legend">
-                <div class="legend-item" data-filter="omission"><span class="legend-color-box" style="background:var(--hl-omissions)"></span>Omissions</div>
-                <div class="legend-item" data-filter="addition"><span class="legend-color-box" style="background:var(--hl-additions)"></span>Additions</div>
-                <div class="legend-item" data-filter="spelling"><span class="legend-color-box" style="background:var(--hl-spelling)"></span>Spelling</div>
-            </div>
-
-            <div class="result-controls" style="margin-top:20px;">
-                <button id="toggleReevaluateBtn" class="take-test-btn" style="width:auto; padding:8px 20px;">Enter Re-evaluate Mode</button>
-                <button onclick="switchView()" class="take-test-btn" style="width:auto; padding:8px 20px;">Switch View</button>
-            </div>
-
-            <div id="comparisonColumns" class="columns view-top-bottom" style="margin-top:20px;">
-                <div class="col"><strong>Your Transcription:</strong><p id="editableTypedText">${res.resultHTML}</p></div>
-                <div class="col"><strong>Original Text:</strong><p id="editableOriginalText">${originalHtml}</p></div>
-            </div>
-        </div>
-    `;
-    
+    container.innerHTML = `<div class="result-sheet-container"><h1>${currentPassage.title} Report</h1><div class="stats-row"><div class="stat-pill">Accuracy: ${res.accuracy}%</div><div class="stat-pill red">Full Mistakes: ${res.mistakeCounters.omission + res.mistakeCounters.addition}</div><div class="stat-pill amber">Half Mistakes: ${res.halfBucketCount}</div></div><div class="columns view-top-bottom"><div class="col"><strong>Transcription:</strong><p id="editableTypedText">${res.resultHTML}</p></div><div class="col"><strong>Original:</strong><p id="editableOriginalText">${res.originalWords.join(' ')}</p></div></div></div>`;
     AITeacher.init();
-    document.getElementById('toggleReevaluateBtn').onclick = toggleReevaluate;
 }
 
-// AI Teacher & Interaction Logic
-const AITeacher = {
-    init: function() {
-        document.getElementById('comparisonColumns').addEventListener('click', (e) => {
-            const icon = e.target.closest('.ai-icon');
-            if (!icon) return;
-            const highlight = e.target.closest('.highlight');
-            this.showAnalysis(highlight);
-        });
-    },
-    showAnalysis: function(el) {
-        const modal = document.getElementById('aiModal');
-        const content = document.getElementById('aiModalContent');
-        modal.classList.add('visible');
-        content.innerHTML = `Analyzing grammar rule for: <b>${el.textContent}</b>...<br><br><i>Note: Connect your AI endpoint URL in the script to see dynamic feedback.</i>`;
-    }
-};
-
-function toggleReevaluate() {
-    isReevaluateModeActive = !isReevaluateModeActive;
-    const btn = document.getElementById('toggleReevaluateBtn');
-    const typedP = document.getElementById('editableTypedText');
-    const origP = document.getElementById('editableOriginalText');
-
-    if(isReevaluateModeActive) {
-        btn.textContent = "Calculate & Exit";
-        btn.style.background = "#7c3aed";
-        btn.style.color = "#fff";
-        typedP.contentEditable = true;
-        origP.contentEditable = true;
-        alert("Mode ON: You can now edit both text boxes. Click calculate when done.");
-    } else {
-        document.getElementById('fullPageLoader').style.display = 'flex';
-        analysisWorker.postMessage({
-            originalText: origP.innerText,
-            userText: typedP.innerText,
-            config: { mode: 'exam', addition: 1, omission: 1, spelling: 0.5, capitalization: 0.5, punctuation: { mode: 'fullstop-only', weight: 0.5 } }
-        });
-        analysisWorker.onmessage = (e) => {
-            renderResultSheet(e.data);
-            document.getElementById('fullPageLoader').style.display = 'none';
-        };
-    }
-}
-
-// Helpers
+const AITeacher = { init: function() { document.querySelectorAll('.ai-icon').forEach(icon => { icon.onclick = (e) => { const el = e.target.closest('.highlight'); document.getElementById('aiModalContent').textContent = "Analyzing Grammar for: " + el.textContent; document.getElementById('aiModal').classList.add('visible'); }; }); } };
 function showView(id) { document.querySelectorAll('.view').forEach(v => v.style.display = 'none'); document.getElementById('exam-view').style.display = 'none'; document.getElementById(id).style.display = 'block'; }
-function goHome() { showView('selection-view'); if(player) player.stopVideo(); timerStarted = false; clearInterval(timer); }
-function saveLocalProgress(acc) {
-    const progress = JSON.parse(localStorage.getItem(`progProgress_${candidateId}`) || '{}');
-    if (!progress[currentPassage.id] || acc > progress[currentPassage.id].accuracy) {
-        progress[currentPassage.id] = { accuracy: acc };
-        localStorage.setItem(`progProgress_${candidateId}`, JSON.stringify(progress));
-    }
-}
-function setupEventListeners() {
-    document.getElementById('passageSearch').oninput = renderGrid;
-    document.getElementById('yearFilter').onchange = renderGrid;
-    document.getElementById('monthFilter').onchange = renderGrid;
-    document.getElementById('statusFilter').onchange = renderGrid;
-    document.getElementById('progressBar').onclick = (e) => {
-        const rect = e.currentTarget.getBoundingClientRect();
-        const pos = (e.clientX - rect.left) / rect.width;
-        player.seekTo(pos * player.getDuration(), true);
-    };
-}
-function switchView() { const col = document.getElementById('comparisonColumns'); col.classList.toggle('view-side-by-side'); col.classList.toggle('view-top-bottom'); }
+function goHome() { showView('selection-view'); if(player) player.stopVideo(); clearInterval(timer); timerStarted = false; }
+function saveProgress(acc) { const prog = JSON.parse(localStorage.getItem(`progProgress_${candidateId}`) || '{}'); if (!prog[currentPassage.id] || acc > prog[currentPassage.id].accuracy) { prog[currentPassage.id] = { accuracy: acc }; localStorage.setItem(`progProgress_${candidateId}`, JSON.stringify(prog)); } }
+function setupEventListeners() { document.getElementById('passageSearch').oninput = renderGrid; document.getElementById('yearFilter').onchange = renderGrid; document.getElementById('monthFilter').onchange = renderGrid; document.getElementById('statusFilter').onchange = renderGrid; document.getElementById('progressBar').onclick = (e) => { const rect = e.currentTarget.getBoundingClientRect(); player.seekTo(((e.clientX - rect.left) / rect.width) * player.getDuration(), true); }; }
 function openTranscriptModal() { document.getElementById('transcriptContent').textContent = originalText; document.getElementById('transcriptModal').classList.add('visible'); }
-function updateAutoStopSettings() { /* Logic for auto-stop timestamp */ }
-
 </script>
 </body>
 </html>
