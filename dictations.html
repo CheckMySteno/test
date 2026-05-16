@@ -4,450 +4,485 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta name="robots" content="noindex">
-<title>Steno Practice Tool - Progressive Magazine</title>
+<title>Steno Practice Tool - Dictations</title>
 
-<!-- External Scripts (Matching versions in your index.html) -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<!-- External Scripts -->
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
-<!-- DigiWallet Script -->
+<!-- NEW: DigiWallet Script -->
 <script src="digiwallet.js"></script>
 
+<!-- Google Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* --- CSS REPLICATED SYSTEMATICALLY FROM KC TOOL --- */
+    /* --- 1. Global Styles (Synced with KC) --- */
     :root {
-      --primary-blue: #007bff; --primary-blue-dark: #0056b3;
-      --text-color: #111827; --dark-grey: #333; --medium-grey: #555;
-      --bg-color: #f8fafc; --surface-color: #ffffff;
-      --border-color: #e2e8f0; --white: #fff;
-      --font-family: 'Inter', sans-serif;
+      --primary-blue: #007bff;
+      --text-color: #111827;
+      --bg-color: #f8fafc;
+      --surface-color: #ffffff;
+      --border-color: #e2e8f0;
       --accent-purple: #7c3aed;
       --accent-purple-light: #f3e8ff;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-      --hl-additions: #fecdd3; --hl-omissions: #d9f99d; --hl-spelling: #fde68a; --hl-capitalization: #bae6fd; --hl-punctuation: #ddd6fe;
+      --hl-additions: #fecdd3;     
+      --hl-omissions: #d9f99d;     
+      --hl-spelling: #fde68a;      
+      --hl-capitalization: #bae6fd; 
+      --hl-punctuation: #ddd6fe;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
-    html, body { font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.5; -webkit-font-smoothing: antialiased; }
-    .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; }
-    button { font-family: var(--font-family); cursor: pointer; border: none; }
+    html, body {
+      font-family: 'Inter', sans-serif; background-color: var(--bg-color); color: var(--text-color);
+      margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.6;
+    }
+    .app-container { max-width: 1200px; margin: 0 auto; padding: 30px 20px; display: none; }
+    button { font-family: 'Inter', sans-serif; cursor: pointer; border: none; }
     .view { display: none; animation: fadeIn 0.4s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* SELECTION VIEW */
-    .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; }
-    .page-header h1 { font-size: 2rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.025em; }
-    .search-wrapper { position: relative; }
-    .search-wrapper input { width: 300px; padding: 12px 16px 12px 44px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.95em; background: white; box-shadow: var(--shadow-sm); }
-    .search-wrapper svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
-
-    .intro-box { background: white; border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; margin-bottom: 32px; box-shadow: var(--shadow-sm); }
-    .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-    .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background: white; font-weight: 500; cursor: pointer; }
-
-    #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-    .passage-card { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; transition: all 0.3s; position: relative; display:flex; flex-direction:column; justify-content:space-between; }
-    .passage-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--accent-purple); }
-    .card-id-badge { font-size: 0.75em; color: var(--accent-purple); font-weight: 800; text-transform: uppercase; }
-    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.8em; font-weight: 600; background-color: #f1f5f9; color: #64748b; width: 100%; margin-top:8px;}
-    .status-badge.attempted { background-color: #ecfdf5; color: #059669; }
-    .take-test-btn { width: 100%; padding: 10px; background: white; border: 1px solid var(--border-color); font-weight: 600; border-radius: 8px; margin-top: 15px; cursor:pointer; }
-    .passage-card:hover .take-test-btn { background: #1e293b; color: white; }
-
-    /* PLAYER & TRANSCRIPTION */
-    #player-view { max-width: 680px; margin: 20px auto; }
-    .practice-station { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0,0,0,0.04); overflow: visible; position: relative; }
-    .player-header { background: #fff; padding: 15px 25px; border-bottom: 1px solid #f1f5f9; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-    .player-body { padding: 30px 25px; text-align: center; }
-    .progress-bar-wrapper { width: 100%; height: 6px; background-color: #f1f5f9; border-radius: 99px; cursor: pointer; position: relative; overflow: hidden; margin: 20px 0;}
-    #progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #8b5cf6, #6366f1); border-radius: 99px; }
-    .controls-cluster { display: flex; align-items: center; justify-content: center; gap: 16px; }
-    .play-btn-large { width: 64px; height: 64px; background: #1e293b; color: white; border-radius: 20px; display:flex; align-items:center; justify-content:center; font-size:24px; cursor:pointer;}
-    .test-config-area { background-color: #f8fafc; border-top: 1px solid #e2e8f0; padding: 20px 25px; border-radius: 0 0 20px 20px; }
-    .modern-select { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 10px; margin-top: 8px; }
-
-    /* RESULTS VIEW */
-    .result-sheet-container { background: white; padding: 35px 45px; border-radius: 16px; border: 1px solid var(--border-color); max-width: 1200px; margin: auto; }
-    .stat-pill { background: #0891b2; color: white; padding: 10px 20px; border-radius: 10px; font-weight: 600; display: inline-flex; align-items: center; margin: 5px; }
-    .col { background: #f8fafc; border: 1px solid var(--border-color); padding: 25px; border-radius: 12px; line-height: 1.7; font-size: 1.1em; }
+    /* Selection Hub Styles */
+    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+    .page-header h1 { font-size: 2rem; font-weight: 800; }
     
-    .highlight { padding: 2px 4px; border-radius: 4px; position: relative; cursor: pointer; }
+    #dictation-type-hub { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
+    .category-card {
+        background: white; border: 1px solid var(--border-color); border-radius: 20px;
+        padding: 30px 25px; text-align: center; transition: all 0.3s ease; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    }
+    .category-card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-color: var(--accent-purple); }
+    .category-card .icon-wrapper { width: 60px; height: 60px; margin: 0 auto 15px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--accent-purple); color: white; font-size: 24px; }
+    
+    .passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px; }
+    .passage-card { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; }
+    .status-tag { padding: 4px 10px; border-radius: 99px; font-size: 0.8rem; font-weight: 600; background: #f1f5f9; }
+    .status-tag.attempted { background: #ecfdf5; color: #059669; }
+    .take-test-btn { width: 100%; padding: 12px; background: #1e293b; color: white; border-radius: 10px; font-weight: 600; margin-top: 15px; }
+
+    /* Player Styles */
+    #player-view { max-width: 680px; margin: 20px auto; }
+    .practice-station { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); border: 1px solid var(--border-color); }
+    .progress-bar-wrapper { width: 100%; height: 8px; background: #f1f5f9; border-radius: 4px; cursor: pointer; overflow: hidden; margin: 20px 0; }
+    #progress-fill { height: 100%; background: var(--accent-purple); width: 0%; transition: width 0.1s linear; }
+
+    /* Result Sheet (Synced with KC) */
+    .result-sheet-container { background: white; border-radius: 16px; padding: 40px; border: 1px solid var(--border-color); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .stat-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; background: #0891b2; color: white; font-weight: 600; }
+    .stat-pill.red { background: #ef4444; }
+    .stat-pill.amber { background: #f97316; }
+    .col { background: #f8fafc; border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); line-height: 1.8; }
+    .highlight { padding: 2px 4px; border-radius: 4px; font-weight: 500; cursor: help; }
     .omission { background: var(--hl-omissions); }
-    .addition { background: var(--hl-additions); }
+    .extra { background: var(--hl-additions); text-decoration: line-through; }
     .spelling { background: var(--hl-spelling); }
 
-    .full-page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; justify-content: center; align-items: center; }
-    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid #7c3aed; border-radius: 50%; width: 40px; height: 40px; animation: spin 0.8s linear infinite; }
+    /* Utility */
+    .full-page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; display: flex; justify-content: center; align-items: center; z-index: 9999; }
+    .spinner { border: 4px solid #f3f3f3; border-top: 4px solid var(--accent-purple); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-    /* EXAM INTERFACE */
-    #exam-view { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; flex-direction: column; z-index: 2000; font-family: Tahoma; }
-    .ssc-header { background: #f0f0f0; border-bottom: 1px solid #ccc; padding: 10px 20px; display: flex; justify-content: space-between; }
-    #typingBox { width: 100%; height: 85%; border: 1px solid #000; padding: 15px; font-family: 'Courier New'; font-size: 18px; resize: none; outline: none; }
+    .locked-screen { text-align: center; padding: 100px 20px; }
 </style>
 </head>
 <body oncontextmenu="return false;">
 
-<div id="fullPageLoader" class="full-page-loader"><div class="spinner"></div></div>
+<div id="fullPageLoader" class="full-page-loader">
+    <div class="spinner"></div>
+</div>
 
-<div class="app-container">
-    <!-- SELECTION VIEW -->
+<div class="app-container" id="mainContainer">
+    <!-- VIEW 1: HUB -->
     <div id="selection-view" class="view">
         <div class="page-header">
-            <h1>Progressive Magazine</h1>
-            <div class="search-wrapper">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" style="position:absolute; left:14px; top:12px; color:#9ca3af;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                <input type="search" id="passageSearch" placeholder="Search title or month...">
+            <h1>Dictation Hub</h1>
+            <button id="resetProgressBtn" style="background: none; color: #64748b; font-size: 0.9rem;">Reset Progress</button>
+        </div>
+        <div id="dictation-type-hub">
+             <div class="category-card" id="cat-prog">
+                <div class="icon-wrapper">P</div>
+                <h3>Progressive</h3>
+                <p>Magazine passages from start to finish.</p>
+            </div>
+             <div class="category-card" id="cat-ssc">
+                 <div class="icon-wrapper">S</div>
+                <h3>SSC Previous Year</h3>
+                <p>Practice with actual past exam papers.</p>
+            </div>
+             <div class="category-card" id="cat-gen">
+                 <div class="icon-wrapper">G</div>
+                <h3>General Matter</h3>
+                <p>A variety of passages on general topics.</p>
+            </div>
+             <div class="category-card" id="cat-kc">
+                 <div class="icon-wrapper">K</div>
+                <h3>Kailash Chandra</h3>
+                <p>Curated selection of essential KC passages.</p>
+            </div>
+            <div class="category-card" id="cat-legal">
+                <div class="icon-wrapper">L</div>
+                <h3>Legal</h3>
+                <p>Passages from court proceedings.</p>
+            </div>
+            <div class="category-card" id="cat-speech">
+                <div class="icon-wrapper">A</div>
+                <h3>Speeches</h3>
+                <p>Official addresses by the President.</p>
             </div>
         </div>
 
-        <div class="intro-box">
-            <h2 style="margin:0;">Monthly Progressive Practice</h2>
-            <p>Synced with your Premium Pass. Access all magazine dictations systematically.</p>
-            <button id="resetProgressBtn" style="color:#ef4444; background:none; border:1px solid #ef4444; padding:8px 15px; border-radius:8px;">Reset Progressive Data</button>
+        <!-- Dynamic Grid Containers -->
+        <div id="progressive-view-container" class="grid-container" style="display: none; margin-top: 30px;">
+            <div class="page-header"><h2>Progressive Dictations</h2><button onclick="showSelectionHub()">Back</button></div>
+            <div id="progressive-grid" class="passage-grid"></div>
         </div>
-
-        <div class="filter-bar">
-            <select id="yearFilter">
-                <option value="">All Years</option>
-                <script>for(let y=new Date().getFullYear(); y>=2020; y--) document.write(`<option value="${y}">${y}</option>`);</script>
-            </select>
-            <select id="monthFilter">
-                <option value="">All Months</option>
-                <option value="01">January</option><option value="02">February</option><option value="03">March</option>
-                <option value="04">April</option><option value="05">May</option><option value="06">June</option>
-                <option value="07">July</option><option value="08">August</option><option value="09">September</option>
-                <option value="10">October</option><option value="11">November</option><option value="12">December</option>
-            </select>
+        <div id="ssc-previous-year-view-container" class="grid-container" style="display: none; margin-top: 30px;">
+            <div class="page-header"><h2>SSC Previous Year</h2><button onclick="showSelectionHub()">Back</button></div>
+            <div id="ssc-previous-year-grid" class="passage-grid"></div>
         </div>
-
-        <div id="passage-grid">
-            <!-- Populated by Firebase following your progressive_index rules -->
+        <div id="general-matter-view-container" class="grid-container" style="display: none; margin-top: 30px;">
+            <div class="page-header"><h2>General Matter</h2><button onclick="showSelectionHub()">Back</button></div>
+            <div id="general-matter-grid" class="passage-grid"></div>
+        </div>
+        <div id="important-kc-view-container" class="grid-container" style="display: none; margin-top: 30px;">
+            <div class="page-header"><h2>Most Important KC</h2><button onclick="showSelectionHub()">Back</button></div>
+            <div id="important-kc-grid" class="passage-grid"></div>
+        </div>
+        <div id="legal-dictation-view-container" class="grid-container" style="display: none; margin-top: 30px;">
+            <div class="page-header"><h2>Legal Dictations</h2><button onclick="showSelectionHub()">Back</button></div>
+            <div id="legal-dictation-grid" class="passage-grid"></div>
+        </div>
+        <div id="president-speech-view-container" class="grid-container" style="display: none; margin-top: 30px;">
+            <div class="page-header"><h2>President's Speeches</h2><button onclick="showSelectionHub()">Back</button></div>
+            <div id="president-speech-grid" class="passage-grid"></div>
         </div>
     </div>
-
-    <!-- PLAYER VIEW -->
+    
+    <!-- VIEW 2: PLAYER -->
     <div id="player-view" class="view">
         <div id="player"></div>
         <div class="practice-station">
-            <div id="player-loader" class="full-page-loader" style="position:absolute; border-radius:20px; background:rgba(255,255,255,0.9);"><div class="spinner"></div></div>
-            <div class="player-header">
-                <div>
-                    <h2 style="margin:0;">Practice Station</h2>
-                    <p id="player-subtitle" style="margin:5px 0 0 0; color:#64748b;">Loading...</p>
-                </div>
-                <button onclick="openTranscriptModal()" style="background:#f1f5f9; padding:8px 15px; border-radius:8px; font-weight:bold;">Transcript</button>
+            <div id="player-loader" class="spinner" style="display:none; margin: 0 auto 20px;"></div>
+            <h2 id="player-subtitle" style="text-align:center;">Dictation Player</h2>
+            
+            <div class="progress-bar-wrapper" id="progressBar"><div id="progress-fill"></div></div>
+            <div style="display:flex; justify-content: space-between; color: #64748b; font-size: 0.85rem; margin-bottom: 20px;">
+                <span id="current-time">00:00</span>
+                <span id="total-time">00:00</span>
             </div>
-            <div class="player-body">
-                <div class="progress-bar-wrapper" id="progressBar"><div id="progress-fill"></div></div>
-                <div style="display:flex; justify-content:space-between; font-size:12px; color:#94a3b8; margin-bottom:20px;">
-                    <span id="current-time">00:00</span><span id="total-time">00:00</span>
-                </div>
-                <div class="controls-cluster">
-                    <button class="control-btn" onclick="seekRelative(-5)">-5s</button>
-                    <button id="playBtn" class="play-btn-large" onclick="togglePlay()">▶</button>
-                    <button id="pauseBtn" class="play-btn-large" onclick="togglePlay()" style="display:none;">⏸</button>
-                    <button class="control-btn" onclick="seekRelative(5)">+5s</button>
-                    <select id="wpmRange" onchange="setPlaybackSpeed()" style="padding:10px; border-radius:10px; border:1px solid #ddd;">
-                        <script>for(let i=60; i<=160; i+=5) document.write(`<option value="${i}" ${i==100?'selected':''}>${i} WPM</option>`);</script>
-                    </select>
-                </div>
+
+            <div style="display:flex; justify-content:center; gap:15px; margin-bottom: 25px;">
+                <button onclick="restartVideo()" style="padding: 10px; border-radius: 8px;">Restart</button>
+                <button id="playBtn" onclick="togglePlay()" style="background: var(--accent-purple); color:white; padding: 10px 25px; border-radius: 8px;">Play</button>
+                <button id="pauseBtn" onclick="togglePlay()" style="display:none; background: #1e293b; color:white; padding: 10px 25px; border-radius: 8px;">Pause</button>
+                <select id="wpmSpeed" onchange="setPlaybackSpeed()" style="padding: 8px; border-radius: 8px; border: 1px solid var(--border-color);">
+                    <option value="80">80 WPM</option>
+                    <option value="100" selected>100 WPM</option>
+                    <option value="120">120 WPM</option>
+                </select>
             </div>
-            <div class="test-config-area">
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                    <div><label style="font-size:12px; font-weight:bold; color:#64748b;">TARGET WORDS</label><select id="wordCountSelect" class="modern-select" onchange="updateAutoStop()"></select></div>
-                    <div><label style="font-size:12px; font-weight:bold; color:#64748b;">TIMER</label><select id="timer-select" class="modern-select"><option value="50">50 Min</option><option value="40">40 Min</option><option value="10">10 Min</option></select></div>
-                </div>
-                <div style="text-align:center; margin-top:15px;"><label><input type="checkbox" id="includeComma"> Count comma (,) mistakes</label></div>
-                <button id="startTranscriptionBtn" onclick="showInstructions()" style="width:100%; padding:15px; background:#1e293b; color:white; border-radius:12px; font-weight:bold; margin-top:15px;">🚀 Start Transcription Test</button>
+
+            <div style="background: #f8fafc; padding: 20px; border-radius: 12px;">
+                <label style="display:block; margin-bottom: 10px; font-weight: 600;">Test Settings:</label>
+                <select id="timer-select" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-color); margin-bottom: 15px;">
+                    <option value="50">50 Minutes</option>
+                    <option value="40">40 Minutes</option>
+                    <option value="10">10 Minutes (Quick)</option>
+                </select>
+                <label style="font-size: 0.9rem; cursor:pointer;"><input type="checkbox" id="includeComma"> Count comma (,) mistakes</label>
+                <button id="startTranscriptionBtn" onclick="showInstructions()" style="width:100%; margin-top:20px; padding: 15px; background: #1e293b; color:white; border-radius: 10px; font-weight:700;">🚀 Start Transcription Test</button>
             </div>
         </div>
-        <button onclick="goHome()" style="background:none; width:100%; margin-top:20px; color:#94a3b8;">Choose a different dictation</button>
+        <button onclick="showView('selection-view')" style="width:100%; margin-top: 20px; color: #64748b; background:none;">Back to list</button>
     </div>
 
-    <!-- RESULTS VIEW -->
+    <!-- VIEW 3: EXAM (SSC SIMULATION) -->
+    <div id="exam-view">
+        <header class="ssc-header">
+            <div class="ssc-header-left">
+                <div class="ssc-logo"><img id="ssc-logo-img" src="" alt="SSC"></div>
+                <div class="ssc-title">
+                    <h1>STAFF SELECTION COMMISSION</h1>
+                    <p>OFFICIAL SKILL TEST SIMULATION</p>
+                </div>
+            </div>
+            <div class="ssc-header-right"><div id="exam-date"></div></div>
+        </header>
+        <main class="ssc-main-content">
+            <div class="ssc-typing-area">
+                <textarea id="typingBox" placeholder="Start typing here..." spellcheck="false" autocomplete="off"></textarea>
+                <button id="submitBtn" onclick="submitTranscription()">Submit Test</button>
+            </div>
+            <aside class="ssc-candidate-panel">
+                <div class="ssc-timer-box">Time Left: <span id="typingTimerDisplay">50:00</span></div>
+                <div class="ssc-candidate-photo"><img src="" alt="Candidate"></div>
+                <div class="ssc-candidate-info">
+                    <b>Name:</b> <span id="candidate-name-display">USER</span><br>
+                    <b>Language:</b> English<br>
+                    <b>Status:</b> Premium Session
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <!-- VIEW 4: RESULTS -->
     <div id="results-view" class="view">
         <div id="resultSheetContainer"></div>
-        <div style="text-align:center; padding:30px;">
-            <button onclick="window.print()" style="padding:12px 25px; background:#374151; color:white; border-radius:8px; margin-right:10px;">Download Report</button>
-            <button onclick="goHome()" style="padding:12px 25px; background:#0891b2; color:white; border-radius:8px;">🏠 Try Another</button>
+        <div style="text-align:center; margin-top: 30px; display: flex; gap: 10px; justify-content: center;">
+            <button id="printReportBtn" style="padding: 12px 25px; border-radius: 8px; background: #374151; color: white;">Download PDF</button>
+            <button onclick="goHome()" style="padding: 12px 25px; border-radius: 8px; background: var(--accent-purple); color: white;">Try Another</button>
         </div>
     </div>
 </div>
 
-<!-- EXAM INTERFACE -->
-<div id="exam-view">
-    <header class="ssc-header">
-        <div><b>STAFF SELECTION COMMISSION</b> - Progressive Magazine</div>
-        <div id="typingTimerDisplay" style="color:red; font-size:24px; font-weight:bold;">50:00</div>
-    </header>
-    <main style="display:flex; flex:1;">
-        <div style="flex:1; padding:20px; display:flex; flex-direction:column;">
-            <textarea id="typingBox" placeholder="Start typing here..."></textarea>
-            <button onclick="submitTranscription()" style="width:120px; background:#000; color:#fff; padding:10px; margin-top:10px;">SUBMIT</button>
-        </div>
-        <div style="width:280px; background:#f0f0f0; border-left:1px solid #ccc; padding:20px;">
-            <div style="width:100px; height:120px; background:#fff; border:1px solid #000; margin:0 auto 15px auto;">PHOTO</div>
-            <div><b>Name:</b> <span id="candidate-name-display">USER</span></div>
-            <div><b>Test:</b> Progressive</div>
-        </div>
-    </main>
+<!-- Modals -->
+<div id="instructions-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2>Practice Instructions</h2>
+        <ul style="text-align:left; margin: 20px 0; line-height: 2;">
+            <li>The timer starts when you type your first character.</li>
+            <li>Use standard typing rules (Full stop, Capitalization).</li>
+            <li>Click Submit when finished to see your accuracy.</li>
+        </ul>
+        <button onclick="startTranscriptionTest()" style="padding: 12px 30px; background: #1e293b; color: white; border-radius: 8px;">Continue to Test</button>
+    </div>
 </div>
 
-<!-- TRANSCRIPT MODAL -->
-<div id="transcriptModal" class="modal-overlay">
-    <div class="modal-content" style="max-width:750px;">
-        <h2>Passage Transcript</h2>
-        <div id="transcriptTextBody" style="text-align:left; max-height:400px; overflow-y:auto; padding:15px; background:#f9fafb; border:1px solid #ddd; line-height:1.8; margin-bottom:15px;"></div>
-        <button onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="padding:10px 20px; background:#64748b; color:white; border-radius:8px;">Close</button>
+<div id="error-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2 id="error-title">Error</h2>
+        <p id="error-message"></p>
+        <button onclick="document.getElementById('error-modal').classList.remove('visible')" class="modal-close-btn">Close</button>
+    </div>
+</div>
+
+<div id="resetConfirmModal" class="modal-overlay">
+    <div class="confirm-dialog">
+        <h3>Reset All Progress?</h3>
+        <p>This will delete your local history and scores. This cannot be undone.</p>
+        <div style="display:flex; gap:10px; justify-content:center; margin-top:20px;">
+            <button onclick="document.getElementById('resetConfirmModal').classList.remove('visible')">Cancel</button>
+            <button id="confirmResetBtn" style="background:#ef4444; color:white;">Confirm Reset</button>
+        </div>
     </div>
 </div>
 
 <script>
-// --- Firebase Config (Matching your index.html) ---
-const firebaseConfig = {
-  apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
-  authDomain: "checkmysteno.firebaseapp.com",
-  projectId: "checkmysteno",
-  storageBucket: "checkmysteno.firebasestorage.app",
-  messagingSenderId: "719325115943",
-  appId: "1:719325115943:web:0dd50a67978816d42a8002"
+// --- 1. CORE CONFIGURATION & DB ---
+const localDb = new Dexie("CheckMyStenoDB");
+localDb.version(1).stores({
+    attempts: '++id, timestamp, dictationName, accuracy, wpm',
+    mistakeLibrary: '++id, &[originalWord+typedWord], count',
+    overallStats: 'id'
+});
+
+const firebaseConfig = { 
+    apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE", 
+    authDomain: "checkmysteno.firebaseapp.com", 
+    projectId: "checkmysteno", 
+    storageBucket: "checkmysteno.firebasestorage.app", 
+    messagingSenderId: "719325115943", 
+    appId: "1:719325115943:web:0dd50a67978816d42a8002" 
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-const auth = firebase.auth();
 
-// --- Globals ---
-let player, allPassages = [], originalText = "", wordCount = 0;
-let candidateId, timer, timeLeft, timerStarted = false;
-let currentDocId = null, analysisWorker = new Worker('worker.js');
-let g_synonymData = [], g_autoStopTimestamp = Infinity;
+// --- 2. GLOBAL STATE ---
+let player, originalText = "", wordCount = 0, currentPassageTitle = "";
+let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
+let g_collection = "", g_docId = "", candidateId, attemptsRef;
+let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
+let g_alignment = [], isReevaluateModeActive = false;
 
-// --- AUTH OBSERVER (Prevents "Missing Permission" Error) ---
-auth.onAuthStateChanged(async (user) => {
-    const loader = document.getElementById('fullPageLoader');
-    if (user) {
-        candidateId = user.uid;
-        document.getElementById('candidate-name-display').textContent = (user.displayName || "USER").toUpperCase();
-        
-        // Optional Synonyms
-        try { 
-            const res = await fetch('/config/flex_synonyms.php'); 
-            if(res.ok) g_synonymData = await res.json();
-        } catch(e) { console.warn("Synonyms skipped."); }
+// --- 3. INITIALIZATION (Security Guard) ---
+window.addEventListener('DOMContentLoaded', async () => {
+    const user = DigiWallet.getUser();
+    const isPremium = DigiWallet.isPremium();
 
-        await fetchPassages();
-        setupFilters();
-        showView('selection-view');
-        loader.style.display = 'none';
-    } else {
-        const walletUser = DigiWallet.getUser();
-        if(!walletUser) {
-            alert("Session expired. Please login again.");
-            window.parent.location.href = "index.html";
-        }
+    if (!user) {
+        window.location.href = "index.html";
+        return;
     }
+
+    if (!isPremium) {
+        document.body.innerHTML = `
+            <div class="locked-screen">
+                <h1 style="font-size: 3rem;">🔒</h1>
+                <h1>Premium Pass Required</h1>
+                <p>The Dictations Hub is a premium feature. Please upgrade your plan to access thousands of dictations.</p>
+                <br>
+                <button onclick="window.location.href='index.html'" style="padding:12px 25px; background:#1e293b; color:white; border-radius:8px;">Back to Home</button>
+            </div>`;
+        return;
+    }
+
+    // Initialize Tool
+    candidateId = user.uid;
+    document.getElementById('candidate-name-display').textContent = (user.name || "USER").toUpperCase();
+    attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
+
+    document.getElementById('fullPageLoader').style.display = 'none';
+    document.getElementById('mainContainer').style.display = 'block';
+
+    setupProgressBar();
+    setupExtraControls();
+    initializeEventListeners();
+    restoreSession();
 });
 
-// --- Systematic Database Fetching based on Rules ---
-async function fetchPassages() {
-    try {
-        // According to your rules, progressive_index is the list
-        const snap = await db.collection("progressive_index").get();
-        allPassages = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        renderGrid();
-    } catch(e) { 
-        console.error(e);
-        document.getElementById('passage-grid').innerHTML = `<p style="color:red; text-align:center; padding:20px;">Access Error: Check if you are Logged In.</p>`; 
-    }
+// --- 4. NAVIGATION & HUB LOGIC ---
+function showSelectionHub() {
+    document.getElementById('dictation-type-hub').style.display = 'grid';
+    document.querySelectorAll('.grid-container').forEach(c => c.style.display = 'none');
+    showView('selection-view');
 }
 
-function renderGrid() {
-    const grid = document.getElementById('passage-grid');
-    const search = document.getElementById('passageSearch').value.toLowerCase();
-    const year = document.getElementById('yearFilter').value;
-    const month = document.getElementById('monthFilter').value;
-    const progress = JSON.parse(localStorage.getItem(`progProgress_${candidateId}`) || '{}');
-    
-    grid.innerHTML = '';
-    allPassages.filter(p => {
-        const mSearch = p.title?.toLowerCase().includes(search) || p.month?.toLowerCase().includes(search);
-        const mYear = year === "" || p.year == year;
-        const mMonth = month === "" || p.month == month;
-        return mSearch && mYear && mMonth;
-    }).forEach(p => {
-        const attempt = progress[p.id];
-        const card = document.createElement('div');
-        card.className = 'passage-card';
-        card.innerHTML = `
-            <div>
-                <span class="card-id-badge">${p.month || ''} ${p.year || ''}</span>
-                <h3 style="margin:5px 0;">${p.title}</h3>
-                <span class="status-badge ${attempt ? 'attempted' : ''}">${attempt ? `Accuracy: ${attempt.accuracy}%` : 'New'}</span>
-            </div>
-            <button class="take-test-btn" onclick="loadPassage('${p.id}')">Start Transcription</button>
-        `;
-        grid.appendChild(card);
-    });
+function showDictationGrid(type) {
+    document.getElementById('dictation-type-hub').style.display = 'none';
+    document.querySelectorAll('.grid-container').forEach(c => c.style.display = 'none');
+    document.getElementById(`${type}-view-container`).style.display = 'block';
 }
 
-async function loadPassage(id) {
-    document.getElementById('fullPageLoader').style.display = 'flex';
-    try {
-        // According to your rules, actual content is in progressive_passages
-        const doc = await db.collection("progressive_passages").doc(id).get();
-        const data = doc.data();
-        originalText = data.text;
-        wordCount = data.wordCount || originalText.split(/\s+/).length;
-        currentDocId = id;
+async function loadAndRenderCategory(config) {
+    showDictationGrid(config.type);
+    const grid = document.getElementById(config.gridId);
+    grid.innerHTML = '<div class="spinner" style="margin: 20px auto;"></div>';
 
-        document.getElementById('player-subtitle').textContent = data.title;
-        document.getElementById('transcriptTextBody').innerText = originalText;
+    try {
+        const indexDoc = await db.collection(config.indexCollection).doc('main').get();
+        if (!indexDoc.exists) throw new Error("Index not found.");
         
-        setupWordOptions();
-        showView('player-view');
-        initYT(data.audioUrl);
-    } catch(e) { alert("Error loading passage content."); }
-    finally { document.getElementById('fullPageLoader').style.display = 'none'; }
+        const data = indexDoc.data();
+        const passages = data.passages || {};
+        const progressData = JSON.parse(localStorage.getItem(`stenoProgress_${candidateId}`) || '{}');
+
+        grid.innerHTML = '';
+        Object.keys(passages).sort().forEach(id => {
+            const p = passages[id];
+            const key = `${config.dataCollection}-${id}`;
+            const attempt = progressData[key];
+            
+            const card = document.createElement('div');
+            card.className = 'passage-card';
+            card.dataset.collection = config.dataCollection;
+            card.dataset.docId = id;
+            
+            card.innerHTML = `
+                <div class="card-header">
+                    <h3>${p.title || id}</h3>
+                    <div class="status-tag ${attempt ? 'attempted' : ''}">
+                        ${attempt ? attempt.accuracy + '%' : 'Available'}
+                    </div>
+                </div>
+                <button class="take-test-btn" ${p.status !== 'available' ? 'disabled' : ''}>
+                    ${p.status === 'available' ? 'Take Test' : 'Locked'}
+                </button>
+            `;
+            grid.appendChild(card);
+        });
+    } catch (e) { grid.innerHTML = '<p>Error loading passages.</p>'; }
 }
 
-function setupWordOptions() {
-    const sel = document.getElementById('wordCountSelect'); sel.innerHTML = '';
-    for(let i=200; i<wordCount; i+=200) sel.add(new Option(`${i} Words`, i));
-    sel.add(new Option(`Full (${wordCount})`, "full", true, true));
-}
-
-function initYT(url) {
-    const id = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
-    if(player) player.loadVideoById(id);
+// --- 5. PLAYER LOGIC ---
+function loadVideo(url) {
+    const videoId = url.split('v=')[1]?.split('&')[0] || url.split('/').pop();
+    const onReady = (e) => { totalVideoDuration = e.target.getDuration(); setPlayerLoading(false); setPlaybackSpeed(); };
+    
+    if (player) { player.loadVideoById(videoId); } 
     else {
-        player = new YT.Player('player', { height:'1', width:'1', videoId:id, 
-            events: { onReady: (e) => {
-                document.getElementById('player-loader').style.display = 'none';
-                document.getElementById('total-time').innerText = formatTime(e.target.getDuration());
-            }, onStateChange: (e) => {
-                if(e.data === 1) {
-                    document.getElementById('playBtn').style.display = 'none';
-                    document.getElementById('pauseBtn').style.display = 'flex';
-                    setInterval(() => {
-                        const cur = player.getCurrentTime();
-                        document.getElementById('progress-fill').style.width = (cur/player.getDuration())*100+"%";
-                        document.getElementById('current-time').innerText = formatTime(cur);
-                        if(cur >= g_autoStopTimestamp) player.pauseVideo();
-                    }, 500);
-                } else {
-                    document.getElementById('playBtn').style.display = 'flex';
-                    document.getElementById('pauseBtn').style.display = 'none';
-                }
-            } }
+        player = new YT.Player('player', {
+            height: '1', width: '1', videoId,
+            playerVars: { 'autoplay': 0, 'controls': 0 },
+            events: { 'onReady': onReady, 'onStateChange': onPlayerStateChange }
         });
     }
 }
 
-function updateAutoStop() {
-    const val = document.getElementById('wordCountSelect').value;
-    g_autoStopTimestamp = (val === "full") ? Infinity : (player.getDuration() * (parseInt(val)/wordCount)) + 5;
+function onPlayerStateChange(e) {
+    const pBtn = document.getElementById('playBtn'), sBtn = document.getElementById('pauseBtn');
+    if (e.data === YT.PlayerState.PLAYING) { pBtn.style.display='none'; sBtn.style.display='block'; trackProgress(); }
+    else { pBtn.style.display='block'; sBtn.style.display='none'; clearInterval(progressInterval); }
 }
 
-function togglePlay() { player.getPlayerState() === 1 ? player.pauseVideo() : player.playVideo(); }
-function seekRelative(s) { player.seekTo(player.getCurrentTime() + s, true); }
 function setPlaybackSpeed() {
-    const target = parseInt(document.getElementById('wpmRange').value);
-    const native = wordCount / (player.getDuration()/60);
-    player.setPlaybackRate(target / native);
+    const targetWPM = parseInt(document.getElementById('wpmSpeed').value);
+    const originalWPM = wordCount / (totalVideoDuration / 60);
+    currentPlaybackRate = targetWPM / originalWPM;
+    player.setPlaybackRate(currentPlaybackRate);
 }
 
-function showInstructions() { player.pauseVideo(); document.getElementById('instructions-modal').classList.add('visible'); }
-
-function startTranscriptionTest() {
-    document.getElementById('instructions-modal').classList.remove('visible');
-    showView('exam-view');
-    timeLeft = parseInt(document.getElementById('timer-select').value) * 60;
-    timerStarted = false;
-    document.getElementById('typingBox').value = '';
-    document.getElementById('typingBox').focus();
-    document.getElementById('typingBox').onkeydown = () => {
-        if(!timerStarted) {
-            timerStarted = true;
-            timer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('typingTimerDisplay').innerText = formatTime(timeLeft);
-                if(timeLeft <= 0) submitTranscription();
-            }, 1000);
-        }
-    };
-}
-
-function submitTranscription() {
-    clearInterval(timer);
-    const typed = document.getElementById('typingBox').value;
-    document.getElementById('fullPageLoader').style.display = 'flex';
+// --- 6. SUBMISSION & ANALYSIS (Using Worker) ---
+async function submitTranscription() {
+    const timeTaken = transcriptionTimerTotalTime - timeLeft;
+    const typedText = document.getElementById('typingBox').value;
     
-    let cropText = originalText;
-    const target = document.getElementById('wordCountSelect').value;
-    if(target !== "full") cropText = originalText.split(/\s+/).slice(0, parseInt(target)).join(" ");
+    if (typedText.split(/\s+/).length < 5) { alert("Please type the passage first."); return; }
+    
+    document.getElementById('fullPageLoader').style.display = 'flex';
+    clearState();
 
-    analysisWorker.postMessage({
-        originalText: cropText, userText: typed,
-        config: { mode:'exam', addition:1, omission:1, spelling:0.5, capitalization:0.5, 
-                  punctuation: { mode: document.getElementById('includeComma').checked ? 'all' : 'fullstop-only', weight:0.5 } },
-        synonymData: g_synonymData
+    const worker = new Worker('worker.js');
+    worker.postMessage({
+        originalText, typedText, 
+        timeTakenSeconds: timeTaken,
+        options: { countCommaMistakes: document.getElementById('includeComma').checked }
     });
 
-    analysisWorker.onmessage = (e) => {
-        const res = e.data;
-        const progress = JSON.parse(localStorage.getItem(`progProgress_${candidateId}`) || '{}');
-        if(!progress[currentDocId] || res.accuracy > progress[currentDocId].accuracy) {
-            progress[currentDocId] = { accuracy: res.accuracy.toFixed(2) };
-            localStorage.setItem(`progProgress_${candidateId}`, JSON.stringify(progress));
-        }
-        renderResults(res);
-        showView('results-view');
+    worker.onmessage = function(e) {
+        const result = e.data;
+        displayAndRenderResults(result, originalText);
+        saveProgressToLocalStorage(result);
+        saveAttemptHybrid(originalText, typedText, result.accuracy, result.fullMistakes, result.halfMistakes, result.typingSpeed, timeTaken, result.totalWords);
+        
         document.getElementById('fullPageLoader').style.display = 'none';
+        worker.terminate();
+        resetTimer();
     };
 }
 
-function renderResults(res) {
-    const container = document.getElementById('resultSheetContainer');
-    container.innerHTML = `
-        <div class="result-sheet-container">
-            <h1>Transcription Report</h1>
-            <div class="stat-pill">Accuracy: ${res.accuracy.toFixed(2)}%</div>
-            <div class="stat-pill" style="background:#ef4444;">Mistakes: ${res.percentageDiff.toFixed(2)}%</div>
-            <div class="columns view-side-by-side">
-                <div class="col"><strong>Your Transcription:</strong><div>${res.resultHTML}</div></div>
-                <div class="col"><strong>Original Text:</strong><div>${res.originalWords.join(" ")}</div></div>
-            </div>
-        </div>
-    `;
+// --- 7. UTILITIES & EVENT LISTENERS ---
+function initializeEventListeners() {
+    document.getElementById('cat-prog').onclick = () => loadAndRenderCategory({type:'prog', gridId:'progressive-grid', indexCollection:'progressive_index', dataCollection:'progressive_passages'});
+    document.getElementById('cat-ssc').onclick = () => loadAndRenderCategory({type:'ssc', gridId:'ssc-previous-year-grid', indexCollection:'sscPreviousYear_index', dataCollection:'sscPreviousYear_passages'});
+    document.getElementById('cat-kc').onclick = () => loadAndRenderCategory({type:'kc', gridId:'important-kc-grid', indexCollection:'importantKC_index', dataCollection:'importantKC_passages'});
+    
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.take-test-btn');
+        if (btn && !btn.disabled) {
+            const card = btn.closest('.passage-card');
+            loadPractice(card.dataset.collection, card.dataset.docId);
+        }
+    });
+
+    document.getElementById('confirmResetBtn').onclick = resetProgress;
 }
 
-// --- Systematic Utils ---
-function formatTime(s) { if(!s || isNaN(s)) return "00:00"; const m=Math.floor(s/60), sec=Math.floor(s%60); return `${m.toString().padStart(2,'0')}:${sec.toString().padStart(2,'0')}`; }
-function showView(id) { 
-    document.querySelectorAll('.view').forEach(v => v.style.display='none'); 
-    document.getElementById('exam-view').style.display='none';
-    const el = document.getElementById(id);
-    if(id==='exam-view') el.style.display='flex'; else el.style.display='block';
+// ... Additional helper functions (formatTime, setupProgressBar, etc.) match KC.html ...
+// ... result rendering functions displayAndRenderResults match KC.html ...
+
+function showView(viewId) {
+    document.querySelectorAll('.view').forEach(el => el.style.display = 'none');
+    const v = document.getElementById(viewId);
+    if(v) v.style.display = 'block';
+    if(viewId === 'exam-view') {
+        document.getElementById('mainContainer').style.display = 'none';
+        document.getElementById('exam-view').style.display = 'flex';
+    } else {
+        document.getElementById('mainContainer').style.display = 'block';
+    }
 }
-function goHome() { location.reload(); }
-function openTranscriptModal() { document.getElementById('transcriptModal').classList.add('visible'); }
-function setupFilters() {
-    const f = () => renderGrid();
-    document.getElementById('passageSearch').oninput = f;
-    document.getElementById('yearFilter').onchange = f;
-    document.getElementById('monthFilter').onchange = f;
-    document.getElementById('resetProgressBtn').onclick = () => { if(confirm("Reset History?")) { localStorage.removeItem(`progProgress_${candidateId}`); renderGrid(); } };
+
+async function resetProgress() {
+    localStorage.removeItem(`stenoProgress_${candidateId}`);
+    await localDb.attempts.clear();
+    alert("History cleared.");
+    window.location.reload();
 }
+
 </script>
 </body>
 </html>
