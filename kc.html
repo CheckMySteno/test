@@ -22,18 +22,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
-    /* --- 1. Global Styles & Theme Variables --- */
+    /* --- 1. Global Styles --- */
     :root {
-      --primary-blue: #3b82f6; --primary-blue-dark: #1d4ed8;
+      --primary-blue: #007bff; --primary-blue-dark: #0056b3;
       --text-color: #0f172a; --dark-grey: #334155; --medium-grey: #64748b;
       --bg-color: #f8fafc; --surface-color: #ffffff;
       --border-color: #e2e8f0; --white: #fff;
       --font-family: 'Inter', sans-serif;
       --accent-purple: #4f46e5;
-      --accent-purple-light: #e0e7ff;
-      --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px -1px rgba(0, 0, 0, 0.05);
+      --accent-purple-light: #f3e8ff;
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
-      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.04), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+      --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -54,52 +54,147 @@
     /* --- 1a. SELECTION VIEW STYLES --- */
     #selection-view { max-width: 1200px; }
     
-    .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; border-bottom: 1px solid var(--border-color); padding-bottom: 20px; }
-    .page-header h1 { font-size: 1.75rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.025em; }
+    .page-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; margin-bottom: 32px; }
+    .page-header h1 { font-size: 2rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.025em; }
     
     .search-wrapper { position: relative; }
-    .search-wrapper input { width: 320px; padding: 10px 16px 10px 40px; border: 1px solid var(--border-color); border-radius: 10px; font-size: 0.9em; background-color: white; color: var(--text-color); box-shadow: var(--shadow-sm); transition: all 0.2s ease; }
-    .search-wrapper input:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-    .search-wrapper svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #94a3b8; }
+    .search-wrapper input { width: 300px; padding: 12px 16px 12px 44px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 0.95em; background-color: white; color: var(--text-color); box-shadow: var(--shadow-sm); transition: all 0.2s ease; }
+    .search-wrapper input:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+    .search-wrapper svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
 
-    .intro-box { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; margin-bottom: 32px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px; }
+    /* --- Consolidate & Clean Dashboard Hero --- */
+    .dashboard-hero {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+    @media (min-width: 992px) {
+        .dashboard-hero.has-resume {
+            grid-template-columns: 1.6fr 1fr;
+        }
+    }
+
+    .intro-box { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px; height: 100%; justify-content: space-between; }
     .intro-header { display: flex; justify-content: space-between; align-items: center; }
-    .intro-header h2 { font-size: 1.2rem; font-weight: 700; margin: 0; color: #0f172a; }
-    .intro-header .tag { background: var(--accent-purple-light); color: var(--accent-purple); padding: 4px 12px; border-radius: 99px; font-size: 0.75em; font-weight: 700; letter-spacing: 0.5px; }
+    .intro-header h2 { font-size: 1.25rem; font-weight: 700; margin: 0; color: #1e293b; letter-spacing: -0.02em; }
+    .intro-header .tag { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.75em; font-weight: 700; letter-spacing: 0.5px; }
+    .intro-box p { margin: 0; color: var(--medium-grey); font-size: 0.95rem; line-height: 1.6; }
     .intro-actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .intro-actions button { padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.9em; transition: all 0.2s; }
-    #startFirstTestBtn { background: var(--accent-purple); color: white; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2); }
-    #startFirstTestBtn:hover { background: #4338ca; transform: translateY(-1px); }
+    #startFirstTestBtn { background: #1e293b; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+    #startFirstTestBtn:hover { background: #0f172a; transform: translateY(-1px); }
     #resetProgressBtn { background: white; border: 1px solid var(--border-color); color: #64748b; }
-    #resetProgressBtn:hover { background: #fff5f5; color: #ef4444; border-color: #fecaca; }
+    #resetProgressBtn:hover { background: #f8fafc; color: #ef4444; border-color: #ef4444; }
 
-    .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; }
-    .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #334155; font-weight: 500; font-size: 0.85em; cursor: pointer; box-shadow: var(--shadow-sm); outline: none; }
+    /* --- Elegant Resume Panel --- */
+    .quick-resume-box {
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+    }
+    .quick-resume-box h3 {
+        margin: 0 0 6px 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+    }
+    .quick-resume-box p {
+        margin: 0 0 16px 0;
+        color: var(--medium-grey);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    .quick-resume-box .intro-actions {
+        display: flex;
+        gap: 10px;
+    }
+    .quick-resume-box button {
+        flex: 1;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85em;
+        transition: all 0.2s;
+    }
+    #resume-again-btn {
+        background: var(--accent-purple-light);
+        color: var(--accent-purple);
+    }
+    #resume-again-btn:hover {
+        background: #ebd5ff;
+    }
+    #resume-next-btn {
+        background: #1e293b;
+        color: white;
+    }
+    #resume-next-btn:hover {
+        background: #0f172a;
+    }
+
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; }
+    .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); outline: none; }
     .filter-bar select:focus { border-color: var(--accent-purple); }
 
-    /* --- Modern Grid Cards --- */
-    #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 20px; }
-    .passage-card { background: white; border: 1px solid var(--border-color); border-radius: 14px; padding: 20px; transition: all 0.2s ease-in-out; display: flex; flex-direction: column; justify-content: space-between; position: relative; box-shadow: var(--shadow-sm); }
-    .passage-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); border-color: #cbd5e1; }
+    /* --- Slim, Colored Card Redesign --- */
+    #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .passage-card { 
+        background: white; 
+        border: 1px solid var(--border-color); 
+        border-radius: 14px; 
+        padding: 16px 20px; 
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        position: relative; 
+        overflow: hidden; 
+        box-shadow: var(--shadow-sm);
+    }
+    .passage-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: #cbd5e1; }
+    
+    /* Elegant Left Colored Indicators */
+    .passage-card.card-status-new { border-left: 3px solid #94a3b8; }
+    .passage-card.card-status-good { border-left: 3px solid #10b981; }
+    .passage-card.card-status-average { border-left: 3px solid #f59e0b; }
+    .passage-card.card-status-low { border-left: 3px solid #ef4444; }
 
-    .card-header { margin-bottom: 12px; width: 100%; }
-    .card-title-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-    .card-title-group h3 { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0; }
-    .card-id-badge { font-size: 0.7em; color: #64748b; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-header { margin-bottom: 8px; width: 100%; }
+    .card-title-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+    .card-title-group h3 { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0; letter-spacing: -0.01em; }
+    .card-id-badge { font-size: 0.7em; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
     
-    .status-badge { display: inline-flex; flex-direction: column; gap: 4px; padding: 8px 12px; border-radius: 10px; font-size: 0.8em; font-weight: 600; width: 100%; margin-top: 4px; border: 1px solid var(--border-color); }
-    .status-badge.new { background-color: #f8fafc; color: #64748b; }
-    .status-badge.attempted-good { background-color: #f0fdf4; color: #166534; border-color: #bbf7d0; }
-    .status-badge.attempted-average { background-color: #fffbeb; color: #92400e; border-color: #fef08a; }
-    .status-badge.attempted-low { background-color: #fef2f2; color: #991b1b; border-color: #fecaca; }
+    /* Clean Nested Status Badges */
+    .status-badge { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 2px; 
+        padding: 6px 10px; 
+        border-radius: 8px; 
+        font-size: 0.75em; 
+        font-weight: 600; 
+        color: #475569;
+        background-color: #f8fafc;
+        border: 1px solid #f1f5f9;
+        margin-top: 6px;
+    }
+    .status-badge.attempted-good { background-color: #f0fdf4; color: #166534; border-color: #dcfce7; }
+    .status-badge.attempted-average { background-color: #fffbeb; color: #92400e; border-color: #fef9c3; }
+    .status-badge.attempted-low { background-color: #fef2f2; color: #991b1b; border-color: #fee2e2; }
     
-    .status-badge .score-row { display: flex; justify-content: space-between; width: 100%; }
-    .status-badge .score-label { font-size: 0.75em; opacity: 0.85; text-transform: uppercase; letter-spacing: 0.5px; }
-    .status-badge .score-val { font-weight: 700; }
+    .status-badge .score-line { display: flex; justify-content: space-between; width: 100%; }
+    .status-badge .best-line { display: flex; justify-content: space-between; width: 100%; border-top: 1px solid rgba(0,0,0,0.03); margin-top: 2px; padding-top: 2px; font-size: 0.9em; opacity: 0.85; }
 
     .card-buttons { margin-top: 12px; }
-    .take-test-btn { width: 100%; padding: 10px; background-color: #f8fafc; border: 1px solid var(--border-color); color: #334155; font-weight: 600; font-size: 0.85rem; border-radius: 8px; transition: all 0.15s; }
-    .passage-card:hover .take-test-btn { background-color: var(--accent-purple); color: white; border-color: var(--accent-purple); box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.15); }
+    .take-test-btn { width: 100%; padding: 8px; background-color: #f8fafc; border: 1px solid var(--border-color); color: #1e293b; font-weight: 600; font-size: 0.85em; border-radius: 8px; transition: all 0.2s; }
+    .passage-card:hover .take-test-btn { background-color: #1e293b; color: white; border-color: #1e293b; }
 
     /* --- 2. SLIM & MODERN PLAYER STYLES --- */
     #player-view { max-width: 680px; margin: 20px auto; }
@@ -308,7 +403,7 @@
     @keyframes fadeInScaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     #resultsWelcomeModal .modal-content { max-width: 800px; width: 95%; text-align: left; font-family: 'Inter', sans-serif; border-radius: 12px; padding: 0; overflow: hidden; animation: fadeInScaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid var(--border-subtle); }
     .pro-modal-header { text-align: center; padding: 30px 35px; border-bottom: 1px solid var(--border-subtle); }
-    .pro-modal-header h2 { font-size: 1.8em; font-weight: 700; margin: 0; margin-bottom: 8px; border: none; padding: 0; }
+    .pro-modal-header h2 { font-size: 1.8em; font-weight: 700; margin: 0 0 8px 0; border: none; padding: 0; }
     .pro-modal-header p { color: var(--text-muted); max-width: 550px; margin: 0 auto; font-size: 1em; line-height: 1.6; }
     .pro-welcome-grid { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 30px 35px; }
     @media (min-width: 768px) { .pro-welcome-grid { grid-template-columns: 1fr 1fr; } }
@@ -431,18 +526,20 @@
             </div>
         </div>
         
-        <div id="quick-resume-container"></div>
-
-        <div class="intro-box">
-            <div class="intro-header">
-                <h2>Practice Section</h2>
-                <span class="tag">PAID</span>
+        <!-- Consolidated, Elegant Dashboard Hero Grid -->
+        <div class="dashboard-hero" id="dashboardHeroSection">
+            <div class="intro-box">
+                <div class="intro-header">
+                    <h2>Practice Section</h2>
+                    <span class="tag">PAID</span>
+                </div>
+                <p>Practice all passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
+                <div class="intro-actions">
+                    <button id="startFirstTestBtn">Start First Test</button>
+                    <button id="resetProgressBtn">Reset Progress</button>
+                </div>
             </div>
-            <p>Practice all passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
-            <div class="intro-actions">
-                <button id="startFirstTestBtn">Start First Test</button>
-                <button id="resetProgressBtn">Reset Progress</button>
-            </div>
+            <div id="quick-resume-container"></div>
         </div>
 
         <div class="filter-bar">
@@ -1016,22 +1113,22 @@ function renderGrid() {
 
             badgeHtml = `
                 <div class="status-badge ${statusClass}">
-                    <div class="score-row">
-                        <span class="score-label">Latest Score:</span>
-                        <span class="score-val">${latestAcc.toFixed(2)}%</span>
+                    <div class="score-line">
+                        <span>Latest Score:</span>
+                        <span>${latestAcc.toFixed(2)}%</span>
                     </div>
-                    <div class="score-row" style="border-top: 1px solid rgba(0,0,0,0.05); margin-top: 4px; padding-top: 4px; font-size: 0.9em; opacity: 0.85;">
+                    <div class="best-line">
                         <span>Lifetime Best:</span>
-                        <span style="font-weight:700;">${bestAcc.toFixed(2)}%</span>
+                        <span>${bestAcc.toFixed(2)}%</span>
                     </div>
                 </div>
             `;
         } else {
             badgeHtml = `
                 <div class="status-badge new">
-                    <div class="score-row">
-                        <span class="score-label">Status:</span>
-                        <span class="score-val">New</span>
+                    <div class="score-line">
+                        <span>Status:</span>
+                        <span>New</span>
                     </div>
                 </div>
             `;
@@ -1880,20 +1977,37 @@ function renderQuickResume() {
     const container = document.getElementById('quick-resume-container');
     container.innerHTML = '';
     const lastAttempt = JSON.parse(localStorage.getItem(`kcLastAttempt_${candidateId}`));
+    const heroSection = document.getElementById('dashboardHeroSection');
 
     if (lastAttempt && allPassageData.length > 0) {
         const { vol, tran } = lastAttempt;
         const currentPassage = allPassageData.find(p => p.volId === vol && p.tranId === tran);
-        if (!currentPassage) return;
+        if (!currentPassage) {
+            if (heroSection) heroSection.classList.remove('has-resume');
+            return;
+        }
         const nextPassage = allPassageData.find(p => p.transcriptNumber === currentPassage.transcriptNumber + 1);
 
         const box = document.createElement('div');
         box.className = 'quick-resume-box';
-        box.innerHTML = `<h3>Resume Your Practice</h3><p>Your last attempt was <strong>Passage ${currentPassage.transcriptNumber}</strong></p><div class="intro-actions"><button id="resume-again-btn">Practice Again</button>${nextPassage ? `<button id="resume-next-btn">Try Next (Passage ${nextPassage.transcriptNumber})</button>` : ''}</div>`;
+        box.innerHTML = `
+            <div>
+                <h3>Resume Your Practice</h3>
+                <p>Your last attempt was <strong>Passage ${currentPassage.transcriptNumber}</strong></p>
+            </div>
+            <div class="intro-actions">
+                <button id="resume-again-btn">Practice Again</button>
+                ${nextPassage ? `<button id="resume-next-btn">Try Next (Passage ${nextPassage.transcriptNumber})</button>` : ''}
+            </div>
+        `;
         container.appendChild(box);
+
+        if (heroSection) heroSection.classList.add('has-resume');
 
         document.getElementById('resume-again-btn').addEventListener('click', () => loadPractice(vol, tran));
         if (nextPassage) document.getElementById('resume-next-btn').addEventListener('click', () => loadPractice(nextPassage.volId, nextPassage.tranId));
+    } else {
+        if (heroSection) heroSection.classList.remove('has-resume');
     }
 }
 
@@ -2350,3 +2464,4 @@ Respond EXACTLY in this JSON format:
 </script>
 </body>
 </html>
+```
