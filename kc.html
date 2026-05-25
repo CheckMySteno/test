@@ -18,7 +18,7 @@
 <!-- Google Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2 family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
@@ -339,7 +339,7 @@
     #transcriptModal .modal-content { max-width: 600px; text-align: left; max-height: 80vh; display: flex; flex-direction: column; }
     #transcriptTextBody { overflow-y: auto; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; line-height: 1.8; color: #374151; font-size: 1.05rem; margin-bottom: 15px; }
 
-    .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+    .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
     .confirm-dialog h3 { margin: 0 0 8px 0; font-size: 1.25em; }
     .confirm-dialog p { margin: 0 0 20px 0; color: var(--medium-grey); }
     .confirm-dialog-actions { display: flex; gap: 10px; justify-content: center; }
@@ -1415,7 +1415,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
     }
 }
 
-// ============================= BUG FIX: SMART CROP & PERSISTENCE =============================
+// ============================= BUG FIX: SMART CROP =============================
 function submitTranscription() {
     AITeacher.clearCache(); // clear cache on new submit
 
@@ -1594,7 +1594,7 @@ async function updateMistakeLibrary(studentMistakes) {
             const typedWord = (mistake.wrong || '').replace(/[.,]$/, '').toLowerCase();
             if (!originalWord || !typedWord || originalWord === typedWord) continue;
 
-            const existingEntry = await localDb.mistakeLibrary.where({ originalWord, typedWord }).first();
+            const existingEntry = await localDb.mistakeLibrary.get({ originalWord, typedWord });
             if (existingEntry) {
                 await localDb.mistakeLibrary.update(existingEntry.id, { count: existingEntry.count + 1 });
             } else {
@@ -1711,7 +1711,7 @@ function initializeResultInteractivity() {
 
     initializeInteractiveLegend();
     
-    // Initialize the modular AI teacher system
+    // Initialize the new modular AI teacher system
     AITeacher.init();
 }
 
