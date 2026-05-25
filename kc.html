@@ -808,17 +808,20 @@
     </div>
 </div>
 
-<!-- Redesigned High-Fidelity Full-Screen Transcript Overlay Modal -->
+<!-- High-Fidelity Pop-up Transcript Modal as Requested -->
 <div id="transcriptModal" class="modal-overlay">
-    <div class="modal-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
-            <h2 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.025em;">Passage Transcript</h2>
-            <button class="modal-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="background: #1e293b; color: white; padding: 10px 20px; font-weight: 600; border-radius: 8px;">✕ Close Transcript</button>
+    <div class="modal-content" style="max-width: 800px; width: 90%; max-height: 85vh; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; padding: 0; border: none; text-align: left; border-radius: 12px;">
+        <div class="transcript-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+            <div class="transcript-header-left" style="display: flex; align-items: center; gap: 10px; color: #1e40af;">
+                <!-- High-Fidelity Document Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 20px; height: 20px; color: #1e40af;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; font-family: 'Inter', sans-serif;">Official Transcription</h2>
+            </div>
+            <button class="transcript-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="background: none; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.15s ease;">✕</button>
         </div>
-        <div id="transcriptTextBody"></div>
-        <div style="text-align: right; margin-top: 10px;">
-            <button class="modal-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="background: #f1f5f9; color: #475569; padding: 12px 24px; font-weight: 600; border-radius: 8px; border: 1px solid #cbd5e1;">Return to Practice Station</button>
-        </div>
+        <div id="transcriptTextBody" style="padding: 24px 28px; overflow-y: auto; font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.85; color: #334155; background-color: #ffffff; text-align: justify; margin: 0; border: none; border-radius: 0; max-height: 65vh;"></div>
     </div>
 </div>
 
