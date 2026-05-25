@@ -961,7 +961,7 @@ function renderGrid() {
     const searchTerm = document.getElementById('passageSearch').value.toLowerCase();
     if (searchTerm) {
         dataToRender = dataToRender.filter(p => {
-            const title = `vol ${p.volume} / tran ${p.transcript}`;
+            const title = `vol ${p.volume} / transcript ${p.transcript}`;
             const passageNum = `passage ${p.transcriptNumber}`;
             return title.includes(searchTerm) || passageNum.includes(searchTerm);
         });
@@ -1415,7 +1415,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
     }
 }
 
-// ============================= BUG FIX: SMART CROP =============================
+// ============================= BUG FIX: SMART CROP & PERSISTENCE =============================
 function submitTranscription() {
     AITeacher.clearCache(); // clear cache on new submit
 
@@ -1585,10 +1585,11 @@ async function resetProgress() {
 }
 
 async function updateMistakeLibrary(studentMistakes) {
-    if (!studentMistakes || !studentMistakes.spelling || studentMistakes.spelling.length === 0) return;
+    const spelling = (studentMistakes && studentMistakes.spelling) ? studentMistakes.spelling : [];
+    if (spelling.length === 0) return;
 
     await localDb.transaction('rw', localDb.mistakeLibrary, async () => {
-        for (const mistake of studentMistakes.spelling) {
+        for (const mistake of spelling) {
             const originalWord = (mistake.correct || '').replace(/[.,]$/, '').toLowerCase();
             const typedWord = (mistake.wrong || '').replace(/[.,]$/, '').toLowerCase();
             if (!originalWord || !typedWord || originalWord === typedWord) continue;
@@ -1601,14 +1602,14 @@ async function updateMistakeLibrary(studentMistakes) {
             }
         }
     });
-    console.log(`📚 ${studentMistakes.spelling.length} spelling mistake(s) processed for the library.`);
+    console.log(`📚 ${spelling.length} spelling mistake(s) processed for the library.`);
 }
 
 async function updateOverallStats(newAttemptStats) {
     await localDb.transaction('rw', localDb.overallStats, async () => {
         const stats = await localDb.overallStats.get(1);
-        const accuracy = parseFloat(newAttemptStats.accuracy);
-        const wpm = parseFloat(newAttemptStats.wpm);
+        const accuracy = parseFloat(newAttemptStats.accuracy) || 0;
+        const wpm = parseFloat(newAttemptStats.wpm) || 0;
 
         if (!stats) {
             await localDb.overallStats.put({ id: 1, totalAttempts: 1, bestAccuracy: accuracy, bestWPM: wpm, avgAccuracy: accuracy, avgWpm: wpm });
@@ -1631,12 +1632,12 @@ async function saveAttemptHybrid(original, typed, analysisResult) {
     const fullResultData = {
         timestamp: new Date().toISOString(),
         dictationName: `Kailash Chandra - Volume ${g_vol.replace('vol', '')} / Transcript ${g_tran.replace('t', '')}`,
-        accuracy: parseFloat(analysisResult.accuracy),
-        wpm: parseFloat(analysisResult.wpm),
+        accuracy: parseFloat(analysisResult.accuracy) || 0,
+        wpm: parseFloat(analysisResult.wpm) || 0,
         originalText: original,
         typedText: typed,
         fullMistakes: fullMistakesCount,
-        halfMistakes: analysisResult.halfBucketCount,
+        halfMistakes: analysisResult.halfBucketCount || 0,
         highlightedHtml: analysisResult.resultHTML,
     };
 
@@ -1710,7 +1711,7 @@ function initializeResultInteractivity() {
 
     initializeInteractiveLegend();
     
-    // Initialize the new modular AI teacher system
+    // Initialize the modular AI teacher system
     AITeacher.init();
 }
 
