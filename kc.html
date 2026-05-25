@@ -34,6 +34,13 @@
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
       --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+      
+      /* Global Highlighting Colors */
+      --hl-additions: #fecdd3;     
+      --hl-omissions: #d9f99d;     
+      --hl-spelling: #fde68a;      
+      --hl-capitalization: #bae6fd; 
+      --hl-punctuation: #ddd6fe;   
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -530,6 +537,23 @@
     /* Ensure the parent span allows the icon to sit nicely */
     .highlight {
         display: inline; /* Keep default text flow */
+    }
+
+    /* Floating, Modern Hover Tooltip */
+    .mistake-hover-tooltip {
+        position: absolute;
+        background: #0f172a; /* Slate 900 */
+        color: #ffffff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-family: 'Inter', sans-serif;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        z-index: 9999;
+        display: none;
+        pointer-events: none;
+        line-height: 1.4;
+        border: 1px solid rgba(255,255,255,0.1);
     }
 </style>
 </head>
@@ -1916,9 +1940,89 @@ function initializeResultInteractivity() {
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
 
     initializeInteractiveLegend();
+    setupHoverTooltips();
     
     // Initialize the new modular AI teacher system
     AITeacher.init();
+}
+
+/* Floating Mistake Hover Tooltip Generator */
+function setupHoverTooltips() {
+    let tooltip = document.getElementById('mistakeTooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'mistakeTooltip';
+        tooltip.className = 'mistake-hover-tooltip';
+        document.body.appendChild(tooltip);
+    }
+
+    const columns = document.getElementById('comparisonColumns');
+    if (!columns) return;
+
+    columns.removeEventListener('mouseover', handleTooltipOver);
+    columns.removeEventListener('mouseout', handleTooltipOut);
+    
+    columns.addEventListener('mouseover', handleTooltipOver);
+    columns.addEventListener('mouseout', handleTooltipOut);
+}
+
+function handleTooltipOver(e) {
+    const el = e.target.closest('.highlight, .mis');
+    if (!el) return;
+
+    const tooltip = document.getElementById('mistakeTooltip');
+    if (!tooltip) return;
+
+    let type = "Mistake";
+    if (el.classList.contains('omission')) type = "Omission";
+    else if (el.classList.contains('addition') || el.classList.contains('extra')) type = "Addition";
+    else if (el.classList.contains('spelling')) type = "Spelling Mistake";
+    else if (el.classList.contains('capitalization')) type = "Capitalization Mistake";
+    else if (el.classList.contains('punctuation')) type = "Punctuation Mistake";
+    else if (el.classList.contains('substitution')) type = "Word Substitution";
+
+    const wrongEl = el.querySelector('del, s');
+    const correctEl = el.querySelector('b, ins');
+
+    let typed = "";
+    let correct = "";
+
+    if (wrongEl && correctEl) {
+        typed = wrongEl.textContent.trim();
+        correct = correctEl.textContent.trim();
+    } else if (el.classList.contains('omission')) {
+        typed = "[None]";
+        correct = el.textContent.trim();
+    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
+        typed = el.textContent.trim();
+        correct = "[None]";
+    } else {
+        typed = el.textContent.trim();
+        correct = "Check Original Text";
+    }
+
+    tooltip.innerHTML = `
+        <div style="font-weight: 700; margin-bottom: 4px; color: #a78bfa; font-size: 0.9em; text-transform: uppercase;">${type}</div>
+        <div style="margin-bottom: 2px;">Typed: <span style="color: #fecdd3; font-weight: 600;">${escapeHtml(typed)}</span></div>
+        <div>Expected: <span style="color: #d9f99d; font-weight: 600;">${escapeHtml(correct)}</span></div>
+    `;
+
+    tooltip.style.display = 'block';
+    
+    const rect = el.getBoundingClientRect();
+    const tooltipHeight = tooltip.offsetHeight;
+    const tooltipWidth = tooltip.offsetWidth;
+    
+    tooltip.style.left = (window.scrollX + rect.left + (rect.width / 2) - (tooltipWidth / 2)) + 'px';
+    tooltip.style.top = (window.scrollY + rect.top - tooltipHeight - 10) + 'px';
+}
+
+function handleTooltipOut(e) {
+    const el = e.target.closest('.highlight, .mis');
+    if (el) {
+        const tooltip = document.getElementById('mistakeTooltip');
+        if (tooltip) tooltip.style.display = 'none';
+    }
 }
 
 function openTranscriptModal() {
@@ -2337,8 +2441,7 @@ const AITeacher = {
                     let anchorMatch = true;
                     for (let a = 0; a < anchorClean.length; a++) {
                         if (words[i - anchorClean.length + a].toLowerCase().replace(/[^\w]/g, '') !== anchorClean[a]) {
-                            anchorMatch = false;
-                            break;
+                            background: none;
                         }
                     }
                     if (anchorMatch) {
