@@ -143,11 +143,11 @@
     .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); outline: none; }
     .filter-bar select:focus { border-color: var(--accent-purple); }
 
-    /* --- Slim, Colored Card Redesign --- */
+    /* --- Slim, Colored Card Redesign with Solid Slate Outlines --- */
     #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
     .passage-card { 
         background: white; 
-        border: 1px solid var(--border-color); 
+        border: 2px solid #0f172a; /* Bold, permanent slate-black borderline */
         border-radius: 14px; 
         padding: 16px 20px; 
         transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
@@ -158,13 +158,13 @@
         overflow: hidden; 
         box-shadow: var(--shadow-sm);
     }
-    .passage-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: #cbd5e1; }
+    .passage-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--accent-purple); }
     
     /* Elegant Left Colored Indicators */
-    .passage-card.card-status-new { border-left: 3px solid #94a3b8; }
-    .passage-card.card-status-good { border-left: 3px solid #10b981; }
-    .passage-card.card-status-average { border-left: 3px solid #f59e0b; }
-    .passage-card.card-status-low { border-left: 3px solid #ef4444; }
+    .passage-card.card-status-new { border-left: 5px solid #94a3b8; }
+    .passage-card.card-status-good { border-left: 5px solid #10b981; }
+    .passage-card.card-status-average { border-left: 5px solid #f59e0b; }
+    .passage-card.card-status-low { border-left: 5px solid #ef4444; }
 
     .card-header { margin-bottom: 8px; width: 100%; }
     .card-title-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
@@ -437,9 +437,33 @@
     #deepAnalysisModal tr:nth-child(even) { background-color: #fcfdff; }
     #deepAnalysisModal em { color: var(--text-muted); font-style: italic; }
 
-    /* New Transcript Modal Styles */
-    #transcriptModal .modal-content { max-width: 600px; text-align: left; max-height: 80vh; display: flex; flex-direction: column; }
-    #transcriptTextBody { overflow-y: auto; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; line-height: 1.8; color: #374151; font-size: 1.05rem; margin-bottom: 15px; }
+    /* Redesigned Transcript Modal - High Fidelity Full-Screen */
+    #transcriptModal .modal-content { 
+        max-width: 100%; 
+        width: 100vw; 
+        height: 100vh; 
+        border-radius: 0; 
+        padding: 40px; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        background-color: #ffffff; 
+        border: none;
+        max-height: 100vh;
+    }
+    #transcriptTextBody { 
+        flex-grow: 1;
+        overflow-y: auto; 
+        padding: 30px; 
+        background: #f8fafc; 
+        border-radius: 12px; 
+        border: 1px solid #e2e8f0; 
+        line-height: 2; 
+        color: #1e293b; 
+        font-size: 1.15rem; 
+        margin-bottom: 25px; 
+        font-family: 'Inter', sans-serif;
+    }
 
     .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
     .confirm-dialog h3 { margin: 0 0 8px 0; font-size: 1.25em; }
@@ -784,12 +808,16 @@
     </div>
 </div>
 
+<!-- Redesigned High-Fidelity Full-Screen Transcript Overlay Modal -->
 <div id="transcriptModal" class="modal-overlay">
     <div class="modal-content">
-        <h2 style="text-align: left; margin-bottom: 15px;">Passage Transcript</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 1px solid #e2e8f0; padding-bottom: 15px;">
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin: 0; letter-spacing: -0.025em;">Passage Transcript</h2>
+            <button class="modal-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="background: #1e293b; color: white; padding: 10px 20px; font-weight: 600; border-radius: 8px;">✕ Close Transcript</button>
+        </div>
         <div id="transcriptTextBody"></div>
-        <div style="text-align: right;">
-            <button class="modal-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')">Close</button>
+        <div style="text-align: right; margin-top: 10px;">
+            <button class="modal-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="background: #f1f5f9; color: #475569; padding: 12px 24px; font-weight: 600; border-radius: 8px; border: 1px solid #cbd5e1;">Return to Practice Station</button>
         </div>
     </div>
 </div>
@@ -1039,7 +1067,7 @@ function renderGrid() {
     grid.innerHTML = '';
 
     const progressData = JSON.parse(localStorage.getItem(`kcProgress_${candidateId}`) || '{}');
-    let dataToRender =[...allPassageData];
+    let dataToRender = [...allPassageData];
 
     const filterValue = document.getElementById('filter-select').value;
     if (filterValue !== 'all') {
@@ -1100,15 +1128,19 @@ function renderGrid() {
         const isAttempted = !!attemptData;
 
         let badgeHtml = '';
+        let statusStripeClass = 'card-status-new';
         if (isAttempted) {
             const latestAcc = parseFloat(attemptData.accuracy) || 0;
             const bestAcc = attemptData.bestAccuracy !== undefined ? parseFloat(attemptData.bestAccuracy) : latestAcc;
             
             let statusClass = 'attempted-low';
+            statusStripeClass = 'card-status-low';
             if (latestAcc >= 95) {
                 statusClass = 'attempted-good';
+                statusStripeClass = 'card-status-good';
             } else if (latestAcc >= 90) {
                 statusClass = 'attempted-average';
+                statusStripeClass = 'card-status-average';
             }
 
             badgeHtml = `
@@ -1134,6 +1166,7 @@ function renderGrid() {
             `;
         }
 
+        card.className = `passage-card ${statusStripeClass}`;
         card.innerHTML = `
               <div class="card-header">
                   <div class="card-title-group">
@@ -1696,11 +1729,26 @@ function saveProgressToLocalStorage(resultData) {
 
     const existing = progressData[key] || { bestAccuracy: 0, bestWpm: 0 };
     
+    // Read the true existing best scores, falling back to legacy flat keys if bestAccuracy is not yet defined
+    let prevBestAcc = 0;
+    if (existing.bestAccuracy !== undefined) {
+        prevBestAcc = parseFloat(existing.bestAccuracy) || 0;
+    } else if (existing.accuracy !== undefined) {
+        prevBestAcc = parseFloat(existing.accuracy) || 0;
+    }
+    
+    let prevBestWpm = 0;
+    if (existing.bestWpm !== undefined) {
+        prevBestWpm = parseFloat(existing.bestWpm) || 0;
+    } else if (existing.wpm !== undefined) {
+        prevBestWpm = parseFloat(existing.wpm) || 0;
+    }
+
     progressData[key] = {
-        accuracy: newAccuracy, // This represents the latest attempt
+        accuracy: newAccuracy, // Keeps the most recent attempt's score
         wpm: newWpm,
-        bestAccuracy: Math.max(existing.bestAccuracy || 0, newAccuracy),
-        bestWpm: Math.max(existing.bestWpm || 0, newWpm)
+        bestAccuracy: Math.max(prevBestAcc, newAccuracy), // Correctly preserves lifetime best
+        bestWpm: Math.max(prevBestWpm, newWpm)
     };
 
     localStorage.setItem(`kcProgress_${candidateId}`, JSON.stringify(progressData));
@@ -2464,4 +2512,3 @@ Respond EXACTLY in this JSON format:
 </script>
 </body>
 </html>
-```
