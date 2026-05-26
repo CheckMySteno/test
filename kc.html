@@ -18,22 +18,29 @@
 <!-- Google Fonts & Icons -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2 family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
 <style>
     /* --- 1. Global Styles --- */
     :root {
       --primary-blue: #007bff; --primary-blue-dark: #0056b3;
-      --text-color: #111827; --dark-grey: #333; --medium-grey: #555;
+      --text-color: #0f172a; --dark-grey: #334155; --medium-grey: #64748b;
       --bg-color: #f8fafc; --surface-color: #ffffff;
       --border-color: #e2e8f0; --white: #fff;
       --font-family: 'Inter', sans-serif;
-      --accent-purple: #7c3aed;
+      --accent-purple: #4f46e5;
       --accent-purple-light: #f3e8ff;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+      --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
+      
+      /* Global Highlighting Colors */
+      --hl-additions: #fecdd3;     
+      --hl-omissions: #d9f99d;     
+      --hl-spelling: #fde68a;      
+      --hl-capitalization: #bae6fd; 
+      --hl-punctuation: #ddd6fe;   
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -62,36 +69,138 @@
     .search-wrapper input:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
     .search-wrapper svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
 
-    .intro-box { background: white; border: 1px solid var(--border-color); border-radius: 20px; padding: 24px; margin-bottom: 32px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px; }
+    /* --- Consolidate & Clean Dashboard Hero --- */
+    .dashboard-hero {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        margin-bottom: 32px;
+    }
+    @media (min-width: 992px) {
+        .dashboard-hero.has-resume {
+            grid-template-columns: 1.6fr 1fr;
+        }
+    }
+
+    .intro-box { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 16px; height: 100%; justify-content: space-between; }
     .intro-header { display: flex; justify-content: space-between; align-items: center; }
-    .intro-header h2 { font-size: 1.25rem; font-weight: 700; margin: 0; color: #1e293b; }
+    .intro-header h2 { font-size: 1.25rem; font-weight: 700; margin: 0; color: #1e293b; letter-spacing: -0.02em; }
     .intro-header .tag { background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; padding: 4px 12px; border-radius: 99px; font-size: 0.75em; font-weight: 700; letter-spacing: 0.5px; }
+    .intro-box p { margin: 0; color: var(--medium-grey); font-size: 0.95rem; line-height: 1.6; }
+    .intro-actions { display: flex; gap: 12px; flex-wrap: wrap; }
     .intro-actions button { padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.9em; transition: all 0.2s; }
     #startFirstTestBtn { background: #1e293b; color: white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
     #startFirstTestBtn:hover { background: #0f172a; transform: translateY(-1px); }
     #resetProgressBtn { background: white; border: 1px solid var(--border-color); color: #64748b; }
     #resetProgressBtn:hover { background: #f8fafc; color: #ef4444; border-color: #ef4444; }
 
+    /* --- Elegant Resume Panel --- */
+    .quick-resume-box {
+        background-color: white;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        box-shadow: var(--shadow-sm);
+        height: 100%;
+    }
+    .quick-resume-box h3 {
+        margin: 0 0 6px 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+        letter-spacing: -0.02em;
+    }
+    .quick-resume-box p {
+        margin: 0 0 16px 0;
+        color: var(--medium-grey);
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+    .quick-resume-box .intro-actions {
+        display: flex;
+        gap: 10px;
+    }
+    .quick-resume-box button {
+        flex: 1;
+        padding: 8px 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85em;
+        transition: all 0.2s;
+    }
+    #resume-again-btn {
+        background: var(--accent-purple-light);
+        color: var(--accent-purple);
+    }
+    #resume-again-btn:hover {
+        background: #ebd5ff;
+    }
+    #resume-next-btn {
+        background: #1e293b;
+        color: white;
+    }
+    #resume-next-btn:hover {
+        background: #0f172a;
+    }
+
     .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; }
-    .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); }
+    .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); outline: none; }
+    .filter-bar select:focus { border-color: var(--accent-purple); }
 
-    #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
-    .passage-card { background: white; border: 1px solid var(--border-color); border-radius: 16px; padding: 20px; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; justify-content: space-between; position: relative; overflow: hidden; }
-    .passage-card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: linear-gradient(90deg, var(--accent-purple), #a78bfa); opacity: 0; transition: opacity 0.3s; }
-    .passage-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: rgba(124, 58, 237, 0.3); }
-    .passage-card:hover::before { opacity: 1; }
-
-    .card-header { margin-bottom: 12px; width: 100%; }
-    .card-title-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-    .card-title-group h3 { font-size: 1.1rem; font-weight: 700; color: #1e293b; margin: 0; }
-    .card-id-badge { font-size: 0.75em; color: #94a3b8; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+    /* --- Slim, Colored Card Redesign with Solid Slate Outlines --- */
+    #passage-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
+    .passage-card { 
+        background: white; 
+        border: 2px solid #0f172a; /* Bold, permanent slate-black borderline */
+        border-radius: 14px; 
+        padding: 16px 20px; 
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        position: relative; 
+        overflow: hidden; 
+        box-shadow: var(--shadow-sm);
+    }
+    .passage-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); border-color: var(--accent-purple); }
     
-    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 6px; font-size: 0.8em; font-weight: 600; background-color: #f1f5f9; color: #64748b; width: 100%; }
-    .status-badge.attempted { background-color: #ecfdf5; color: #059669; }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background-color: currentColor; }
+    /* Elegant Left Colored Indicators */
+    .passage-card.card-status-new { border-left: 5px solid #94a3b8; }
+    .passage-card.card-status-good { border-left: 5px solid #10b981; }
+    .passage-card.card-status-average { border-left: 5px solid #f59e0b; }
+    .passage-card.card-status-low { border-left: 5px solid #ef4444; }
 
-    .card-buttons { margin-top: 16px; }
-    .take-test-btn { width: 100%; padding: 10px; background-color: white; border: 1px solid var(--border-color); color: #1e293b; font-weight: 600; border-radius: 8px; transition: all 0.2s; }
+    .card-header { margin-bottom: 8px; width: 100%; }
+    .card-title-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; }
+    .card-title-group h3 { font-size: 1.05rem; font-weight: 700; color: #0f172a; margin: 0; letter-spacing: -0.01em; }
+    .card-id-badge { font-size: 0.7em; color: #94a3b8; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    /* Clean Nested Status Badges */
+    .status-badge { 
+        display: flex; 
+        flex-direction: column; 
+        gap: 2px; 
+        padding: 6px 10px; 
+        border-radius: 8px; 
+        font-size: 0.75em; 
+        font-weight: 600; 
+        color: #475569;
+        background-color: #f8fafc;
+        border: 1px solid #f1f5f9;
+        margin-top: 6px;
+    }
+    .status-badge.attempted-good { background-color: #f0fdf4; color: #166534; border-color: #dcfce7; }
+    .status-badge.attempted-average { background-color: #fffbeb; color: #92400e; border-color: #fef9c3; }
+    .status-badge.attempted-low { background-color: #fef2f2; color: #991b1b; border-color: #fee2e2; }
+    
+    .status-badge .score-line { display: flex; justify-content: space-between; width: 100%; }
+    .status-badge .best-line { display: flex; justify-content: space-between; width: 100%; border-top: 1px solid rgba(0,0,0,0.03); margin-top: 2px; padding-top: 2px; font-size: 0.9em; opacity: 0.85; }
+
+    .card-buttons { margin-top: 12px; }
+    .take-test-btn { width: 100%; padding: 8px; background-color: #f8fafc; border: 1px solid var(--border-color); color: #1e293b; font-weight: 600; font-size: 0.85em; border-radius: 8px; transition: all 0.2s; }
     .passage-card:hover .take-test-btn { background-color: #1e293b; color: white; border-color: #1e293b; }
 
     /* --- 2. SLIM & MODERN PLAYER STYLES --- */
@@ -197,7 +306,7 @@
         border: 1px solid var(--border-subtle);
         border-radius: 16px;
         padding: 35px 45px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         max-width: 1200px;
         margin: auto;
         transition: background-color 0.3s, box-shadow 0.3s;
@@ -264,13 +373,14 @@
     .highlight { position: relative; padding: 2px 5px; border-radius: 4px; margin: 0 1px; font-weight: 500; -webkit-box-decoration-break: clone; box-decoration-break: clone; display: inline; transition: transform 0.2s ease-out; }
     .highlight:hover { transform: scale(1.15); z-index: 5; }
     .highlight:hover::after { content: attr(data-tooltip-text); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; padding: 8px 12px; background-color: #111827; color: white; font-size: 0.8em; font-weight: 500; font-family: 'Inter', sans-serif; border-radius: 6px; white-space: nowrap; z-index: 10; opacity: 1; visibility: visible; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
-    .extra, .substitution { background: var(--hl-additions); }
-    .omission { background: var(--hl-omissions); }
-    .spelling { background: var(--hl-spelling); }
-    .spelling b { font-weight: 700; color: #166534; }
-    .capitalization { background: var(--hl-capitalization); }
-    .punctuation { background: var(--hl-punctuation); }
-    .addition { background: var(--hl-additions); }
+    
+    /* Support classes for both mis and highlight elements generated by analysis worker */
+    .mis.extra, .mis.substitution, .mis.addition, .highlight.extra, .highlight.substitution, .highlight.addition { background: var(--hl-additions) !important; }
+    .mis.omission, .highlight.omission { background: var(--hl-omissions) !important; }
+    .mis.spelling, .highlight.spelling { background: var(--hl-spelling) !important; }
+    .mis.capitalization, .highlight.capitalization { background: var(--hl-capitalization) !important; }
+    .mis.punctuation, .highlight.punctuation { background: var(--hl-punctuation) !important; }
+    
     .hidden-mistake { background: none !important; text-decoration: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; font-weight: normal !important; }
     .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
     .action-buttons { text-align: center; padding-top: 30px; padding-bottom: 10px; }
@@ -335,9 +445,33 @@
     #deepAnalysisModal tr:nth-child(even) { background-color: #fcfdff; }
     #deepAnalysisModal em { color: var(--text-muted); font-style: italic; }
 
-    /* New Transcript Modal Styles */
-    #transcriptModal .modal-content { max-width: 600px; text-align: left; max-height: 80vh; display: flex; flex-direction: column; }
-    #transcriptTextBody { overflow-y: auto; padding: 15px; background: #f9fafb; border-radius: 8px; border: 1px solid #e5e7eb; line-height: 1.8; color: #374151; font-size: 1.05rem; margin-bottom: 15px; }
+    /* Redesigned Transcript Modal - High Fidelity Full-Screen */
+    #transcriptModal .modal-content { 
+        max-width: 100%; 
+        width: 100vw; 
+        height: 100vh; 
+        border-radius: 0; 
+        padding: 40px; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        background-color: #ffffff; 
+        border: none;
+        max-height: 100vh;
+    }
+    #transcriptTextBody { 
+        flex-grow: 1;
+        overflow-y: auto; 
+        padding: 30px; 
+        background: #f8fafc; 
+        border-radius: 12px; 
+        border: 1px solid #e2e8f0; 
+        line-height: 2; 
+        color: #1e293b; 
+        font-size: 1.15rem; 
+        margin-bottom: 25px; 
+        font-family: 'Inter', sans-serif;
+    }
 
     .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
     .confirm-dialog h3 { margin: 0 0 8px 0; font-size: 1.25em; }
@@ -404,6 +538,23 @@
     .highlight {
         display: inline; /* Keep default text flow */
     }
+
+    /* Floating, Modern Hover Tooltip */
+    .mistake-hover-tooltip {
+        position: absolute;
+        background: #0f172a; /* Slate 900 */
+        color: #ffffff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-family: 'Inter', sans-serif;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        z-index: 9999;
+        display: none;
+        pointer-events: none;
+        line-height: 1.4;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -424,18 +575,20 @@
             </div>
         </div>
         
-        <div id="quick-resume-container"></div>
-
-        <div class="intro-box">
-            <div class="intro-header">
-                <h2>Practice Section</h2>
-                <span class="tag">PAID</span>
+        <!-- Consolidated, Elegant Dashboard Hero Grid -->
+        <div class="dashboard-hero" id="dashboardHeroSection">
+            <div class="intro-box">
+                <div class="intro-header">
+                    <h2>Practice Section</h2>
+                    <span class="tag">PAID</span>
+                </div>
+                <p>Practice all passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
+                <div class="intro-actions">
+                    <button id="startFirstTestBtn">Start First Test</button>
+                    <button id="resetProgressBtn">Reset Progress</button>
+                </div>
             </div>
-            <p>Practice all passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
-            <div class="intro-actions">
-                <button id="startFirstTestBtn">Start First Test</button>
-                <button id="resetProgressBtn">Reset Progress</button>
-            </div>
+            <div id="quick-resume-container"></div>
         </div>
 
         <div class="filter-bar">
@@ -446,8 +599,9 @@
             </select>
             <select id="sort-select">
                 <option value="default">Sort by Number</option>
-                <option value="score-asc">Sort by Score (Low to High)</option>
-                <option value="score-desc">Sort by Score (High to Low)</option>
+                <option value="score-asc">Sort by Latest Score (Low to High)</option>
+                <option value="score-desc">Sort by Latest Score (High to Low)</option>
+                <option value="best-desc">Sort by Best Score (High to Low)</option>
             </select>
         </div>
 
@@ -593,7 +747,7 @@
 
 <div id="error-modal" class="modal-overlay">
     <div class="modal-content">
-        <h2 id="error-title">An Error Occurred</h2>
+        <h2>An Error Occurred</h2>
         <p id="error-message" style="line-height: 1.6; margin-bottom: 25px;">Could not load the requested passage. Please check your internet connection and try again.</p>
         <button id="error-close-btn" class="modal-close-btn">Close</button>
     </div>
@@ -679,13 +833,20 @@
     </div>
 </div>
 
+<!-- High-Fidelity Pop-up Transcript Modal as Requested -->
 <div id="transcriptModal" class="modal-overlay">
-    <div class="modal-content">
-        <h2 style="text-align: left; margin-bottom: 15px;">Passage Transcript</h2>
-        <div id="transcriptTextBody"></div>
-        <div style="text-align: right;">
-            <button class="modal-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')">Close</button>
+    <div class="modal-content" style="max-width: 800px; width: 90%; max-height: 85vh; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column; overflow: hidden; padding: 0; border: none; text-align: left; border-radius: 12px;">
+        <div class="transcript-header" style="display: flex; justify-content: space-between; align-items: center; padding: 18px 24px; border-bottom: 1px solid #e2e8f0; background-color: #ffffff;">
+            <div class="transcript-header-left" style="display: flex; align-items: center; gap: 10px; color: #1e40af;">
+                <!-- High-Fidelity Document Icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 20px; height: 20px; color: #1e40af;">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
+                </svg>
+                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; font-family: 'Inter', sans-serif;">Official Transcription</h2>
+            </div>
+            <button class="transcript-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="background: none; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.15s ease;">✕</button>
         </div>
+        <div id="transcriptTextBody" style="padding: 24px 28px; overflow-y: auto; font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.85; color: #334155; background-color: #ffffff; text-align: justify; margin: 0; border: none; border-radius: 0; max-height: 65vh;"></div>
     </div>
 </div>
 
@@ -934,7 +1095,7 @@ function renderGrid() {
     grid.innerHTML = '';
 
     const progressData = JSON.parse(localStorage.getItem(`kcProgress_${candidateId}`) || '{}');
-    let dataToRender =[...allPassageData];
+    let dataToRender = [...allPassageData];
 
     const filterValue = document.getElementById('filter-select').value;
     if (filterValue !== 'all') {
@@ -950,10 +1111,25 @@ function renderGrid() {
         dataToRender.sort((a, b) => {
             const keyA = `${a.volId}-${a.tranId}`;
             const keyB = `${b.volId}-${b.tranId}`;
-            const scoreA = progressData[keyA] ? progressData[keyA].accuracy : -1;
-            const scoreB = progressData[keyB] ? progressData[keyB].accuracy : -1;
-            if (sortValue === 'score-asc') return scoreA - scoreB;
-            if (sortValue === 'score-desc') return scoreB - scoreA;
+            
+            const itemA = progressData[keyA];
+            const itemB = progressData[keyB];
+
+            if (sortValue === 'score-asc') {
+                const accA = itemA ? (itemA.accuracy !== undefined ? itemA.accuracy : -1) : -1;
+                const accB = itemB ? (itemB.accuracy !== undefined ? itemB.accuracy : -1) : -1;
+                return accA - accB;
+            }
+            if (sortValue === 'score-desc') {
+                const accA = itemA ? (itemA.accuracy !== undefined ? itemA.accuracy : -1) : -1;
+                const accB = itemB ? (itemB.accuracy !== undefined ? itemB.accuracy : -1) : -1;
+                return accB - accA;
+            }
+            if (sortValue === 'best-desc') {
+                const bestA = itemA ? (itemA.bestAccuracy !== undefined ? itemA.bestAccuracy : (itemA.accuracy || -1)) : -1;
+                const bestB = itemB ? (itemB.bestAccuracy !== undefined ? itemB.bestAccuracy : (itemB.accuracy || -1)) : -1;
+                return bestB - bestA;
+            }
             return 0;
         });
     }
@@ -979,14 +1155,51 @@ function renderGrid() {
         const attemptData = progressData[key];
         const isAttempted = !!attemptData;
 
+        let badgeHtml = '';
+        let statusStripeClass = 'card-status-new';
+        if (isAttempted) {
+            const latestAcc = parseFloat(attemptData.accuracy) || 0;
+            const bestAcc = attemptData.bestAccuracy !== undefined ? parseFloat(attemptData.bestAccuracy) : latestAcc;
+            
+            let statusClass = 'attempted-low';
+            statusStripeClass = 'card-status-low';
+            if (latestAcc >= 95) {
+                statusClass = 'attempted-good';
+                statusStripeClass = 'card-status-good';
+            } else if (latestAcc >= 90) {
+                statusClass = 'attempted-average';
+                statusStripeClass = 'card-status-average';
+            }
+
+            badgeHtml = `
+                <div class="status-badge ${statusClass}">
+                    <div class="score-line">
+                        <span>Latest Score:</span>
+                        <span>${latestAcc.toFixed(2)}%</span>
+                    </div>
+                    <div class="best-line">
+                        <span>Lifetime Best:</span>
+                        <span>${bestAcc.toFixed(2)}%</span>
+                    </div>
+                </div>
+            `;
+        } else {
+            badgeHtml = `
+                <div class="status-badge new">
+                    <div class="score-line">
+                        <span>Status:</span>
+                        <span>New</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        card.className = `passage-card ${statusStripeClass}`;
         card.innerHTML = `
               <div class="card-header">
                   <div class="card-title-group">
                       <span class="card-id-badge">KC / VOL ${data.volume}</span>
-                      <span class="status-badge ${isAttempted ? 'attempted' : ''}">
-                        <span class="status-dot"></span>
-                        ${isAttempted ? `${attemptData.accuracy}%` : 'New'}
-                      </span>
+                      ${badgeHtml}
                   </div>
                   <h3>Passage ${data.transcriptNumber}</h3>
               </div>
@@ -1539,17 +1752,34 @@ function saveProgressToLocalStorage(resultData) {
     const key = `${g_vol}-${g_tran}`;
     const progressData = JSON.parse(localStorage.getItem(`kcProgress_${candidateId}`) || '{}');
 
-    const newScore = {
-        accuracy: parseFloat(resultData.accuracy),
-        wpm: parseFloat(resultData.wpm),
-    };
+    const newAccuracy = parseFloat(resultData.accuracy) || 0;
+    const newWpm = parseFloat(resultData.wpm) || 0;
 
-    const existingScore = progressData[key];
-    if (!existingScore || newScore.accuracy > existingScore.accuracy) {
-        progressData[key] = newScore;
-        localStorage.setItem(`kcProgress_${candidateId}`, JSON.stringify(progressData));
+    const existing = progressData[key] || {};
+    
+    // Read the true existing best scores, falling back to legacy flat keys if bestAccuracy is not yet defined
+    let prevBestAcc = 0;
+    if (existing.bestAccuracy !== undefined) {
+        prevBestAcc = parseFloat(existing.bestAccuracy) || 0;
+    } else if (existing.accuracy !== undefined) {
+        prevBestAcc = parseFloat(existing.accuracy) || 0;
+    }
+    
+    let prevBestWpm = 0;
+    if (existing.bestWpm !== undefined) {
+        prevBestWpm = parseFloat(existing.bestWpm) || 0;
+    } else if (existing.wpm !== undefined) {
+        prevBestWpm = parseFloat(existing.wpm) || 0;
     }
 
+    progressData[key] = {
+        accuracy: newAccuracy, // Keeps the most recent attempt's score
+        wpm: newWpm,
+        bestAccuracy: Math.max(prevBestAcc, newAccuracy), // Correctly preserves lifetime best
+        bestWpm: Math.max(prevBestWpm, newWpm)
+    };
+
+    localStorage.setItem(`kcProgress_${candidateId}`, JSON.stringify(progressData));
     localStorage.setItem(`kcLastAttempt_${candidateId}`, JSON.stringify({ vol: g_vol, tran: g_tran }));
 }
 
@@ -1594,7 +1824,7 @@ async function updateMistakeLibrary(studentMistakes) {
             const typedWord = (mistake.wrong || '').replace(/[.,]$/, '').toLowerCase();
             if (!originalWord || !typedWord || originalWord === typedWord) continue;
 
-            const existingEntry = await localDb.mistakeLibrary.get({ originalWord, typedWord });
+            const existingEntry = await localDb.mistakeLibrary.where('[originalWord+typedWord]').equals([originalWord, typedWord]).first();
             if (existingEntry) {
                 await localDb.mistakeLibrary.update(existingEntry.id, { count: existingEntry.count + 1 });
             } else {
@@ -1624,11 +1854,15 @@ async function updateOverallStats(newAttemptStats) {
     });
 }
 
+/**
+ * EXACT DATABASES ARCHITECTURE ALIGNMENT FOR DASHBOARDS PERSISTENCE (test-analysis & details compatibility)
+ */
 async function saveAttemptHybrid(original, typed, analysisResult) {
     if (!candidateId) { console.error("Candidate not initialized, cannot save."); return; }
 
     const fullMistakesCount = (analysisResult.mistakeCounters.addition || 0) + (analysisResult.mistakeCounters.omission || 0);
 
+    // [ALIGNED PAYLOAD SCHEMA] Structured exactly for test-analysis.html & details.html parsing dependencies
     const fullResultData = {
         timestamp: new Date().toISOString(),
         dictationName: `Kailash Chandra - Volume ${g_vol.replace('vol', '')} / Transcript ${g_tran.replace('t', '')}`,
@@ -1639,11 +1873,19 @@ async function saveAttemptHybrid(original, typed, analysisResult) {
         fullMistakes: fullMistakesCount,
         halfMistakes: analysisResult.halfBucketCount || 0,
         highlightedHtml: analysisResult.resultHTML,
+        mistakeProfile: {
+            omission: analysisResult.mistakeCounters.omission || 0,
+            extra: analysisResult.mistakeCounters.addition || 0,
+            spelling: analysisResult.mistakeCounters.spelling || 0,
+            substitution: analysisResult.mistakeCounters.substitution || 0,
+            capitalization: analysisResult.mistakeCounters.capitalization || 0,
+            punctuation: (analysisResult.mistakeCounters.punctuation?.fullstop || 0) + (analysisResult.mistakeCounters.punctuation?.other || 0)
+        }
     };
 
     try {
         await localDb.attempts.add(fullResultData);
-        console.log("✅ Full attempt with HTML saved locally.");
+        console.log("✅ Full attempt with mistake breakdown and original transcripts saved locally to Dexie.");
 
         await updateOverallStats(analysisResult);
         await updateMistakeLibrary(analysisResult.studentMistakes);
@@ -1680,10 +1922,9 @@ function initializeEventListeners() {
     document.getElementById('filter-select').addEventListener('change', renderGrid);
     document.getElementById('sort-select').addEventListener('change', renderGrid);
     document.getElementById('startFirstTestBtn').addEventListener('click', () => document.querySelector('.passage-card .take-test-btn')?.click());
-    document.getElementById('error-close-btn').addEventListener('click', () => document.getElementById('error-modal').classList.remove('visible'));
+    document.getElementById('resetProgressBtn').addEventListener('click', () => resetModal.classList.add('visible'));
 
     const resetModal = document.getElementById('resetConfirmModal');
-    document.getElementById('resetProgressBtn').addEventListener('click', () => resetModal.classList.add('visible'));
     document.getElementById('cancelResetBtn').addEventListener('click', () => resetModal.classList.remove('visible'));
     document.getElementById('confirmResetBtn').addEventListener('click', () => { resetProgress(); resetModal.classList.remove('visible'); });
 
@@ -1710,9 +1951,89 @@ function initializeResultInteractivity() {
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
 
     initializeInteractiveLegend();
+    setupHoverTooltips();
     
     // Initialize the new modular AI teacher system
     AITeacher.init();
+}
+
+/* Floating Mistake Hover Tooltip Generator */
+function setupHoverTooltips() {
+    let tooltip = document.getElementById('mistakeTooltip');
+    if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'mistakeTooltip';
+        tooltip.className = 'mistake-hover-tooltip';
+        document.body.appendChild(tooltip);
+    }
+
+    const columns = document.getElementById('comparisonColumns');
+    if (!columns) return;
+
+    columns.removeEventListener('mouseover', handleTooltipOver);
+    columns.removeEventListener('mouseout', handleTooltipOut);
+    
+    columns.addEventListener('mouseover', handleTooltipOver);
+    columns.addEventListener('mouseout', handleTooltipOut);
+}
+
+function handleTooltipOver(e) {
+    const el = e.target.closest('.highlight, .mis');
+    if (!el) return;
+
+    const tooltip = document.getElementById('mistakeTooltip');
+    if (!tooltip) return;
+
+    let type = "Mistake";
+    if (el.classList.contains('omission')) type = "Omission";
+    else if (el.classList.contains('addition') || el.classList.contains('extra')) type = "Addition";
+    else if (el.classList.contains('spelling')) type = "Spelling Mistake";
+    else if (el.classList.contains('capitalization')) type = "Capitalization Mistake";
+    else if (el.classList.contains('punctuation')) type = "Punctuation Mistake";
+    else if (el.classList.contains('substitution')) type = "Word Substitution";
+
+    const wrongEl = el.querySelector('del, s');
+    const correctEl = el.querySelector('b, ins');
+
+    let typed = "";
+    let correct = "";
+
+    if (wrongEl && correctEl) {
+        typed = wrongEl.textContent.trim();
+        correct = correctEl.textContent.trim();
+    } else if (el.classList.contains('omission')) {
+        typed = "[None]";
+        correct = el.textContent.trim();
+    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
+        typed = el.textContent.trim();
+        correct = "[None]";
+    } else {
+        typed = el.textContent.trim();
+        correct = "Check Original Text";
+    }
+
+    tooltip.innerHTML = `
+        <div style="font-weight: 700; margin-bottom: 4px; color: #a78bfa; font-size: 0.9em; text-transform: uppercase;">${type}</div>
+        <div style="margin-bottom: 2px;">Typed: <span style="color: #fecdd3; font-weight: 600;">${escapeHtml(typed)}</span></div>
+        <div>Expected: <span style="color: #d9f99d; font-weight: 600;">${escapeHtml(correct)}</span></div>
+    `;
+
+    tooltip.style.display = 'block';
+    
+    const rect = el.getBoundingClientRect();
+    const tooltipHeight = tooltip.offsetHeight;
+    const tooltipWidth = tooltip.offsetWidth;
+    
+    tooltip.style.left = (window.scrollX + rect.left + (rect.width / 2) - (tooltipWidth / 2)) + 'px';
+    tooltip.style.top = (window.scrollY + rect.top - tooltipHeight - 10) + 'px';
+}
+
+function handleTooltipOut(e) {
+    const el = e.target.closest('.highlight, .mis');
+    if (el) {
+        const tooltip = document.getElementById('mistakeTooltip');
+        if (tooltip) tooltip.style.display = 'none';
+    }
 }
 
 function openTranscriptModal() {
@@ -1823,20 +2144,37 @@ function renderQuickResume() {
     const container = document.getElementById('quick-resume-container');
     container.innerHTML = '';
     const lastAttempt = JSON.parse(localStorage.getItem(`kcLastAttempt_${candidateId}`));
+    const heroSection = document.getElementById('dashboardHeroSection');
 
     if (lastAttempt && allPassageData.length > 0) {
         const { vol, tran } = lastAttempt;
         const currentPassage = allPassageData.find(p => p.volId === vol && p.tranId === tran);
-        if (!currentPassage) return;
+        if (!currentPassage) {
+            if (heroSection) heroSection.classList.remove('has-resume');
+            return;
+        }
         const nextPassage = allPassageData.find(p => p.transcriptNumber === currentPassage.transcriptNumber + 1);
 
         const box = document.createElement('div');
         box.className = 'quick-resume-box';
-        box.innerHTML = `<h3>Resume Your Practice</h3><p>Your last attempt was <strong>Passage ${currentPassage.transcriptNumber}</strong></p><div class="intro-actions"><button id="resume-again-btn">Practice Again</button>${nextPassage ? `<button id="resume-next-btn">Try Next (Passage ${nextPassage.transcriptNumber})</button>` : ''}</div>`;
+        box.innerHTML = `
+            <div>
+                <h3>Resume Your Practice</h3>
+                <p>Your last attempt was <strong>Passage ${currentPassage.transcriptNumber}</strong></p>
+            </div>
+            <div class="intro-actions">
+                <button id="resume-again-btn">Practice Again</button>
+                ${nextPassage ? `<button id="resume-next-btn">Try Next (Passage ${nextPassage.transcriptNumber})</button>` : ''}
+            </div>
+        `;
         container.appendChild(box);
+
+        if (heroSection) heroSection.classList.add('has-resume');
 
         document.getElementById('resume-again-btn').addEventListener('click', () => loadPractice(vol, tran));
         if (nextPassage) document.getElementById('resume-next-btn').addEventListener('click', () => loadPractice(nextPassage.volId, nextPassage.tranId));
+    } else {
+        if (heroSection) heroSection.classList.remove('has-resume');
     }
 }
 
@@ -1883,7 +2221,7 @@ function initializeInteractiveLegend() {
 
 function applyFilters() {
     const activeFilters = Array.from(document.querySelectorAll('#interactive-legend .legend-item.active')).map(item => item.dataset.filterType);
-    const allHighlightElements = document.querySelectorAll('#editableTypedText .mis');
+    const allHighlightElements = document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight');
     
     allHighlightElements.forEach(el => {
         let isVisible = false;
@@ -1915,7 +2253,7 @@ function showDeepAnalysisModal() {
     const tableBody = document.getElementById('deep-analysis-table-body');
     let tableRowsHtml = '';
     
-    const mistakes =[
+    const mistakes = [
         ...spelling.map(m => ({ type: 'Spelling', wrong: m.wrong, correct: m.correct })),
         ...capitalisation.map(m => ({ type: 'Capitalization', wrong: m.wrong, correct: m.correct })),
         ...replacements.map(m => ({ type: 'Replacement', wrong: m.added, correct: m.omitted }))
@@ -2105,6 +2443,10 @@ const AITeacher = {
         let targetClean = targetWord.toLowerCase().replace(/[^\w]/g, '');
         let anchorClean = anchorText.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(Boolean);
         
+        let Math_min = Math.min;
+        let Math_max = Math.max;
+        let Math_floor = Math.floor;
+        
         let bestIdx = -1;
         
         for (let i = 0; i < words.length; i++) {
@@ -2147,10 +2489,10 @@ const AITeacher = {
             }
         }
         
-        if (bestIdx === -1) bestIdx = Math.floor(words.length / 2); // Absolute fallback
+        if (bestIdx === -1) bestIdx = Math_floor(words.length / 2); // Absolute fallback
         
-        let start = Math.max(0, bestIdx - 10);
-        let end = Math.min(words.length, bestIdx + 10);
+        let start = Math_max(0, bestIdx - 10);
+        let end = Math_min(words.length, bestIdx + 10);
         
         let windowWords = words.slice(start, end);
         
