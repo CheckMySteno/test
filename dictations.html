@@ -12,7 +12,7 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
-<!-- DigiWallet Script -->
+<!-- NEW: DigiWallet Script attached here -->
 <script src="digiwallet.js"></script>
 
 <!-- Google Fonts & Icons -->
@@ -146,7 +146,7 @@
         background: #0f172a;
     }
 
-    .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; flex-wrap: wrap; align-items: center; }
+    .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; }
     .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); outline: none; }
     .filter-bar select:focus { border-color: var(--accent-purple); }
 
@@ -420,7 +420,7 @@
     @keyframes fadeInScaleUp { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
     #resultsWelcomeModal .modal-content { max-width: 800px; width: 95%; text-align: left; font-family: 'Inter', sans-serif; border-radius: 12px; padding: 0; overflow: hidden; animation: fadeInScaleUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); border: 1px solid var(--border-subtle); }
     .pro-modal-header { text-align: center; padding: 30px 35px; border-bottom: 1px solid var(--border-subtle); }
-    .pro-modal-header h2 { font-size: 1.8em; font-weight: 700; margin: 0 0 8px 0; border: none; padding: 0; }
+    .pro-modal-header h2 { font-size: 1.8em; font-weight: 700; margin: 0; margin-bottom: 8px; border: none; padding: 0; }
     .pro-modal-header p { color: var(--text-muted); max-width: 550px; margin: 0 auto; font-size: 1em; line-height: 1.6; }
     .pro-welcome-grid { display: grid; grid-template-columns: 1fr; gap: 20px; padding: 30px 35px; }
     @media (min-width: 768px) { .pro-welcome-grid { grid-template-columns: 1fr 1fr; } }
@@ -482,7 +482,7 @@
         font-family: 'Inter', sans-serif;
     }
 
-    .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); border: 1px solid var(--border-subtle); }
+    .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
     .confirm-dialog h3 { margin: 0 0 8px 0; font-size: 1.25em; }
     .confirm-dialog p { margin: 0 0 20px 0; color: var(--medium-grey); }
     .confirm-dialog-actions { display: flex; gap: 10px; justify-content: center; }
@@ -624,6 +624,11 @@
                 <option value="score-asc">Sort by Latest Score (Low to High)</option>
                 <option value="score-desc">Sort by Latest Score (High to Low)</option>
                 <option value="best-desc">Sort by Best Score (High to Low)</option>
+            </select>
+            <select id="filter-select">
+                <option value="all">Show All Status</option>
+                <option value="attempted">Show Attempted</option>
+                <option value="not-attempted">Show Not Attempted</option>
             </select>
         </div>
 
@@ -972,10 +977,10 @@ try {
 } catch (e) {
     console.error("Firebase initialization failed. Please provide valid credentials.", e);
 }
-const db = firebase.firestore ? firebase.firestore() : null;
+let db = null;
 
 // --- Global State Variables ---
-let player, originalText = "", wordCount = 0;
+let player, originalText = "", wordCount = 0, currentPassageTitle = "";
 let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
 let g_vol = "monthlyProgressive_passages", g_tran = "", candidateId, attemptsRef;
 let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
@@ -1027,11 +1032,15 @@ async function initializePracticeMonthly() {
         return;
     }
 
+    // Safely initialize Firebase reference dynamically
+    if (firebase.firestore) {
+        db = firebase.firestore();
+    }
+
     // Connect user details
     candidateId = user.uid; 
     document.getElementById('candidate-name-display').textContent = (user.name || "CANDIDATE").toUpperCase();
     
-    // Safely initialize Firebase reference
     if (db) {
         attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
     } else {
@@ -1095,6 +1104,7 @@ function getCurrentConfigForWorker() {
 
 function setupFilters() {
     const yearFilter = document.getElementById('monthlyYearFilter');
+    if (!yearFilter) return;
     const currentYear = new Date().getFullYear();
     yearFilter.innerHTML = '<option value="">All Years</option>';
     for (let i = currentYear; i >= currentYear - 5; i--) {
@@ -1102,11 +1112,12 @@ function setupFilters() {
     }
 }
 
-// --- Passage Data and Grid Rendering ---
+// --- Passage Data and Grid Rendering (Stabilized JS sorting to prevent blank load errors) ---
 async function generateAllPassageData() {
     allPassageData =[];
+    if (!db) return;
     try {
-        const querySnapshot = await db.collection('monthlyProgressive_index').orderBy(firebase.firestore.FieldPath.documentId(), "desc").get();
+        const querySnapshot = await db.collection('monthlyProgressive_index').get();
         querySnapshot.forEach(doc => {
             const docId = doc.id; // Format: YYYY_MM
             const [year, month] = docId.split('_');
@@ -1124,6 +1135,8 @@ async function generateAllPassageData() {
                 });
             }
         });
+        // Sort chronologically reverse by default
+        allPassageData.sort((a, b) => b.id.localeCompare(a.id));
     } catch (error) {
         console.error("Error loading passage indexes:", error);
     }
@@ -1134,7 +1147,7 @@ function renderGrid() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const progressData = JSON.parse(localStorage.getItem(`kcProgress_${candidateId}`) || '{}');
+    const progressData = JSON.parse(localStorage.getItem(`stenoProgress_${candidateId}`) || '{}');
     let dataToRender = [...allPassageData];
 
     const filterYear = document.getElementById('monthlyYearFilter').value;
@@ -1541,6 +1554,7 @@ function updateSpeedDisplay(val) {
     document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
 }
 
+// --- Dynamic Modal and Controls (photocopy from kc 14) ---
 function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
 function restartVideo() { if (player) { player.seekTo(0, true); player.playVideo(); } }
 function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
@@ -1906,7 +1920,7 @@ async function saveAttemptHybrid(original, typed, analysisResult) {
 
     const fullMistakesCount = (analysisResult.mistakeCounters.addition || 0) + (analysisResult.mistakeCounters.omission || 0);
 
-    // [STABILIZATION FIX] Ensure .addition classes produced by some workers are mapped to .extra classes expected by dashboards
+    // [STABILIZATION FIX] Map internal addition tags to class "extra" expected by test-analysis and attempt details dashboards
     let normalizedResultHtml = analysisResult.resultHTML || '';
     normalizedResultHtml = normalizedResultHtml.replace(/\baddition\b/g, 'extra');
 
