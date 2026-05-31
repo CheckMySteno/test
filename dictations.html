@@ -1588,6 +1588,78 @@ function adjustSpeed(amount) {
 
 function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
+// ==========================================
+// HIGH PERFORMANCE MISTAKE PARSER (FIXES TOOLTIP ISSUES)
+// ==========================================
+function extractTypedAndCorrect(el) {
+    let typed = "";
+    let correct = "";
+    
+    const wrongEl = el.querySelector('del, s, strike');
+    const correctEl = el.querySelector('b, ins, strong');
+    
+    if (wrongEl) {
+        typed = wrongEl.textContent.trim();
+    }
+    if (correctEl) {
+        correct = correctEl.textContent.trim();
+    }
+    
+    // Fallback parsing based on mistake categories
+    if (el.classList.contains('omission')) {
+        if (!correct) {
+            correct = el.textContent.replace(/[\u2715\u2713]/g, '').trim(); 
+        }
+        typed = "[None]";
+    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
+        if (!typed) {
+            typed = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
+        }
+        correct = "[None]";
+    } else {
+        // Fallback for overlapping or untagged custom styling
+        if (!typed || !correct) {
+            const tooltipAttr = el.getAttribute('data-tooltip-text') || "";
+            if (tooltipAttr) {
+                const expectedMatch = tooltipAttr.match(/Expected:\s*(.*)/i);
+                const typedMatch = tooltipAttr.match(/Typed:\s*([^,]*)/i);
+                if (expectedMatch) correct = expectedMatch[1].trim();
+                if (typedMatch) typed = typedMatch[1].trim();
+            }
+        }
+        
+        // Final fallback checks using DOM hierarchy positions
+        if (!typed) {
+            typed = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
+        }
+        if (!correct) {
+            const indexAttr = el.getAttribute('data-index');
+            if (indexAttr !== null && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
+                const idx = parseInt(indexAttr);
+                if (!isNaN(idx) && g_lastAnalysisResult.originalWords[idx]) {
+                    correct = g_lastAnalysisResult.originalWords[idx];
+                }
+            }
+            if (!correct) {
+                correct = "[Check Original]";
+            }
+        }
+    }
+    
+    // De-duplicate if tooltips overlap unexpectedly
+    if (typed === correct && (el.classList.contains('spelling') || el.classList.contains('substitution') || el.classList.contains('capitalization'))) {
+        const indexAttr = el.getAttribute('data-index');
+        if (indexAttr !== null && g_lastAnalysisResult && g_lastAnalysisResult.originalWords) {
+            const idx = parseInt(indexAttr);
+            if (!isNaN(idx) && g_lastAnalysisResult.originalWords[idx]) {
+                correct = g_lastAnalysisResult.originalWords[idx];
+            }
+        }
+    }
+    
+    return { typed, correct };
+}
+
 function renderResultSheet(analysisResult, isReevaluation = false) {
     g_lastAnalysisResult = analysisResult;
 
@@ -2042,7 +2114,7 @@ function setupHoverTooltips() {
 }
 
 function handleTooltipOver(e) {
-    const el = e.target.closest('.highlight, .mis');
+    const el = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
     if (!el) return;
 
     const tooltip = document.getElementById('mistakeTooltip');
@@ -2056,25 +2128,7 @@ function handleTooltipOver(e) {
     else if (el.classList.contains('punctuation')) type = "Punctuation Mistake";
     else if (el.classList.contains('substitution')) type = "Word Substitution";
 
-    const wrongEl = el.querySelector('del, s');
-    const correctEl = el.querySelector('b, ins');
-
-    let typed = "";
-    let correct = "";
-
-    if (wrongEl && correctEl) {
-        typed = wrongEl.textContent.trim();
-        correct = correctEl.textContent.trim();
-    } else if (el.classList.contains('omission')) {
-        typed = "[None]";
-        correct = el.textContent.trim();
-    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
-        typed = el.textContent.trim();
-        correct = "[None]";
-    } else {
-        typed = el.textContent.trim();
-        correct = "Check Original Text";
-    }
+    const { typed, correct } = extractTypedAndCorrect(el);
 
     tooltip.innerHTML = `
         <div style="font-weight: 700; margin-bottom: 4px; color: #a78bfa; font-size: 0.9em; text-transform: uppercase;">${type}</div>
@@ -2093,7 +2147,7 @@ function handleTooltipOver(e) {
 }
 
 function handleTooltipOut(e) {
-    const el = e.target.closest('.highlight, .mis');
+    const el = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
     if (el) {
         const tooltip = document.getElementById('mistakeTooltip');
         if (tooltip) tooltip.style.display = 'none';
@@ -2250,10 +2304,10 @@ function initializeInteractiveLegend() {
     const mistakeCounters = g_lastAnalysisResult.mistakeCounters;
     const mistakeMap = {
         omission: mistakeCounters.omission || 0,
-        addition: mistakeCounters.addition || 0,
+        addition: (mistakeCounters.addition || 0) + (mistakeCounters.substitution || 0),
         spelling: mistakeCounters.spelling || 0,
         capitalization: mistakeCounters.capitalization || 0,
-        punctuation: (mistakeCounters.punctuation.fullstop || 0) + (mistakeCounters.punctuation.other || 0),
+        punctuation: (mistakeCounters.punctuation?.fullstop || 0) + (mistakeCounters.punctuation?.other || 0),
     };
     
     legendContainer.querySelectorAll('.legend-item').forEach(item => {
@@ -2286,7 +2340,7 @@ function initializeInteractiveLegend() {
 
 function applyFilters() {
     const activeFilters = Array.from(document.querySelectorAll('#interactive-legend .legend-item.active')).map(item => item.dataset.filterType);
-    const allHighlightElements = document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight');
+    const allHighlightElements = document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight, #editableTypedText .extra, #editableTypedText .substitution, #editableTypedText .omission, #editableTypedText .spelling, #editableTypedText .capitalization, #editableTypedText .punctuation');
     
     allHighlightElements.forEach(el => {
         let isVisible = false;
@@ -2294,7 +2348,11 @@ function applyFilters() {
             isVisible = true;
         } else {
             for(const filter of activeFilters) {
-                if(el.classList.contains(filter)) {
+                let match = el.classList.contains(filter);
+                if (filter === 'addition' && (el.classList.contains('extra') || el.classList.contains('substitution'))) {
+                    match = true;
+                }
+                if (match) {
                     isVisible = true;
                     break;
                 }
@@ -2375,7 +2433,7 @@ const AITeacher = {
         const icon = e.target.closest('.ai-icon');
         if (!icon) return;
 
-        const highlight = e.target.closest('.highlight');
+        const highlight = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
         if (!highlight) return;
 
         e.stopPropagation(); 
@@ -2392,76 +2450,20 @@ const AITeacher = {
     // ---------------------------------------------------------------------
     extractMistakeData: function(highlight) {
         let type = this.getMistakeType(highlight);
-        let clone = highlight.cloneNode(true);
-        let iconNode = clone.querySelector('.ai-icon'); 
-        if (iconNode) iconNode.remove();
-
-        let wrongText = "";
-        let correctText = "";
-
-        // NEW DOM EXTRACTION LOGIC:
-        // We look specifically for tags the worker injects to separate your text from the answer.
         
-        // 1. Find the crossed out word (what the user typed)
-        let strikeEl = clone.querySelector('del, s, strike');
-        if (strikeEl) {
-            wrongText = strikeEl.textContent.trim();
-            strikeEl.remove();
-        }
-
-        // 2. Find the correct word injected by the worker
-        let boldEl = clone.querySelector('b, ins');
-        if (boldEl) {
-            correctText = boldEl.textContent.trim();
-            boldEl.remove();
-        }
-
-        // 3. Whatever is left over after removing the tags
-        let remainingText = clone.textContent.trim();
-
-        // 4. Resolve the words based on the tags we found
-        if (wrongText && correctText) {
-            // We successfully separated both from tags!
-        } else if (wrongText && !correctText) {
-            correctText = remainingText;
-        } else if (!wrongText && correctText) {
-            wrongText = remainingText;
-        } else {
-            // No explicit tags found, rely on mistake type
-            if (type === 'Omission') {
-                correctText = remainingText;
-                wrongText = "[Missing Word]";
-            } else if (type === 'Addition') {
-                wrongText = remainingText;
-                correctText = "[Extra Word]";
-            } else {
-                wrongText = remainingText;
-                // Attempt tooltip fallback for correct text
-                let tooltip = highlight.getAttribute('data-tooltip-text') || "";
-                if (tooltip.includes('Expected:')) {
-                    correctText = tooltip.split('Expected:')[1].trim();
-                } else if (tooltip.includes('Missing:')) {
-                    correctText = tooltip.split('Missing:')[1].trim();
-                } else {
-                    correctText = "unknown";
-                }
-            }
-        }
-
-        let cleanOriginal = correctText.trim();
-        let cleanTyped = wrongText.trim();
+        // Use our robust extractor
+        const { typed, correct } = extractTypedAndCorrect(highlight);
 
         // GET CONTEXT FROM THE RAW TEXT STRINGS
-        // We get a 3-word anchor before the mistake to safely find it in the raw strings
         let anchorWords = this.getAnchorWords(highlight);
 
-        let userContext = this.findContext(g_lastTypedText, anchorWords, cleanTyped, type === 'Omission');
-        let origContext = this.findContext(originalText, anchorWords, cleanOriginal, type === 'Addition');
+        let userContext = this.findContext(g_lastTypedText, anchorWords, typed, type === 'Omission');
+        let origContext = this.findContext(originalText, anchorWords, correct, type === 'Addition');
 
         return {
             type: type,
-            originalWord: cleanOriginal,
-            typedWord: cleanTyped,
+            originalWord: correct,
+            typedWord: typed,
             userContext: userContext,
             originalContext: origContext
         };
