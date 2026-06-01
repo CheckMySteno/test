@@ -20,6 +20,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
     /* --- 1. Global Styles --- */
@@ -29,18 +30,19 @@
       --bg-color: #f8fafc; --surface-color: #ffffff;
       --border-color: #e2e8f0; --white: #fff;
       --font-family: 'Inter', sans-serif;
+      --font-monospace: 'JetBrains Mono', 'Courier New', monospace;
       --accent-purple: #4f46e5;
       --accent-purple-light: #f3e8ff;
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
       --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
       
-      /* Global Highlighting Colors */
-      --hl-additions: #fecdd3;     
-      --hl-omissions: #d9f99d;     
-      --hl-spelling: #fde68a;      
-      --hl-capitalization: #bae6fd; 
-      --hl-punctuation: #ddd6fe;   
+      /* Global Highlighting Colors (Modern Pastel Underlays) */
+      --hl-additions: #fef2f2;     
+      --hl-omissions: #f0fdf4;     
+      --hl-spelling: #fffbeb;      
+      --hl-capitalization: #f0f9ff; 
+      --hl-punctuation: #faf5ff;   
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -270,7 +272,7 @@
     .ssc-header-right { font-size: 0.8em; text-align: right; }
     .ssc-main-content { display: flex; flex-grow: 1; overflow-y: auto; }
     .ssc-typing-area { flex-grow: 1; display: flex; flex-direction: column; padding: 15px; }
-    #typingBox { width: 100%; flex-grow: 1; border: 1px solid #000; border-radius: 0; padding: 10px; font-size: 16px; font-family: 'Courier New', Courier, monospace; resize: none; }
+    #typingBox { width: 100%; flex-grow: 1; border: 1px solid #000; border-radius: 0; padding: 10px; font-size: 16px; font-family: var(--font-monospace); resize: none; }
     #typingBox:focus { outline: none; }
     #submitBtn { width: 90px; padding: 5px 10px; font-size: 0.9em; background-color: #000; border-radius: 0; color: white; margin-top: 10px; }
     .ssc-candidate-panel { width: 280px; background-color: #f0f0f0; border-left: 1px solid #ccc; padding: 15px; text-align: left; font-size: 0.9em; color: #333; flex-shrink: 0; }
@@ -283,58 +285,93 @@
     .ssc-candidate-info { line-height: 1.8; }
     .ssc-candidate-info b { font-weight: bold; color: #000; }
 
-    /* --- 4. RESULT SHEET STYLES --- */
+    /* --- 4. RESULT SHEET STYLES (BRIGHT WHITE VISUAL OVERHAUL) --- */
     #results-view { display: none; }
     .result-sheet-container {
-        --bg-main: #f8fafc;
-        --surface-card: #ffffff;
-        --border-subtle: #e2e8f0;
-        --text-header: #1e293b;
-        --text-body: #334155;
-        --text-muted: #64748b;
-        --primary-cyan: #0891b2;
-        --accent-red: #ef4444;
-        --accent-amber: #f97316;
-        --hl-additions: #fecdd3;     
-        --hl-omissions: #d9f99d;     
-        --hl-spelling: #fde68a;      
-        --hl-capitalization: #bae6fd; 
-        --hl-punctuation: #ddd6fe;   
-
-        font-family: 'Inter', sans-serif;
-        background-color: var(--surface-card);
-        border: 1px solid var(--border-subtle);
+        background-color: #ffffff;
+        border: 1px solid var(--border-color);
         border-radius: 16px;
-        padding: 35px 45px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        padding: 40px;
+        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.02);
         max-width: 1200px;
         margin: auto;
-        transition: background-color 0.3s, box-shadow 0.3s;
     }
 
     #results-view.reevaluate-mode-active .result-sheet-container {
-        background-color: #f0f2f5;
-        box-shadow: 0 0 0 3px var(--accent-purple), 0 8px 25px rgba(0,0,0,0.1);
+        background-color: #f8fafc;
+        box-shadow: 0 0 0 3px var(--accent-purple), 0 8px 25px rgba(0,0,0,0.05);
     }
 
-    #results-view.reevaluate-mode-active[contenteditable="true"] {
-        outline: 2px solid var(--accent-purple);
-        background-color: white;
-        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
-        padding: 10px;
-        border-radius: 8px;
+    .result-sheet-container h1 { 
+        font-size: 2rem; 
+        font-weight: 800; 
+        margin: 0 0 20px 0; 
+        color: var(--text-color); 
+        letter-spacing: -0.02em;
     }
 
-    .result-sheet-container h1 { font-size: 2.25em; font-weight: 800; margin: 0 0 25px 0; color: var(--text-header); }
-    .stats-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
-    .stats-row { display: flex; flex-wrap: wrap; gap: 12px; }
-    .stat-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95em; color: white; background-color: var(--primary-cyan); box-shadow: 0 4px 10px -2px rgba(8, 145, 178, 0.25); }
-    .stat-pill.full-width { flex-grow: 1; font-size: 1.1em; }
-    .stat-pill.red { background-color: var(--accent-red); box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.2); }
-    .stat-pill.amber { background-color: var(--accent-amber); box-shadow: 0 4px 10px -2px rgba(249, 115, 22, 0.2); }
-    .stat-pill img, .stat-pill svg { width: 18px; height: 18px; }
+    /* --- Modern SVG Radial Metrics --- */
+    .radial-gauges-panel {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 30px;
+        padding: 25px;
+        background-color: #ffffff;
+        border: 1px solid #f1f5f9;
+        border-radius: 16px;
+        margin-bottom: 30px;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.01);
+    }
     
-    .legend-container { display: flex; flex-wrap: wrap; gap: 10px 15px; padding: 25px 0; margin-bottom: 25px; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); align-items: center; }
+    .radial-metric-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+    .radial-ring {
+        transition: stroke-dashoffset 0.5s ease-out;
+    }
+
+    /* --- Key Stats Grid --- */
+    .metrics-dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    .metric-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.01);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.03);
+    }
+    .metric-card-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--medium-grey);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .metric-card-value {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-color);
+        font-family: var(--font-monospace);
+    }
+
+    .legend-container { display: flex; flex-wrap: wrap; gap: 10px 15px; padding: 25px 0; margin-bottom: 25px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); align-items: center; }
     .legend-item { display: flex; align-items: center; font-size: 0.9em; font-weight: 500; cursor: pointer; padding: 6px 12px; border-radius: 8px; transition: all 0.2s ease; border: 1px solid transparent; }
     .legend-item:hover { background-color: #f0f2f5; transform: translateY(-2px); }
     .legend-item.active { background-color: var(--accent-purple-light); border-color: var(--accent-purple); font-weight: 600; color: var(--accent-purple); }
@@ -345,8 +382,8 @@
 
     .result-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
     .action-section { display: flex; align-items: center; gap: 10px; }
-    .view-switch-btn { background-color: var(--bg-main); border: 1px solid var(--border-subtle); padding: 8px 16px; border-radius: 8px; font-weight: 600; color: var(--text-body); cursor: pointer; transition: all 0.2s; }
-    .view-switch-btn:hover { background-color: #e2e8f0; }
+    .view-switch-btn { background-color: #ffffff; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; font-weight: 600; color: var(--text-body); cursor: pointer; transition: all 0.2s; }
+    .view-switch-btn:hover { background-color: #f8fafc; }
     
     #viewSwitchBtn { background-color: var(--accent-purple-light); color: var(--accent-purple); border-color: var(--accent-purple); }
     #viewSwitchBtn:hover { background-color: #dadaf7; }
@@ -362,55 +399,79 @@
     .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
     .columns.view-top-bottom { grid-template-columns: 1fr; }
-    .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; }
-    .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; }
+    
+    /* Monospace evaluation text box styles */
+    .col { background: #ffffff; border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); line-height: 1.8; font-size: 1.15em; word-wrap: break-word; font-family: var(--font-monospace); }
+    .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; font-family: var(--font-family); }
     .col p { margin: 0; }
     .word-wrapper { cursor: pointer; display: inline; transition: background-color 0.2s ease, transform 0.2s ease; position: relative; }
     .active-highlight { background-color: #4B0082 !important; color: white !important; border-radius: 3px; animation: pop-3d 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
     @keyframes pop-3d { 0% { transform: scale3d(1, 1, 1); box-shadow: 0 0 0 rgba(0,0,0,0); } 50% { transform: scale3d(1.1, 1.1, 1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.2); } 100% { transform: scale3d(1, 1, 1); box-shadow: 0 0 0 rgba(0,0,0,0); } }
     .word-wrapper.status-shown::after { content: attr(data-status-icon); position: absolute; top: 50%; left: 50%; font-size: 1.8em; color: white; text-shadow: 0 2px 8px black; opacity: 0; animation: fade-in-out 0.8s ease-in-out forwards; pointer-events: none; z-index: 10; }
     @keyframes fade-in-out { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 30% { opacity: 0.9; } 80% { opacity: 0.9; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
-    .highlight { position: relative; padding: 2px 5px; border-radius: 4px; margin: 0 1px; font-weight: 500; -webkit-box-decoration-break: clone; box-decoration-break: clone; display: inline; transition: transform 0.2s ease-out; }
-    .highlight:hover { transform: scale(1.15); z-index: 5; }
-    .highlight:hover::after { content: attr(data-tooltip-text); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; padding: 8px 12px; background-color: #111827; color: white; font-size: 0.8em; font-weight: 500; font-family: 'Inter', sans-serif; border-radius: 6px; white-space: nowrap; z-index: 10; opacity: 1; visibility: visible; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     
-    /* Support classes for both mis and highlight elements generated by analysis worker */
-    .mis.extra, .mis.substitution, .mis.addition, .highlight.extra, .highlight.substitution, .highlight.addition { 
-        background: var(--hl-additions) !important; 
-        text-decoration: none !important;
+    /* Refined Custom Highlights with high specificity */
+    #editableTypedText .mis, #editableTypedText .highlight {
+        border-radius: 4px;
+        padding: 2px 4px;
+        margin: 0 1px;
+        display: inline;
+        transition: all 0.2s ease;
+    }
+    
+    #editableTypedText .mis.omission, #editableTypedText .highlight.omission {
+        background-color: var(--hl-omissions) !important;
+        border-bottom: 2px solid #22c55e !important;
+        color: #166534 !important;
+    }
+
+    #editableTypedText .mis.spelling, #editableTypedText .highlight.spelling {
+        background-color: var(--hl-spelling) !important;
+        border-bottom: 2px dashed #d97706 !important;
+        color: #92400e !important;
+    }
+
+    #editableTypedText .mis.capitalization, #editableTypedText .highlight.capitalization {
+        background-color: var(--hl-capitalization) !important;
+        border-bottom: 2px solid #0284c7 !important;
+        color: #075985 !important;
+    }
+
+    #editableTypedText .mis.punctuation, #editableTypedText .highlight.punctuation {
+        background-color: var(--hl-punctuation) !important;
+        border-bottom: 2px solid #7c3aed !important;
+        color: #5b21b6 !important;
+    }
+
+    #editableTypedText .mis.extra, #editableTypedText .mis.addition, #editableTypedText .mis.substitution,
+    #editableTypedText .highlight.extra, #editableTypedText .highlight.addition, #editableTypedText .highlight.substitution {
+        background-color: var(--hl-additions) !important;
+        color: #991b1b !important;
         position: relative;
         display: inline-block;
+        text-decoration: none !important;
     }
-    .mis.extra::after, .mis.substitution::after, .mis.addition::after,
-    .highlight.extra::after, .highlight.substitution::after, .highlight.addition::after,
-    .extra::after, .substitution::after {
+
+    #editableTypedText .mis.extra::after, #editableTypedText .mis.addition::after, #editableTypedText .mis.substitution::after,
+    #editableTypedText .highlight.extra::after, #editableTypedText .highlight.addition::after, #editableTypedText .highlight.substitution::after {
         content: "";
         position: absolute;
         left: 0;
         top: 50%;
         width: 100%;
         height: 2px;
-        background-color: #be123c; /* Deep red crimson line cutting through the middle */
+        background-color: #ef4444; /* Custom middle cut line */
         transform: scaleX(0);
         transform-origin: left;
         animation: draw-strike 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     }
+
     @keyframes draw-strike {
         to {
             transform: scaleX(1);
         }
     }
 
-    .mis.omission, .highlight.omission { background: var(--hl-omissions) !important; }
-    .mis.spelling, .highlight.spelling { background: var(--hl-spelling) !important; }
-    .mis.capitalization, .highlight.capitalization { background: var(--hl-capitalization) !important; }
-    .mis.punctuation, .highlight.punctuation { background: var(--hl-punctuation) !important; }
-    .extra, .substitution { background: var(--hl-additions); text-decoration: none; position: relative; display: inline-block; }
-    .omission { background: var(--hl-omissions); }
-    .spelling { background: var(--hl-spelling); }
-    .capitalization { background: var(--hl-capitalization); }
-    .punctuation { background: var(--hl-punctuation); }
-    
     /* SPECIFICITY WORKAROUND FOR FILTERING WAR */
     #editableTypedText .hidden-mistake,
     #editableTypedText span.hidden-mistake,
@@ -532,7 +593,7 @@
         color: #1e293b; 
         font-size: 1.15rem; 
         margin-bottom: 25px; 
-        font-family: 'Inter', sans-serif;
+        font-family: var(--font-family);
     }
 
     .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
@@ -544,79 +605,6 @@
     #cancelResetBtn { background-color: #e5e7eb; color: #4b5563; }
     
     .full-page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; }
-    
-    @media (max-width: 768px) {
-        .ssc-header { flex-direction: column; gap: 10px; padding: 10px; text-align: center; }
-        .ssc-header-left, .ssc-header-right { text-align: center; width: 100%; }
-        .ssc-title h1 { font-size: 1em; }
-        .ssc-main-content { flex-direction: column; }
-        .ssc-typing-area { padding: 10px; min-height: 50vh; }
-        .ssc-candidate-panel { width: 100%; border-left: none; border-top: 1px solid #ccc; flex-shrink: 1; padding: 10px; }
-        .ssc-photo-box { margin-bottom: 10px; }
-        .config-grid { grid-template-columns: 1fr; }
-    }
-
-    @media print {
-      body, .app-container, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
-      .view { display: none !important; }
-      #results-view { display: block !important; }
-      .action-buttons, .result-controls, .legend-container, .back-btn { display: none !important; }
-      .result-sheet-container { padding: 0; }
-      .col { border: 1px solid #ccc; max-height: none; overflow-y: visible; }
-      .columns { grid-template-columns: 1fr 1fr !important; }
-    }
-    
-    /* Specific styles for AI Modal & Icon */
-    .ai-mistake-context { background:#f1f5f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #4f46e5; font-size: 0.95rem; }
-    .ai-explanation-text { font-size: 1rem; color: #1e293b; }
-    .ai-rule-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform:uppercase; margin-bottom: 5px; }
-    
-    /* AI Icon Styling */
-    .ai-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        width: 16px;
-        height: 16px;
-        background-color: #4f46e5; /* Indigo color */
-        color: white;
-        border-radius: 50%;
-        font-size: 10px;
-        font-weight: bold;
-        margin-left: 4px;
-        cursor: pointer;
-        vertical-align: middle;
-        user-select: none;
-        transition: transform 0.2s;
-        text-decoration: none !important;
-    }
-
-    .ai-icon:hover {
-        transform: scale(1.2);
-        background-color: #4338ca;
-    }
-
-    /* Ensure the parent span allows the icon to sit nicely */
-    .highlight {
-        display: inline; /* Keep default text flow */
-    }
-
-    /* Floating, Modern Hover Tooltip */
-    .mistake-hover-tooltip {
-        position: absolute;
-        background: #0f172a; /* Slate 900 */
-        color: #ffffff;
-        padding: 10px 14px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-family: 'Inter', sans-serif;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        z-index: 9999;
-        display: none;
-        pointer-events: none;
-        line-height: 1.4;
-        border: 1px solid rgba(255,255,255,0.1);
-    }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -922,11 +910,11 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 20px; height: 20px; color: #1e40af;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
-                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; font-family: 'Inter', sans-serif;">Official Transcription</h2>
+                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; font-family: var(--font-family);">Official Transcription</h2>
             </div>
             <button class="transcript-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="background: none; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.15s ease;">✕</button>
         </div>
-        <div id="transcriptTextBody" style="padding: 24px 28px; overflow-y: auto; font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.85; color: #334155; background-color: #ffffff; text-align: justify; margin: 0; border: none; border-radius: 0; max-height: 65vh;"></div>
+        <div id="transcriptTextBody" style="padding: 24px 28px; overflow-y: auto; font-family: var(--font-family); font-size: 1.05rem; line-height: 1.85; color: #334155; background-color: #ffffff; text-align: justify; margin: 0; border: none; border-radius: 0; max-height: 65vh;"></div>
     </div>
 </div>
 
@@ -986,7 +974,7 @@
 
 <!-- AI Analysis Modal -->
 <div id="aiModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 600px; text-align: left; border-radius: 12px; font-family: 'Inter', sans-serif;">
+    <div class="modal-content" style="max-width: 600px; text-align: left; border-radius: 12px; font-family: var(--font-family);">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
             <h3 style="margin:0; font-size:1.1rem; color:#4f46e5; display:flex; align-items:center; gap:8px;">
                 <span>🧠</span> AI Teacher Analysis
@@ -1751,7 +1739,12 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
     if (isReevaluation) {
         const reevalContainer = document.getElementById('reevaluated-accuracy-container');
         if (reevalContainer) {
-            reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${analysisResult.accuracy.toFixed(2)}%</div></div>`;
+            reevalContainer.innerHTML = `
+                <div class="stats-row" style="justify-content: center; margin-top: 15px;">
+                    <div class="stat-pill" style="background-color: var(--accent-purple); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700;">
+                        Re-evaluated Accuracy: ${analysisResult.accuracy.toFixed(2)}%
+                    </div>
+                </div>`;
         }
         
         document.getElementById('editableTypedText').innerHTML = analysisResult.resultHTML;
@@ -1775,37 +1768,90 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 
         const fullMistakesCount = (mistakeCounters.addition || 0) + (mistakeCounters.omission || 0);
 
+        // Calculate offset values for SVG circle rings
+        const accDashOffset = 314.16 - (314.16 * Math.min(100, Math.max(0, accuracy)) / 100);
+        const speedDashOffset = 314.16 - (314.16 * Math.min(100, Math.max(0, (parseFloat(wpm) / 120) * 100)) / 100);
+        const diffDashOffset = 314.16 - (314.16 * Math.min(100, Math.max(0, percentageDiff)) / 100);
+
         let originalTextHtml = analysisResult.originalWords.map((word, index) => 
             `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
         ).join(' ');
 
         container.innerHTML = `
         <div class="result-sheet-container">
-            <h1>Result Sheet:</h1>
-            <div class="stats-container">
-                <div class="stats-row"><div class="stat-pill full-width">${escapeHtml(dictationName)}</div></div>
-                <div class="stats-row">
-                    <div class="stat-pill">Total words: ${totalWordsP1}</div>
-                    <div class="stat-pill">Typed words: ${totalWordsP2}</div>
-                    <div class="stat-pill">Typing Speed: ${wpm} WPM</div>
+            <h1 style="border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 25px;">${escapeHtml(dictationName)}</h1>
+            
+            <!-- Dynamic SVG Radial Gauge Panel -->
+            <div class="radial-gauges-panel">
+                <div class="radial-metric-box">
+                    <svg class="radial-ring" width="120" height="120" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="50" fill="transparent" stroke="#f1f5f9" stroke-width="8"></circle>
+                        <circle cx="60" cy="60" r="50" fill="transparent" stroke="#10b981" stroke-width="8"
+                                stroke-dasharray="314.16" stroke-dashoffset="${accDashOffset}"
+                                stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
+                        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="20" font-weight="800" fill="#0f172a" font-family="var(--font-monospace)">${accuracy.toFixed(1)}%</text>
+                    </svg>
+                    <span style="font-size: 0.85em; font-weight: 700; color: #64748b; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Accuracy</span>
                 </div>
-                <div class="stats-row">
-                    <div class="stat-pill red">Full Mistakes: ${fullMistakesCount}</div>
-                    <div class="stat-pill amber">Half Mistakes: ${halfBucketCount}</div>
-                    <div class="stat-pill">Total % of Mistakes: ${percentageDiff.toFixed(2)}%</div>
-                    <div class="stat-pill">Accuracy: ${accuracy.toFixed(2)}%</div>
+                
+                <div class="radial-metric-box">
+                    <svg class="radial-ring" width="120" height="120" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="50" fill="transparent" stroke="#f1f5f9" stroke-width="8"></circle>
+                        <circle cx="60" cy="60" r="50" fill="transparent" stroke="#3b82f6" stroke-width="8"
+                                stroke-dasharray="314.16" stroke-dashoffset="${speedDashOffset}"
+                                stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
+                        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="20" font-weight="800" fill="#0f172a" font-family="var(--font-monospace)">${Math.round(wpm)}</text>
+                    </svg>
+                    <span style="font-size: 0.85em; font-weight: 700; color: #64748b; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Speed (WPM)</span>
                 </div>
-                <div id="reevaluated-accuracy-container"></div>
-                <div class="stats-row"><div class="stat-pill">Test Date: ${escapeHtml(testDate)}</div></div>
+
+                <div class="radial-metric-box">
+                    <svg class="radial-ring" width="120" height="120" viewBox="0 0 120 120">
+                        <circle cx="60" cy="60" r="50" fill="transparent" stroke="#f1f5f9" stroke-width="8"></circle>
+                        <circle cx="60" cy="60" r="50" fill="transparent" stroke="#ef4444" stroke-width="8"
+                                stroke-dasharray="314.16" stroke-dashoffset="${diffDashOffset}"
+                                stroke-linecap="round" transform="rotate(-90 60 60)"></circle>
+                        <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-size="20" font-weight="800" fill="#0f172a" font-family="var(--font-monospace)">${percentageDiff.toFixed(1)}%</text>
+                    </svg>
+                    <span style="font-size: 0.85em; font-weight: 700; color: #64748b; margin-top: 10px; text-transform: uppercase; letter-spacing: 0.5px;">Mistake Rate</span>
+                </div>
             </div>
+
+            <!-- Sleek Metrics Cards Dashboard Grid -->
+            <div class="metrics-dashboard-grid">
+                <div class="metric-card">
+                    <span class="metric-card-label">Original Words</span>
+                    <span class="metric-card-value">${totalWordsP1}</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-card-label">Typed Words</span>
+                    <span class="metric-card-value">${totalWordsP2}</span>
+                </div>
+                <div class="metric-card" style="border-left: 4px solid #ef4444;">
+                    <span class="metric-card-label" style="color: #ef4444;">Full Mistakes</span>
+                    <span class="metric-card-value" style="color: #ef4444;">${fullMistakesCount}</span>
+                </div>
+                <div class="metric-card" style="border-left: 4px solid #f59e0b;">
+                    <span class="metric-card-label" style="color: #f59e0b;">Half Mistakes</span>
+                    <span class="metric-card-value" style="color: #f59e0b;">${halfBucketCount}</span>
+                </div>
+            </div>
+
+            <div id="reevaluated-accuracy-container"></div>
+            
+            <div style="font-size: 0.85em; font-weight: 600; color: #94a3b8; margin-bottom: 25px;">
+                Test Date: ${escapeHtml(testDate)}
+            </div>
+
             <div class="legend-container" id="interactive-legend">
-                <div class="legend-item" data-filter-type="omission"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span>Omissions<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="addition"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span>Additions<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="spelling"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span>Spelling<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="capitalization"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span>Capitalization<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="punctuation"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span>Punctuation<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="omission"><span class="legend-color-box" style="background-color: var(--hl-omissions); border-bottom: 2px solid #22c55e;"></span>Omissions<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="addition"><span class="legend-color-box" style="background-color: var(--hl-additions); border-bottom: 2px solid #ef4444;"></span>Additions<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="spelling"><span class="legend-color-box" style="background-color: var(--hl-spelling); border-bottom: 2px dashed #d97706;"></span>Spelling<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="capitalization"><span class="legend-color-box" style="background-color: var(--hl-capitalization); border-bottom: 2px solid #0284c7;"></span>Capitalization<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="punctuation"><span class="legend-color-box" style="background-color: var(--hl-punctuation); border-bottom: 2px solid #7c3aed;"></span>Punctuation<span class="mistake-count"></span></div>
                 <button id="reset-filter-btn" class="view-switch-btn">Show All</button>
             </div>
+            
             <div class="result-controls">
                 <div class="action-section">
                     <button id="deepAnalysisBtn" class="view-switch-btn">Deep Analysis</button>
@@ -1817,6 +1863,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 </div>
                 <button id="viewSwitchBtn" class="view-switch-btn">Switch to Side-by-Side View</button>
             </div>
+            
             <div id="comparisonColumns" class="columns view-top-bottom">
                 <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText" contenteditable="false">${analysisResult.resultHTML}</p></div>
                 <div class="col" id="originalCol"><strong>Original Text:</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div>
