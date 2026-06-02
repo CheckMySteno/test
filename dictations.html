@@ -1496,6 +1496,7 @@ function handleFirstKeydown() {
     }
 }
 
+// --- Player controls ---
 function startTimer() {
     if (timer) return;
     timer = setInterval(() => {
@@ -1599,7 +1600,24 @@ function updateSpeedDisplay(val) {
     document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
 }
 
-// --- Dynamic Modal and Controls (photocopy from kc 14) ---
+function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
+function trackProgress() { clearInterval(progressInterval); progressInterval = setInterval(updateVideoTimeDisplay, 250); }
+function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); const clickPosition = (e.clientX - rect.left) / rect.width; player.seekTo(clickPosition * totalVideoDuration, true); }); }
+function formatTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); const sec = Math.round(s % 60).toString().padStart(2, '0'); return isNaN(m) || isNaN(sec) ? "00:00" : `${m}:${sec}` }
+
+function updateVideoTimeDisplay() { 
+    if (!player || typeof player.getCurrentTime !== 'function') return; 
+    const rawCurrentTime = player.getCurrentTime(); 
+    
+    const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate; 
+    const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate; 
+    
+    document.getElementById("progress-fill").style.width = (rawCurrentTime / totalVideoDuration) * 100 + "%"; 
+    document.getElementById('current-time').innerText = formatTime(effectiveCurrentTime); 
+    document.getElementById('total-time').innerText = formatTime(effectiveTotalDuration); 
+}
+
+function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
 function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
 function adjustSpeed(amount) { 
     const range = document.getElementById('wpmRange');
@@ -1609,112 +1627,6 @@ function adjustSpeed(amount) {
     range.value = newVal;
     updateSpeedDisplay(newVal);
     setPlaybackSpeed();
-}
-
-function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-
-// ==========================================
-// HIGH PERFORMANCE MISTAKE PARSER (FIXES TOOLTIP ISSUES)
-// ==========================================
-function extractTypedAndCorrect(el) {
-    let typed = "";
-    let correct = "";
-
-    // SOURCE 1: Parse from explicit data-tooltip-text attribute if present
-    const tooltipAttr = el.getAttribute('data-tooltip-text') || "";
-    if (tooltipAttr) {
-        const expectedMatch = tooltipAttr.match(/Expected:\s*([^,]*)/i);
-        const typedMatch = tooltipAttr.match(/Typed:\s*(.*)/i);
-        const missingMatch = tooltipAttr.match(/Missing:\s*(.*)/i);
-        const extraMatch = tooltipAttr.match(/Extra:\s*(.*)/i);
-
-        if (expectedMatch) correct = expectedMatch[1].trim();
-        if (typedMatch) typed = typedMatch[1].trim();
-        if (missingMatch) {
-            correct = missingMatch[1].trim();
-            typed = "[None]";
-        }
-        if (extraMatch) {
-            typed = extraMatch[1].trim();
-            correct = "[None]";
-        }
-    }
-
-    // SOURCE 2: Query DOM children as a fallback or verification
-    const wrongEl = el.querySelector('del, s, strike');
-    const correctEl = el.querySelector('b, ins, strong');
-
-    if (wrongEl && !typed) {
-        typed = wrongEl.textContent.trim();
-    }
-    if (correctEl && !correct) {
-        correct = correctEl.textContent.trim();
-    }
-
-    // SOURCE 3: Clean clone-based parsing if still empty
-    if (!typed || !correct) {
-        const clone = el.cloneNode(true);
-        const wrongInClone = clone.querySelector('del, s, strike');
-        if (wrongInClone) {
-            if (!typed) typed = wrongInClone.textContent.trim();
-            wrongInClone.remove();
-        }
-        clone.querySelectorAll('.ai-icon, button, svg, script').forEach(node => node.remove());
-        const remainingText = clone.textContent.replace(/[\u2715\u2713]/g, '').trim();
-
-        if (!correct && remainingText) {
-            correct = remainingText;
-        }
-        if (!typed && remainingText) {
-            typed = remainingText;
-        }
-    }
-
-    // SOURCE 4: Contextual fallback mapping using index lookup
-    const indexAttr = el.getAttribute('data-index');
-    const idx = indexAttr !== null ? parseInt(indexAttr) : NaN;
-
-    if (!correct || correct === "[Check Original]" || correct === "unknown") {
-        if (!isNaN(idx) && g_lastAnalysisResult) {
-            if (g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
-                correct = g_lastAnalysisResult.originalWords[idx];
-            }
-        }
-    }
-
-    if (!typed) {
-        if (!isNaN(idx) && g_lastAnalysisResult) {
-            if (g_lastAnalysisResult.userWords && g_lastAnalysisResult.userWords[idx]) {
-                typed = g_lastAnalysisResult.userWords[idx];
-            }
-        }
-    }
-
-    // Semantic cleanups for Omissions/Additions
-    if (el.classList.contains('omission')) {
-        typed = "[None]";
-        if (!correct || correct === "[None]") {
-            correct = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
-        }
-    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
-        correct = "[None]";
-        if (!typed || typed === "[None]") {
-            typed = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
-        }
-    }
-
-    // Ensure no duplicate strings are returned for replacements/spelling
-    if (typed === correct && (el.classList.contains('spelling') || el.classList.contains('capitalization') || el.classList.contains('substitution'))) {
-        if (!isNaN(idx) && g_lastAnalysisResult && g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
-            correct = g_lastAnalysisResult.originalWords[idx];
-        }
-    }
-
-    // Sanitize placeholders
-    if (!typed) typed = "[Check Transcription]";
-    if (!correct) correct = "[Check Original Text]";
-
-    return { typed, correct };
 }
 
 function renderResultSheet(analysisResult, isReevaluation = false) {
@@ -2183,6 +2095,11 @@ async function sendLightweightStatsToFirebase(analysisResult) {
 }
 
 function initializeEventListeners() {
+    const resetModal = document.getElementById('resetConfirmModal');
+    if (resetModal) {
+        document.getElementById('resetProgressBtn').addEventListener('click', () => resetModal.classList.add('visible'));
+    }
+    
     document.getElementById('passage-grid').addEventListener('click', (e) => {
         const button = e.target.closest('.take-test-btn');
         if (button) { const card = button.closest('.passage-card'); loadPractice(card.dataset.volume, card.dataset.transcript); }
@@ -2193,9 +2110,7 @@ function initializeEventListeners() {
     document.getElementById('monthlyYearFilter').addEventListener('change', renderGrid);
     document.getElementById('monthlyMonthFilter').addEventListener('change', renderGrid);
     document.getElementById('startFirstTestBtn').addEventListener('click', () => document.querySelector('.passage-card .take-test-btn')?.click());
-    document.getElementById('resetProgressBtn').addEventListener('click', () => resetModal.classList.add('visible'));
 
-    const resetModal = document.getElementById('resetConfirmModal');
     document.getElementById('cancelResetBtn').addEventListener('click', () => resetModal.classList.remove('visible'));
     document.getElementById('confirmResetBtn').addEventListener('click', () => { resetProgress(); resetModal.classList.remove('visible'); });
 
