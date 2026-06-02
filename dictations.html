@@ -313,15 +313,12 @@
 
     /* --- Sophisticated Detailed Slate Banner --- */
     .sophisticated-result-header {
-        background: #0f172a;
+        background: linear-gradient(135deg, #1e293b, #0f172a);
         color: white;
-        border-radius: 12px;
-        padding: 18px 24px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+        border-radius: 16px;
+        padding: 25px 30px;
         margin-bottom: 25px;
-        box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
     }
 
     /* --- Key Stats Grid --- */
@@ -595,6 +592,23 @@
     #cancelResetBtn { background-color: #e5e7eb; color: #4b5563; }
     
     .full-page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; }
+
+    /* --- Floating JS-based Mouse Tooltip Styles --- */
+    .mistake-hover-tooltip {
+        position: absolute;
+        background: #0f172a; /* Slate 900 */
+        color: #ffffff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-family: 'Inter', sans-serif;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        z-index: 9999;
+        display: none;
+        pointer-events: none;
+        line-height: 1.4;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -1038,6 +1052,38 @@ function setupAntiInspection() {
     if (typingBox) {
         typingBox.addEventListener('contextmenu', (e) => e.stopPropagation());
     }
+}
+
+// --- Dynamic Modal and Controls (photocopy from kc 14) ---
+function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
+function restartVideo() { if (player) { player.seekTo(0, true); player.playVideo(); } }
+function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
+function trackProgress() { clearInterval(progressInterval); progressInterval = setInterval(updateVideoTimeDisplay, 250); }
+function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); const clickPosition = (e.clientX - rect.left) / rect.width; player.seekTo(clickPosition * totalVideoDuration, true); }); }
+function formatTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); const sec = Math.round(s % 60).toString().padStart(2, '0'); return isNaN(m) || isNaN(sec) ? "00:00" : `${m}:${sec}` }
+
+function updateVideoTimeDisplay() { 
+    if (!player || typeof player.getCurrentTime !== 'function') return; 
+    const rawCurrentTime = player.getCurrentTime(); 
+    
+    const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate; 
+    const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate; 
+    
+    document.getElementById("progress-fill").style.width = (rawCurrentTime / totalVideoDuration) * 100 + "%"; 
+    document.getElementById('current-time').innerText = formatTime(effectiveCurrentTime); 
+    document.getElementById('total-time').innerText = formatTime(effectiveTotalDuration); 
+}
+
+function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
+function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
+function adjustSpeed(amount) { 
+    const range = document.getElementById('wpmRange');
+    let newVal = parseInt(range.value) + amount;
+    if(newVal < 60) newVal = 60;
+    if(newVal > 160) newVal = 160;
+    range.value = newVal;
+    updateSpeedDisplay(newVal);
+    setPlaybackSpeed();
 }
 
 function setLogoSource() {
@@ -1585,38 +1631,6 @@ function updateSpeedDisplay(val) {
     document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
 }
 
-// --- Dynamic Modal and Controls (photocopy from kc 14) ---
-function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
-function restartVideo() { if (player) { player.seekTo(0, true); player.playVideo(); } }
-function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
-function trackProgress() { clearInterval(progressInterval); progressInterval = setInterval(updateVideoTimeDisplay, 250); }
-function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); const clickPosition = (e.clientX - rect.left) / rect.width; player.seekTo(clickPosition * totalVideoDuration, true); }); }
-function formatTime(s) { const m = Math.floor(s / 60).toString().padStart(2, '0'); const sec = Math.round(s % 60).toString().padStart(2, '0'); return isNaN(m) || isNaN(sec) ? "00:00" : `${m}:${sec}` }
-
-function updateVideoTimeDisplay() { 
-    if (!player || typeof player.getCurrentTime !== 'function') return; 
-    const rawCurrentTime = player.getCurrentTime(); 
-    
-    const effectiveCurrentTime = rawCurrentTime / currentPlaybackRate; 
-    const effectiveTotalDuration = totalVideoDuration / currentPlaybackRate; 
-    
-    document.getElementById("progress-fill").style.width = (rawCurrentTime / totalVideoDuration) * 100 + "%"; 
-    document.getElementById('current-time').innerText = formatTime(effectiveCurrentTime); 
-    document.getElementById('total-time').innerText = formatTime(effectiveTotalDuration); 
-}
-
-function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
-function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
-function adjustSpeed(amount) { 
-    const range = document.getElementById('wpmRange');
-    let newVal = parseInt(range.value) + amount;
-    if(newVal < 60) newVal = 60;
-    if(newVal > 160) newVal = 160;
-    range.value = newVal;
-    updateSpeedDisplay(newVal);
-    setPlaybackSpeed();
-}
-
 function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 // ==========================================
@@ -1767,29 +1781,36 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             
             <!-- Compact & Sophisticated Sleek Slate Dashboard Header -->
             <div class="sophisticated-result-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <!-- Sophisticated Doc Icon -->
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <div style="display: flex; align-items: center; gap: 16px; flex-wrap: wrap;">
+                    <div style="background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 10px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                    </div>
                     <div>
-                        <h2 style="margin: 0; font-size: 1.15rem; font-weight: 700; color: #ffffff; letter-spacing: -0.015em;">${escapeHtml(dictationName)}</h2>
-                        <p style="margin: 2px 0 0 0; font-size: 0.8rem; color: #94a3b8; font-weight: 500;">Stenography Assessment Report</p>
+                        <h2 style="margin: 0; font-size: 1.25rem; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">${escapeHtml(dictationName)}</h2>
+                        <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 0.8rem; color: #94a3b8; font-weight: 600; flex-wrap: wrap;">
+                            <span>📋 SSC STENOGRAPHER MODE</span>
+                            <span style="color: #334155;">•</span>
+                            <span>ENGLISH</span>
+                            <span style="color: #334155;">•</span>
+                            <span style="color: #60a5fa;">${testDate}</span>
+                        </div>
                     </div>
                 </div>
                 
-                <div style="display: flex; gap: 20px; align-items: center;">
+                <div style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap; margin-top: 10px;">
                     <div style="text-align: right;">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.3px;">Accuracy</div>
-                        <div style="font-size: 1.3rem; font-weight: 800; color: #10b981; font-family: var(--font-monospace);">${accuracy.toFixed(2)}%</div>
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Evaluation Score</div>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: #10b981; font-family: var(--font-monospace); margin-top: 2px;">${accuracy.toFixed(2)}%</div>
                     </div>
-                    <div style="width: 1px; height: 28px; background-color: #334155;"></div>
+                    <div style="width: 1px; height: 35px; background-color: #334155;"></div>
                     <div style="text-align: right;">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.3px;">Speed</div>
-                        <div style="font-size: 1.3rem; font-weight: 800; color: #3b82f6; font-family: var(--font-monospace);">${Math.round(wpm)} WPM</div>
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Speed</div>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: #3b82f6; font-family: var(--font-monospace); margin-top: 2px;">${Math.round(wpm)} <span style="font-size: 1rem; color: #94a3b8; font-weight: 600;">WPM</span></div>
                     </div>
-                    <div style="width: 1px; height: 28px; background-color: #334155;"></div>
+                    <div style="width: 1px; height: 35px; background-color: #334155;"></div>
                     <div style="text-align: right;">
-                        <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.3px;">Mistake Rate</div>
-                        <div style="font-size: 1.3rem; font-weight: 800; color: #ef4444; font-family: var(--font-monospace);">${percentageDiff.toFixed(2)}%</div>
+                        <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Mistake Rate</div>
+                        <div style="font-size: 1.85rem; font-weight: 800; color: #ef4444; font-family: var(--font-monospace); margin-top: 2px;">${percentageDiff.toFixed(2)}%</div>
                     </div>
                 </div>
             </div>
@@ -1829,16 +1850,33 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <button id="reset-filter-btn" class="view-switch-btn">Show All</button>
             </div>
             
-            <div class="result-controls">
-                <div class="action-section">
-                    <button id="deepAnalysisBtn" class="view-switch-btn">Deep Analysis</button>
+            <!-- Highly Aligned, Modern Action Toolbar -->
+            <div class="result-controls" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.01); flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <!-- Deep Analysis Button -->
+                    <button id="deepAnalysisBtn" style="background-color: #0f172a; color: white; font-weight: 600; font-size: 0.85rem; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s;">
+                        🔍 Deep Analysis
+                    </button>
+                    
+                    <!-- Re-evaluate Button -->
                     <div class="reevaluate-wrapper">
-                        <button id="toggleReevaluateBtn" class="view-switch-btn">Enter Re-evaluate Mode</button>
-                        <span class="tooltip-icon" data-tooltip="Enter a special mode to edit BOTH your text and the original text, then recalculate your score to see the difference.">?</span>
+                        <button id="toggleReevaluateBtn" style="background-color: var(--accent-amber); color: white; font-weight: 600; font-size: 0.85rem; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s;">
+                            🔄 Enter Re-evaluate Mode
+                        </button>
                     </div>
-                    <button id="reportErrorBtn" class="view-switch-btn" style="background-color: #f97316; color: white;">Report Error</button>
+
+                    <!-- Report Error Button -->
+                    <button id="reportErrorBtn" style="background-color: #ef4444; color: white; font-weight: 600; font-size: 0.85rem; padding: 10px 18px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s;">
+                        ⚠️ Report Passage Error
+                    </button>
                 </div>
-                <button id="viewSwitchBtn" class="view-switch-btn">Switch to Side-by-Side View</button>
+
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <!-- Switch View Button -->
+                    <button id="viewSwitchBtn" style="background-color: #f1f5f9; color: #334155; font-weight: 600; font-size: 0.85rem; padding: 10px 18px; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s;">
+                        🖥️ Split View: Top/Bottom
+                    </button>
+                </div>
             </div>
             
             <div id="comparisonColumns" class="columns view-top-bottom">
@@ -1848,21 +1886,6 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
         </div>`;
 
         if (!localStorage.getItem('hideResultsWelcome')) document.getElementById('resultsWelcomeModal').classList.add('visible');
-
-        document.getElementById('viewSwitchBtn').addEventListener('click', () => {
-            const columnsContainer = document.getElementById('comparisonColumns');
-            const isTopBottom = columnsContainer.classList.contains('view-top-bottom');
-            if (isTopBottom) {
-                columnsContainer.classList.remove('view-top-bottom');
-                columnsContainer.classList.add('view-side-by-side');
-                document.getElementById('viewSwitchBtn').textContent = 'Switch to Top/Bottom View';
-            } else {
-                columnsContainer.classList.remove('view-side-by-side');
-                columnsContainer.classList.add('view-top-bottom');
-                document.getElementById('viewSwitchBtn').textContent = 'Switch to Side-by-Side View';
-            }
-        });
-        document.getElementById('printReportBtn').addEventListener('click', () => window.print());
         initializeResultInteractivity();
     }
 }
