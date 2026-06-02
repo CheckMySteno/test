@@ -617,6 +617,23 @@
     <div class="spinner"></div>
 </div>
 
+<!-- Dynamic Premium Upgrade Modal Interception -->
+<div id="premiumUpgradeModal" class="modal-overlay">
+    <div class="modal-content" style="max-width: 500px; padding: 35px; border-radius: 16px; text-align: center;">
+        <div style="background-color: #fef3c7; color: #d97706; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; font-size: 1.8rem;">
+            👑
+        </div>
+        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; border: none; padding: 0;">Upgrade to Premium Pass</h2>
+        <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px;">
+            Adjustable speeds and Unlimited Transcription Tests are exclusive to Premium Pass holders. Upgrade today to unlock these features, advanced AI evaluations, and performance analytics.
+        </p>
+        <div style="display: flex; gap: 12px; justify-content: center;">
+            <button onclick="document.getElementById('premiumUpgradeModal').classList.remove('visible')" style="background-color: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 8px; font-weight: 600;">Cancel</button>
+            <button onclick="redirectToPlans()" style="background-color: #7c3aed; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(124,58,237,0.25);">Get Premium Pass 🚀</button>
+        </div>
+    </div>
+</div>
+
 <div class="app-container">
     <div id="selection-view" class="view">
         <div class="page-header">
@@ -747,7 +764,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                         </button>
                         <div class="setting-popover" style="min-width: 200px;">
-                            <span class="setting-label">Speed</span>
+                            <span id="speedSettingLabel" class="setting-label">Speed 🔒</span>
                             <div id="wpmSpeedDisplay">100 WPM</div>
                             <input type="range" id="wpmRange" min="60" max="160" step="5" value="100" oninput="updateSpeedDisplay(this.value)" onchange="setPlaybackSpeed()">
                             <!-- Hidden input for compatibility -->
@@ -787,7 +804,7 @@
                     </label>
                 </div>
 
-                <button id="startTranscriptionBtn" onclick="showInstructions()" disabled>🚀 Start Transcription Test</button>
+                <button id="startTranscriptionBtn" onclick="showInstructions()" disabled>🚀 Start Transcription Test 🔒</button>
             </div>
         </div>
         <button onclick="clearStateAndGoBack()" class="back-btn">Choose a different dictation</button>
@@ -1038,6 +1055,7 @@ let g_selectedTarget = "full";
 let g_stopVideoWatcher = null; 
 let g_autoStopTimestamp = Infinity; 
 let g_synonymData =[];
+let g_isPremium = false; // Global Freemium Level Identifier
 
 document.addEventListener("DOMContentLoaded", initializePracticeMonthly);
 
@@ -1062,20 +1080,21 @@ function setLogoSource() {
 
 // --- Initialization ---
 async function initializePracticeMonthly() {
-    // Check DigiWallet for Access
+    // Check Authentication state
     const user = DigiWallet.getUser();
-    const isPremium = DigiWallet.isPremium();
-
-    if (!user || !isPremium) {
-        showErrorModal("Access Denied", "No valid Premium Pass found. Please log in and upgrade first.");
+    if (!user) {
+        showErrorModal("Access Denied", "Please log in using your account first.");
         document.body.innerHTML = `
             <div style="text-align:center; padding:50px; font-family:sans-serif;">
                 <h1 style="color:#ef4444;">Access Denied</h1>
-                <p>A Premium Pass is required to access the Practice tool.</p>
+                <p>A valid login account is required to access the practice tools.</p>
                 <button onclick="window.parent.postMessage('closeTool', '*')" style="padding:10px 20px; cursor:pointer;">Go Back</button>
             </div>`;
         return;
     }
+
+    // Set Premium Pass globally
+    g_isPremium = DigiWallet.isPremium();
 
     // Safely initialize Firebase reference dynamically
     if (firebase.firestore) {
@@ -1091,6 +1110,9 @@ async function initializePracticeMonthly() {
     } else {
         console.warn("Firestore is not available. Progress will not be saved to the cloud.");
     }
+
+    // Style elements based on Premium Tier
+    adjustInterfaceForPremiumTier();
 
     setupAntiInspection();
     setupProgressBar();
@@ -1111,6 +1133,44 @@ async function initializePracticeMonthly() {
     renderGrid();
     initializeEventListeners();
     renderQuickResume();
+}
+
+function adjustInterfaceForPremiumTier() {
+    const trialBadge = document.createElement('span');
+    trialBadge.className = 'tag';
+    
+    if (g_isPremium) {
+        trialBadge.textContent = "PREMIUM ACTIVE";
+        trialBadge.style.background = "linear-gradient(135deg, #10b981, #059669)";
+    } else {
+        trialBadge.textContent = "FREE PREVIEW MODE";
+        trialBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
+        
+        // Disable Speed adjustments and Transcribe on Start Button Labels
+        const speedLabel = document.getElementById('speedSettingLabel');
+        if (speedLabel) speedLabel.innerHTML = "Speed (Locked) 🔒";
+        
+        const startBtn = document.getElementById('startTranscriptionBtn');
+        if (startBtn) startBtn.innerHTML = "🔒 Start Transcription (Premium Only)";
+    }
+    
+    const headerBox = document.querySelector('.intro-header');
+    if (headerBox) {
+        const oldTag = headerBox.querySelector('.tag');
+        if (oldTag) oldTag.remove();
+        headerBox.appendChild(trialBadge);
+    }
+}
+
+function showPremiumUpgradeModal() {
+    document.getElementById('premiumUpgradeModal').classList.add('visible');
+    if (player && typeof player.pauseVideo === 'function') {
+        player.pauseVideo();
+    }
+}
+
+function redirectToPlans() {
+    window.location.href = 'plan.html';
 }
 
 /**
@@ -1398,7 +1458,7 @@ async function loadPractice(volumeId, transcriptId) {
         saveState({ view: 'player-view', g_vol, g_tran, originalText, wordCount, audioUrl: textDoc.data().audioUrl });
 
         showView('player-view');
-        setPlayerLoading(true);
+        setPlayerLoading(false);
 
         setupWordCountOptions();
 
@@ -1464,6 +1524,11 @@ function updateAutoStopSettings() {
 }
 
 function showInstructions() {
+    // Check if the user has premium before allowing them to access the transcription modal
+    if (!g_isPremium) {
+        showPremiumUpgradeModal();
+        return;
+    }
     if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
     document.getElementById('instructions-modal').classList.add('visible');
 }
@@ -1578,6 +1643,19 @@ function onPlayerStateChange(event) {
 
 function setPlaybackSpeed() {
     if (!player || !player.setPlaybackRate) return;
+    
+    // Block non-premium attempts at speed adjustment
+    if (!g_isPremium) {
+        const slider = document.getElementById('wpmRange');
+        if (slider && parseFloat(slider.value) !== 100) {
+            slider.value = 100;
+            updateSpeedDisplay(100);
+            player.setPlaybackRate(1);
+            showPremiumUpgradeModal();
+            return;
+        }
+    }
+
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
     
     if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
@@ -1621,6 +1699,10 @@ function updateVideoTimeDisplay() {
 function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
 function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
 function adjustSpeed(amount) { 
+    if (!g_isPremium) {
+        showPremiumUpgradeModal();
+        return;
+    }
     const range = document.getElementById('wpmRange');
     let newVal = parseInt(range.value) + amount;
     if(newVal < 60) newVal = 60;
@@ -2619,55 +2701,33 @@ function capitalizeFirstLetter(string) {
 // =========================================================================
 
 const AITeacher = {
-    // Make sure this is your active Google Apps Script Deployment URL
     ENDPOINT_URL: "https://script.google.com/macros/s/AKfycbyKfEvIsbTY7QwojbLSN2udwK4HNux5xJTVfoFW97nPgxa-soQ445-VQ5YJXKy9Lbsv/exec",
-    
     cache: {},
     isFetching: false,
-
     init: function() {
         const columns = document.getElementById('comparisonColumns');
         if (!columns) return;
-        // Bind click listener for the AI icon specifically
         columns.removeEventListener('click', this.handleMistakeClick);
         columns.addEventListener('click', this.handleMistakeClick.bind(this));
     },
-
     clearCache: function() {
-        this.cache = {}; // Resets on new test submission
+        this.cache = {};
     },
-
     handleMistakeClick: function(e) {
         const icon = e.target.closest('.ai-icon');
         if (!icon) return;
-
         const highlight = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
         if (!highlight) return;
-
         e.stopPropagation(); 
-        
-        // 1. Extract exactly what was typed, expected, and the context
         const mistakeData = this.extractMistakeData(highlight);
-        
-        // 2. Pass it to the AI Fetch engine
         this.fetchAnalysis(mistakeData);
     },
-
-    // ---------------------------------------------------------------------
-    // EXTRACTION LOGIC: Pulls precise words and surrounding raw sentences
-    // ---------------------------------------------------------------------
     extractMistakeData: function(highlight) {
         let type = this.getMistakeType(highlight);
-        
-        // Use our robust extractor
         const { typed, correct } = extractTypedAndCorrect(highlight);
-
-        // GET CONTEXT FROM THE RAW TEXT STRINGS
         let anchorWords = this.getAnchorWords(highlight);
-
         let userContext = this.findContext(g_lastTypedText, anchorWords, typed, type === 'Omission');
         let origContext = this.findContext(originalText, anchorWords, correct, type === 'Addition');
-
         return {
             type: type,
             originalWord: correct,
@@ -2676,7 +2736,6 @@ const AITeacher = {
             originalContext: origContext
         };
     },
-
     getMistakeType: function(highlight) {
         if (highlight.dataset.mistakeType) return highlight.dataset.mistakeType;
         if (highlight.classList.contains('capitalization')) return 'Capitalization';
@@ -2687,46 +2746,32 @@ const AITeacher = {
         if (highlight.classList.contains('addition') || highlight.classList.contains('extra')) return 'Addition';
         return 'Unknown';
     },
-
     getAnchorWords: function(highlight) {
-        // Walks backwards in the DOM to gather the 3 words the user typed immediately before the error
         let container = document.getElementById('editableTypedText');
         if (!container) return "";
         let walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
         let node;
         let textBefore = "";
-        
         while ((node = walker.nextNode())) {
             if (highlight.contains(node)) break;
-            
-            // Skip injected worker tags in prior highlights so we only get pure user text
             let parent = node.parentElement;
             if (parent && (parent.tagName === 'B' || parent.tagName === 'INS')) continue;
-            
             textBefore += " " + node.textContent;
         }
-        
         let words = textBefore.trim().split(/\s+/).filter(Boolean);
         return words.slice(-3).join(" ");
     },
-
     findContext: function(rawText, anchorText, targetWord, isMissing) {
-        // Searches the RAW string to build a perfect 20-word window context
         if (!rawText) return "Context not available.";
         let words = rawText.split(/\s+/);
-        
         let targetClean = targetWord.toLowerCase().replace(/[^\w]/g, '');
         let anchorClean = anchorText.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(Boolean);
-        
         let Math_min = Math.min;
         let Math_max = Math.max;
         let Math_floor = Math.floor;
-        
         let bestIdx = -1;
-        
         for (let i = 0; i < words.length; i++) {
             if (isMissing) {
-                // If it's a missing word, we just match the anchor exactly
                 if (anchorClean.length > 0 && i >= anchorClean.length) {
                     let anchorMatch = true;
                     for (let a = 0; a < anchorClean.length; a++) {
@@ -2741,7 +2786,6 @@ const AITeacher = {
                     }
                 }
             } else {
-                // If not missing, match the target word AND the anchor
                 if (words[i].toLowerCase().replace(/[^\w]/g, '') === targetClean) {
                     if (anchorClean.length === 0) {
                         bestIdx = i;
@@ -2750,51 +2794,51 @@ const AITeacher = {
                         let anchorMatch = true;
                         for (let a = 0; a < anchorClean.length; a++) {
                             if (words[i - anchorClean.length + a].toLowerCase().replace(/[^\w]/g, '') !== anchorClean[a]) {
-                                        anchorMatch = false;
-                                        break;
-                                    }
-                                }
-                                if (anchorMatch) {
-                                    bestIdx = i;
-                                    break;
-                                }
+                                anchorMatch = false;
+                                break;
                             }
-                            if (bestIdx === -1) bestIdx = i;
+                        }
+                        if (anchorMatch) {
+                            bestIdx = i;
+                            break;
                         }
                     }
+                    if (bestIdx === -1) bestIdx = i;
                 }
-                if (bestIdx === -1) bestIdx = Math_floor(words.length / 2);
-                let start = Math_max(0, bestIdx - 10);
-                let end = Math_min(words.length, bestIdx + 10);
-                let windowWords = words.slice(start, end);
-                let adjustedIdx = bestIdx - start;
-                if (!isMissing && windowWords[adjustedIdx]) {
-                    windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
-                } else if (isMissing && windowWords[adjustedIdx]) {
-                    windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
-                }
-                return windowWords.join(" ") + "...";
-            },
-            fetchAnalysis: async function(data) {
-                const modal = document.getElementById('aiModal');
-                const content = document.getElementById('aiModalContent');
-                const loader = document.getElementById('aiLoadingState');
-                modal.classList.add('visible');
-                const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
-                if (this.cache[cacheKey]) {
-                    this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
-                    return;
-                }
-                if (this.isFetching) {
-                    content.style.display = 'none';
-                    loader.style.display = 'block';
-                    return;
-                }
-                this.isFetching = true;
-                content.style.display = 'none';
-                loader.style.display = 'block';
-                try {
-                    const promptText = `Act as an English grammar teacher for stenography students.
+            }
+        }
+        if (bestIdx === -1) bestIdx = Math_floor(words.length / 2);
+        let start = Math_max(0, bestIdx - 10);
+        let end = Math_min(words.length, bestIdx + 10);
+        let windowWords = words.slice(start, end);
+        let adjustedIdx = bestIdx - start;
+        if (!isMissing && windowWords[adjustedIdx]) {
+            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
+        } else if (isMissing && windowWords[adjustedIdx]) {
+            windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
+        }
+        return windowWords.join(" ") + "...";
+    },
+    fetchAnalysis: async function(data) {
+        const modal = document.getElementById('aiModal');
+        const content = document.getElementById('aiModalContent');
+        const loader = document.getElementById('aiLoadingState');
+        modal.classList.add('visible');
+        const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
+        if (this.cache[cacheKey]) {
+            this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
+            return;
+        }
+        if (this.isFetching) {
+            content.style.display = 'none';
+            loader.style.display = 'block';
+            return;
+        }
+        this.isFetching = true;
+        content.style.display = 'none';
+        loader.style.display = 'block';
+        try {
+            const promptText = `Act as an English grammar teacher for stenography students.
 A student made a transcription error. Analyze it and explain the grammar or punctuation rule.
 
 Error Type: ${data.type}
@@ -2812,65 +2856,65 @@ Respond EXACTLY in this JSON format:
   "rule": "The underlying grammar, spelling, or punctuation rule.",
   "examples":["Correct example 1", "Correct example 2"]
 }`;
-                    const response = await fetch(this.ENDPOINT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: "analyzeSingle",
-                            prompt: promptText 
-                        })
-                    });
-                    const result = await response.json();
-                    if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
-                    const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const aiParsedData = JSON.parse(cleanJson);
-                    this.cache[cacheKey] = aiParsedData;
-                    this.renderUI(aiParsedData, data.originalWord, data.typedWord);
-                } catch (error) {
-                    console.error(error);
-                    content.style.display = 'block';
-                    content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
-                } finally {
-                    this.isFetching = false;
-                    loader.style.display = 'none';
-                    content.style.display = 'block';
-                }
-            },
-            renderUI: function(aiData, origWord, typedWord) {
-                const content = document.getElementById('aiModalContent');
-                let explanation = "General error detected.";
-                let rule = "Grammar rule not identified.";
-                let examplesHtml = "";
-                if (typeof aiData === 'object') {
-                    explanation = aiData.explanation || explanation;
-                    rule = aiData.rule || rule;
-                    if (aiData.examples && Array.isArray(aiData.examples)) {
-                        examplesHtml = `
-                            <div style="margin-top: 15px;">
-                                <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
-                                <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
-                                    ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
-                                </ul>
-                            </div>`;
-                    }
-                } else {
-                    explanation = aiData;
-                }
-                content.innerHTML = `
-                    <div class="ai-mistake-context">
-                        Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
-                    </div>
-                    <div>
-                        <span class="ai-rule-badge">Explanation</span>
-                        <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
-                    </div>
-                    <div>
-                        <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
-                        <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
-                    </div>
-                    ${examplesHtml}
-                `;
+            const response = await fetch(this.ENDPOINT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: "analyzeSingle",
+                    prompt: promptText 
+                })
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
+            const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+            const aiParsedData = JSON.parse(cleanJson);
+            this.cache[cacheKey] = aiParsedData;
+            this.renderUI(aiParsedData, data.originalWord, data.typedWord);
+        } catch (error) {
+            console.error(error);
+            content.style.display = 'block';
+            content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
+        } finally {
+            this.isFetching = false;
+            loader.style.display = 'none';
+            content.style.display = 'block';
+        }
+    },
+    renderUI: function(aiData, origWord, typedWord) {
+        const content = document.getElementById('aiModalContent');
+        let explanation = "General error detected.";
+        let rule = "Grammar rule not identified.";
+        let examplesHtml = "";
+        if (typeof aiData === 'object') {
+            explanation = aiData.explanation || explanation;
+            rule = aiData.rule || rule;
+            if (aiData.examples && Array.isArray(aiData.examples)) {
+                examplesHtml = `
+                    <div style="margin-top: 15px;">
+                        <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
+                        <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
+                            ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
+                        </ul>
+                    </div>`;
             }
-        };
+        } else {
+            explanation = aiData;
+        }
+        content.innerHTML = `
+            <div class="ai-mistake-context">
+                Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
+            </div>
+            <div>
+                <span class="ai-rule-badge">Explanation</span>
+                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
+            </div>
+            <div>
+                <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
+                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
+            </div>
+            ${examplesHtml}
+        `;
+    }
+};
 // =========================================================================
 
 </script>
