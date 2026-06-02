@@ -1269,10 +1269,10 @@ function renderGrid() {
             
             let statusClass = 'attempted-low';
             statusStripeClass = 'card-status-low';
-            if (latestAcc >= 95) {
+            if (latestAcc >= 90) {
                 statusClass = 'attempted-good';
                 statusStripeClass = 'card-status-good';
-            } else if (latestAcc >= 90) {
+            } else if (latestAcc >= 80) {
                 statusClass = 'attempted-average';
                 statusStripeClass = 'card-status-average';
             }
@@ -1771,6 +1771,9 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 
         const fullMistakesCount = (mistakeCounters.addition || 0) + (mistakeCounters.omission || 0);
 
+        // Dynamically compute exact physical keystrokes/strokes from text length
+        const strokesCount = g_lastTypedText ? g_lastTypedText.length : (totalWordsP2 * 5);
+
         let originalTextHtml = analysisResult.originalWords.map((word, index) => 
             `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
         ).join(' ');
@@ -1830,9 +1833,9 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                         </div>
                     </div>
                     
-                    <!-- Dynamic Qualification Badge -->
+                    <!-- Dynamic Qualification Badge (Grade D limit is 10% errors/90% accuracy) -->
                     <div>
-                        ${accuracy >= 95 
+                        ${accuracy >= 90 
                             ? `<span style="background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 8px 18px; border-radius: 99px; font-size: 0.85rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);">✨ EXAM QUALIFIED</span>`
                             : `<span style="background-color: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 18px; border-radius: 99px; font-size: 0.85rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15);">⚠️ EXAM REJECTED</span>`
                         }
@@ -1841,7 +1844,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
 
             <!-- Sleek Metrics Cards Dashboard Grid -->
-            <div class="metrics-dashboard-grid">
+            <div class="metrics-dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
                 <div class="metric-card">
                     <span class="metric-card-label">Original Words</span>
                     <span class="metric-card-value">${totalWordsP1}</span>
@@ -1857,6 +1860,10 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <div class="metric-card" style="border-left: 4px solid #f59e0b;">
                     <span class="metric-card-label" style="color: #f59e0b;">Half Mistakes</span>
                     <span class="metric-card-value" style="color: #f59e0b;">${halfBucketCount}</span>
+                </div>
+                <div class="metric-card" style="border-left: 4px solid #a78bfa;">
+                    <span class="metric-card-label" style="color: #a78bfa;">Physical Strokes</span>
+                    <span class="metric-card-value" style="color: #a78bfa;">${strokesCount}</span>
                 </div>
             </div>
 
@@ -1876,29 +1883,29 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
             
             <!-- Highly Aligned, Premium Action Toolbar Card -->
-            <div class="result-controls" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
+            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.01); flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <!-- Deep Analysis Button -->
-                    <button id="deepAnalysisBtn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
+                    <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
                         🔍 Deep Analysis
                     </button>
                     
                     <!-- Re-evaluate Button -->
                     <div class="reevaluate-wrapper">
-                        <button id="toggleReevaluateBtn" style="background-color: var(--accent-amber); color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(249,115,22,0.15);">
+                        <button id="toggleReevaluateBtn" class="view-switch-btn" style="background-color: var(--accent-amber); color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(249,115,22,0.15);">
                             🔄 Enter Re-evaluate Mode
                         </button>
                     </div>
 
                     <!-- Report Error Button -->
-                    <button id="reportErrorBtn" style="background-color: #ef4444; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(239,68,68,0.15);">
+                    <button id="reportErrorBtn" class="view-switch-btn" style="background-color: #ef4444; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(239,68,68,0.15); display: flex; align-items: center; gap: 6px;">
                         ⚠️ Report Passage Error
                     </button>
                 </div>
 
                 <div style="display: flex; gap: 12px; align-items: center;">
                     <!-- Switch View Button -->
-                    <button id="viewSwitchBtn" style="background-color: #f1f5f9; color: #334155; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s;">
+                    <button id="viewSwitchBtn" class="view-switch-btn" style="background-color: #f1f5f9; color: #334155; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;">
                         🖥️ Split View: Top/Bottom
                     </button>
                 </div>
@@ -2235,6 +2242,12 @@ function initializeEventListeners() {
     document.getElementById('otherErrorText').addEventListener('input', validateReportForm);
     
     document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.remove('visible'));
+
+    // Bind Print Button cleanly at load
+    const printBtn = document.getElementById('printReportBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', () => window.print());
+    }
     
     window.addEventListener('beforeunload', function (e) { if (document.getElementById('results-view').style.display === 'block') { const msg = 'Are you sure you want to leave? Your corrected transcript and re-evaluated score will not be saved. Please download the report first.'; (e || window.event).returnValue = msg; return msg; } });
 }
@@ -2246,6 +2259,27 @@ function initializeResultInteractivity() {
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
+
+    // Interactive switch view listener robustly bound
+    document.getElementById('viewSwitchBtn').addEventListener('click', () => {
+        const columnsContainer = document.getElementById('comparisonColumns');
+        const isTopBottom = columnsContainer.classList.contains('view-top-bottom');
+        if (isTopBottom) {
+            columnsContainer.classList.remove('view-top-bottom');
+            columnsContainer.classList.add('view-side-by-side');
+            document.getElementById('viewSwitchBtn').textContent = '🖥️ Split View: Side-by-Side';
+        } else {
+            columnsContainer.classList.remove('view-side-by-side');
+            columnsContainer.classList.add('view-top-bottom');
+            document.getElementById('viewSwitchBtn').textContent = '🖥️ Split View: Top/Bottom';
+        }
+    });
+
+    // Cleanly register print button within report DOM loops
+    const printBtn = document.getElementById('printReportBtn');
+    if (printBtn) {
+        printBtn.addEventListener('click', () => window.print());
+    }
 
     initializeInteractiveLegend();
     setupHoverTooltips();
@@ -2477,7 +2511,11 @@ function initializeInteractiveLegend() {
         countSpan.textContent = `(${(mistakeMap[filterType] || 0)})`;
     });
 
-    legendContainer.addEventListener('click', function(e) {
+    // Clear prior listeners completely to prevent filter blocks after multiple re-evaluations
+    const newLegendContainer = legendContainer.cloneNode(true);
+    legendContainer.parentNode.replaceChild(newLegendContainer, legendContainer);
+
+    newLegendContainer.addEventListener('click', function(e) {
         const clickedItem = e.target.closest('.legend-item');
         if (!clickedItem) return;
 
@@ -2485,7 +2523,7 @@ function initializeInteractiveLegend() {
             clickedItem.classList.toggle('active');
         } else {
             const wasActive = clickedItem.classList.contains('active');
-            legendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
+            newLegendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
             if (!wasActive) {
                 clickedItem.classList.add('active');
             }
@@ -2493,10 +2531,15 @@ function initializeInteractiveLegend() {
         applyFilters();
     });
 
-    document.getElementById('reset-filter-btn').addEventListener('click', () => {
-        legendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
-        applyFilters();
-    });
+    const resetBtn = document.getElementById('reset-filter-btn');
+    if (resetBtn) {
+        const newResetBtn = resetBtn.cloneNode(true);
+        resetBtn.parentNode.replaceChild(newResetBtn, resetBtn);
+        newResetBtn.addEventListener('click', () => {
+            newLegendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
+            applyFilters();
+        });
+    }
 }
 
 function applyFilters() {
@@ -2707,67 +2750,51 @@ const AITeacher = {
                         let anchorMatch = true;
                         for (let a = 0; a < anchorClean.length; a++) {
                             if (words[i - anchorClean.length + a].toLowerCase().replace(/[^\w]/g, '') !== anchorClean[a]) {
-                                anchorMatch = false;
-                                break;
+                                        anchorMatch = false;
+                                        break;
+                                    }
+                                }
+                                if (anchorMatch) {
+                                    bestIdx = i;
+                                    break;
+                                }
                             }
-                        }
-                        if (anchorMatch) {
-                            bestIdx = i;
-                            break;
+                            if (bestIdx === -1) bestIdx = i;
                         }
                     }
-                    if (bestIdx === -1) bestIdx = i;
                 }
-            }
-        }
-        
-        if (bestIdx === -1) bestIdx = Math_floor(words.length / 2);
-        
-        let start = Math_max(0, bestIdx - 10);
-        let end = Math_min(words.length, bestIdx + 10);
-        
-        let windowWords = words.slice(start, end);
-        
-        let adjustedIdx = bestIdx - start;
-        if (!isMissing && windowWords[adjustedIdx]) {
-            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
-        } else if (isMissing && windowWords[adjustedIdx]) {
-            windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
-        }
-        
-        return windowWords.join(" ") + "...";
-    },
-
-    // ---------------------------------------------------------------------
-    // API FETCH LOGIC: Constructs prompt and calls backend
-    // ---------------------------------------------------------------------
-    fetchAnalysis: async function(data) {
-        const modal = document.getElementById('aiModal');
-        const content = document.getElementById('aiModalContent');
-        const loader = document.getElementById('aiLoadingState');
-        
-        modal.classList.add('visible');
-        
-        const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
-        
-        if (this.cache[cacheKey]) {
-            this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
-            return;
-        }
-
-        if (this.isFetching) {
-            content.style.display = 'none';
-            loader.style.display = 'block';
-            return;
-        }
-
-        this.isFetching = true;
-        content.style.display = 'none';
-        loader.style.display = 'block';
-
-        try {
-            // Highly specific prompt with pure raw text context injected
-            const promptText = `Act as an English grammar teacher for stenography students.
+                if (bestIdx === -1) bestIdx = Math_floor(words.length / 2);
+                let start = Math_max(0, bestIdx - 10);
+                let end = Math_min(words.length, bestIdx + 10);
+                let windowWords = words.slice(start, end);
+                let adjustedIdx = bestIdx - start;
+                if (!isMissing && windowWords[adjustedIdx]) {
+                    windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
+                } else if (isMissing && windowWords[adjustedIdx]) {
+                    windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
+                }
+                return windowWords.join(" ") + "...";
+            },
+            fetchAnalysis: async function(data) {
+                const modal = document.getElementById('aiModal');
+                const content = document.getElementById('aiModalContent');
+                const loader = document.getElementById('aiLoadingState');
+                modal.classList.add('visible');
+                const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
+                if (this.cache[cacheKey]) {
+                    this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
+                    return;
+                }
+                if (this.isFetching) {
+                    content.style.display = 'none';
+                    loader.style.display = 'block';
+                    return;
+                }
+                this.isFetching = true;
+                content.style.display = 'none';
+                loader.style.display = 'block';
+                try {
+                    const promptText = `Act as an English grammar teacher for stenography students.
 A student made a transcription error. Analyze it and explain the grammar or punctuation rule.
 
 Error Type: ${data.type}
@@ -2785,83 +2812,65 @@ Respond EXACTLY in this JSON format:
   "rule": "The underlying grammar, spelling, or punctuation rule.",
   "examples":["Correct example 1", "Correct example 2"]
 }`;
-
-            const response = await fetch(this.ENDPOINT_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: "analyzeSingle",
-                    prompt: promptText 
-                })
-            });
-
-            const result = await response.json();
-            
-            if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
-
-            // Parse response safely
-            const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
-            const aiParsedData = JSON.parse(cleanJson);
-
-            // Save to Cache
-            this.cache[cacheKey] = aiParsedData;
-
-            // Render
-            this.renderUI(aiParsedData, data.originalWord, data.typedWord);
-
-        } catch (error) {
-            console.error(error);
-            content.style.display = 'block';
-            content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
-        } finally {
-            this.isFetching = false;
-            loader.style.display = 'none';
-            content.style.display = 'block';
-        }
-    },
-
-    // ---------------------------------------------------------------------
-    // UI RENDER LOGIC: Formats the JSON into HTML
-    // ---------------------------------------------------------------------
-    renderUI: function(aiData, origWord, typedWord) {
-        const content = document.getElementById('aiModalContent');
-        
-        let explanation = "General error detected.";
-        let rule = "Grammar rule not identified.";
-        let examplesHtml = "";
-
-        if (typeof aiData === 'object') {
-            explanation = aiData.explanation || explanation;
-            rule = aiData.rule || rule;
-            
-            if (aiData.examples && Array.isArray(aiData.examples)) {
-                examplesHtml = `
-                    <div style="margin-top: 15px;">
-                        <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
-                        <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
-                            ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
-                        </ul>
-                    </div>`;
+                    const response = await fetch(this.ENDPOINT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: "analyzeSingle",
+                            prompt: promptText 
+                        })
+                    });
+                    const result = await response.json();
+                    if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
+                    const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const aiParsedData = JSON.parse(cleanJson);
+                    this.cache[cacheKey] = aiParsedData;
+                    this.renderUI(aiParsedData, data.originalWord, data.typedWord);
+                } catch (error) {
+                    console.error(error);
+                    content.style.display = 'block';
+                    content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
+                } finally {
+                    this.isFetching = false;
+                    loader.style.display = 'none';
+                    content.style.display = 'block';
+                }
+            },
+            renderUI: function(aiData, origWord, typedWord) {
+                const content = document.getElementById('aiModalContent');
+                let explanation = "General error detected.";
+                let rule = "Grammar rule not identified.";
+                let examplesHtml = "";
+                if (typeof aiData === 'object') {
+                    explanation = aiData.explanation || explanation;
+                    rule = aiData.rule || rule;
+                    if (aiData.examples && Array.isArray(aiData.examples)) {
+                        examplesHtml = `
+                            <div style="margin-top: 15px;">
+                                <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
+                                <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
+                                    ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
+                                </ul>
+                            </div>`;
+                    }
+                } else {
+                    explanation = aiData;
+                }
+                content.innerHTML = `
+                    <div class="ai-mistake-context">
+                        Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
+                    </div>
+                    <div>
+                        <span class="ai-rule-badge">Explanation</span>
+                        <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
+                    </div>
+                    <div>
+                        <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
+                        <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
+                    </div>
+                    ${examplesHtml}
+                `;
             }
-        } else {
-            explanation = aiData;
-        }
-
-        content.innerHTML = `
-            <div class="ai-mistake-context">
-                Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
-            </div>
-            <div>
-                <span class="ai-rule-badge">Explanation</span>
-                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
-            </div>
-            <div>
-                <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
-                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
-            </div>
-            ${examplesHtml}
-        `;
-    }
-};
+        };
 // =========================================================================
 
 </script>
