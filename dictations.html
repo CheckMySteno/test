@@ -1496,7 +1496,6 @@ function handleFirstKeydown() {
     }
 }
 
-// --- Player controls ---
 function startTimer() {
     if (timer) return;
     timer = setInterval(() => {
@@ -1600,6 +1599,8 @@ function updateSpeedDisplay(val) {
     document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
 }
 
+function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
+function restartVideo() { if (player) { player.seekTo(0, true); player.playVideo(); } }
 function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
 function trackProgress() { clearInterval(progressInterval); progressInterval = setInterval(updateVideoTimeDisplay, 250); }
 function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); const clickPosition = (e.clientX - rect.left) / rect.width; player.seekTo(clickPosition * totalVideoDuration, true); }); }
@@ -1629,6 +1630,112 @@ function adjustSpeed(amount) {
     setPlaybackSpeed();
 }
 
+function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+// ==========================================
+// HIGH PERFORMANCE MISTAKE PARSER (FIXES TOOLTIP ISSUES)
+// ==========================================
+function extractTypedAndCorrect(el) {
+    let typed = "";
+    let correct = "";
+
+    // SOURCE 1: Parse from explicit data-tooltip-text attribute if present
+    const tooltipAttr = el.getAttribute('data-tooltip-text') || "";
+    if (tooltipAttr) {
+        const expectedMatch = tooltipAttr.match(/Expected:\s*([^,]*)/i);
+        const typedMatch = tooltipAttr.match(/Typed:\s*(.*)/i);
+        const missingMatch = tooltipAttr.match(/Missing:\s*(.*)/i);
+        const extraMatch = tooltipAttr.match(/Extra:\s*(.*)/i);
+
+        if (expectedMatch) correct = expectedMatch[1].trim();
+        if (typedMatch) typed = typedMatch[1].trim();
+        if (missingMatch) {
+            correct = missingMatch[1].trim();
+            typed = "[None]";
+        }
+        if (extraMatch) {
+            typed = extraMatch[1].trim();
+            correct = "[None]";
+        }
+    }
+
+    // SOURCE 2: Query DOM children as a fallback or verification
+    const wrongEl = el.querySelector('del, s, strike');
+    const correctEl = el.querySelector('b, ins, strong');
+
+    if (wrongEl && !typed) {
+        typed = wrongEl.textContent.trim();
+    }
+    if (correctEl && !correct) {
+        correct = correctEl.textContent.trim();
+    }
+
+    // SOURCE 3: Clean clone-based parsing if still empty
+    if (!typed || !correct) {
+        const clone = el.cloneNode(true);
+        const wrongInClone = clone.querySelector('del, s, strike');
+        if (wrongInClone) {
+            if (!typed) typed = wrongInClone.textContent.trim();
+            wrongInClone.remove();
+        }
+        clone.querySelectorAll('.ai-icon, button, svg, script').forEach(node => node.remove());
+        const remainingText = clone.textContent.replace(/[\u2715\u2713]/g, '').trim();
+
+        if (!correct && remainingText) {
+            correct = remainingText;
+        }
+        if (!typed && remainingText) {
+            typed = remainingText;
+        }
+    }
+
+    // SOURCE 4: Contextual fallback mapping using index lookup
+    const indexAttr = el.getAttribute('data-index');
+    const idx = indexAttr !== null ? parseInt(indexAttr) : NaN;
+
+    if (!correct || correct === "[Check Original]" || correct === "unknown") {
+        if (!isNaN(idx) && g_lastAnalysisResult) {
+            if (g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
+                correct = g_lastAnalysisResult.originalWords[idx];
+            }
+        }
+    }
+
+    if (!typed) {
+        if (!isNaN(idx) && g_lastAnalysisResult) {
+            if (g_lastAnalysisResult.userWords && g_lastAnalysisResult.userWords[idx]) {
+                typed = g_lastAnalysisResult.userWords[idx];
+            }
+        }
+    }
+
+    // Semantic cleanups for Omissions/Additions
+    if (el.classList.contains('omission')) {
+        typed = "[None]";
+        if (!correct || correct === "[None]") {
+            correct = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
+        }
+    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
+        correct = "[None]";
+        if (!typed || typed === "[None]") {
+            typed = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
+        }
+    }
+
+    // Ensure no duplicate strings are returned for replacements/spelling
+    if (typed === correct && (el.classList.contains('spelling') || el.classList.contains('capitalization') || el.classList.contains('substitution'))) {
+        if (!isNaN(idx) && g_lastAnalysisResult && g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
+            correct = g_lastAnalysisResult.originalWords[idx];
+        }
+    }
+
+    // Sanitize placeholders
+    if (!typed) typed = "[Check Transcription]";
+    if (!correct) correct = "[Check Original Text]";
+
+    return { typed, correct };
+}
+
 function renderResultSheet(analysisResult, isReevaluation = false) {
     g_lastAnalysisResult = analysisResult;
 
@@ -1656,7 +1763,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
         const dictationName = `Monthly Progressive - ${currentPassageTitle || g_tran}`;
         const testDate = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
 
-        const { mistakeCounters, halfBucketCount, totalWordsP1, totalWordsP2, percentageDiff, accuracy } = analysisResult;
+        const { mistakeCounters = {}, halfBucketCount = 0, totalWordsP1 = 0, totalWordsP2 = 0, percentageDiff = 0, accuracy = 0 } = analysisResult;
         
         const timeTakenMinutes = (transcriptionTimerTotalTime - timeLeft) / 60;
         const wpm = timeTakenMinutes > 0 ? (totalWordsP2 / timeTakenMinutes).toFixed(2) : "0.00";
@@ -1754,8 +1861,11 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
 
             <div id="reevaluated-accuracy-container"></div>
+            
+            <div style="font-size: 0.85em; font-weight: 600; color: #94a3b8; margin-bottom: 25px;">
+                Test Date: ${escapeHtml(testDate)}
+            </div>
 
-            <!-- Enhanced Mistake Category Filters -->
             <div class="legend-container" id="interactive-legend">
                 <div class="legend-item" data-filter-type="omission"><span class="legend-color-box" style="background-color: var(--hl-omissions); border-bottom: 2px solid #22c55e;"></span>Omissions<span class="mistake-count"></span></div>
                 <div class="legend-item" data-filter-type="addition"><span class="legend-color-box" style="background-color: var(--hl-additions); border-bottom: 2px solid #ef4444;"></span>Additions<span class="mistake-count"></span></div>
@@ -2037,7 +2147,8 @@ async function updateOverallStats(newAttemptStats) {
 async function saveAttemptHybrid(original, typed, analysisResult) {
     if (!candidateId) { console.error("Candidate not initialized, cannot save."); return; }
 
-    const fullMistakesCount = (analysisResult.mistakeCounters.addition || 0) + (analysisResult.mistakeCounters.omission || 0);
+    const mistakeCounters = analysisResult.mistakeCounters || {};
+    const fullMistakesCount = (mistakeCounters.addition || 0) + (mistakeCounters.omission || 0);
 
     // [STABILIZATION FIX] Map internal addition tags to class "extra" expected by test-analysis and attempt details dashboards
     let normalizedResultHtml = analysisResult.resultHTML || '';
@@ -2055,12 +2166,12 @@ async function saveAttemptHybrid(original, typed, analysisResult) {
         halfMistakes: analysisResult.halfBucketCount || 0,
         highlightedHtml: normalizedResultHtml,
         mistakeProfile: {
-            omission: analysisResult.mistakeCounters.omission || 0,
-            extra: analysisResult.mistakeCounters.addition || 0,
-            spelling: analysisResult.mistakeCounters.spelling || 0,
-            substitution: analysisResult.mistakeCounters.substitution || 0,
-            capitalization: analysisResult.mistakeCounters.capitalization || 0,
-            punctuation: (analysisResult.mistakeCounters.punctuation?.fullstop || 0) + (analysisResult.mistakeCounters.punctuation?.other || 0)
+            omission: mistakeCounters.omission || 0,
+            extra: mistakeCounters.addition || 0,
+            spelling: mistakeCounters.spelling || 0,
+            substitution: mistakeCounters.substitution || 0,
+            capitalization: mistakeCounters.capitalization || 0,
+            punctuation: (mistakeCounters.punctuation?.fullstop || 0) + (mistakeCounters.punctuation?.other || 0)
         }
     };
 
@@ -2351,7 +2462,7 @@ function initializeInteractiveLegend() {
     const legendContainer = document.getElementById('interactive-legend');
     if (!legendContainer || !g_lastAnalysisResult) return;
 
-    const mistakeCounters = g_lastAnalysisResult.mistakeCounters;
+    const mistakeCounters = g_lastAnalysisResult.mistakeCounters || {};
     const mistakeMap = {
         omission: mistakeCounters.omission || 0,
         addition: (mistakeCounters.addition || 0) + (mistakeCounters.substitution || 0),
@@ -2605,12 +2716,12 @@ const AITeacher = {
                             break;
                         }
                     }
-                    if (bestIdx === -1) bestIdx = i; // Fallback
+                    if (bestIdx === -1) bestIdx = i;
                 }
             }
         }
         
-        if (bestIdx === -1) bestIdx = Math_floor(words.length / 2); // Absolute fallback
+        if (bestIdx === -1) bestIdx = Math_floor(words.length / 2);
         
         let start = Math_max(0, bestIdx - 10);
         let end = Math_min(words.length, bestIdx + 10);
@@ -2619,7 +2730,7 @@ const AITeacher = {
         
         let adjustedIdx = bestIdx - start;
         if (!isMissing && windowWords[adjustedIdx]) {
-            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`; // highlight word in context
+            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
         } else if (isMissing && windowWords[adjustedIdx]) {
             windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
         }
@@ -2732,7 +2843,7 @@ Respond EXACTLY in this JSON format:
                     </div>`;
             }
         } else {
-            explanation = aiData; // Fallback if AI returned raw string
+            explanation = aiData;
         }
 
         content.innerHTML = `
