@@ -8,6 +8,7 @@
 
 <!-- External Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
@@ -201,6 +202,10 @@
     
     .status-badge .score-line { display: flex; justify-content: space-between; width: 100%; }
     .status-badge .best-line { display: flex; justify-content: space-between; width: 100%; border-top: 1px solid rgba(0,0,0,0.03); margin-top: 2px; padding-top: 2px; font-size: 0.9em; opacity: 0.85; }
+
+    .card-buttons { margin-top: 12px; }
+    .take-test-btn { width: 100%; padding: 8px; background-color: #f8fafc; border: 1px solid var(--border-color); color: #1e293b; font-weight: 600; font-size: 0.85em; border-radius: 8px; transition: all 0.2s; }
+    .passage-card:hover .take-test-btn { background-color: #1e293b; color: white; border-color: #1e293b; }
 
     /* --- 2. SLIM & MODERN PLAYER STYLES --- */
     #player-view { max-width: 680px; margin: 20px auto; }
@@ -1026,7 +1031,7 @@ const firebaseConfig = {
   authDomain: "checkmysteno.firebaseapp.com",
   projectId: "checkmysteno",
   storageBucket: "checkmysteno.firebasestorage.app",
-  marginSenderId: "719325115943",
+  messagingSenderId: "719325115943",
   appId: "1:719325115943:web:0dd50a67978816d42a8002"
 };
 // Initialize Firebase
@@ -1373,6 +1378,7 @@ function renderGrid() {
             `;
         }
 
+        // Exact markup restored for dictation cards to match first file perfectly
         card.className = `passage-card ${statusStripeClass}`;
         card.innerHTML = `
               <div class="card-header">
@@ -1700,8 +1706,6 @@ function updateSpeedDisplay(val) {
     document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
 }
 
-function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
-function restartVideo() { if (player) { player.seekTo(0, true); player.playVideo(); } }
 function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
 function trackProgress() { clearInterval(progressInterval); progressInterval = setInterval(updateVideoTimeDisplay, 250); }
 function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); const clickPosition = (e.clientX - rect.left) / rect.width; player.seekTo(clickPosition * totalVideoDuration, true); }); }
@@ -1733,112 +1737,6 @@ function adjustSpeed(amount) {
     range.value = newVal;
     updateSpeedDisplay(newVal);
     setPlaybackSpeed();
-}
-
-function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-
-// ==========================================
-// HIGH PERFORMANCE MISTAKE PARSER (FIXES TOOLTIP ISSUES)
-// ==========================================
-function extractTypedAndCorrect(el) {
-    let typed = "";
-    let correct = "";
-
-    // SOURCE 1: Parse from explicit data-tooltip-text attribute if present
-    const tooltipAttr = el.getAttribute('data-tooltip-text') || "";
-    if (tooltipAttr) {
-        const expectedMatch = tooltipAttr.match(/Expected:\s*([^,]*)/i);
-        const typedMatch = tooltipAttr.match(/Typed:\s*(.*)/i);
-        const missingMatch = tooltipAttr.match(/Missing:\s*(.*)/i);
-        const extraMatch = tooltipAttr.match(/Extra:\s*(.*)/i);
-
-        if (expectedMatch) correct = expectedMatch[1].trim();
-        if (typedMatch) typed = typedMatch[1].trim();
-        if (missingMatch) {
-            correct = missingMatch[1].trim();
-            typed = "[None]";
-        }
-        if (extraMatch) {
-            typed = extraMatch[1].trim();
-            correct = "[None]";
-        }
-    }
-
-    // SOURCE 2: Query DOM children as a fallback or verification
-    const wrongEl = el.querySelector('del, s, strike');
-    const correctEl = el.querySelector('b, ins, strong');
-
-    if (wrongEl && !typed) {
-        typed = wrongEl.textContent.trim();
-    }
-    if (correctEl && !correct) {
-        correct = correctEl.textContent.trim();
-    }
-
-    // SOURCE 3: Clean clone-based parsing if still empty
-    if (!typed || !correct) {
-        const clone = el.cloneNode(true);
-        const wrongInClone = clone.querySelector('del, s, strike');
-        if (wrongInClone) {
-            if (!typed) typed = wrongInClone.textContent.trim();
-            wrongInClone.remove();
-        }
-        clone.querySelectorAll('.ai-icon, button, svg, script').forEach(node => node.remove());
-        const remainingText = clone.textContent.replace(/[\u2715\u2713]/g, '').trim();
-
-        if (!correct && remainingText) {
-            correct = remainingText;
-        }
-        if (!typed && remainingText) {
-            typed = remainingText;
-        }
-    }
-
-    // SOURCE 4: Contextual fallback mapping using index lookup
-    const indexAttr = el.getAttribute('data-index');
-    const idx = indexAttr !== null ? parseInt(indexAttr) : NaN;
-
-    if (!correct || correct === "[Check Original]" || correct === "unknown") {
-        if (!isNaN(idx) && g_lastAnalysisResult) {
-            if (g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
-                correct = g_lastAnalysisResult.originalWords[idx];
-            }
-        }
-    }
-
-    if (!typed) {
-        if (!isNaN(idx) && g_lastAnalysisResult) {
-            if (g_lastAnalysisResult.userWords && g_lastAnalysisResult.userWords[idx]) {
-                typed = g_lastAnalysisResult.userWords[idx];
-            }
-        }
-    }
-
-    // Semantic cleanups for Omissions/Additions
-    if (el.classList.contains('omission')) {
-        typed = "[None]";
-        if (!correct || correct === "[None]") {
-            correct = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
-        }
-    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
-        correct = "[None]";
-        if (!typed || typed === "[None]") {
-            typed = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
-        }
-    }
-
-    // Ensure no duplicate strings are returned for replacements/spelling
-    if (typed === correct && (el.classList.contains('spelling') || el.classList.contains('capitalization') || el.classList.contains('substitution'))) {
-        if (!isNaN(idx) && g_lastAnalysisResult && g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
-            correct = g_lastAnalysisResult.originalWords[idx];
-        }
-    }
-
-    // Sanitize placeholders
-    if (!typed) typed = "[Check Transcription]";
-    if (!correct) correct = "[Check Original Text]";
-
-    return { typed, correct };
 }
 
 function renderResultSheet(analysisResult, isReevaluation = false) {
@@ -1901,7 +1799,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #334155; padding-bottom: 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 15px; width: 100%;">
                     <div style="display: flex; align-items: center; gap: 14px;">
                         <div style="background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                         </div>
                         <div>
                             <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.025em; line-height: 1.2;">${escapeHtml(dictationName)}</h2>
@@ -1997,7 +1895,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
             
             <!-- Highly Aligned, Premium Action Toolbar Card -->
-            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
+            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <!-- Deep Analysis Button -->
                     <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
