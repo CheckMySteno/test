@@ -202,10 +202,6 @@
     .status-badge .score-line { display: flex; justify-content: space-between; width: 100%; }
     .status-badge .best-line { display: flex; justify-content: space-between; width: 100%; border-top: 1px solid rgba(0,0,0,0.03); margin-top: 2px; padding-top: 2px; font-size: 0.9em; opacity: 0.85; }
 
-    .card-buttons { margin-top: 12px; }
-    .take-test-btn { width: 100%; padding: 8px; background-color: #f8fafc; border: 1px solid var(--border-color); color: #1e293b; font-weight: 600; font-size: 0.85em; border-radius: 8px; transition: all 0.2s; }
-    .passage-card:hover .take-test-btn { background-color: #1e293b; color: white; border-color: #1e293b; }
-
     /* --- 2. SLIM & MODERN PLAYER STYLES --- */
     #player-view { max-width: 680px; margin: 20px auto; }
 
@@ -1030,7 +1026,7 @@ const firebaseConfig = {
   authDomain: "checkmysteno.firebaseapp.com",
   projectId: "checkmysteno",
   storageBucket: "checkmysteno.firebasestorage.app",
-  messagingSenderId: "719325115943",
+  marginSenderId: "719325115943",
   appId: "1:719325115943:web:0dd50a67978816d42a8002"
 };
 // Initialize Firebase
@@ -1171,6 +1167,23 @@ function showPremiumUpgradeModal() {
 
 function redirectToPlans() {
     window.location.href = 'plan.html';
+}
+
+/**
+ * Active premium-tier verification querying the DB directly on action click
+ */
+async function verifyPremiumStatusActive() {
+    if (!db || !candidateId) return false;
+    try {
+        const userDoc = await db.collection("users").doc(candidateId).get();
+        if (userDoc.exists && userDoc.data().isPremium === true) {
+            g_isPremium = true; // Update global state
+            return true;
+        }
+    } catch (e) {
+        console.error("Database status verification failed, using local secure check.", e);
+    }
+    return DigiWallet.isPremium(); 
 }
 
 /**
@@ -1523,13 +1536,23 @@ function updateAutoStopSettings() {
     }
 }
 
-function showInstructions() {
-    // Check if the user has premium before allowing them to access the transcription modal
-    if (!g_isPremium) {
+async function showInstructions() {
+    // Show loader while we actively query Firestore
+    document.getElementById('fullPageLoader').style.display = 'flex';
+    
+    // Active backend-verification check on click
+    const isVerifiedPremium = await verifyPremiumStatusActive();
+    
+    document.getElementById('fullPageLoader').style.display = 'none';
+
+    if (!isVerifiedPremium) {
         showPremiumUpgradeModal();
         return;
     }
-    if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
+
+    if (player && typeof player.pauseVideo === 'function') {
+        player.pauseVideo();
+    }
     document.getElementById('instructions-modal').classList.add('visible');
 }
 
@@ -1838,6 +1861,15 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
         ).join(' ');
         document.getElementById('editableOriginalText').innerHTML = originalTextHtml;
+        
+        // Clean up AI option icons dynamically: remove them if the error is not capitalization or punctuation
+        document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight').forEach(el => {
+            const isTarget = el.classList.contains('capitalization') || el.classList.contains('punctuation');
+            if (!isTarget) {
+                el.querySelectorAll('.ai-icon').forEach(icon => icon.remove());
+            }
+        });
+
         initializeResultInteractivity();
 
     } else {
@@ -1965,7 +1997,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
             
             <!-- Highly Aligned, Premium Action Toolbar Card -->
-            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.01); flex-wrap: wrap; gap: 15px;">
+            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <!-- Deep Analysis Button -->
                     <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
@@ -1998,6 +2030,14 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <div class="col" id="originalCol"><strong>Original Text:</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div>
             </div>
         </div>`;
+
+        // Clean up AI option icons dynamically: remove them if the error is not capitalization or punctuation
+        document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight').forEach(el => {
+            const isTarget = el.classList.contains('capitalization') || el.classList.contains('punctuation');
+            if (!isTarget) {
+                el.querySelectorAll('.ai-icon').forEach(icon => icon.remove());
+            }
+        });
 
         if (!localStorage.getItem('hideResultsWelcome')) document.getElementById('resultsWelcomeModal').classList.add('visible');
         initializeResultInteractivity();
@@ -2856,65 +2896,65 @@ Respond EXACTLY in this JSON format:
   "rule": "The underlying grammar, spelling, or punctuation rule.",
   "examples":["Correct example 1", "Correct example 2"]
 }`;
-            const response = await fetch(this.ENDPOINT_URL, {
-                method: 'POST',
-                body: JSON.stringify({
-                    action: "analyzeSingle",
-                    prompt: promptText 
-                })
-            });
-            const result = await response.json();
-            if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
-            const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
-            const aiParsedData = JSON.parse(cleanJson);
-            this.cache[cacheKey] = aiParsedData;
-            this.renderUI(aiParsedData, data.originalWord, data.typedWord);
-        } catch (error) {
-            console.error(error);
-            content.style.display = 'block';
-            content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
-        } finally {
-            this.isFetching = false;
-            loader.style.display = 'none';
-            content.style.display = 'block';
-        }
-    },
-    renderUI: function(aiData, origWord, typedWord) {
-        const content = document.getElementById('aiModalContent');
-        let explanation = "General error detected.";
-        let rule = "Grammar rule not identified.";
-        let examplesHtml = "";
-        if (typeof aiData === 'object') {
-            explanation = aiData.explanation || explanation;
-            rule = aiData.rule || rule;
-            if (aiData.examples && Array.isArray(aiData.examples)) {
-                examplesHtml = `
-                    <div style="margin-top: 15px;">
-                        <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
-                        <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
-                            ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
-                        </ul>
-                    </div>`;
+                    const response = await fetch(this.ENDPOINT_URL, {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            action: "analyzeSingle",
+                            prompt: promptText 
+                        })
+                    });
+                    const result = await response.json();
+                    if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
+                    const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+                    const aiParsedData = JSON.parse(cleanJson);
+                    this.cache[cacheKey] = aiParsedData;
+                    this.renderUI(aiParsedData, data.originalWord, data.typedWord);
+                } catch (error) {
+                    console.error(error);
+                    content.style.display = 'block';
+                    content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
+                } finally {
+                    this.isFetching = false;
+                    loader.style.display = 'none';
+                    content.style.display = 'block';
+                }
+            },
+            renderUI: function(aiData, origWord, typedWord) {
+                const content = document.getElementById('aiModalContent');
+                let explanation = "General error detected.";
+                let rule = "Grammar rule not identified.";
+                let examplesHtml = "";
+                if (typeof aiData === 'object') {
+                    explanation = aiData.explanation || explanation;
+                    rule = aiData.rule || rule;
+                    if (aiData.examples && Array.isArray(aiData.examples)) {
+                        examplesHtml = `
+                            <div style="margin-top: 15px;">
+                                <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
+                                <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
+                                    ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
+                                </ul>
+                            </div>`;
+                    }
+                } else {
+                    explanation = aiData;
+                }
+                content.innerHTML = `
+                    <div class="ai-mistake-context">
+                        Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
+                    </div>
+                    <div>
+                        <span class="ai-rule-badge">Explanation</span>
+                        <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
+                    </div>
+                    <div>
+                        <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
+                        <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
+                    </div>
+                    ${examplesHtml}
+                `;
             }
-        } else {
-            explanation = aiData;
-        }
-        content.innerHTML = `
-            <div class="ai-mistake-context">
-                Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
-            </div>
-            <div>
-                <span class="ai-rule-badge">Explanation</span>
-                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
-            </div>
-            <div>
-                <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
-                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
-            </div>
-            ${examplesHtml}
-        `;
-    }
-};
+        };
 // =========================================================================
 
 </script>
