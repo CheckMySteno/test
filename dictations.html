@@ -47,7 +47,7 @@
       --hl-punctuation: #faf5ff;   
     }
 
-    *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after { box-smoothing: border-box; box-sizing: border-box; }
     html, body {
       font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
       margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.5;
@@ -1079,6 +1079,25 @@ function setLogoSource() {
     if (logoImg) logoImg.src = defaultLogo || "";
 }
 
+// --- Real-time Firestore Document Sync (Cross-tab synchronizer) ---
+function listenToPremiumStatusRealTime() {
+    if (!db || !candidateId) return;
+    
+    // Create an active real-time listener on the user's document
+    db.collection("users").doc(candidateId).onSnapshot((doc) => {
+        if (doc.exists) {
+            const data = doc.data();
+            const hasPremium = data.plan === 'premium' || data.isPremium === true;
+            if (hasPremium && !g_isPremium) {
+                g_isPremium = true; // Update local state
+                adjustInterfaceForPremiumTier(); // Dynamically unlock player controls & button label
+            }
+        }
+    }, (error) => {
+        console.warn("Real-time profile listener restricted. Bypasses are still secure.", error);
+    });
+}
+
 // --- Initialization ---
 async function initializePracticeMonthly() {
     // Check Authentication state
@@ -1115,6 +1134,9 @@ async function initializePracticeMonthly() {
     // Style elements based on Premium Tier
     adjustInterfaceForPremiumTier();
 
+    // Initialize real-time listener
+    listenToPremiumStatusRealTime();
+
     setupAntiInspection();
     setupProgressBar();
     setupExtraControls();
@@ -1143,6 +1165,13 @@ function adjustInterfaceForPremiumTier() {
     if (g_isPremium) {
         trialBadge.textContent = "PREMIUM ACTIVE";
         trialBadge.style.background = "linear-gradient(135deg, #10b981, #059669)";
+        
+        // Remove speed padlock labels dynamically
+        const speedLabel = document.getElementById('speedSettingLabel');
+        if (speedLabel) speedLabel.innerHTML = "Speed";
+        
+        const startBtn = document.getElementById('startTranscriptionBtn');
+        if (startBtn) startBtn.innerHTML = "🚀 Start Transcription Test";
     } else {
         trialBadge.textContent = "FREE PREVIEW MODE";
         trialBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
@@ -1181,9 +1210,13 @@ async function verifyPremiumStatusActive() {
     if (!db || !candidateId) return false;
     try {
         const userDoc = await db.collection("users").doc(candidateId).get();
-        if (userDoc.exists && userDoc.data().isPremium === true) {
-            g_isPremium = true; // Update global state
-            return true;
+        if (userDoc.exists) {
+            const data = userDoc.data();
+            const hasPremium = data.plan === 'premium' || data.isPremium === true;
+            if (hasPremium) {
+                g_isPremium = true; // Update global state
+                return true;
+            }
         }
     } catch (e) {
         console.error("Database status verification failed, using local secure check.", e);
@@ -1799,7 +1832,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #334155; padding-bottom: 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 15px; width: 100%;">
                     <div style="display: flex; align-items: center; gap: 14px;">
                         <div style="background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                         </div>
                         <div>
                             <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.025em; line-height: 1.2;">${escapeHtml(dictationName)}</h2>
@@ -1895,7 +1928,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
             
             <!-- Highly Aligned, Premium Action Toolbar Card -->
-            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
+            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <!-- Deep Analysis Button -->
                     <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
@@ -1910,14 +1943,14 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                     </div>
 
                     <!-- Report Error Button -->
-                    <button id="reportErrorBtn" class="view-switch-btn" style="background-color: #ef4444; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(239,68,68,0.15); display: flex; align-items: center; gap: 6px;">
+                    <button id="reportErrorBtn" class="view-switch-btn" style="background-color: #ef4444; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(239,68,68,0.15);">
                         ⚠️ Report Passage Error
                     </button>
                 </div>
 
                 <div style="display: flex; gap: 12px; align-items: center;">
                     <!-- Switch View Button -->
-                    <button id="viewSwitchBtn" class="view-switch-btn" style="background-color: #f1f5f9; color: #334155; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;">
+                    <button id="viewSwitchBtn" class="view-switch-btn" style="background-color: #f1f5f9; color: #334155; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s;">
                         🖥️ Split View: Top/Bottom
                     </button>
                 </div>
@@ -2059,7 +2092,6 @@ function submitTranscription() {
         goHome();
     }
 }
-// ========================== END BUG FIX ============================
 
 function saveProgressToLocalStorage(resultData) {
     if (!candidateId) return;
