@@ -47,7 +47,7 @@
       --hl-punctuation: #faf5ff;   
     }
 
-    *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after { box-smoothing: border-box; box-sizing: border-box; }
     html, body {
       font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
       margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.5;
@@ -641,7 +641,7 @@
             <h1>Monthly-wise Progressive Dictations</h1>
             <div class="header-controls">
                 <div class="search-wrapper">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
                     <input type="search" id="passageSearch" placeholder="Search passages...">
                 </div>
             </div>
@@ -913,7 +913,7 @@
             </div>
         </div>
 
-        <div class="pro-modal-footer" style="padding: 15px 35px;">
+        <div class="pro-modal-footer" style="padding: 15px 30px;">
             <label>
                 <input type="checkbox" id="dontShowAgainCheckbox">
                 Don't show me this again
@@ -1081,11 +1081,10 @@ function setLogoSource() {
 
 // --- Real-time Firestore Document Sync (Cross-tab synchronizer) ---
 function listenToPremiumStatusRealTime() {
-    if (!db || !firebase.auth().currentUser) return;
+    if (!db || !candidateId) return;
     
-    // Create an active real-time listener on the user's document using the secure Auth UID
-    const uid = firebase.auth().currentUser.uid;
-    db.collection("users").doc(uid).onSnapshot((doc) => {
+    // Create an active real-time listener on the user's document
+    db.collection("users").doc(candidateId).onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
             const hasPremium = data.plan === 'premium' || data.isPremium === true;
@@ -1096,17 +1095,6 @@ function listenToPremiumStatusRealTime() {
         }
     }, (error) => {
         console.warn("Real-time profile listener restricted. Bypasses are still secure.", error);
-    });
-}
-
-function setupPremiumSync() {
-    firebase.auth().onAuthStateChanged((user) => {
-        if (user) {
-            // Firebase Auth is now fully active! The listener will connect smoothly.
-            listenToPremiumStatusRealTime();
-        } else {
-            console.log("Waiting for secure authentication handshake...");
-        }
     });
 }
 
@@ -1146,8 +1134,8 @@ async function initializePracticeMonthly() {
     // Style elements based on Premium Tier
     adjustInterfaceForPremiumTier();
 
-    // Initialize real-time listener securely through our Auth state changed observer
-    setupPremiumSync();
+    // Initialize real-time listener
+    listenToPremiumStatusRealTime();
 
     setupAntiInspection();
     setupProgressBar();
@@ -1219,18 +1207,14 @@ function redirectToPlans() {
  * Active premium-tier verification querying the DB directly on action click
  */
 async function verifyPremiumStatusActive() {
-    // Ensure both Firestore and Firebase Auth session are ready
-    if (!db || !firebase.auth().currentUser) return false;
-    
-    // Query using the active Firebase Auth UID directly
-    const uid = firebase.auth().currentUser.uid;
+    if (!db || !candidateId) return false;
     try {
-        const userDoc = await db.collection("users").doc(uid).get();
+        const userDoc = await db.collection("users").doc(candidateId).get();
         if (userDoc.exists) {
             const data = userDoc.data();
             const hasPremium = data.plan === 'premium' || data.isPremium === true;
             if (hasPremium) {
-                g_isPremium = true; // Update local state
+                g_isPremium = true; // Update global state
                 return true;
             }
         }
@@ -1669,41 +1653,20 @@ function extractVideoID(url) { if (typeof url !== 'string') return null; const r
 function loadVideo(url, autoPlay = false) {
     const videoId = extractVideoID(url);
     if (!videoId) { showErrorModal("Invalid URL", "Invalid YouTube URL provided: " + url); return; }
-    
     const onPlayerReady = (event) => {
         totalVideoDuration = event.target.getDuration();
         setPlayerLoading(false);
         setPlaybackSpeed();
         updateAutoStopSettings();
     };
-
-    // Safeguard against asynchronous YT API loading
-    if (typeof YT === 'undefined' || typeof YT.Player === 'undefined') {
-        // If YT is not defined yet, wait and try again shortly
-        setTimeout(() => loadVideo(url, autoPlay), 200);
-        return;
-    }
-
     if (player && typeof player.loadVideoById === 'function' && player.getIframe()?.isConnected) {
         player.loadVideoById(videoId);
         const readyCheck = setInterval(() => {
-            if (player.getDuration() > 0 && player.getPlayerState() !== -1) { 
-                clearInterval(readyCheck); 
-                onPlayerReady({ target: player }); 
-            }
+            if (player.getDuration() > 0 && player.getPlayerState() !== -1) { clearInterval(readyCheck); onPlayerReady({ target: player }); }
         }, 100);
     } else {
         if (player && typeof player.destroy === 'function') player.destroy();
-        player = new YT.Player('player', { 
-            height: '1', 
-            width: '1', 
-            videoId: videoId, 
-            playerVars: { 'autoplay': autoPlay ? 1 : 0, 'controls': 0 }, 
-            events: { 
-                'onReady': onPlayerReady, 
-                'onStateChange': onPlayerStateChange 
-            } 
-        });
+        player = new YT.Player('player', { height: '1', width: '1', videoId, playerVars: { 'autoplay': autoPlay ? 1 : 0, 'controls': 0 }, events: { 'onReady': onPlayerReady, 'onStateChange': onPlayerStateChange } });
     }
 }
 
@@ -1757,7 +1720,7 @@ function setPlaybackSpeed() {
 
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
     
-    if (!isNaN(targetWPM) && wordCount && totalVideoDuration && totalVideoDuration > 0) { 
+    if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
         const originalWPM = wordCount / (totalVideoDuration / 60); 
         if(originalWPM > 0) {
             currentPlaybackRate = targetWPM / originalWPM;
@@ -1767,10 +1730,6 @@ function setPlaybackSpeed() {
     } else {
         currentPlaybackRate = 1;
     }
-
-    // YouTube playback rates must fall strictly within [0.25, 2] to prevent fatal engine crashes
-    if (currentPlaybackRate < 0.25) currentPlaybackRate = 0.25;
-    if (currentPlaybackRate > 2) currentPlaybackRate = 2;
     
     player.setPlaybackRate(currentPlaybackRate);
     updateVideoTimeDisplay();
@@ -1812,8 +1771,6 @@ function adjustSpeed(amount) {
     updateSpeedDisplay(newVal);
     setPlaybackSpeed();
 }
-
-function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
 function renderResultSheet(analysisResult, isReevaluation = false) {
     g_lastAnalysisResult = analysisResult;
@@ -1875,7 +1832,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #334155; padding-bottom: 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 15px; width: 100%;">
                     <div style="display: flex; align-items: center; gap: 14px;">
                         <div style="background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                         </div>
                         <div>
                             <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.025em; line-height: 1.2;">${escapeHtml(dictationName)}</h2>
@@ -1971,7 +1928,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
             
             <!-- Highly Aligned, Premium Action Toolbar Card -->
-            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
+            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <!-- Deep Analysis Button -->
                     <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
@@ -2789,69 +2746,69 @@ const AITeacher = {
                     let anchorMatch = true;
                     for (let a = 0; a < anchorClean.length; a++) {
                         if (words[i - anchorClean.length + a].toLowerCase().replace(/[^\w]/g, '') !== anchorClean[a]) {
-                                    anchorMatch = false;
-                                    break;
-                                }
-                            }
-                            if (anchorMatch) {
-                                bestIdx = i;
-                                break;
-                            }
-                        }
-                    } else {
-                        if (words[i].toLowerCase().replace(/[^\w]/g, '') === targetClean) {
-                            if (anchorClean.length === 0) {
-                                bestIdx = i;
-                                break;
-                            } else if (i >= anchorClean.length) {
-                                let anchorMatch = true;
-                                for (let a = 0; a < anchorClean.length; a++) {
-                                    if (words[i - anchorClean.length + a].toLowerCase().replace(/[^\w]/g, '') !== anchorClean[a]) {
-                                        anchorMatch = false;
-                                        break;
-                                    }
-                                }
-                                if (anchorMatch) {
-                                    bestIdx = i;
-                                    break;
-                                }
-                            }
-                            if (bestIdx === -1) bestIdx = i;
+                            anchorMatch = false;
+                            break;
                         }
                     }
+                    if (anchorMatch) {
+                        bestIdx = i;
+                        break;
+                    }
                 }
-                if (bestIdx === -1) bestIdx = Math_floor(words.length / 2);
-                let start = Math_max(0, bestIdx - 10);
-                let end = Math_min(words.length, bestIdx + 10);
-                let windowWords = words.slice(start, end);
-                let adjustedIdx = bestIdx - start;
-                if (!isMissing && windowWords[adjustedIdx]) {
-                    windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
-                } else if (isMissing && windowWords[adjustedIdx]) {
-                    windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
+            } else {
+                if (words[i].toLowerCase().replace(/[^\w]/g, '') === targetClean) {
+                    if (anchorClean.length === 0) {
+                        bestIdx = i;
+                        break;
+                    } else if (i >= anchorClean.length) {
+                        let anchorMatch = true;
+                        for (let a = 0; a < anchorClean.length; a++) {
+                            if (words[i - anchorClean.length + a].toLowerCase().replace(/[^\w]/g, '') !== anchorClean[a]) {
+                                anchorMatch = false;
+                                break;
+                            }
+                        }
+                        if (anchorMatch) {
+                            bestIdx = i;
+                            break;
+                        }
+                    }
+                    if (bestIdx === -1) bestIdx = i;
                 }
-                return windowWords.join(" ") + "...";
-            },
-            fetchAnalysis: async function(data) {
-                const modal = document.getElementById('aiModal');
-                const content = document.getElementById('aiModalContent');
-                const loader = document.getElementById('aiLoadingState');
-                modal.classList.add('visible');
-                const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
-                if (this.cache[cacheKey]) {
-                    this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
-                    return;
-                }
-                if (this.isFetching) {
-                    content.style.display = 'none';
-                    loader.style.display = 'block';
-                    return;
-                }
-                this.isFetching = true;
-                content.style.display = 'none';
-                loader.style.display = 'block';
-                try {
-                    const promptText = `Act as an English grammar teacher for stenography students.
+            }
+        }
+        if (bestIdx === -1) bestIdx = Math_floor(words.length / 2);
+        let start = Math_max(0, bestIdx - 10);
+        let end = Math_min(words.length, bestIdx + 10);
+        let windowWords = words.slice(start, end);
+        let adjustedIdx = bestIdx - start;
+        if (!isMissing && windowWords[adjustedIdx]) {
+            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
+        } else if (isMissing && windowWords[adjustedIdx]) {
+            windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
+        }
+        return windowWords.join(" ") + "...";
+    },
+    fetchAnalysis: async function(data) {
+        const modal = document.getElementById('aiModal');
+        const content = document.getElementById('aiModalContent');
+        const loader = document.getElementById('aiLoadingState');
+        modal.classList.add('visible');
+        const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
+        if (this.cache[cacheKey]) {
+            this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
+            return;
+        }
+        if (this.isFetching) {
+            content.style.display = 'none';
+            loader.style.display = 'block';
+            return;
+        }
+        this.isFetching = true;
+        content.style.display = 'none';
+        loader.style.display = 'block';
+        try {
+            const promptText = `Act as an English grammar teacher for stenography students.
 A student made a transcription error. Analyze it and explain the grammar or punctuation rule.
 
 Error Type: ${data.type}
