@@ -47,7 +47,7 @@
       --hl-punctuation: #faf5ff;   
     }
 
-    *, *::before, *::after { box-smoothing: border-box; box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; }
     html, body {
       font-family: var(--font-family); background-color: var(--bg-color); color: var(--text-color);
       margin: 0; padding: 0; width: 100%; min-height: 100vh; line-height: 1.5;
@@ -151,7 +151,7 @@
     }
 
     .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; }
-    .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); outline: none; }
+    .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); outline: pointer; outline: none; }
     .filter-bar select:focus { border-color: var(--accent-purple); }
 
     /* --- Slim, Colored Card Redesign with Solid Slate Outlines --- */
@@ -1081,10 +1081,11 @@ function setLogoSource() {
 
 // --- Real-time Firestore Document Sync (Cross-tab synchronizer) ---
 function listenToPremiumStatusRealTime() {
-    if (!db || !candidateId) return;
+    if (!db || !firebase.auth().currentUser) return;
     
-    // Create an active real-time listener on the user's document
-    db.collection("users").doc(candidateId).onSnapshot((doc) => {
+    // Create an active real-time listener on the user's document using the secure Auth UID
+    const uid = firebase.auth().currentUser.uid;
+    db.collection("users").doc(uid).onSnapshot((doc) => {
         if (doc.exists) {
             const data = doc.data();
             const hasPremium = data.plan === 'premium' || data.isPremium === true;
@@ -1095,6 +1096,17 @@ function listenToPremiumStatusRealTime() {
         }
     }, (error) => {
         console.warn("Real-time profile listener restricted. Bypasses are still secure.", error);
+    });
+}
+
+function setupPremiumSync() {
+    firebase.auth().onAuthStateChanged((user) => {
+        if (user) {
+            // Firebase Auth is now fully active! The listener will connect smoothly.
+            listenToPremiumStatusRealTime();
+        } else {
+            console.log("Waiting for secure authentication handshake...");
+        }
     });
 }
 
@@ -1134,8 +1146,8 @@ async function initializePracticeMonthly() {
     // Style elements based on Premium Tier
     adjustInterfaceForPremiumTier();
 
-    // Initialize real-time listener
-    listenToPremiumStatusRealTime();
+    // Initialize real-time listener securely through our Auth state changed observer
+    setupPremiumSync();
 
     setupAntiInspection();
     setupProgressBar();
@@ -1207,14 +1219,18 @@ function redirectToPlans() {
  * Active premium-tier verification querying the DB directly on action click
  */
 async function verifyPremiumStatusActive() {
-    if (!db || !candidateId) return false;
+    // Ensure both Firestore and Firebase Auth session are ready
+    if (!db || !firebase.auth().currentUser) return false;
+    
+    // Query using the active Firebase Auth UID directly
+    const uid = firebase.auth().currentUser.uid;
     try {
-        const userDoc = await db.collection("users").doc(candidateId).get();
+        const userDoc = await db.collection("users").doc(uid).get();
         if (userDoc.exists) {
             const data = userDoc.data();
             const hasPremium = data.plan === 'premium' || data.isPremium === true;
             if (hasPremium) {
-                g_isPremium = true; // Update global state
+                g_isPremium = true; // Update local state
                 return true;
             }
         }
@@ -1720,7 +1736,7 @@ function setPlaybackSpeed() {
 
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
     
-    if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
+    if (!isNaN(targetWPM) && wordCount && totalVideoDuration && totalVideoDuration > 0) { 
         const originalWPM = wordCount / (totalVideoDuration / 60); 
         if(originalWPM > 0) {
             currentPlaybackRate = targetWPM / originalWPM;
@@ -1730,6 +1746,10 @@ function setPlaybackSpeed() {
     } else {
         currentPlaybackRate = 1;
     }
+
+    // YouTube playback rates must fall strictly within [0.25, 2] to prevent fatal engine crashes
+    if (currentPlaybackRate < 0.25) currentPlaybackRate = 0.25;
+    if (currentPlaybackRate > 2) currentPlaybackRate = 2;
     
     player.setPlaybackRate(currentPlaybackRate);
     updateVideoTimeDisplay();
@@ -2629,7 +2649,7 @@ function applyFilters() {
 
 function showDeepAnalysisModal() {
     if (!g_lastAnalysisResult || !g_lastAnalysisResult.studentMistakes) {
-        alert("Analysis data not available.");
+        alert("Analysis data available.");
         return;
     }
     const { spelling, capitalisation, replacements } = g_lastAnalysisResult.studentMistakes;
