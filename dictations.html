@@ -8,7 +8,6 @@
 
 <!-- External Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
@@ -1175,23 +1174,6 @@ function redirectToPlans() {
 }
 
 /**
- * Active premium-tier verification querying the DB directly on action click
- */
-async function verifyPremiumStatusActive() {
-    if (!db || !candidateId) return false;
-    try {
-        const userDoc = await db.collection("users").doc(candidateId).get();
-        if (userDoc.exists && userDoc.data().isPremium === true) {
-            g_isPremium = true; // Update global state
-            return true;
-        }
-    } catch (e) {
-        console.error("Database status verification failed, using local secure check.", e);
-    }
-    return DigiWallet.isPremium(); 
-}
-
-/**
  * Fetches synonym data from the server and stores it globally.
  */
 async function loadSynonyms() {
@@ -1378,7 +1360,6 @@ function renderGrid() {
             `;
         }
 
-        // Exact markup restored for dictation cards to match first file perfectly
         card.className = `passage-card ${statusStripeClass}`;
         card.innerHTML = `
               <div class="card-header">
@@ -1542,23 +1523,13 @@ function updateAutoStopSettings() {
     }
 }
 
-async function showInstructions() {
-    // Show loader while we actively query Firestore
-    document.getElementById('fullPageLoader').style.display = 'flex';
-    
-    // Active backend-verification check on click
-    const isVerifiedPremium = await verifyPremiumStatusActive();
-    
-    document.getElementById('fullPageLoader').style.display = 'none';
-
-    if (!isVerifiedPremium) {
+function showInstructions() {
+    // Check if the user has premium before allowing them to access the transcription modal
+    if (!g_isPremium) {
         showPremiumUpgradeModal();
         return;
     }
-
-    if (player && typeof player.pauseVideo === 'function') {
-        player.pauseVideo();
-    }
+    if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
     document.getElementById('instructions-modal').classList.add('visible');
 }
 
@@ -1706,6 +1677,8 @@ function updateSpeedDisplay(val) {
     document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
 }
 
+function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
+function restartVideo() { if (player) { player.seekTo(0, true); player.playVideo(); } }
 function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
 function trackProgress() { clearInterval(progressInterval); progressInterval = setInterval(updateVideoTimeDisplay, 250); }
 function setupProgressBar() { document.getElementById("progressBar").addEventListener("click", function (e) { if (!player || !player.seekTo || !totalVideoDuration) return; const rect = e.currentTarget.getBoundingClientRect(); const clickPosition = (e.clientX - rect.left) / rect.width; player.seekTo(clickPosition * totalVideoDuration, true); }); }
@@ -1739,6 +1712,112 @@ function adjustSpeed(amount) {
     setPlaybackSpeed();
 }
 
+function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+
+// ==========================================
+// HIGH PERFORMANCE MISTAKE PARSER (FIXES TOOLTIP ISSUES)
+// ==========================================
+function extractTypedAndCorrect(el) {
+    let typed = "";
+    let correct = "";
+
+    // SOURCE 1: Parse from explicit data-tooltip-text attribute if present
+    const tooltipAttr = el.getAttribute('data-tooltip-text') || "";
+    if (tooltipAttr) {
+        const expectedMatch = tooltipAttr.match(/Expected:\s*([^,]*)/i);
+        const typedMatch = tooltipAttr.match(/Typed:\s*(.*)/i);
+        const missingMatch = tooltipAttr.match(/Missing:\s*(.*)/i);
+        const extraMatch = tooltipAttr.match(/Extra:\s*(.*)/i);
+
+        if (expectedMatch) correct = expectedMatch[1].trim();
+        if (typedMatch) typed = typedMatch[1].trim();
+        if (missingMatch) {
+            correct = missingMatch[1].trim();
+            typed = "[None]";
+        }
+        if (extraMatch) {
+            typed = extraMatch[1].trim();
+            correct = "[None]";
+        }
+    }
+
+    // SOURCE 2: Query DOM children as a fallback or verification
+    const wrongEl = el.querySelector('del, s, strike');
+    const correctEl = el.querySelector('b, ins, strong');
+
+    if (wrongEl && !typed) {
+        typed = wrongEl.textContent.trim();
+    }
+    if (correctEl && !correct) {
+        correct = correctEl.textContent.trim();
+    }
+
+    // SOURCE 3: Clean clone-based parsing if still empty
+    if (!typed || !correct) {
+        const clone = el.cloneNode(true);
+        const wrongInClone = clone.querySelector('del, s, strike');
+        if (wrongInClone) {
+            if (!typed) typed = wrongInClone.textContent.trim();
+            wrongInClone.remove();
+        }
+        clone.querySelectorAll('.ai-icon, button, svg, script').forEach(node => node.remove());
+        const remainingText = clone.textContent.replace(/[\u2715\u2713]/g, '').trim();
+
+        if (!correct && remainingText) {
+            correct = remainingText;
+        }
+        if (!typed && remainingText) {
+            typed = remainingText;
+        }
+    }
+
+    // SOURCE 4: Contextual fallback mapping using index lookup
+    const indexAttr = el.getAttribute('data-index');
+    const idx = indexAttr !== null ? parseInt(indexAttr) : NaN;
+
+    if (!correct || correct === "[Check Original]" || correct === "unknown") {
+        if (!isNaN(idx) && g_lastAnalysisResult) {
+            if (g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
+                correct = g_lastAnalysisResult.originalWords[idx];
+            }
+        }
+    }
+
+    if (!typed) {
+        if (!isNaN(idx) && g_lastAnalysisResult) {
+            if (g_lastAnalysisResult.userWords && g_lastAnalysisResult.userWords[idx]) {
+                typed = g_lastAnalysisResult.userWords[idx];
+            }
+        }
+    }
+
+    // Semantic cleanups for Omissions/Additions
+    if (el.classList.contains('omission')) {
+        typed = "[None]";
+        if (!correct || correct === "[None]") {
+            correct = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
+        }
+    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
+        correct = "[None]";
+        if (!typed || typed === "[None]") {
+            typed = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
+        }
+    }
+
+    // Ensure no duplicate strings are returned for replacements/spelling
+    if (typed === correct && (el.classList.contains('spelling') || el.classList.contains('capitalization') || el.classList.contains('substitution'))) {
+        if (!isNaN(idx) && g_lastAnalysisResult && g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
+            correct = g_lastAnalysisResult.originalWords[idx];
+        }
+    }
+
+    // Sanitize placeholders
+    if (!typed) typed = "[Check Transcription]";
+    if (!correct) correct = "[Check Original Text]";
+
+    return { typed, correct };
+}
+
 function renderResultSheet(analysisResult, isReevaluation = false) {
     g_lastAnalysisResult = analysisResult;
 
@@ -1759,15 +1838,6 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
         ).join(' ');
         document.getElementById('editableOriginalText').innerHTML = originalTextHtml;
-        
-        // Clean up AI option icons dynamically: remove them if the error is not capitalization or punctuation
-        document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight').forEach(el => {
-            const isTarget = el.classList.contains('capitalization') || el.classList.contains('punctuation');
-            if (!isTarget) {
-                el.querySelectorAll('.ai-icon').forEach(icon => icon.remove());
-            }
-        });
-
         initializeResultInteractivity();
 
     } else {
@@ -1799,7 +1869,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #334155; padding-bottom: 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 15px; width: 100%;">
                     <div style="display: flex; align-items: center; gap: 14px;">
                         <div style="background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
                         </div>
                         <div>
                             <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.025em; line-height: 1.2;">${escapeHtml(dictationName)}</h2>
@@ -1895,7 +1965,7 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             </div>
             
             <!-- Highly Aligned, Premium Action Toolbar Card -->
-            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.02); flex-wrap: wrap; gap: 15px;">
+            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.01); flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
                     <!-- Deep Analysis Button -->
                     <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
@@ -1928,14 +1998,6 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
                 <div class="col" id="originalCol"><strong>Original Text:</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div>
             </div>
         </div>`;
-
-        // Clean up AI option icons dynamically: remove them if the error is not capitalization or punctuation
-        document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight').forEach(el => {
-            const isTarget = el.classList.contains('capitalization') || el.classList.contains('punctuation');
-            if (!isTarget) {
-                el.querySelectorAll('.ai-icon').forEach(icon => icon.remove());
-            }
-        });
 
         if (!localStorage.getItem('hideResultsWelcome')) document.getElementById('resultsWelcomeModal').classList.add('visible');
         initializeResultInteractivity();
@@ -2794,65 +2856,65 @@ Respond EXACTLY in this JSON format:
   "rule": "The underlying grammar, spelling, or punctuation rule.",
   "examples":["Correct example 1", "Correct example 2"]
 }`;
-                    const response = await fetch(this.ENDPOINT_URL, {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            action: "analyzeSingle",
-                            prompt: promptText 
-                        })
-                    });
-                    const result = await response.json();
-                    if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
-                    const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
-                    const aiParsedData = JSON.parse(cleanJson);
-                    this.cache[cacheKey] = aiParsedData;
-                    this.renderUI(aiParsedData, data.originalWord, data.typedWord);
-                } catch (error) {
-                    console.error(error);
-                    content.style.display = 'block';
-                    content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
-                } finally {
-                    this.isFetching = false;
-                    loader.style.display = 'none';
-                    content.style.display = 'block';
-                }
-            },
-            renderUI: function(aiData, origWord, typedWord) {
-                const content = document.getElementById('aiModalContent');
-                let explanation = "General error detected.";
-                let rule = "Grammar rule not identified.";
-                let examplesHtml = "";
-                if (typeof aiData === 'object') {
-                    explanation = aiData.explanation || explanation;
-                    rule = aiData.rule || rule;
-                    if (aiData.examples && Array.isArray(aiData.examples)) {
-                        examplesHtml = `
-                            <div style="margin-top: 15px;">
-                                <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
-                                <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
-                                    ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
-                                </ul>
-                            </div>`;
-                    }
-                } else {
-                    explanation = aiData;
-                }
-                content.innerHTML = `
-                    <div class="ai-mistake-context">
-                        Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
-                    </div>
-                    <div>
-                        <span class="ai-rule-badge">Explanation</span>
-                        <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
-                    </div>
-                    <div>
-                        <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
-                        <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
-                    </div>
-                    ${examplesHtml}
-                `;
+            const response = await fetch(this.ENDPOINT_URL, {
+                method: 'POST',
+                body: JSON.stringify({
+                    action: "analyzeSingle",
+                    prompt: promptText 
+                })
+            });
+            const result = await response.json();
+            if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
+            const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
+            const aiParsedData = JSON.parse(cleanJson);
+            this.cache[cacheKey] = aiParsedData;
+            this.renderUI(aiParsedData, data.originalWord, data.typedWord);
+        } catch (error) {
+            console.error(error);
+            content.style.display = 'block';
+            content.innerHTML = `<p style="color:#ef4444; padding:20px;">Could not analyze. Reason: ${error.message}</p>`;
+        } finally {
+            this.isFetching = false;
+            loader.style.display = 'none';
+            content.style.display = 'block';
+        }
+    },
+    renderUI: function(aiData, origWord, typedWord) {
+        const content = document.getElementById('aiModalContent');
+        let explanation = "General error detected.";
+        let rule = "Grammar rule not identified.";
+        let examplesHtml = "";
+        if (typeof aiData === 'object') {
+            explanation = aiData.explanation || explanation;
+            rule = aiData.rule || rule;
+            if (aiData.examples && Array.isArray(aiData.examples)) {
+                examplesHtml = `
+                    <div style="margin-top: 15px;">
+                        <span class="ai-rule-badge" style="background: #dcfce7; color: #166534;">Examples</span>
+                        <ul style="padding-left: 20px; margin-top: 5px; font-size: 0.95rem; color: #334155;">
+                            ${aiData.examples.map(ex => `<li style="margin-bottom: 5px;">${ex}</li>`).join('')}
+                        </ul>
+                    </div>`;
             }
-        };
+        } else {
+            explanation = aiData;
+        }
+        content.innerHTML = `
+            <div class="ai-mistake-context">
+                Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
+            </div>
+            <div>
+                <span class="ai-rule-badge">Explanation</span>
+                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${explanation}</p>
+            </div>
+            <div>
+                <span class="ai-rule-badge" style="background: #fef08a; color: #854d0e;">Rule</span>
+                <p class="ai-explanation-text" style="margin-top: 5px; margin-bottom: 15px;">${rule}</p>
+            </div>
+            ${examplesHtml}
+        `;
+    }
+};
 // =========================================================================
 
 </script>
