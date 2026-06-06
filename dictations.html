@@ -1057,6 +1057,31 @@ let g_autoStopTimestamp = Infinity;
 let g_synonymData =[];
 let g_isPremium = false; // Global Freemium Level Identifier
 
+// --- SECURE PREMIUM STATE CLOSURE ---
+const AuthController = (function() {
+    let _isPrem = false;
+    let _unsub = null;
+
+    return {
+        init: function(uid, dbRef) {
+            if (_unsub) _unsub();
+            if (!dbRef) return;
+            _unsub = dbRef.collection('users').doc(uid).onSnapshot(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    _isPrem = (data.isPremium === true || data.plan === 'premium');
+                    adjustInterfaceForPremiumTier();
+                }
+            }, err => {
+                console.error("Secure subscription failed:", err);
+            });
+        },
+        isPremium: function() {
+            return _isPrem;
+        }
+    };
+})();
+
 document.addEventListener("DOMContentLoaded", initializePracticeMonthly);
 
 // --- Anti-Cheating & Setup ---
@@ -1093,7 +1118,7 @@ async function initializePracticeMonthly() {
         return;
     }
 
-    // Set Premium Pass globally
+    // Set Premium Pass globally fallback first
     g_isPremium = DigiWallet.isPremium();
 
     // Safely initialize Firebase reference dynamically
@@ -1107,9 +1132,14 @@ async function initializePracticeMonthly() {
     
     if (db) {
         attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
+        // Initialize Realtime Listener
+        AuthController.init(candidateId, db);
     } else {
         console.warn("Firestore is not available. Progress will not be saved to the cloud.");
     }
+
+    // Sync state configuration
+    g_isPremium = AuthController.isPremium();
 
     // Style elements based on Premium Tier
     adjustInterfaceForPremiumTier();
@@ -1136,12 +1166,21 @@ async function initializePracticeMonthly() {
 }
 
 function adjustInterfaceForPremiumTier() {
+    // Sync external variable to ensure template integration checks hold true
+    g_isPremium = AuthController.isPremium();
+
     const trialBadge = document.createElement('span');
     trialBadge.className = 'tag';
     
     if (g_isPremium) {
         trialBadge.textContent = "PREMIUM ACTIVE";
         trialBadge.style.background = "linear-gradient(135deg, #10b981, #059669)";
+
+        const speedLabel = document.getElementById('speedSettingLabel');
+        if (speedLabel) speedLabel.innerHTML = "Speed Settings";
+        
+        const startBtn = document.getElementById('startTranscriptionBtn');
+        if (startBtn) startBtn.innerHTML = "🚀 Start Transcription Test";
     } else {
         trialBadge.textContent = "FREE PREVIEW MODE";
         trialBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
@@ -1524,8 +1563,8 @@ function updateAutoStopSettings() {
 }
 
 function showInstructions() {
-    // Check if the user has premium before allowing them to access the transcription modal
-    if (!g_isPremium) {
+    // Check closure-based state instead of loose local variable to prevent tampering
+    if (!AuthController.isPremium()) {
         showPremiumUpgradeModal();
         return;
     }
@@ -1644,8 +1683,8 @@ function onPlayerStateChange(event) {
 function setPlaybackSpeed() {
     if (!player || !player.setPlaybackRate) return;
     
-    // Block non-premium attempts at speed adjustment
-    if (!g_isPremium) {
+    // Block non-premium attempts at speed adjustment using closure state
+    if (!AuthController.isPremium()) {
         const slider = document.getElementById('wpmRange');
         if (slider && parseFloat(slider.value) !== 100) {
             slider.value = 100;
@@ -1699,7 +1738,7 @@ function updateVideoTimeDisplay() {
 function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
 function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
 function adjustSpeed(amount) { 
-    if (!g_isPremium) {
+    if (!AuthController.isPremium()) {
         showPremiumUpgradeModal();
         return;
     }
