@@ -1058,41 +1058,27 @@ let g_autoStopTimestamp = Infinity;
 let g_synonymData =[];
 let g_isPremium = false; // Global Freemium Level Identifier
 
-// --- SECURE PREMIUM STATE CLOSURE ---
-const AuthController = (function() {
-    let _isPrem = false;
-    let _unsub = null;
-
-    return {
-        init: function(uid, dbRef) {
-            if (_unsub) _unsub();
-            if (!dbRef) return;
-            
-            // Wait until Firebase Auth SDK initializes the session token to bypass "Missing Permissions"
-            firebase.auth().onAuthStateChanged(user => {
-                if (user && user.uid === uid) {
-                    _unsub = dbRef.collection('users').doc(uid).onSnapshot(doc => {
-                        if (doc.exists) {
-                            const data = doc.data();
-                            _isPrem = (data.isPremium === true || data.plan === 'premium');
-                            adjustInterfaceForPremiumTier();
-                        }
-                    }, err => {
-                        console.warn("Real-time listener failed, falling back to wallet logic.");
-                        _isPrem = DigiWallet.isPremium();
-                        adjustInterfaceForPremiumTier();
-                    });
-                } else {
-                    _isPrem = DigiWallet.isPremium();
-                    adjustInterfaceForPremiumTier();
-                }
-            });
-        },
-        isPremium: function() {
-            return _isPrem;
+// --- ACTIVE FIRESTORE ENFORCEMENT ENGINE ---
+async function checkPremiumStatusOnServer() {
+    const user = DigiWallet.getUser();
+    if (!user || !db) return false;
+    try {
+        const doc = await db.collection('users').doc(user.uid).get();
+        if (doc.exists) {
+            const data = doc.data();
+            const activePlan = (data.isPremium === true || data.plan === 'premium');
+            let notExpired = true;
+            if (data.expiry) {
+                const expiryDate = data.expiry.toDate ? data.expiry.toDate() : new Date(data.expiry);
+                notExpired = expiryDate > new Date();
+            }
+            return activePlan && notExpired;
         }
-    };
-})();
+    } catch (e) {
+        console.error("Direct server premium check failed:", e);
+    }
+    return false;
+}
 
 document.addEventListener("DOMContentLoaded", initializePracticeMonthly);
 
@@ -1130,9 +1116,6 @@ async function initializePracticeMonthly() {
         return;
     }
 
-    // Set Premium Pass globally fallback first
-    g_isPremium = DigiWallet.isPremium();
-
     // Safely initialize Firebase reference dynamically
     if (firebase.firestore) {
         db = firebase.firestore();
@@ -1144,17 +1127,14 @@ async function initializePracticeMonthly() {
     
     if (db) {
         attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
-        // Initialize Realtime Listener
-        AuthController.init(candidateId, db);
     } else {
         console.warn("Firestore is not available. Progress will not be saved to the cloud.");
     }
 
-    // Sync state configuration
-    g_isPremium = AuthController.isPremium() || DigiWallet.isPremium();
-
-    // Style elements based on Premium Tier
-    adjustInterfaceForPremiumTier();
+    // Perform an active check immediately during page load
+    const activePrem = await checkPremiumStatusOnServer();
+    g_isPremium = activePrem;
+    adjustInterfaceForPremiumTierDirect(activePrem);
 
     setupAntiInspection();
     setupProgressBar();
@@ -1177,46 +1157,38 @@ async function initializePracticeMonthly() {
     renderQuickResume();
 }
 
-function adjustInterfaceForPremiumTier() {
-    // Sync external variable to ensure template integration checks hold true
-    g_isPremium = AuthController.isPremium();
+function adjustInterfaceForPremiumTierDirect(activePrem) {
+    g_isPremium = activePrem;
+    const speedLabel = document.getElementById('speedSettingLabel');
+    const startBtn = document.getElementById('startTranscriptionBtn');
+    const trialBadge = document.querySelector('.intro-header .tag');
 
-    const trialBadge = document.createElement('span');
-    trialBadge.className = 'tag';
-    
-    if (g_isPremium) {
-        trialBadge.textContent = "PREMIUM ACTIVE";
-        trialBadge.style.background = "linear-gradient(135deg, #10b981, #059669)";
-
-        const speedLabel = document.getElementById('speedSettingLabel');
+    if (activePrem) {
         if (speedLabel) speedLabel.innerHTML = "Speed Settings";
-        
-        const startBtn = document.getElementById('startTranscriptionBtn');
         if (startBtn) {
             startBtn.innerHTML = "🚀 Start Transcription Test";
             startBtn.disabled = false;
         }
+        if (trialBadge) {
+            trialBadge.textContent = "PREMIUM ACTIVE";
+            trialBadge.style.background = "linear-gradient(135deg, #10b981, #059669)";
+        }
     } else {
-        trialBadge.textContent = "FREE PREVIEW MODE";
-        trialBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
-        
-        // Disable Speed adjustments and Transcribe on Start Button Labels
-        const speedLabel = document.getElementById('speedSettingLabel');
         if (speedLabel) speedLabel.innerHTML = "Speed (Locked) 🔒";
-        
-        const startBtn = document.getElementById('startTranscriptionBtn');
         if (startBtn) {
             startBtn.innerHTML = "🔒 Start Transcription (Premium Only)";
-            startBtn.disabled = false; // Enabled to trigger upgrade prompt
+            startBtn.disabled = false; // Kept clickable to run verification checks on interaction
+        }
+        if (trialBadge) {
+            trialBadge.textContent = "FREE PREVIEW MODE";
+            trialBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
         }
     }
-    
-    const headerBox = document.querySelector('.intro-header');
-    if (headerBox) {
-        const oldTag = headerBox.querySelector('.tag');
-        if (oldTag) oldTag.remove();
-        headerBox.appendChild(trialBadge);
-    }
+}
+
+// Retained legacy compatibility wrapper
+function adjustInterfaceForPremiumTier() {
+    adjustInterfaceForPremiumTierDirect(g_isPremium);
 }
 
 function showPremiumUpgradeModal() {
@@ -1243,7 +1215,6 @@ async function loadSynonyms() {
         g_synonymData = Array.isArray(data) ? data :[];
         console.log(`Synonym engine loaded with ${g_synonymData.length} groups.`);
     } catch (error) {
-        // Prevent 404 errors on GitHub pages from logging alerts or blocking main execution thread
         console.warn("Synonym system initialized using local fallback library.");
         g_synonymData =[]; 
     }
@@ -1522,6 +1493,10 @@ async function loadPractice(volumeId, transcriptId) {
 
         document.getElementById('player-subtitle').textContent = currentPassageTitle || `Passage ${g_tran}`;
         loadVideo(textDoc.data().audioUrl, false);
+        
+        // Active checking to enforce locks as soon as view mounts
+        const activePrem = await checkPremiumStatusOnServer();
+        adjustInterfaceForPremiumTierDirect(activePrem);
     } catch (error) {
         showErrorModal("Loading Error", "Error: " + error.message);
         showView('selection-view');
@@ -1581,13 +1556,20 @@ function updateAutoStopSettings() {
     }
 }
 
-function showInstructions() {
-    // Check closure-based state instead of loose local variable to prevent tampering
-    if (!AuthController.isPremium()) {
+async function showInstructions() {
+    if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
+    
+    // Explicit, tamper-proof read from server before proceeding
+    document.getElementById('fullPageLoader').style.display = 'flex';
+    const activePrem = await checkPremiumStatusOnServer();
+    document.getElementById('fullPageLoader').style.display = 'none';
+
+    adjustInterfaceForPremiumTierDirect(activePrem);
+
+    if (!activePrem) {
         showPremiumUpgradeModal();
         return;
     }
-    if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
     document.getElementById('instructions-modal').classList.add('visible');
 }
 
@@ -1699,19 +1681,22 @@ function onPlayerStateChange(event) {
     }
 }
 
-function setPlaybackSpeed() {
+async function setPlaybackSpeed() {
     if (!player || !player.setPlaybackRate) return;
     
-    // Block non-premium attempts at speed adjustment using closure state
-    if (!AuthController.isPremium()) {
+    // Explicit server validation step before allowing player rate change
+    const activePrem = await checkPremiumStatusOnServer();
+    adjustInterfaceForPremiumTierDirect(activePrem);
+
+    if (!activePrem) {
         const slider = document.getElementById('wpmRange');
-        if (slider && parseFloat(slider.value) !== 100) {
+        if (slider) {
             slider.value = 100;
             updateSpeedDisplay(100);
-            player.setPlaybackRate(1);
-            showPremiumUpgradeModal();
-            return;
         }
+        player.setPlaybackRate(1);
+        showPremiumUpgradeModal();
+        return;
     }
 
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
@@ -1756,8 +1741,12 @@ function updateVideoTimeDisplay() {
 
 function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
 function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
-function adjustSpeed(amount) { 
-    if (!AuthController.isPremium()) {
+
+async function adjustSpeed(amount) { 
+    const activePrem = await checkPremiumStatusOnServer();
+    adjustInterfaceForPremiumTierDirect(activePrem);
+
+    if (!activePrem) {
         showPremiumUpgradeModal();
         return;
     }
