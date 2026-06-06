@@ -1058,12 +1058,27 @@ let g_autoStopTimestamp = Infinity;
 let g_synonymData =[];
 let g_isPremium = false; // Global Freemium Level Identifier
 
+// --- SECURE AUTHENTICATION STATE WRAPPER ---
+function getFirebaseUserSecure() {
+    return new Promise((resolve) => {
+        const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
+            unsubscribe();
+            resolve(user);
+        });
+    });
+}
+
 // --- ACTIVE FIRESTORE ENFORCEMENT ENGINE ---
 async function checkPremiumStatusOnServer() {
-    const user = DigiWallet.getUser();
-    if (!user || !db) return false;
     try {
-        const doc = await db.collection('users').doc(user.uid).get();
+        let firebaseUser = firebase.auth().currentUser;
+        if (!firebaseUser) {
+            firebaseUser = await getFirebaseUserSecure();
+        }
+        
+        if (!firebaseUser || !db) return false;
+
+        const doc = await db.collection('users').doc(firebaseUser.uid).get();
         if (doc.exists) {
             const data = doc.data();
             const activePlan = (data.isPremium === true || data.plan === 'premium');
