@@ -9,7 +9,6 @@
 <!-- External Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
@@ -21,7 +20,6 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
 <style>
     /* --- 1. Global Styles --- */
@@ -31,20 +29,18 @@
       --bg-color: #f8fafc; --surface-color: #ffffff;
       --border-color: #e2e8f0; --white: #fff;
       --font-family: 'Inter', sans-serif;
-      --font-monospace: 'JetBrains Mono', 'Courier New', monospace;
       --accent-purple: #4f46e5;
       --accent-purple-light: #f3e8ff;
       --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
       --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
       --shadow-lg: 0 10px 15px -3px rgba(15, 23, 42, 0.05), 0 4px 6px -4px rgba(15, 23, 42, 0.05);
-      --accent-amber: #f97316;
       
-      /* Global Highlighting Colors (Modern Pastel Underlays) */
-      --hl-additions: #fef2f2;     
-      --hl-omissions: #f0fdf4;     
-      --hl-spelling: #fffbeb;      
-      --hl-capitalization: #f0f9ff; 
-      --hl-punctuation: #faf5ff;   
+      /* Global Highlighting Colors */
+      --hl-additions: #fecdd3;     
+      --hl-omissions: #d9f99d;     
+      --hl-spelling: #fde68a;      
+      --hl-capitalization: #bae6fd; 
+      --hl-punctuation: #ddd6fe;   
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -73,7 +69,7 @@
     .search-wrapper input:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
     .search-wrapper svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: #9ca3af; }
 
-    /* --- Consolidated, Elegant Dashboard Hero Grid --- */
+    /* --- Consolidate & Clean Dashboard Hero --- */
     .dashboard-hero {
         display: grid;
         grid-template-columns: 1fr;
@@ -268,13 +264,12 @@
     #exam-view { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: #fff; flex-direction: column; padding: 0; font-family: 'Tahoma', Arial, sans-serif; }
     .ssc-header { display: flex; align-items: center; justify-content: space-between; background-color: #f0f0f0; padding: 5px 20px; border-bottom: 1px solid #ccc; flex-shrink: 0; }
     .ssc-header-left { display: flex; align-items: center; gap: 15px; }
-    .ssc-logo img { height: 45px; }
     .ssc-title h1 { font-size: 1.1em; color: #000; margin: 0; font-weight: bold; }
     .ssc-title p { margin: 0; font-size: 0.8em; color: #555; }
     .ssc-header-right { font-size: 0.8em; text-align: right; }
     .ssc-main-content { display: flex; flex-grow: 1; overflow-y: auto; }
     .ssc-typing-area { flex-grow: 1; display: flex; flex-direction: column; padding: 15px; }
-    #typingBox { width: 100%; flex-grow: 1; border: 1px solid #000; border-radius: 0; padding: 10px; font-size: 16px; font-family: var(--font-monospace); resize: none; }
+    #typingBox { width: 100%; flex-grow: 1; border: 1px solid #000; border-radius: 0; padding: 10px; font-size: 16px; font-family: 'Courier New', Courier, monospace; resize: none; }
     #typingBox:focus { outline: none; }
     #submitBtn { width: 90px; padding: 5px 10px; font-size: 0.9em; background-color: #000; border-radius: 0; color: white; margin-top: 10px; }
     .ssc-candidate-panel { width: 280px; background-color: #f0f0f0; border-left: 1px solid #ccc; padding: 15px; text-align: left; font-size: 0.9em; color: #333; flex-shrink: 0; }
@@ -287,80 +282,59 @@
     .ssc-candidate-info { line-height: 1.8; }
     .ssc-candidate-info b { font-weight: bold; color: #000; }
 
-    /* --- 4. RESULT SHEET STYLES (BRIGHT WHITE VISUAL OVERHAUL) --- */
+    /* --- 4. RESULT SHEET STYLES --- */
     #results-view { display: none; }
     .result-sheet-container {
-        background-color: #ffffff;
-        border: 1px solid var(--border-color);
+        --bg-main: #f8fafc;
+        --surface-card: #ffffff;
+        --border-subtle: #e2e8f0;
+        --text-header: #1e293b;
+        --text-body: #334155;
+        --text-muted: #64748b;
+        --primary-cyan: #0891b2;
+        --accent-red: #ef4444;
+        --accent-amber: #f97316;
+        --hl-additions: #fecdd3;     
+        --hl-omissions: #d9f99d;     
+        --hl-spelling: #fde68a;      
+        --hl-capitalization: #bae6fd; 
+        --hl-punctuation: #ddd6fe;   
+
+        font-family: 'Inter', sans-serif;
+        background-color: var(--surface-card);
+        border: 1px solid var(--border-subtle);
         border-radius: 16px;
-        padding: 40px;
-        box-shadow: 0 10px 30px rgba(15, 23, 42, 0.02);
+        padding: 35px 45px;
+        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05), 0 2px 4px -2px rgb(0 0 0 / 0.1);
         max-width: 1200px;
         margin: auto;
+        transition: background-color 0.3s, box-shadow 0.3s;
     }
 
     #results-view.reevaluate-mode-active .result-sheet-container {
-        background-color: #f8fafc;
-        box-shadow: 0 0 0 3px var(--accent-purple), 0 8px 25px rgba(0,0,0,0.05);
+        background-color: #f0f2f5;
+        box-shadow: 0 0 0 3px var(--accent-purple), 0 8px 25px rgba(0,0,0,0.1);
     }
 
-    .result-sheet-container h1 { 
-        font-size: 2rem; 
-        font-weight: 800; 
-        margin: 0 0 20px 0; 
-        color: var(--text-color); 
-        letter-spacing: -0.02em;
+    #results-view.reevaluate-mode-active[contenteditable="true"] {
+        outline: 2px solid var(--accent-purple);
+        background-color: white;
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
+        padding: 10px;
+        border-radius: 8px;
     }
 
-    /* --- Sophisticated Detailed Slate Banner --- */
-    .sophisticated-result-header {
-        background: linear-gradient(135deg, #1e293b, #0f172a);
-        color: white;
-        border-radius: 16px;
-        padding: 25px 30px;
-        margin-bottom: 25px;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08);
-    }
-
-    /* --- Key Stats Grid --- */
-    .metrics-dashboard-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 30px;
-    }
-    .metric-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
-        border-radius: 12px;
-        padding: 20px;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.01);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .metric-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0,0,0,0.03);
-    }
-    .metric-card-label {
-        font-size: 0.75rem;
-        font-weight: 700;
-        color: var(--medium-grey);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .metric-card-value {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--text-color);
-        font-family: var(--font-monospace);
-    }
-
-    .legend-container { display: flex; flex-wrap: wrap; gap: 10px 15px; padding: 25px 0; margin-bottom: 25px; border-top: 1px solid var(--border-color); border-bottom: 1px solid var(--border-color); align-items: center; }
+    .result-sheet-container h1 { font-size: 2.25em; font-weight: 800; margin: 0 0 25px 0; color: var(--text-header); }
+    .stats-container { display: flex; flex-direction: column; gap: 12px; margin-bottom: 30px; }
+    .stats-row { display: flex; flex-wrap: wrap; gap: 12px; }
+    .stat-pill { display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px; border-radius: 10px; font-weight: 600; font-size: 0.95em; color: white; background-color: var(--primary-cyan); box-shadow: 0 4px 10px -2px rgba(8, 145, 178, 0.25); }
+    .stat-pill.full-width { flex-grow: 1; font-size: 1.1em; }
+    .stat-pill.red { background-color: var(--accent-red); box-shadow: 0 4px 10px -2px rgba(239, 68, 68, 0.2); }
+    .stat-pill.amber { background-color: var(--accent-amber); box-shadow: 0 4px 10px -2px rgba(249, 115, 22, 0.2); }
+    .stat-pill img, .stat-pill svg { width: 18px; height: 18px; }
+    
+    .legend-container { display: flex; flex-wrap: wrap; gap: 10px 15px; padding: 25px 0; margin-bottom: 25px; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); align-items: center; }
     .legend-item { display: flex; align-items: center; font-size: 0.9em; font-weight: 500; cursor: pointer; padding: 6px 12px; border-radius: 8px; transition: all 0.2s ease; border: 1px solid transparent; }
-    .legend-item:hover { background-color: #f0f2f5; transform: translateY(-2px); }
     .legend-item.active { background-color: var(--accent-purple-light); border-color: var(--accent-purple); font-weight: 600; color: var(--accent-purple); }
     .legend-color-box { width: 16px; height: 16px; border-radius: 4px; margin-right: 8px; flex-shrink: 0; }
     .mistake-count { font-weight: 700; margin-left: 6px; color: var(--text-muted); }
@@ -369,16 +343,16 @@
 
     .result-controls { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
     .action-section { display: flex; align-items: center; gap: 10px; }
-    .view-switch-btn { background-color: #ffffff; border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 8px; font-weight: 600; color: var(--text-body); cursor: pointer; transition: all 0.2s; }
-    .view-switch-btn:hover { background-color: #f8fafc; }
+    .view-switch-btn { background-color: var(--bg-main); border: 1px solid var(--border-subtle); padding: 8px 16px; border-radius: 8px; font-weight: 600; color: var(--text-body); cursor: pointer; transition: all 0.2s; }
+    .view-switch-btn:hover { background-color: #e2e8f0; }
     
     #viewSwitchBtn { background-color: var(--accent-purple-light); color: var(--accent-purple); border-color: var(--accent-purple); }
     #viewSwitchBtn:hover { background-color: #dadaf7; }
 
     #deepAnalysisBtn { background-color: #374151; color: white; }
-    #toggleReevaluateBtn { background-color: var(--accent-amber); color: white; }
 
     .reevaluate-wrapper { position: relative; display: inline-flex; align-items: center; gap: 8px; }
+    #toggleReevaluateBtn { background-color: var(--accent-amber); color: white; }
     .tooltip-icon { background-color: #9ca3af; color: white; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.8em; font-weight: bold; cursor: help; position: relative; }
     .tooltip-icon:hover::after { content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%; transform: translateX(-50%); background-color: #1f2937; color: white; padding: 8px 12px; border-radius: 6px; font-size: 0.9em; white-space: nowrap; z-index: 10; opacity: 1; visibility: visible; transition: opacity 0.2s; }
     .tooltip-icon::after { content: attr(data-tooltip); opacity: 0; visibility: hidden; }
@@ -386,114 +360,26 @@
     .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
     .columns.view-top-bottom { grid-template-columns: 1fr; }
-    
-    /* Monospace evaluation text box styles */
-    .col { background: #ffffff; border-radius: 12px; padding: 25px; border: 1px solid var(--border-color); line-height: 1.8; font-size: 1.15em; word-wrap: break-word; font-family: var(--font-monospace); }
-    .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; font-family: var(--font-family); }
+    .col { background: var(--bg-main); border-radius: 12px; padding: 25px; border: 1px solid var(--border-subtle); line-height: 1.7; font-size: 1.1em; word-wrap: break-word; }
+    .col strong { display: block; margin-bottom: 12px; color: var(--text-header); font-weight: 700; }
     .col p { margin: 0; }
     .word-wrapper { cursor: pointer; display: inline; transition: background-color 0.2s ease, transform 0.2s ease; position: relative; }
     .active-highlight { background-color: #4B0082 !important; color: white !important; border-radius: 3px; animation: pop-3d 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both; }
     @keyframes pop-3d { 0% { transform: scale3d(1, 1, 1); box-shadow: 0 0 0 rgba(0,0,0,0); } 50% { transform: scale3d(1.1, 1.1, 1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.2); } 100% { transform: scale3d(1, 1, 1); box-shadow: 0 0 0 rgba(0,0,0,0); } }
     .word-wrapper.status-shown::after { content: attr(data-status-icon); position: absolute; top: 50%; left: 50%; font-size: 1.8em; color: white; text-shadow: 0 2px 8px black; opacity: 0; animation: fade-in-out 0.8s ease-in-out forwards; pointer-events: none; z-index: 10; }
     @keyframes fade-in-out { 0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); } 30% { opacity: 0.9; } 80% { opacity: 0.9; } 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.5); } }
-    
-    /* Refined Custom Highlights with high specificity */
-    #editableTypedText .mis, #editableTypedText .highlight {
-        border-radius: 4px;
-        padding: 2px 4px;
-        margin: 0 1px;
-        display: inline;
-        transition: all 0.2s ease;
-    }
-    
-    #editableTypedText .mis.omission, #editableTypedText .highlight.omission {
-        background-color: var(--hl-omissions) !important;
-        border-bottom: 2px solid #22c55e !important;
-        color: #166534 !important;
-    }
-
-    #editableTypedText .mis.spelling, #editableTypedText .highlight.spelling {
-        background-color: var(--hl-spelling) !important;
-        border-bottom: 2px dashed #d97706 !important;
-        color: #92400e !important;
-    }
-
-    #editableTypedText .mis.capitalization, #editableTypedText .highlight.capitalization {
-        background-color: var(--hl-capitalization) !important;
-        border-bottom: 2px solid #0284c7 !important;
-        color: #075985 !important;
-    }
-
-    #editableTypedText .mis.punctuation, #editableTypedText .highlight.punctuation {
-        background-color: var(--hl-punctuation) !important;
-        border-bottom: 2px solid #7c3aed !important;
-        color: #5b21b6 !important;
-    }
-
-    #editableTypedText .mis.extra, #editableTypedText .mis.addition, #editableTypedText .mis.substitution,
-    #editableTypedText .highlight.extra, #editableTypedText .highlight.addition, #editableTypedText .highlight.substitution {
-        background-color: var(--hl-additions) !important;
-        color: #991b1b !important;
-        position: relative;
-        display: inline-block;
-        text-decoration: none !important;
-    }
-
-    #editableTypedText .mis.extra::after, #editableTypedText .mis.addition::after, #editableTypedText .mis.substitution::after,
-    #editableTypedText .highlight.extra::after, #editableTypedText .highlight.addition::after, #editableTypedText .highlight.substitution::after {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 50%;
-        width: 100%;
-        height: 2px;
-        background-color: #ef4444; /* Custom middle cut line */
-        transform: scaleX(0);
-        transform-origin: left;
-        animation: draw-strike 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-    }
-
-    @keyframes draw-strike {
-        to {
-            transform: scaleX(1);
-        }
-    }
-
-    /* SPECIFICITY WORKAROUND FOR FILTERING WAR */
-    #editableTypedText .hidden-mistake,
-    #editableTypedText span.hidden-mistake,
-    #editableTypedText .hidden-mistake.mis,
-    #editableTypedText .hidden-mistake.highlight {
-        background: none !important;
-        text-decoration: none !important;
-        border-bottom: none !important;
-        color: inherit !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        border-radius: 0 !important;
-        font-weight: normal !important;
-        box-shadow: none !important;
-        border: none !important;
-    }
-    #editableTypedText .hidden-mistake b, 
-    #editableTypedText .hidden-mistake ins, 
-    #editableTypedText .hidden-mistake strong { 
-        font-weight: normal !important; 
-        color: inherit !important; 
-        text-decoration: none !important; 
-    }
-    #editableTypedText .hidden-mistake del, 
-    #editableTypedText .hidden-mistake s, 
-    #editableTypedText .hidden-mistake strike { 
-        display: none !important; 
-    }
-    #editableTypedText .hidden-mistake .ai-icon { 
-        display: none !important; 
-    }
-    #editableTypedText .hidden-mistake::after {
-        display: none !important; /* Hide custom red strike-through line on hidden mistakes */
-    }
-    
+    .highlight { position: relative; padding: 2px 5px; border-radius: 4px; margin: 0 1px; font-weight: 500; -webkit-box-decoration-break: clone; box-decoration-break: clone; display: inline; transition: transform 0.2s ease-out; }
+    .highlight:hover { transform: scale(1.15); z-index: 5; }
+    .highlight:hover::after { content: attr(data-tooltip-text); position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); margin-bottom: 8px; padding: 8px 12px; background-color: #111827; color: white; font-size: 0.8em; font-weight: 500; font-family: 'Inter', sans-serif; border-radius: 6px; white-space: nowrap; z-index: 10; opacity: 1; visibility: visible; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+    .extra, .substitution { background: var(--hl-additions); }
+    .omission { background: var(--hl-omissions); }
+    .spelling { background: var(--hl-spelling); }
+    .spelling b { font-weight: 700; color: #166534; }
+    .capitalization { background: var(--hl-capitalization); }
+    .punctuation { background: var(--hl-punctuation); }
+    .addition { background: var(--hl-additions); }
+    .hidden-mistake { background: none !important; text-decoration: none !important; color: inherit !important; padding: 0 !important; margin: 0 !important; border-radius: 0 !important; font-weight: normal !important; }
+    .hidden-mistake b { font-weight: normal !important; color: inherit !important; }
     .action-buttons { text-align: center; padding-top: 30px; padding-bottom: 10px; }
     .action-buttons .primary-btn { background-color: #374151; max-width: 400px; margin: 10px auto; display: inline-block; color: white; padding: 12px 25px; border-radius: 8px; font-weight: 600; }
     .action-buttons .secondary-btn { background-color: var(--primary-cyan); color: white; }
@@ -512,7 +398,7 @@
         display: flex; opacity: 1;
     }
     .modal-content { background-color: var(--surface-color); color: var(--text-color); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
-    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header); }
+    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header);}
     .modal-content ul { text-align: left; list-style-position: inside; padding: 0; margin: 0 0 30px 0; line-height: 2.2; color: var(--text-body); }
     .modal-content ul li::marker { color: var(--accent-purple); }
     #continue-btn, .modal-close-btn { background-color: #1f2937; color: white; padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; }
@@ -547,7 +433,7 @@
     #reportErrorModal label { font-weight: 600; color: var(--text-header); }
     #reportErrorModal select, #reportErrorModal textarea { width: 100%; padding: 10px 12px; background-color: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 1em; margin-top: 5px; color: var(--text-color); }
     #reportErrorModal select:focus, #reportErrorModal textarea:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
-    #submitReportBtn:disabled { background-color: #d1d5db; opacity: 0.7; cursor: not-allowed; box-shadow: none; }
+    #submitReportBtn:disabled { background-color: #d1d5db; opacity: 0.7; cursor: not-allowed; }
 
     #deepAnalysisModal .modal-content { max-width: 900px; width: 95%; text-align: left; }
     #deepAnalysisModal table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95em; }
@@ -581,10 +467,10 @@
         color: #1e293b; 
         font-size: 1.15rem; 
         margin-bottom: 25px; 
-        font-family: var(--font-family);
+        font-family: 'Inter', sans-serif;
     }
 
-    .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
+    .confirm-dialog { background: var(--surface-color); padding: 24px; border-radius: 16px; text-align: center; max-width: 400px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); border: 1px solid var(--border-subtle); }
     .confirm-dialog h3 { margin: 0 0 8px 0; font-size: 1.25em; }
     .confirm-dialog p { margin: 0 0 20px 0; color: var(--medium-grey); }
     .confirm-dialog-actions { display: flex; gap: 10px; justify-content: center; }
@@ -593,22 +479,26 @@
     #cancelResetBtn { background-color: #e5e7eb; color: #4b5563; }
     
     .full-page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; }
+    
+    @media (max-width: 768px) {
+        .ssc-header { flex-direction: column; gap: 10px; padding: 10px; text-align: center; }
+        .ssc-header-left, .ssc-header-right { text-align: center; width: 100%; }
+        .ssc-title h1 { font-size: 1em; }
+        .ssc-main-content { flex-direction: column; }
+        .ssc-typing-area { padding: 10px; min-height: 50vh; }
+        .ssc-candidate-panel { width: 100%; border-left: none; border-top: 1px solid #ccc; flex-shrink: 1; padding: 10px; }
+        .ssc-photo-box { margin-bottom: 10px; }
+        .config-grid { grid-template-columns: 1fr; }
+    }
 
-    /* --- Floating JS-based Mouse Tooltip Styles --- */
-    .mistake-hover-tooltip {
-        position: absolute;
-        background: #0f172a; /* Slate 900 */
-        color: #ffffff;
-        padding: 10px 14px;
-        border-radius: 8px;
-        font-size: 0.85rem;
-        font-family: 'Inter', sans-serif;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-        z-index: 9999;
-        display: none;
-        pointer-events: none;
-        line-height: 1.4;
-        border: 1px solid rgba(255,255,255,0.1);
+    @media print {
+      body, .app-container, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
+      .view { display: none !important; }
+      #results-view { display: block !important; }
+      .action-buttons, .result-controls, .legend-container, .back-btn { display: none !important; }
+      .result-sheet-container { padding: 0; }
+      .col { border: 1px solid #ccc; max-height: none; overflow-y: visible; }
+      .columns { grid-template-columns: 1fr 1fr !important; }
     }
     
     /* Specific styles for AI Modal & Icon */
@@ -640,29 +530,34 @@
         transform: scale(1.2);
         background-color: #4338ca;
     }
+
+    /* Ensure the parent span allows the icon to sit nicely */
+    .highlight {
+        display: inline; /* Keep default text flow */
+    }
+
+    /* Floating, Modern Hover Tooltip */
+    .mistake-hover-tooltip {
+        position: absolute;
+        background: #0f172a; /* Slate 900 */
+        color: #ffffff;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-family: 'Inter', sans-serif;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        z-index: 9999;
+        display: none;
+        pointer-events: none;
+        line-height: 1.4;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
 </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div id="fullPageLoader" class="full-page-loader">
     <div class="spinner"></div>
-</div>
-
-<!-- Dynamic Premium Upgrade Modal Interception -->
-<div id="premiumUpgradeModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 500px; padding: 35px; border-radius: 16px; text-align: center;">
-        <div style="background-color: #fef3c7; color: #d97706; width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; font-size: 1.8rem;">
-            👑
-        </div>
-        <h2 style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px; border: none; padding: 0;">Upgrade to Premium Pass</h2>
-        <p style="color: #64748b; font-size: 0.95rem; line-height: 1.6; margin-bottom: 25px;">
-            Adjustable speeds and Unlimited Transcription Tests are exclusive to Premium Pass holders. Upgrade today to unlock these features, advanced AI evaluations, and performance analytics.
-        </p>
-        <div style="display: flex; gap: 12px; justify-content: center;">
-            <button onclick="document.getElementById('premiumUpgradeModal').classList.remove('visible')" style="background-color: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 8px; font-weight: 600;">Cancel</button>
-            <button onclick="redirectToPlans()" style="background-color: #7c3aed; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(124,58,237,0.25);">Get Premium Pass 🚀</button>
-        </div>
-    </div>
 </div>
 
 <div class="app-container">
@@ -684,7 +579,7 @@
                     <h2>Practice Section</h2>
                     <span class="tag">PAID</span>
                 </div>
-                <p>Practice KC passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
+                <p>Practice all passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
                 <div class="intro-actions">
                     <button id="startFirstTestBtn">Start First Test</button>
                     <button id="resetProgressBtn">Reset Progress</button>
@@ -695,7 +590,7 @@
 
         <div class="filter-bar">
             <select id="filter-select">
-                <option value="all">Show All Status</option>
+                <option value="all">Show All</option>
                 <option value="attempted">Show Attempted</option>
                 <option value="not-attempted">Show Not Attempted</option>
             </select>
@@ -777,7 +672,7 @@
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
                         </button>
                         <div class="setting-popover" style="min-width: 200px;">
-                            <span id="speedSettingLabel" class="setting-label">Speed 🔒</span>
+                            <span class="setting-label">Speed</span>
                             <div id="wpmSpeedDisplay">100 WPM</div>
                             <input type="range" id="wpmRange" min="60" max="160" step="5" value="100" oninput="updateSpeedDisplay(this.value)" onchange="setPlaybackSpeed()">
                             <!-- Hidden input for compatibility -->
@@ -817,7 +712,7 @@
                     </label>
                 </div>
 
-                <button id="startTranscriptionBtn" onclick="showInstructions()" disabled>🚀 Start Transcription Test 🔒</button>
+                <button id="startTranscriptionBtn" onclick="showInstructions()" disabled>🚀 Start Transcription Test</button>
             </div>
         </div>
         <button onclick="clearStateAndGoBack()" class="back-btn">Choose a different dictation</button>
@@ -944,11 +839,11 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 20px; height: 20px; color: #1e40af;">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m2.25 0H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
                 </svg>
-                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; font-family: var(--font-family);">Official Transcription</h2>
+                <h2 style="font-size: 1.15rem; font-weight: 700; margin: 0; letter-spacing: -0.01em; font-family: 'Inter', sans-serif;">Official Transcription</h2>
             </div>
             <button class="transcript-close-btn" onclick="document.getElementById('transcriptModal').classList.remove('visible')" style="background: none; border: none; color: #64748b; font-size: 1.25rem; cursor: pointer; padding: 4px; display: flex; align-items: center; justify-content: center; transition: color 0.15s ease;">✕</button>
         </div>
-        <div id="transcriptTextBody" style="padding: 24px 28px; overflow-y: auto; font-family: var(--font-family); font-size: 1.05rem; line-height: 1.85; color: #334155; background-color: #ffffff; text-align: justify; margin: 0; border: none; border-radius: 0; max-height: 65vh;"></div>
+        <div id="transcriptTextBody" style="padding: 24px 28px; overflow-y: auto; font-family: 'Inter', sans-serif; font-size: 1.05rem; line-height: 1.85; color: #334155; background-color: #ffffff; text-align: justify; margin: 0; border: none; border-radius: 0; max-height: 65vh;"></div>
     </div>
 </div>
 
@@ -997,7 +892,7 @@
 
 <div id="resetConfirmModal" class="modal-overlay">
     <div class="confirm-dialog">
-        <h3>Reset Practice Progress?</h3>
+        <h3>Reset KC Progress?</h3>
         <p>This will permanently delete your saved scores and attempt history from this browser and from the cloud. This action cannot be undone.</p>
         <div class="confirm-dialog-actions">
             <button id="cancelResetBtn">Cancel</button>
@@ -1008,7 +903,7 @@
 
 <!-- AI Analysis Modal -->
 <div id="aiModal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 600px; text-align: left; border-radius: 12px; font-family: var(--font-family);">
+    <div class="modal-content" style="max-width: 600px; text-align: left; border-radius: 12px; font-family: 'Inter', sans-serif;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; border-bottom:1px solid #eee; padding-bottom:10px;">
             <h3 style="margin:0; font-size:1.1rem; color:#4f46e5; display:flex; align-items:center; gap:8px;">
                 <span>🧠</span> AI Teacher Analysis
@@ -1052,12 +947,12 @@ try {
 } catch (e) {
     console.error("Firebase initialization failed. Please provide valid credentials.", e);
 }
-let db = null;
+const db = firebase.firestore ? firebase.firestore() : null;
 
 // --- Global State Variables ---
-let player, originalText = "", wordCount = 0, currentPassageTitle = "";
+let player, originalText = "", wordCount = 0;
 let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
-let g_vol = "volumes", g_tran = "", candidateId, attemptsRef;
+let g_vol = "", g_tran = "", candidateId, attemptsRef;
 let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
 let g_lastAnalysisResult; 
 let allPassageData =[];
@@ -1068,44 +963,6 @@ let g_selectedTarget = "full";
 let g_stopVideoWatcher = null; 
 let g_autoStopTimestamp = Infinity; 
 let g_synonymData =[];
-let g_isPremium = false; // Global Freemium Level Identifier
-
-// --- SECURE AUTHENTICATION STATE WRAPPER ---
-function getFirebaseUserSecure() {
-    return new Promise((resolve) => {
-        const unsubscribe = firebase.auth().onAuthStateChanged((user) => {
-            unsubscribe();
-            resolve(user);
-        });
-    });
-}
-
-// --- ACTIVE FIRESTORE ENFORCEMENT ENGINE ---
-async function checkPremiumStatusOnServer() {
-    try {
-        let firebaseUser = firebase.auth().currentUser;
-        if (!firebaseUser) {
-            firebaseUser = await getFirebaseUserSecure();
-        }
-        
-        if (!firebaseUser || !db) return false;
-
-        const doc = await db.collection('users').doc(firebaseUser.uid).get();
-        if (doc.exists) {
-            const data = doc.data();
-            const activePlan = (data.isPremium === true || data.plan === 'premium');
-            let notExpired = true;
-            if (data.expiry) {
-                const expiryDate = data.expiry.toDate ? data.expiry.toDate() : new Date(data.expiry);
-                notExpired = expiryDate > new Date();
-            }
-            return activePlan && notExpired;
-        }
-    } catch (e) {
-        console.error("Direct server premium check failed:", e);
-    }
-    return false;
-}
 
 document.addEventListener("DOMContentLoaded", initializePracticeKC);
 
@@ -1130,38 +987,31 @@ function setLogoSource() {
 
 // --- Initialization ---
 async function initializePracticeKC() {
-    // Check Authentication state
+    // Check DigiWallet for Access
     const user = DigiWallet.getUser();
-    if (!user) {
-        showErrorModal("Access Denied", "Please log in using your account first.");
+    const isPremium = DigiWallet.isPremium();
+
+    if (!user || !isPremium) {
+        showErrorModal("Access Denied", "No valid Premium Pass found. Please log in and upgrade first.");
         document.body.innerHTML = `
             <div style="text-align:center; padding:50px; font-family:sans-serif;">
                 <h1 style="color:#ef4444;">Access Denied</h1>
-                <p>A valid login account is required to access the practice tools.</p>
+                <p>A Premium Pass is required to access the Practice KC tool.</p>
                 <button onclick="window.parent.postMessage('closeTool', '*')" style="padding:10px 20px; cursor:pointer;">Go Back</button>
             </div>`;
         return;
-    }
-
-    // Safely initialize Firebase reference dynamically
-    if (firebase.firestore) {
-        db = firebase.firestore();
     }
 
     // Connect user details
     candidateId = user.uid; 
     document.getElementById('candidate-name-display').textContent = (user.name || "CANDIDATE").toUpperCase();
     
+    // Safely initialize Firebase reference
     if (db) {
         attemptsRef = db.collection("testAnalysis").doc(candidateId).collection("attempts");
     } else {
         console.warn("Firestore is not available. Progress will not be saved to the cloud.");
     }
-
-    // Perform an active check immediately during page load
-    const activePrem = await checkPremiumStatusOnServer();
-    g_isPremium = activePrem;
-    adjustInterfaceForPremiumTierDirect(activePrem);
 
     setupAntiInspection();
     setupProgressBar();
@@ -1183,51 +1033,6 @@ async function initializePracticeKC() {
     renderQuickResume();
 }
 
-function adjustInterfaceForPremiumTierDirect(activePrem) {
-    g_isPremium = activePrem;
-    const speedLabel = document.getElementById('speedSettingLabel');
-    const startBtn = document.getElementById('startTranscriptionBtn');
-    const trialBadge = document.querySelector('.intro-header .tag');
-
-    if (activePrem) {
-        if (speedLabel) speedLabel.innerHTML = "Speed Settings";
-        if (startBtn) {
-            startBtn.innerHTML = "🚀 Start Transcription Test";
-            startBtn.disabled = false;
-        }
-        if (trialBadge) {
-            trialBadge.textContent = "PREMIUM ACTIVE";
-            trialBadge.style.background = "linear-gradient(135deg, #10b981, #059669)";
-        }
-    } else {
-        if (speedLabel) speedLabel.innerHTML = "Speed (Locked) 🔒";
-        if (startBtn) {
-            startBtn.innerHTML = "🔒 Start Transcription (Premium Only)";
-            startBtn.disabled = false; // Kept clickable to run verification checks on interaction
-        }
-        if (trialBadge) {
-            trialBadge.textContent = "FREE PREVIEW MODE";
-            trialBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
-        }
-    }
-}
-
-// Retained legacy compatibility wrapper
-function adjustInterfaceForPremiumTier() {
-    adjustInterfaceForPremiumTierDirect(g_isPremium);
-}
-
-function showPremiumUpgradeModal() {
-    document.getElementById('premiumUpgradeModal').classList.add('visible');
-    if (player && typeof player.pauseVideo === 'function') {
-        player.pauseVideo();
-    }
-}
-
-function redirectToPlans() {
-    window.location.href = 'plan.html';
-}
-
 /**
  * Fetches synonym data from the server and stores it globally.
  */
@@ -1235,14 +1040,14 @@ async function loadSynonyms() {
     try {
         const response = await fetch('/config/flex_synonyms.php');
         if (!response.ok) {
-            throw new Error(`HTTP status ${response.status}`);
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
         g_synonymData = Array.isArray(data) ? data :[];
         console.log(`Synonym engine loaded with ${g_synonymData.length} groups.`);
     } catch (error) {
-        console.warn("Synonym system initialized using local fallback library.");
-        g_synonymData =[]; 
+        console.error("Could not load synonym data. The checker will be less accurate.", error);
+        g_synonymData =[]; // Ensure it's an empty array on failure
     }
 }
 
@@ -1355,10 +1160,10 @@ function renderGrid() {
             
             let statusClass = 'attempted-low';
             statusStripeClass = 'card-status-low';
-            if (latestAcc >= 90) {
+            if (latestAcc >= 95) {
                 statusClass = 'attempted-good';
                 statusStripeClass = 'card-status-good';
-            } else if (latestAcc >= 80) {
+            } else if (latestAcc >= 90) {
                 statusClass = 'attempted-average';
                 statusStripeClass = 'card-status-average';
             }
@@ -1492,7 +1297,7 @@ async function loadPractice(volumeId, transcriptId) {
         setupWordCountOptions();
 
         const passageData = allPassageData.find(p => p.volId === g_vol && p.tranId === g_tran);
-        document.getElementById('player-subtitle').textContent = `Kailash Chandra - Passage ${passageData ? passageData.transcriptNumber : ''}`;
+        document.getElementById('player-subtitle').textContent = `Kailash Chandra - Passage ${passageData.transcriptNumber}`;
         loadVideo(audioData.audioUrl, false);
     } catch (error) {
         showErrorModal("Loading Error", "Error: " + error.message);
@@ -1553,20 +1358,8 @@ function updateAutoStopSettings() {
     }
 }
 
-async function showInstructions() {
+function showInstructions() {
     if (player && typeof player.pauseVideo === 'function') player.pauseVideo();
-    
-    // Explicit, tamper-proof read from server before proceeding
-    document.getElementById('fullPageLoader').style.display = 'flex';
-    const activePrem = await checkPremiumStatusOnServer();
-    document.getElementById('fullPageLoader').style.display = 'none';
-
-    adjustInterfaceForPremiumTierDirect(activePrem);
-
-    if (!activePrem) {
-        showPremiumUpgradeModal();
-        return;
-    }
     document.getElementById('instructions-modal').classList.add('visible');
 }
 
@@ -1678,16 +1471,11 @@ function onPlayerStateChange(event) {
     }
 }
 
-async function setPlaybackSpeed() {
+function setPlaybackSpeed() {
     if (!player || !player.setPlaybackRate) return;
-    
-    // Explicit server validation step before allowing player rate change
-    const activePrem = await checkPremiumStatusOnServer();
-    adjustInterfaceForPremiumTierDirect(activePrem);
-
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
     
-    if (wordCount && totalVideoDuration) { 
+    if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
         const originalWPM = wordCount / (totalVideoDuration / 60); 
         if(originalWPM > 0) {
             currentPlaybackRate = targetWPM / originalWPM;
@@ -1696,23 +1484,6 @@ async function setPlaybackSpeed() {
         }
     } else {
         currentPlaybackRate = 1;
-    }
-
-    if (!activePrem && Math.abs(currentPlaybackRate - 1) > 0.01) {
-        // Fall back to original video speed (1.0 rate)
-        currentPlaybackRate = 1;
-        // Calculate and show the actual WPM of the original video
-        if (wordCount && totalVideoDuration) {
-            const originalWPM = Math.round(wordCount / (totalVideoDuration / 60));
-            document.getElementById('wpmRange').value = originalWPM;
-            updateSpeedDisplay(originalWPM);
-        } else {
-            document.getElementById('wpmRange').value = 100;
-            updateSpeedDisplay(100);
-        }
-        player.setPlaybackRate(1);
-        showPremiumUpgradeModal();
-        return;
     }
     
     player.setPlaybackRate(currentPlaybackRate);
@@ -1744,15 +1515,7 @@ function updateVideoTimeDisplay() {
 
 function setPlayerLoading(isLoading) { document.getElementById('player-loader').style.display = isLoading ? 'flex' : 'none'; document.querySelectorAll('#player-view button, #player-view select').forEach(el => { if (el.id !== 'startTranscriptionBtn') el.disabled = isLoading; }); document.getElementById('startTranscriptionBtn').disabled = true; if (!isLoading) document.getElementById('startTranscriptionBtn').disabled = false; }
 function setupExtraControls() { document.getElementById('volume-slider').addEventListener('input', (e) => player?.setVolume(e.target.value)); document.addEventListener('keydown', (e) => { if (document.getElementById('player-view').style.display === 'block') { if (e.code === 'Space' && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') { e.preventDefault(); togglePlay(); } if (e.code === 'ArrowLeft') { e.preventDefault(); seekRelative(-5); } if (e.code === 'ArrowRight') { e.preventDefault(); seekRelative(5); } } }); const today = new Date(); document.getElementById('exam-date').innerHTML = `<b>Exam Date:</b> ${today.getDate().toString().padStart(2, '0')}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getFullYear()}`; }
-
-async function adjustSpeed(amount) { 
-    const activePrem = await checkPremiumStatusOnServer();
-    adjustInterfaceForPremiumTierDirect(activePrem);
-
-    if (!activePrem) {
-        showPremiumUpgradeModal();
-        return;
-    }
+function adjustSpeed(amount) { 
     const range = document.getElementById('wpmRange');
     let newVal = parseInt(range.value) + amount;
     if(newVal < 60) newVal = 60;
@@ -1764,122 +1527,13 @@ async function adjustSpeed(amount) {
 
 function escapeHtml(s = "") { return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-// =========================================================================
-// HIGH PERFORMANCE MISTAKE PARSER (FIXES TOOLTIP ISSUES)
-// =========================================================================
-function extractTypedAndCorrect(el) {
-    let typed = "";
-    let correct = "";
-
-    // SOURCE 1: Parse from explicit data-tooltip-text attribute if present
-    const tooltipAttr = el.getAttribute('data-tooltip-text') || "";
-    if (tooltipAttr) {
-        const expectedMatch = tooltipAttr.match(/Expected:\s*([^,]*)/i);
-        const typedMatch = tooltipAttr.match(/Typed:\s*(.*)/i);
-        const missingMatch = tooltipAttr.match(/Missing:\s*(.*)/i);
-        const extraMatch = tooltipAttr.match(/Extra:\s*(.*)/i);
-
-        if (expectedMatch) correct = expectedMatch[1].trim();
-        if (typedMatch) typed = typedMatch[1].trim();
-        if (missingMatch) {
-            correct = missingMatch[1].trim();
-            typed = "[None]";
-        }
-        if (extraMatch) {
-            typed = extraMatch[1].trim();
-            correct = "[None]";
-        }
-    }
-
-    // SOURCE 2: Query DOM children as a fallback or verification
-    const wrongEl = el.querySelector('del, s, strike');
-    const correctEl = el.querySelector('b, ins, strong');
-
-    if (wrongEl && !typed) {
-        typed = wrongEl.textContent.trim();
-    }
-    if (correctEl && !correct) {
-        correct = correctEl.textContent.trim();
-    }
-
-    // SOURCE 3: Clean clone-based parsing if still empty
-    if (!typed || !correct) {
-        const clone = el.cloneNode(true);
-        const wrongInClone = clone.querySelector('del, s, strike');
-        if (wrongInClone) {
-            if (!typed) typed = wrongInClone.textContent.trim();
-            wrongInClone.remove();
-        }
-        clone.querySelectorAll('.ai-icon, button, svg, script').forEach(node => node.remove());
-        const remainingText = clone.textContent.replace(/[\u2715\u2713]/g, '').trim();
-
-        if (!correct && remainingText) {
-            correct = remainingText;
-        }
-        if (!typed && remainingText) {
-            typed = remainingText;
-        }
-    }
-
-    // SOURCE 4: Contextual fallback mapping using index lookup
-    const indexAttr = el.getAttribute('data-index');
-    const idx = indexAttr !== null ? parseInt(indexAttr) : NaN;
-
-    if (!correct || correct === "[Check Original]" || correct === "unknown") {
-        if (!isNaN(idx) && g_lastAnalysisResult) {
-            if (g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
-                correct = g_lastAnalysisResult.originalWords[idx];
-            }
-        }
-    }
-
-    if (!typed) {
-        if (!isNaN(idx) && g_lastAnalysisResult) {
-            if (g_lastAnalysisResult.userWords && g_lastAnalysisResult.userWords[idx]) {
-                typed = g_lastAnalysisResult.userWords[idx];
-            }
-        }
-    }
-
-    // Semantic cleanups for Omissions/Additions
-    if (el.classList.contains('omission')) {
-        typed = "[None]";
-        if (!correct || correct === "[None]") {
-            correct = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
-        }
-    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
-        correct = "[None]";
-        if (!typed || typed === "[None]") {
-            typed = el.textContent.replace(/[\u2715\u2713]/g, '').trim();
-        }
-    }
-
-    // Ensure no duplicate strings are returned for replacements/spelling
-    if (typed === correct && (el.classList.contains('spelling') || el.classList.contains('capitalization') || el.classList.contains('substitution'))) {
-        if (!isNaN(idx) && g_lastAnalysisResult && g_lastAnalysisResult.originalWords && g_lastAnalysisResult.originalWords[idx]) {
-            correct = g_lastAnalysisResult.originalWords[idx];
-        }
-    }
-
-    // Sanitize placeholders
-    if (!typed) typed = "[Check Transcription]";
-    if (!correct) correct = "[Check Original Text]";
-
-    return { typed, correct };
-}
-
 function renderResultSheet(analysisResult, isReevaluation = false) {
     g_lastAnalysisResult = analysisResult;
 
     if (isReevaluation) {
         const reevalContainer = document.getElementById('reevaluated-accuracy-container');
         if (reevalContainer) {
-            reevalContainer.innerHTML = `
-                <div class="stats-row" style="justify-content: center; margin-top: 15px;">
-                    <div class="stat-pill" style="background-color: var(--accent-purple); color: #fff; padding: 10px 20px; border-radius: 10px; font-weight: 700;">
-                        Re-evaluated Accuracy: ${analysisResult.accuracy.toFixed(2)}%
-                    </div>
-                </div>`;
+            reevalContainer.innerHTML = `<div class="stats-row"><div class="stat-pill" style="background-color: var(--accent-purple);">Re-evaluated Accuracy: ${analysisResult.accuracy.toFixed(2)}%</div></div>`;
         }
         
         document.getElementById('editableTypedText').innerHTML = analysisResult.resultHTML;
@@ -1892,11 +1546,10 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 
     } else {
         const container = document.getElementById('resultSheetContainer');
-        const passageData = allPassageData.find(p => p.volId === g_vol && p.tranId === g_tran);
-        const dictationName = `Kailash Chandra - Volume ${passageData ? passageData.volume : ''} / Passage ${passageData ? passageData.transcriptNumber : ''}`;
+        const dictationName = `Kailash Chandra - Volume ${g_vol.replace('vol', '')} / Transcript ${g_tran.replace('t', '')}`;
         const testDate = new Date().toLocaleString('en-IN', { dateStyle: 'long', timeStyle: 'short' });
 
-        const { mistakeCounters = {}, halfBucketCount = 0, totalWordsP1 = 0, totalWordsP2 = 0, percentageDiff = 0, accuracy = 0 } = analysisResult;
+        const { mistakeCounters, halfBucketCount, totalWordsP1, totalWordsP2, percentageDiff, accuracy } = analysisResult;
         
         const timeTakenMinutes = (transcriptionTimerTotalTime - timeLeft) / 60;
         const wpm = timeTakenMinutes > 0 ? (totalWordsP2 / timeTakenMinutes).toFixed(2) : "0.00";
@@ -1904,146 +1557,48 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 
         const fullMistakesCount = (mistakeCounters.addition || 0) + (mistakeCounters.omission || 0);
 
-        // Dynamically compute exact physical keystrokes/strokes from text length
-        const strokesCount = g_lastTypedText ? g_lastTypedText.length : (totalWordsP2 * 5);
-
         let originalTextHtml = analysisResult.originalWords.map((word, index) => 
             `<span class="word-wrapper" data-index="${index}">${escapeHtml(word)}</span>`
         ).join(' ');
 
         container.innerHTML = `
         <div class="result-sheet-container">
-            
-            <!-- Highly Sophisticated & Detailed Slate Dashboard Header Card -->
-            <div class="sophisticated-result-header">
-                <!-- Row 1: Document Details & Candidate Metadata -->
-                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #334155; padding-bottom: 18px; margin-bottom: 18px; flex-wrap: wrap; gap: 15px; width: 100%;">
-                    <div style="display: flex; align-items: center; gap: 14px;">
-                        <div style="background-color: rgba(59, 130, 246, 0.15); color: #60a5fa; padding: 12px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.15);">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #a78bfa;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                        </div>
-                        <div>
-                            <h2 style="margin: 0; font-size: 1.35rem; font-weight: 800; color: #ffffff; letter-spacing: -0.025em; line-height: 1.2;">${escapeHtml(dictationName)}</h2>
-                            <div style="display: flex; align-items: center; gap: 8px; margin-top: 6px; font-size: 0.8rem; color: #94a3b8; font-weight: 600; flex-wrap: wrap;">
-                                <span style="background: rgba(255,255,255,0.08); padding: 2px 8px; border-radius: 4px;">📋 SSC STENOGRAPHER CONSOLE</span>
-                                <span style="color: #334155;">•</span>
-                                <span style="color: #f3f4f6;">LANGUAGE: ENGLISH</span>
-                                <span style="color: #334155;">•</span>
-                                <span style="color: #60a5fa;">DATE: ${testDate}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Candidate & Exam Target Sub-panel -->
-                    <div style="display: flex; gap: 24px; font-size: 0.82rem; color: #cbd5e1; border-left: 2px solid #334155; padding-left: 20px; align-items: center; min-height: 45px;">
-                        <div>
-                            <div style="color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.5px;">Candidate Name</div>
-                            <div style="font-weight: 800; color: #ffffff; margin-top: 3px; font-size: 0.95rem;">${document.getElementById('candidate-name-display').textContent}</div>
-                        </div>
-                        <div>
-                            <div style="color: #94a3b8; font-weight: 700; text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.5px;">Exam Target</div>
-                            <div style="font-weight: 800; color: #a78bfa; margin-top: 3px; font-size: 0.95rem;">GRADE C & D</div>
-                        </div>
-                    </div>
+            <h1>Result Sheet:</h1>
+            <div class="stats-container">
+                <div class="stats-row"><div class="stat-pill full-width">${escapeHtml(dictationName)}</div></div>
+                <div class="stats-row">
+                    <div class="stat-pill">Total words: ${totalWordsP1}</div>
+                    <div class="stat-pill">Typed words: ${totalWordsP2}</div>
+                    <div class="stat-pill">Typing Speed: ${wpm} WPM</div>
                 </div>
-                
-                <!-- Row 2: Dense Performance Analytics Blocks -->
-                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; width: 100%;">
-                    <div style="display: flex; gap: 40px; align-items: center; flex-wrap: wrap;">
-                        <div>
-                            <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Evaluation Score</div>
-                            <div style="font-size: 2.1rem; font-weight: 800; color: #10b981; font-family: var(--font-monospace); margin-top: 2px; line-height: 1.1;">${accuracy.toFixed(2)}%</div>
-                        </div>
-                        <div style="width: 1px; height: 35px; background-color: #334155;"></div>
-                        <div>
-                            <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Transcription Speed</div>
-                            <div style="font-size: 2.1rem; font-weight: 800; color: #3b82f6; font-family: var(--font-monospace); margin-top: 2px; line-height: 1.1;">${wpm} <span style="font-size: 1rem; color: #94a3b8; font-weight: 600;">WPM</span></div>
-                        </div>
-                        <div style="width: 1px; height: 35px; background-color: #334155;"></div>
-                        <div>
-                            <div style="font-size: 0.72rem; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px;">Mistake Ratio</div>
-                            <div style="font-size: 2.1rem; font-weight: 800; color: #ef4444; font-family: var(--font-monospace); margin-top: 2px; line-height: 1.1;">${percentageDiff.toFixed(2)}%</div>
-                        </div>
-                    </div>
-                    
-                    <!-- Dynamic Qualification Badge (Grade D limit is 10% errors/90% accuracy) -->
-                    <div>
-                        ${accuracy >= 90 
-                            ? `<span style="background-color: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); padding: 8px 18px; border-radius: 99px; font-size: 0.85rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.15);">✨ EXAM QUALIFIED</span>`
-                            : `<span style="background-color: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.3); padding: 8px 18px; border-radius: 99px; font-size: 0.85rem; font-weight: 800; letter-spacing: 0.5px; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.15);">⚠️ EXAM REJECTED</span>`
-                        }
-                    </div>
+                <div class="stats-row">
+                    <div class="stat-pill red">Full Mistakes: ${fullMistakesCount}</div>
+                    <div class="stat-pill amber">Half Mistakes: ${halfBucketCount}</div>
+                    <div class="stat-pill">Total % of Mistakes: ${percentageDiff.toFixed(2)}%</div>
+                    <div class="stat-pill">Accuracy: ${accuracy.toFixed(2)}%</div>
                 </div>
+                <div id="reevaluated-accuracy-container"></div>
+                <div class="stats-row"><div class="stat-pill">Test Date: ${escapeHtml(testDate)}</div></div>
             </div>
-
-            <!-- Sleek Metrics Cards Dashboard Grid -->
-            <div class="metrics-dashboard-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
-                <div class="metric-card">
-                    <span class="metric-card-label">Original Words</span>
-                    <span class="metric-card-value">${totalWordsP1}</span>
-                </div>
-                <div class="metric-card">
-                    <span class="metric-card-label">Typed Words</span>
-                    <span class="metric-card-value">${totalWordsP2}</span>
-                </div>
-                <div class="metric-card" style="border-left: 4px solid #ef4444;">
-                    <span class="metric-card-label" style="color: #ef4444;">Full Mistakes</span>
-                    <span class="metric-card-value" style="color: #ef4444;">${fullMistakesCount}</span>
-                </div>
-                <div class="metric-card" style="border-left: 4px solid #f59e0b;">
-                    <span class="metric-card-label" style="color: #f59e0b;">Half Mistakes</span>
-                    <span class="metric-card-value" style="color: #f59e0b;">${halfBucketCount}</span>
-                </div>
-                <div class="metric-card" style="border-left: 4px solid #a78bfa;">
-                    <span class="metric-card-label" style="color: #a78bfa;">Physical Strokes</span>
-                    <span class="metric-card-value" style="color: #a78bfa;">${strokesCount}</span>
-                </div>
-            </div>
-
-            <div id="reevaluated-accuracy-container"></div>
-            
-            <div style="font-size: 0.85em; font-weight: 600; color: #94a3b8; margin-bottom: 25px;">
-                Test Date: ${escapeHtml(testDate)}
-            </div>
-
             <div class="legend-container" id="interactive-legend">
-                <div class="legend-item" data-filter-type="omission"><span class="legend-color-box" style="background-color: var(--hl-omissions); border-bottom: 2px solid #22c55e;"></span>Omissions<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="addition"><span class="legend-color-box" style="background-color: var(--hl-additions); border-bottom: 2px solid #ef4444;"></span>Additions<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="spelling"><span class="legend-color-box" style="background-color: var(--hl-spelling); border-bottom: 2px dashed #d97706;"></span>Spelling<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="capitalization"><span class="legend-color-box" style="background-color: var(--hl-capitalization); border-bottom: 2px solid #0284c7;"></span>Capitalization<span class="mistake-count"></span></div>
-                <div class="legend-item" data-filter-type="punctuation"><span class="legend-color-box" style="background-color: var(--hl-punctuation); border-bottom: 2px solid #7c3aed;"></span>Punctuation<span class="mistake-count"></span></div>
-                <button id="reset-filter-btn" class="view-switch-btn" style="border: 1px solid var(--border-color); font-weight: 700;">Show All Highlights</button>
+                <div class="legend-item" data-filter-type="omission"><span class="legend-color-box" style="background-color: var(--hl-omissions);"></span>Omissions<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="addition"><span class="legend-color-box" style="background-color: var(--hl-additions);"></span>Additions<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="spelling"><span class="legend-color-box" style="background-color: var(--hl-spelling);"></span>Spelling<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="capitalization"><span class="legend-color-box" style="background-color: var(--hl-capitalization);"></span>Capitalization<span class="mistake-count"></span></div>
+                <div class="legend-item" data-filter-type="punctuation"><span class="legend-color-box" style="background-color: var(--hl-punctuation);"></span>Punctuation<span class="mistake-count"></span></div>
+                <button id="reset-filter-btn" class="view-switch-btn">Show All</button>
             </div>
-            
-            <!-- Highly Aligned, Premium Action Toolbar Card -->
-            <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.01); flex-wrap: wrap; gap: 15px;">
-                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <!-- Deep Analysis Button -->
-                    <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
-                        🔍 Deep Analysis
-                    </button>
-                    
-                    <!-- Re-evaluate Button -->
+            <div class="result-controls">
+                <div class="action-section">
+                    <button id="deepAnalysisBtn" class="view-switch-btn">Deep Analysis</button>
                     <div class="reevaluate-wrapper">
-                        <button id="toggleReevaluateBtn" class="view-switch-btn" style="background-color: var(--accent-amber); color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(249,115,22,0.15);">
-                            🔄 Enter Re-evaluate Mode
-                        </button>
+                        <button id="toggleReevaluateBtn" class="view-switch-btn">Enter Re-evaluate Mode</button>
+                        <span class="tooltip-icon" data-tooltip="Enter a special mode to edit BOTH your text and the original text, then recalculate your score to see the difference.">?</span>
                     </div>
-
-                    <!-- Report Error Button -->
-                    <button id="reportErrorBtn" class="view-switch-btn" style="background-color: #ef4444; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(239,68,68,0.15); display: flex; align-items: center; gap: 6px;">
-                        ⚠️ Report Passage Error
-                    </button>
+                    <button id="reportErrorBtn" class="view-switch-btn" style="background-color: #f97316; color: white;">Report Error</button>
                 </div>
-
-                <div style="display: flex; gap: 12px; align-items: center;">
-                    <!-- Switch View Button -->
-                    <button id="viewSwitchBtn" class="view-switch-btn" style="background-color: #f1f5f9; color: #334155; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: 1px solid #cbd5e1; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px;">
-                        🖥️ Split View: Top/Bottom
-                    </button>
-                </div>
+                <button id="viewSwitchBtn" class="view-switch-btn">Switch to Side-by-Side View</button>
             </div>
-            
             <div id="comparisonColumns" class="columns view-top-bottom">
                 <div class="col" id="typedCol"><strong>Your Transcription:</strong><p id="editableTypedText" contenteditable="false">${analysisResult.resultHTML}</p></div>
                 <div class="col" id="originalCol"><strong>Original Text:</strong><p id="editableOriginalText" contenteditable="false">${originalTextHtml}</p></div>
@@ -2051,6 +1606,21 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
         </div>`;
 
         if (!localStorage.getItem('hideResultsWelcome')) document.getElementById('resultsWelcomeModal').classList.add('visible');
+
+        document.getElementById('viewSwitchBtn').addEventListener('click', () => {
+            const columnsContainer = document.getElementById('comparisonColumns');
+            const isTopBottom = columnsContainer.classList.contains('view-top-bottom');
+            if (isTopBottom) {
+                columnsContainer.classList.remove('view-top-bottom');
+                columnsContainer.classList.add('view-side-by-side');
+                document.getElementById('viewSwitchBtn').textContent = 'Switch to Top/Bottom View';
+            } else {
+                columnsContainer.classList.remove('view-side-by-side');
+                columnsContainer.classList.add('view-top-bottom');
+                document.getElementById('viewSwitchBtn').textContent = 'Switch to Side-by-Side View';
+            }
+        });
+        document.getElementById('printReportBtn').addEventListener('click', () => window.print());
         initializeResultInteractivity();
     }
 }
@@ -2345,11 +1915,6 @@ async function sendLightweightStatsToFirebase(analysisResult) {
 }
 
 function initializeEventListeners() {
-    const resetModal = document.getElementById('resetConfirmModal');
-    if (resetModal) {
-        document.getElementById('resetProgressBtn').addEventListener('click', () => resetModal.classList.add('visible'));
-    }
-    
     document.getElementById('passage-grid').addEventListener('click', (e) => {
         const button = e.target.closest('.take-test-btn');
         if (button) { const card = button.closest('.passage-card'); loadPractice(card.dataset.volume, card.dataset.transcript); }
@@ -2358,7 +1923,9 @@ function initializeEventListeners() {
     document.getElementById('filter-select').addEventListener('change', renderGrid);
     document.getElementById('sort-select').addEventListener('change', renderGrid);
     document.getElementById('startFirstTestBtn').addEventListener('click', () => document.querySelector('.passage-card .take-test-btn')?.click());
+    document.getElementById('resetProgressBtn').addEventListener('click', () => resetModal.classList.add('visible'));
 
+    const resetModal = document.getElementById('resetConfirmModal');
     document.getElementById('cancelResetBtn').addEventListener('click', () => resetModal.classList.remove('visible'));
     document.getElementById('confirmResetBtn').addEventListener('click', () => { resetProgress(); resetModal.classList.remove('visible'); });
 
@@ -2371,13 +1938,7 @@ function initializeEventListeners() {
     document.getElementById('errorTypeSelect').addEventListener('change', validateReportForm);
     document.getElementById('otherErrorText').addEventListener('input', validateReportForm);
     
-    document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.add('visible'));
-
-    // Bind Print Button cleanly at load
-    const printBtn = document.getElementById('printReportBtn');
-    if (printBtn) {
-        printBtn.addEventListener('click', () => window.print());
-    }
+    document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.remove('visible'));
     
     window.addEventListener('beforeunload', function (e) { if (document.getElementById('results-view').style.display === 'block') { const msg = 'Are you sure you want to leave? Your corrected transcript and re-evaluated score will not be saved. Please download the report first.'; (e || window.event).returnValue = msg; return msg; } });
 }
@@ -2389,27 +1950,6 @@ function initializeResultInteractivity() {
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
     document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
-
-    // Interactive switch view listener robustly bound
-    document.getElementById('viewSwitchBtn').addEventListener('click', () => {
-        const columnsContainer = document.getElementById('comparisonColumns');
-        const isTopBottom = columnsContainer.classList.contains('view-top-bottom');
-        if (isTopBottom) {
-            columnsContainer.classList.remove('view-top-bottom');
-            columnsContainer.classList.add('view-side-by-side');
-            document.getElementById('viewSwitchBtn').textContent = '🖥️ Split View: Side-by-Side';
-        } else {
-            columnsContainer.classList.remove('view-side-by-side');
-            columnsContainer.classList.add('view-top-bottom');
-            document.getElementById('viewSwitchBtn').textContent = '🖥️ Split View: Top/Bottom';
-        }
-    });
-
-    // Cleanly register print button within report DOM loops
-    const printBtn = document.getElementById('printReportBtn');
-    if (printBtn) {
-        printBtn.addEventListener('click', () => window.print());
-    }
 
     initializeInteractiveLegend();
     setupHoverTooltips();
@@ -2439,21 +1979,39 @@ function setupHoverTooltips() {
 }
 
 function handleTooltipOver(e) {
-    const el = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
-    if (!el || el.classList.contains('hidden-mistake')) return;
+    const el = e.target.closest('.highlight, .mis');
+    if (!el) return;
 
     const tooltip = document.getElementById('mistakeTooltip');
     if (!tooltip) return;
 
     let type = "Mistake";
     if (el.classList.contains('omission')) type = "Omission";
-    else if (el.classList.contains('extra') || el.classList.contains('addition')) type = "Addition";
+    else if (el.classList.contains('addition') || el.classList.contains('extra')) type = "Addition";
     else if (el.classList.contains('spelling')) type = "Spelling Mistake";
     else if (el.classList.contains('capitalization')) type = "Capitalization Mistake";
     else if (el.classList.contains('punctuation')) type = "Punctuation Mistake";
     else if (el.classList.contains('substitution')) type = "Word Substitution";
 
-    const { typed, correct } = extractTypedAndCorrect(el);
+    const wrongEl = el.querySelector('del, s');
+    const correctEl = el.querySelector('b, ins');
+
+    let typed = "";
+    let correct = "";
+
+    if (wrongEl && correctEl) {
+        typed = wrongEl.textContent.trim();
+        correct = correctEl.textContent.trim();
+    } else if (el.classList.contains('omission')) {
+        typed = "[None]";
+        correct = el.textContent.trim();
+    } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
+        typed = el.textContent.trim();
+        correct = "[None]";
+    } else {
+        typed = el.textContent.trim();
+        correct = "Check Original Text";
+    }
 
     tooltip.innerHTML = `
         <div style="font-weight: 700; margin-bottom: 4px; color: #a78bfa; font-size: 0.9em; text-transform: uppercase;">${type}</div>
@@ -2472,7 +2030,7 @@ function handleTooltipOver(e) {
 }
 
 function handleTooltipOut(e) {
-    const el = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
+    const el = e.target.closest('.highlight, .mis');
     if (el) {
         const tooltip = document.getElementById('mistakeTooltip');
         if (tooltip) tooltip.style.display = 'none';
@@ -2625,13 +2183,13 @@ function initializeInteractiveLegend() {
     const legendContainer = document.getElementById('interactive-legend');
     if (!legendContainer || !g_lastAnalysisResult) return;
 
-    const mistakeCounters = g_lastAnalysisResult.mistakeCounters || {};
+    const mistakeCounters = g_lastAnalysisResult.mistakeCounters;
     const mistakeMap = {
         omission: mistakeCounters.omission || 0,
-        addition: (mistakeCounters.addition || 0) + (mistakeCounters.substitution || 0),
+        addition: mistakeCounters.addition || 0,
         spelling: mistakeCounters.spelling || 0,
         capitalization: mistakeCounters.capitalization || 0,
-        punctuation: (mistakeCounters.punctuation?.fullstop || 0) + (mistakeCounters.punctuation?.other || 0),
+        punctuation: (mistakeCounters.punctuation.fullstop || 0) + (mistakeCounters.punctuation.other || 0),
     };
     
     legendContainer.querySelectorAll('.legend-item').forEach(item => {
@@ -2640,11 +2198,7 @@ function initializeInteractiveLegend() {
         countSpan.textContent = `(${(mistakeMap[filterType] || 0)})`;
     });
 
-    // Clear prior listeners completely to prevent filter blocks after multiple re-evaluations
-    const newLegendContainer = legendContainer.cloneNode(true);
-    legendContainer.parentNode.replaceChild(newLegendContainer, legendContainer);
-
-    newLegendContainer.addEventListener('click', function(e) {
+    legendContainer.addEventListener('click', function(e) {
         const clickedItem = e.target.closest('.legend-item');
         if (!clickedItem) return;
 
@@ -2652,7 +2206,7 @@ function initializeInteractiveLegend() {
             clickedItem.classList.toggle('active');
         } else {
             const wasActive = clickedItem.classList.contains('active');
-            newLegendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
+            legendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
             if (!wasActive) {
                 clickedItem.classList.add('active');
             }
@@ -2660,36 +2214,23 @@ function initializeInteractiveLegend() {
         applyFilters();
     });
 
-    const resetBtn = document.getElementById('reset-filter-btn');
-    if (resetBtn) {
-        const newResetBtn = resetBtn.cloneNode(true);
-        resetBtn.parentNode.replaceChild(newResetBtn, resetBtn);
-        newResetBtn.addEventListener('click', () => {
-            newLegendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
-            applyFilters();
-        });
-    }
+    document.getElementById('reset-filter-btn').addEventListener('click', () => {
+        legendContainer.querySelectorAll('.legend-item').forEach(item => item.classList.remove('active'));
+        applyFilters();
+    });
 }
 
 function applyFilters() {
     const activeFilters = Array.from(document.querySelectorAll('#interactive-legend .legend-item.active')).map(item => item.dataset.filterType);
-    
-    // Select all highlight spans inside transcription box
-    const allHighlightElements = document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight, #editableTypedText .extra, #editableTypedText .substitution, #editableTypedText .omission, #editableTypedText .spelling, #editableTypedText .capitalization, #editableTypedText .punctuation');
+    const allHighlightElements = document.querySelectorAll('#editableTypedText .mis, #editableTypedText .highlight');
     
     allHighlightElements.forEach(el => {
-        if (el.classList.contains('ai-icon')) return;
-        
         let isVisible = false;
-        if (activeFilters.length === 0) {
+        if(activeFilters.length === 0) {
             isVisible = true;
         } else {
-            for (const filter of activeFilters) {
-                let match = el.classList.contains(filter);
-                if (filter === 'addition' && (el.classList.contains('extra') || el.classList.contains('substitution') || el.classList.contains('addition'))) {
-                    match = true;
-                }
-                if (match) {
+            for(const filter of activeFilters) {
+                if(el.classList.contains(filter)) {
                     isVisible = true;
                     break;
                 }
@@ -2713,7 +2254,7 @@ function showDeepAnalysisModal() {
     const tableBody = document.getElementById('deep-analysis-table-body');
     let tableRowsHtml = '';
     
-    const mistakes =[
+    const mistakes = [
         ...spelling.map(m => ({ type: 'Spelling', wrong: m.wrong, correct: m.correct })),
         ...capitalisation.map(m => ({ type: 'Capitalization', wrong: m.wrong, correct: m.correct })),
         ...replacements.map(m => ({ type: 'Replacement', wrong: m.added, correct: m.omitted }))
@@ -2748,41 +2289,120 @@ function capitalizeFirstLetter(string) {
 // =========================================================================
 
 const AITeacher = {
+    // Make sure this is your active Google Apps Script Deployment URL
     ENDPOINT_URL: "https://script.google.com/macros/s/AKfycbyKfEvIsbTY7QwojbLSN2udwK4HNux5xJTVfoFW97nPgxa-soQ445-VQ5YJXKy9Lbsv/exec",
+    
     cache: {},
     isFetching: false,
+
     init: function() {
         const columns = document.getElementById('comparisonColumns');
         if (!columns) return;
+        // Bind click listener for the AI icon specifically
         columns.removeEventListener('click', this.handleMistakeClick);
         columns.addEventListener('click', this.handleMistakeClick.bind(this));
     },
+
     clearCache: function() {
-        this.cache = {};
+        this.cache = {}; // Resets on new test submission
     },
+
     handleMistakeClick: function(e) {
         const icon = e.target.closest('.ai-icon');
         if (!icon) return;
-        const highlight = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
+
+        const highlight = e.target.closest('.highlight');
         if (!highlight) return;
+
         e.stopPropagation(); 
+        
+        // 1. Extract exactly what was typed, expected, and the context
         const mistakeData = this.extractMistakeData(highlight);
+        
+        // 2. Pass it to the AI Fetch engine
         this.fetchAnalysis(mistakeData);
     },
+
+    // ---------------------------------------------------------------------
+    // EXTRACTION LOGIC: Pulls precise words and surrounding raw sentences
+    // ---------------------------------------------------------------------
     extractMistakeData: function(highlight) {
         let type = this.getMistakeType(highlight);
-        const { typed, correct } = extractTypedAndCorrect(highlight);
+        let clone = highlight.cloneNode(true);
+        let iconNode = clone.querySelector('.ai-icon'); 
+        if (iconNode) iconNode.remove();
+
+        let wrongText = "";
+        let correctText = "";
+
+        // NEW DOM EXTRACTION LOGIC:
+        // We look specifically for tags the worker injects to separate your text from the answer.
+        
+        // 1. Find the crossed out word (what the user typed)
+        let strikeEl = clone.querySelector('del, s, strike');
+        if (strikeEl) {
+            wrongText = strikeEl.textContent.trim();
+            strikeEl.remove();
+        }
+
+        // 2. Find the correct word injected by the worker
+        let boldEl = clone.querySelector('b, ins');
+        if (boldEl) {
+            correctText = boldEl.textContent.trim();
+            boldEl.remove();
+        }
+
+        // 3. Whatever is left over after removing the tags
+        let remainingText = clone.textContent.trim();
+
+        // 4. Resolve the words based on the tags we found
+        if (wrongText && correctText) {
+            // We successfully separated both from tags!
+        } else if (wrongText && !correctText) {
+            correctText = remainingText;
+        } else if (!wrongText && correctText) {
+            wrongText = remainingText;
+        } else {
+            // No explicit tags found, rely on mistake type
+            if (type === 'Omission') {
+                correctText = remainingText;
+                wrongText = "[Missing Word]";
+            } else if (type === 'Addition') {
+                wrongText = remainingText;
+                correctText = "[Extra Word]";
+            } else {
+                wrongText = remainingText;
+                // Attempt tooltip fallback for correct text
+                let tooltip = highlight.getAttribute('data-tooltip-text') || "";
+                if (tooltip.includes('Expected:')) {
+                    correctText = tooltip.split('Expected:')[1].trim();
+                } else if (tooltip.includes('Missing:')) {
+                    correctText = tooltip.split('Missing:')[1].trim();
+                } else {
+                    correctText = "unknown";
+                }
+            }
+        }
+
+        let cleanOriginal = correctText.trim();
+        let cleanTyped = wrongText.trim();
+
+        // GET CONTEXT FROM THE RAW TEXT STRINGS
+        // We get a 3-word anchor before the mistake to safely find it in the raw strings
         let anchorWords = this.getAnchorWords(highlight);
-        let userContext = this.findContext(g_lastTypedText, anchorWords, typed, type === 'Omission');
-        let origContext = this.findContext(originalText, anchorWords, correct, type === 'Addition');
+
+        let userContext = this.findContext(g_lastTypedText, anchorWords, cleanTyped, type === 'Omission');
+        let origContext = this.findContext(originalText, anchorWords, cleanOriginal, type === 'Addition');
+
         return {
             type: type,
-            originalWord: correct,
-            typedWord: typed,
+            originalWord: cleanOriginal,
+            typedWord: cleanTyped,
             userContext: userContext,
             originalContext: origContext
         };
     },
+
     getMistakeType: function(highlight) {
         if (highlight.dataset.mistakeType) return highlight.dataset.mistakeType;
         if (highlight.classList.contains('capitalization')) return 'Capitalization';
@@ -2793,32 +2413,46 @@ const AITeacher = {
         if (highlight.classList.contains('addition') || highlight.classList.contains('extra')) return 'Addition';
         return 'Unknown';
     },
+
     getAnchorWords: function(highlight) {
+        // Walks backwards in the DOM to gather the 3 words the user typed immediately before the error
         let container = document.getElementById('editableTypedText');
         if (!container) return "";
         let walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, null, false);
         let node;
         let textBefore = "";
+        
         while ((node = walker.nextNode())) {
             if (highlight.contains(node)) break;
+            
+            // Skip injected worker tags in prior highlights so we only get pure user text
             let parent = node.parentElement;
             if (parent && (parent.tagName === 'B' || parent.tagName === 'INS')) continue;
+            
             textBefore += " " + node.textContent;
         }
+        
         let words = textBefore.trim().split(/\s+/).filter(Boolean);
         return words.slice(-3).join(" ");
     },
+
     findContext: function(rawText, anchorText, targetWord, isMissing) {
+        // Searches the RAW string to build a perfect 20-word window context
         if (!rawText) return "Context not available.";
         let words = rawText.split(/\s+/);
+        
         let targetClean = targetWord.toLowerCase().replace(/[^\w]/g, '');
         let anchorClean = anchorText.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/).filter(Boolean);
+        
         let Math_min = Math.min;
         let Math_max = Math.max;
         let Math_floor = Math.floor;
+        
         let bestIdx = -1;
+        
         for (let i = 0; i < words.length; i++) {
             if (isMissing) {
+                // If it's a missing word, we just match the anchor exactly
                 if (anchorClean.length > 0 && i >= anchorClean.length) {
                     let anchorMatch = true;
                     for (let a = 0; a < anchorClean.length; a++) {
@@ -2833,6 +2467,7 @@ const AITeacher = {
                     }
                 }
             } else {
+                // If not missing, match the target word AND the anchor
                 if (words[i].toLowerCase().replace(/[^\w]/g, '') === targetClean) {
                     if (anchorClean.length === 0) {
                         bestIdx = i;
@@ -2850,41 +2485,57 @@ const AITeacher = {
                             break;
                         }
                     }
-                    if (bestIdx === -1) bestIdx = i;
+                    if (bestIdx === -1) bestIdx = i; // Fallback
                 }
             }
         }
-        if (bestIdx === -1) bestIdx = Math_floor(words.length / 2);
+        
+        if (bestIdx === -1) bestIdx = Math_floor(words.length / 2); // Absolute fallback
+        
         let start = Math_max(0, bestIdx - 10);
         let end = Math_min(words.length, bestIdx + 10);
+        
         let windowWords = words.slice(start, end);
+        
         let adjustedIdx = bestIdx - start;
         if (!isMissing && windowWords[adjustedIdx]) {
-            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`;
+            windowWords[adjustedIdx] = `[${windowWords[adjustedIdx]}]`; // highlight word in context
         } else if (isMissing && windowWords[adjustedIdx]) {
             windowWords.splice(adjustedIdx, 0, `[${targetWord}]`);
         }
+        
         return windowWords.join(" ") + "...";
     },
+
+    // ---------------------------------------------------------------------
+    // API FETCH LOGIC: Constructs prompt and calls backend
+    // ---------------------------------------------------------------------
     fetchAnalysis: async function(data) {
         const modal = document.getElementById('aiModal');
         const content = document.getElementById('aiModalContent');
         const loader = document.getElementById('aiLoadingState');
+        
         modal.classList.add('visible');
+        
         const cacheKey = `${data.originalWord}_${data.typedWord}_${data.type}`;
+        
         if (this.cache[cacheKey]) {
             this.renderUI(this.cache[cacheKey], data.originalWord, data.typedWord);
             return;
         }
+
         if (this.isFetching) {
             content.style.display = 'none';
             loader.style.display = 'block';
             return;
         }
+
         this.isFetching = true;
         content.style.display = 'none';
         loader.style.display = 'block';
+
         try {
+            // Highly specific prompt with pure raw text context injected
             const promptText = `Act as an English grammar teacher for stenography students.
 A student made a transcription error. Analyze it and explain the grammar or punctuation rule.
 
@@ -2903,6 +2554,7 @@ Respond EXACTLY in this JSON format:
   "rule": "The underlying grammar, spelling, or punctuation rule.",
   "examples":["Correct example 1", "Correct example 2"]
 }`;
+
             const response = await fetch(this.ENDPOINT_URL, {
                 method: 'POST',
                 body: JSON.stringify({
@@ -2910,12 +2562,21 @@ Respond EXACTLY in this JSON format:
                     prompt: promptText 
                 })
             });
+
             const result = await response.json();
+            
             if (!result.success) throw new Error("AI Backend Error: " + (result.error || "Unknown"));
+
+            // Parse response safely
             const cleanJson = result.reply.replace(/```json/g, '').replace(/```/g, '').trim();
             const aiParsedData = JSON.parse(cleanJson);
+
+            // Save to Cache
             this.cache[cacheKey] = aiParsedData;
+
+            // Render
             this.renderUI(aiParsedData, data.originalWord, data.typedWord);
+
         } catch (error) {
             console.error(error);
             content.style.display = 'block';
@@ -2926,14 +2587,21 @@ Respond EXACTLY in this JSON format:
             content.style.display = 'block';
         }
     },
+
+    // ---------------------------------------------------------------------
+    // UI RENDER LOGIC: Formats the JSON into HTML
+    // ---------------------------------------------------------------------
     renderUI: function(aiData, origWord, typedWord) {
         const content = document.getElementById('aiModalContent');
+        
         let explanation = "General error detected.";
         let rule = "Grammar rule not identified.";
         let examplesHtml = "";
+
         if (typeof aiData === 'object') {
             explanation = aiData.explanation || explanation;
             rule = aiData.rule || rule;
+            
             if (aiData.examples && Array.isArray(aiData.examples)) {
                 examplesHtml = `
                     <div style="margin-top: 15px;">
@@ -2944,8 +2612,9 @@ Respond EXACTLY in this JSON format:
                     </div>`;
             }
         } else {
-            explanation = aiData;
+            explanation = aiData; // Fallback if AI returned raw string
         }
+
         content.innerHTML = `
             <div class="ai-mistake-context">
                 Comparing: <b>${origWord}</b> <span style="color:#16a34a">(Correct)</span> vs <b>${typedWord}</b> <span style="color:#dc2626">(Your Typo)</span>
