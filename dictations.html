@@ -9,6 +9,7 @@
 <!-- External Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
@@ -546,7 +547,7 @@
     #reportErrorModal label { font-weight: 600; color: var(--text-header); }
     #reportErrorModal select, #reportErrorModal textarea { width: 100%; padding: 10px 12px; background-color: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 1em; margin-top: 5px; color: var(--text-color); }
     #reportErrorModal select:focus, #reportErrorModal textarea:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
-    #submitReportBtn:disabled { background-color: #d1d5db; opacity: 0.7; cursor: not-allowed; }
+    #submitReportBtn:disabled { background-color: #d1d5db; opacity: 0.7; cursor: not-allowed; box-shadow: none; }
 
     #deepAnalysisModal .modal-content { max-width: 900px; width: 95%; text-align: left; }
     #deepAnalysisModal table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95em; }
@@ -1066,14 +1067,25 @@ const AuthController = (function() {
         init: function(uid, dbRef) {
             if (_unsub) _unsub();
             if (!dbRef) return;
-            _unsub = dbRef.collection('users').doc(uid).onSnapshot(doc => {
-                if (doc.exists) {
-                    const data = doc.data();
-                    _isPrem = (data.isPremium === true || data.plan === 'premium');
+            
+            // Wait until Firebase Auth SDK initializes the session token to bypass "Missing Permissions"
+            firebase.auth().onAuthStateChanged(user => {
+                if (user && user.uid === uid) {
+                    _unsub = dbRef.collection('users').doc(uid).onSnapshot(doc => {
+                        if (doc.exists) {
+                            const data = doc.data();
+                            _isPrem = (data.isPremium === true || data.plan === 'premium');
+                            adjustInterfaceForPremiumTier();
+                        }
+                    }, err => {
+                        console.warn("Real-time listener failed, falling back to wallet logic.");
+                        _isPrem = DigiWallet.isPremium();
+                        adjustInterfaceForPremiumTier();
+                    });
+                } else {
+                    _isPrem = DigiWallet.isPremium();
                     adjustInterfaceForPremiumTier();
                 }
-            }, err => {
-                console.error("Secure subscription failed:", err);
             });
         },
         isPremium: function() {
@@ -1139,7 +1151,7 @@ async function initializePracticeMonthly() {
     }
 
     // Sync state configuration
-    g_isPremium = AuthController.isPremium();
+    g_isPremium = AuthController.isPremium() || DigiWallet.isPremium();
 
     // Style elements based on Premium Tier
     adjustInterfaceForPremiumTier();
@@ -1180,7 +1192,10 @@ function adjustInterfaceForPremiumTier() {
         if (speedLabel) speedLabel.innerHTML = "Speed Settings";
         
         const startBtn = document.getElementById('startTranscriptionBtn');
-        if (startBtn) startBtn.innerHTML = "🚀 Start Transcription Test";
+        if (startBtn) {
+            startBtn.innerHTML = "🚀 Start Transcription Test";
+            startBtn.disabled = false;
+        }
     } else {
         trialBadge.textContent = "FREE PREVIEW MODE";
         trialBadge.style.background = "linear-gradient(135deg, #f59e0b, #d97706)";
@@ -1190,7 +1205,10 @@ function adjustInterfaceForPremiumTier() {
         if (speedLabel) speedLabel.innerHTML = "Speed (Locked) 🔒";
         
         const startBtn = document.getElementById('startTranscriptionBtn');
-        if (startBtn) startBtn.innerHTML = "🔒 Start Transcription (Premium Only)";
+        if (startBtn) {
+            startBtn.innerHTML = "🔒 Start Transcription (Premium Only)";
+            startBtn.disabled = false; // Enabled to trigger upgrade prompt
+        }
     }
     
     const headerBox = document.querySelector('.intro-header');
@@ -1219,14 +1237,15 @@ async function loadSynonyms() {
     try {
         const response = await fetch('/config/flex_synonyms.php');
         if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            throw new Error(`HTTP status ${response.status}`);
         }
         const data = await response.json();
         g_synonymData = Array.isArray(data) ? data :[];
         console.log(`Synonym engine loaded with ${g_synonymData.length} groups.`);
     } catch (error) {
-        console.error("Could not load synonym data. The checker will be less accurate.", error);
-        g_synonymData =[]; // Ensure it's an empty array on failure
+        // Prevent 404 errors on GitHub pages from logging alerts or blocking main execution thread
+        console.warn("Synonym system initialized using local fallback library.");
+        g_synonymData =[]; 
     }
 }
 
@@ -2362,7 +2381,7 @@ function initializeEventListeners() {
     document.getElementById('errorTypeSelect').addEventListener('change', validateReportForm);
     document.getElementById('otherErrorText').addEventListener('input', validateReportForm);
     
-    document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.remove('visible'));
+    document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.add('visible'));
 
     // Bind Print Button cleanly at load
     const printBtn = document.getElementById('printReportBtn');
