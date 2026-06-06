@@ -512,7 +512,7 @@
         display: flex; opacity: 1;
     }
     .modal-content { background-color: var(--surface-color); color: var(--text-color); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
-    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header);}
+    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header); }
     .modal-content ul { text-align: left; list-style-position: inside; padding: 0; margin: 0 0 30px 0; line-height: 2.2; color: var(--text-body); }
     .modal-content ul li::marker { color: var(--accent-purple); }
     #continue-btn, .modal-close-btn { background-color: #1f2937; color: white; padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; }
@@ -684,7 +684,7 @@
                     <h2>Practice Section</h2>
                     <span class="tag">PAID</span>
                 </div>
-                <p>Practice monthly progressive passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
+                <p>Practice KC passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
                 <div class="intro-actions">
                     <button id="startFirstTestBtn">Start First Test</button>
                     <button id="resetProgressBtn">Reset Progress</button>
@@ -1492,12 +1492,8 @@ async function loadPractice(volumeId, transcriptId) {
         setupWordCountOptions();
 
         const passageData = allPassageData.find(p => p.volId === g_vol && p.tranId === g_tran);
-        document.getElementById('player-subtitle').textContent = `Kailash Chandra - Passage ${passageData.transcriptNumber}`;
+        document.getElementById('player-subtitle').textContent = `Kailash Chandra - Passage ${passageData ? passageData.transcriptNumber : ''}`;
         loadVideo(audioData.audioUrl, false);
-        
-        // Active checking to enforce locks as soon as view mounts
-        const activePrem = await checkPremiumStatusOnServer();
-        adjustInterfaceForPremiumTierDirect(activePrem);
     } catch (error) {
         showErrorModal("Loading Error", "Error: " + error.message);
         showView('selection-view');
@@ -1689,20 +1685,9 @@ async function setPlaybackSpeed() {
     const activePrem = await checkPremiumStatusOnServer();
     adjustInterfaceForPremiumTierDirect(activePrem);
 
-    if (!activePrem) {
-        const slider = document.getElementById('wpmRange');
-        if (slider) {
-            slider.value = 100;
-            updateSpeedDisplay(100);
-        }
-        player.setPlaybackRate(1);
-        showPremiumUpgradeModal();
-        return;
-    }
-
     const targetWPM = parseInt(document.getElementById('wpmRange').value);
     
-    if (!isNaN(targetWPM) && wordCount && totalVideoDuration) { 
+    if (wordCount && totalVideoDuration) { 
         const originalWPM = wordCount / (totalVideoDuration / 60); 
         if(originalWPM > 0) {
             currentPlaybackRate = targetWPM / originalWPM;
@@ -1711,6 +1696,23 @@ async function setPlaybackSpeed() {
         }
     } else {
         currentPlaybackRate = 1;
+    }
+
+    if (!activePrem && Math.abs(currentPlaybackRate - 1) > 0.01) {
+        // Fall back to original video speed (1.0 rate)
+        currentPlaybackRate = 1;
+        // Calculate and show the actual WPM of the original video
+        if (wordCount && totalVideoDuration) {
+            const originalWPM = Math.round(wordCount / (totalVideoDuration / 60));
+            document.getElementById('wpmRange').value = originalWPM;
+            updateSpeedDisplay(originalWPM);
+        } else {
+            document.getElementById('wpmRange').value = 100;
+            updateSpeedDisplay(100);
+        }
+        player.setPlaybackRate(1);
+        showPremiumUpgradeModal();
+        return;
     }
     
     player.setPlaybackRate(currentPlaybackRate);
@@ -2369,7 +2371,7 @@ function initializeEventListeners() {
     document.getElementById('errorTypeSelect').addEventListener('change', validateReportForm);
     document.getElementById('otherErrorText').addEventListener('input', validateReportForm);
     
-    document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.remove('visible'));
+    document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.add('visible'));
 
     // Bind Print Button cleanly at load
     const printBtn = document.getElementById('printReportBtn');
