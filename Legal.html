@@ -13,7 +13,10 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
-<!-- NEW: DigiWallet Script attached here -->
+<!-- Centralized Common Assets Script (Optional: Include your base64 variables here) -->
+<script src="common-assets.js" onerror="console.warn('Common assets script not found; using local fallback logic.')"></script>
+
+<!-- DigiWallet Script -->
 <script src="digiwallet.js"></script>
 
 <!-- Google Fonts & Icons -->
@@ -213,7 +216,7 @@
     .practice-station { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0,0,0,0.04); overflow: visible; position: relative; }
 
     .player-header { background: #fff; padding: 15px 25px; border-bottom: 1px solid #f1f5f9; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-    .player-info h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
+    .player-info h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; }
     .player-info p { margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b; }
 
     .transcript-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
@@ -512,7 +515,7 @@
         display: flex; opacity: 1;
     }
     .modal-content { background-color: var(--surface-color); color: var(--text-color); padding: 30px 40px; border-radius: 8px; width: 90%; max-width: 600px; text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.1); border: 1px solid var(--border-subtle); }
-    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header);}
+    .modal-content h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 25px; border-bottom: 1px solid var(--border-subtle); padding-bottom: 15px; color: var(--text-header); }
     .modal-content ul { text-align: left; list-style-position: inside; padding: 0; margin: 0 0 30px 0; line-height: 2.2; color: var(--text-body); }
     .modal-content ul li::marker { color: var(--accent-purple); }
     #continue-btn, .modal-close-btn { background-color: #1f2937; color: white; padding: 12px 30px; font-size: 1.1em; font-weight: bold; border-radius: 8px; transition: background-color 0.2s; }
@@ -610,6 +613,89 @@
         line-height: 1.4;
         border: 1px solid rgba(255,255,255,0.1);
     }
+    
+    /* Specific styles for AI Modal & Icon */
+    .ai-mistake-context { background:#f1f5f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #4f46e5; font-size: 0.95rem; }
+    .ai-explanation-text { font-size: 1rem; color: #1e293b; }
+    .ai-rule-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform:uppercase; margin-bottom: 5px; }
+    
+    /* AI Icon Styling */
+    .ai-icon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 16px;
+        height: 16px;
+        background-color: #4f46e5; /* Indigo color */
+        color: white;
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: bold;
+        margin-left: 4px;
+        cursor: pointer;
+        vertical-align: middle;
+        user-select: none;
+        transition: transform 0.2s;
+        text-decoration: none !important;
+    }
+
+    .ai-icon:hover {
+        transform: scale(1.2);
+        background-color: #4338ca;
+    }
+
+    /* Soft Boundary Full Screen Modal Overhaul */
+    #disclaimer-modal .modal-content {
+        max-width: 100vw !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        padding: 60px 80px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: #f8fafc !important; /* Soft off-white backdrop */
+        border: none !important;
+        overflow-y: auto;
+    }
+    
+    .disclaimer-card {
+        background-color: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 50px;
+        box-shadow: var(--shadow-lg);
+        max-width: 800px;
+        margin: auto;
+        line-height: 1.8;
+    }
+    .disclaimer-card h3 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin-bottom: 25px;
+        color: #0f172a;
+    }
+    .disclaimer-body p {
+        font-size: 0.95rem;
+        color: #334155;
+        margin-bottom: 20px;
+    }
+    .disclaimer-body ul {
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        list-style-type: disc;
+    }
+    .disclaimer-body li {
+        font-size: 0.92rem;
+        color: #475569;
+    }
+    .disclaimer-body strong {
+        color: #0f172a;
+        font-weight: 700;
+    }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -635,23 +721,23 @@
     </div>
 </div>
 
-<!-- Fair Use Disclaimer Modal Overlay -->
+<!-- Fair Use Disclaimer Full Screen Modal Overlay -->
 <div id="disclaimer-modal" class="modal-overlay">
-    <div class="modal-content" style="max-width: 480px; text-align: left; padding: 30px; border-radius: 12px;">
-        <h3 style="margin-top: 0; font-size: 1.2rem; font-weight: 700; color: #0f172a; display: flex; align-items: center; gap: 8px; font-family: var(--font-family);">
-            <span>ℹ️</span> Fair Use Disclaimer
-        </h3>
-        <div style="font-size: 0.85rem; color: #475569; line-height: 1.6; margin: 15px 0; border-top: 1px solid #f1f5f9; padding-top: 15px; font-family: var(--font-family);">
-            <p style="margin: 0 0 12px 0;">This application operates strictly under public educational guidelines:</p>
-            <ul style="padding-left: 18px; margin: 0 0 16px 0; display: flex; flex-direction: column; gap: 8px; list-style-type: disc;">
-                <li>No monetary benefits are derived from the distribution or playback of this dictation material.</li>
-                <li>Audio resources are fetched dynamically from public channels on YouTube and streamed directly via the official YouTube IFrame API.</li>
-                <li>This utility is designed solely for non-profit stenography practice and educational skill evaluation.</li>
-                <li>All respective copyrights, trademarks, ownership, and original licensing rights belong entirely to their original creators and owners.</li>
-            </ul>
-        </div>
-        <div style="text-align: right;">
-            <button onclick="document.getElementById('disclaimer-modal').classList.remove('visible')" class="modal-close-btn" style="padding: 8px 20px; font-size: 0.85rem; border-radius: 6px;">Close</button>
+    <div class="modal-content">
+        <div class="disclaimer-card">
+            <h3>Fair Use & Technical Integration Statement</h3>
+            <div class="disclaimer-body">
+                <p>This interactive training environment is maintained in alignment with non-commercial, non-profit academic principles to provide specialized shorthand skill support:</p>
+                <ul>
+                    <li><strong>Pedagogical Purpose:</strong> The stream and associated text references serve exclusively as an educational asset, assisting transcriptionists and stenography students in skill development and objective evaluation.</li>
+                    <li><strong>No Financial Exchange:</strong> Access to this dictation tool is supplied completely free of charge. No monetary benefit, licensing revenue, commercial gains, or proprietary margins are extracted from the hosting, utilization, or playback of the voice files provided.</li>
+                    <li><strong>Standardized API Interface:</strong> All audio streaming operations are mediated through the public, standardized IFrame integration infrastructure provided by YouTube. The system does not replicate, modify, download, store, or locally host proprietary data streams.</li>
+                    <li><strong>Rights Preservation:</strong> We explicitly declare that this platform does not assume, imply, or assert any ownership interest or copyright over the auditory files utilized. All proprietary licensing, distribution privileges, voice performance rights, and copyrights belong fully and unconditionally to their respective original publishers and copyright holders.</li>
+                </ul>
+            </div>
+            <div style="text-align: right; margin-top: 35px;">
+                <button onclick="document.getElementById('disclaimer-modal').classList.remove('visible')" class="modal-close-btn" style="padding: 12px 30px; font-size: 0.9rem; border-radius: 8px; font-weight: bold;">Return to Player</button>
+            </div>
         </div>
     </div>
 </div>
@@ -675,7 +761,7 @@
                     <h2>Practice Section</h2>
                     <span class="tag">PAID</span>
                 </div>
-                <p>Practice legal dictations. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
+                <p>Practice legal progressive passages. Your progress is saved automatically in this browser. Use the reset button to clear your local and cloud data.</p>
                 <div class="intro-actions">
                     <button id="startFirstTestBtn">Start First Test</button>
                     <button id="resetProgressBtn">Reset Progress</button>
@@ -712,7 +798,7 @@
                 <div class="player-info">
                     <h2 class="player-title">
                         Dictation Player
-                        <!-- Subtle Professional Disclaimer Information Button -->
+                        <!-- Dynamic Pop-up Information Button -->
                         <button onclick="document.getElementById('disclaimer-modal').classList.add('visible')" style="background: none; border: none; color: #94a3b8; padding: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s ease;" title="Fair Use Disclaimer">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 18px; height: 18px;">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
@@ -1122,9 +1208,20 @@ function setupAntiInspection() {
 }
 
 function setLogoSource() {
-    const defaultLogo = ""; 
     const logoImg = document.getElementById('ssc-logo-img');
-    if (logoImg) logoImg.src = defaultLogo || "";
+    if (!logoImg) return;
+    
+    // Checks standard locations for a common loaded base64 asset
+    if (window.SSC_LOGO_B64) {
+        logoImg.src = window.SSC_LOGO_B64;
+    } else if (window.commonAssets && window.commonAssets.sscLogo) {
+        logoImg.src = window.commonAssets.sscLogo;
+    } else if (typeof DigiWallet !== 'undefined' && typeof DigiWallet.getLogo === 'function') {
+        logoImg.src = DigiWallet.getLogo();
+    } else {
+        // Fallback default vector indicator
+        logoImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'><circle cx='12' cy='12' r='10'/><path d='M12 8v8M8 12h8'/></svg>";
+    }
 }
 
 // --- Initialization ---
