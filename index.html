@@ -33,6 +33,13 @@
     body[data-theme="sunset"] { --primary-bg: #fff1f2; --text-color: #4c1d24; --secondary-text-color: #8c2d42; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #fecdd3; --button-gradient-start: #fb923c; --button-gradient-end: #f472b6; }
     body[data-theme="oceanic"] { --primary-bg: #f0f9ff; --text-color: #082f49; --secondary-text-color: #075985; --card-bg: white; --card-shadow: rgba(0, 0, 0, 0.08); --card-border: #e0f2fe; --button-gradient-start: #22d3ee; --button-gradient-end: #0ea5e9; }
 
+    /* --- HIGH CONTRAST CLASS --- */
+    body.contrast-mode #mainContent,
+    body.contrast-mode #mainHeader,
+    body.contrast-mode .dock {
+        filter: contrast(125%);
+    }
+
     /* --- GLOBAL STYLES --- */
     html { scroll-behavior: smooth; }
     body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); transition: background-color 0.3s, color 0.3s; }
@@ -689,8 +696,7 @@
                 let html = '';
                 
                 actions.forEach(action => {
-                    const isUrl = action.target.includes('.html') || action.target.includes('http');
-                    const clickHandler = isUrl ? `window.location.href='${action.target}'` : `launchTool('${action.target}')`;
+                    const clickHandler = `launchTool('${action.target}')`;
                     const color = action.color || '#6366f1';
                     
                     html += `
@@ -865,6 +871,18 @@
     function setScrollLock(locked) { document.body.classList[locked ? 'add' : 'remove']('modal-open'); }
     
     function launchTool(toolName) {
+        // Halt navigation and trigger login popup if the user is not logged in
+        if (!currentUser && toolName !== 'about') {
+            showAuthModal();
+            return;
+        }
+
+        // Handle raw links or URLs directly if they are specified inside quick actions
+        if (toolName.includes('.html') || toolName.startsWith('http')) {
+            window.location.href = toolName;
+            return;
+        }
+
         let destination = 'index.html';
         if (toolName === 'kc') destination = 'kc.html';
         else if (toolName === 'dictations') destination = 'dictations.html';
@@ -1016,6 +1034,76 @@
         GID('profileSaveStatus').style.display = 'none';
     }
 
+    // --- My Pass Modal ---
+    function showPassModal() {
+        if (!currentUser) {
+            showAuthModal();
+            return;
+        }
+        const isPremium = isUserPremium(currentUser);
+        const container = GID('passDetailsContainer');
+        
+        if (isPremium) {
+            const expiryDate = currentUser.expiry.toDate ? currentUser.expiry.toDate().toLocaleDateString() : new Date(currentUser.expiry).toLocaleDateString();
+            container.innerHTML = `
+                <div class="pass-card">
+                    <i class="fas fa-crown" style="font-size: 2rem; opacity: 0.8; position: absolute; right: -10px; bottom: -10px; transform: rotate(-20deg) scale(3);"></i>
+                    <h3 style="margin: 0 0 5px 0;">Premium Pass</h3>
+                    <p style="margin: 0; font-weight: 600;">Status: Active</p>
+                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Valid until: ${expiryDate}</p>
+                </div>
+            `;
+        } else {
+            container.innerHTML = `
+                <div class="pass-card free">
+                    <i class="fas fa-ticket-alt" style="font-size: 2rem; opacity: 0.1; position: absolute; right: 10px; bottom: 10px; transform: rotate(-20deg) scale(3);"></i>
+                    <h3 style="margin: 0 0 5px 0;">Free Tier</h3>
+                    <p style="margin: 0; color: var(--secondary-text-color);">You don't have an active premium pass.</p>
+                </div>
+            `;
+        }
+        
+        GID('passModal').style.display = 'flex';
+        GID('passModal').classList.add('visible');
+        setScrollLock(true);
+    }
+    function hidePassModal() { 
+        GID('passModal').classList.remove('visible'); 
+        setTimeout(() => { GID('passModal').style.display = 'none'; }, 300);
+        setScrollLock(false); 
+    }
+
+    // --- Settings Modal ---
+    function showSettingsModal() { 
+        GID('set-email-notif').checked = localStorage.getItem('setEmailNotif') !== 'false';
+        GID('set-autosave').checked = localStorage.getItem('setAutosave') !== 'false';
+        GID('set-contrast').checked = localStorage.getItem('setContrast') === 'true';
+        
+        GID('settingsModal').style.display = 'flex';
+        GID('settingsModal').classList.add('visible'); 
+        setScrollLock(true); 
+    }
+    function hideSettingsModal() { 
+        GID('settingsModal').classList.remove('visible'); 
+        setTimeout(() => { GID('settingsModal').style.display = 'none'; }, 300);
+        setScrollLock(false); 
+    }
+    function saveSettings() {
+        localStorage.setItem('setEmailNotif', GID('set-email-notif').checked);
+        localStorage.setItem('setAutosave', GID('set-autosave').checked);
+        
+        const contrastActive = GID('set-contrast').checked;
+        localStorage.setItem('setContrast', contrastActive);
+        
+        if (contrastActive) {
+            document.body.classList.add('contrast-mode');
+        } else {
+            document.body.classList.remove('contrast-mode');
+        }
+        
+        hideSettingsModal();
+    }
+
     function switchProfileTab(tab) {
         const editBtn = document.querySelectorAll('.profile-tabs .tab-btn')[0];
         const histBtn = document.querySelectorAll('.profile-tabs .tab-btn')[1];
@@ -1075,74 +1163,6 @@
             console.error("Error loading history:", err);
             container.innerHTML = '<p style="text-align: center; color: var(--error-color); margin-top: 2rem;">Could not load purchase history.</p>';
         }
-    }
-
-    // --- My Pass Modal ---
-    function showPassModal() {
-        if (!currentUser) {
-            showAuthModal();
-            return;
-        }
-        const isPremium = isUserPremium(currentUser);
-        const container = GID('passDetailsContainer');
-        
-        if (isPremium) {
-            const expiryDate = currentUser.expiry.toDate ? currentUser.expiry.toDate().toLocaleDateString() : new Date(currentUser.expiry).toLocaleDateString();
-            container.innerHTML = `
-                <div class="pass-card">
-                    <i class="fas fa-crown" style="font-size: 2rem; opacity: 0.8; position: absolute; right: -10px; bottom: -10px; transform: rotate(-20deg) scale(3);"></i>
-                    <h3 style="margin: 0 0 5px 0;">Premium Pass</h3>
-                    <p style="margin: 0; font-weight: 600;">Status: Active</p>
-                    <p style="margin: 5px 0 0 0; font-size: 0.9rem;">Valid until: ${expiryDate}</p>
-                </div>
-            `;
-        } else {
-            container.innerHTML = `
-                <div class="pass-card free">
-                    <i class="fas fa-ticket-alt" style="font-size: 2rem; opacity: 0.1; position: absolute; right: 10px; bottom: 10px; transform: rotate(-20deg) scale(3);"></i>
-                    <h3 style="margin: 0 0 5px 0;">Free Tier</h3>
-                    <p style="margin: 0; color: var(--secondary-text-color);">You don't have an active premium pass.</p>
-                </div>
-            `;
-        }
-        
-        GID('passModal').style.display = 'flex';
-        GID('passModal').classList.add('visible');
-        setScrollLock(true);
-    }
-    function hidePassModal() { 
-        GID('passModal').classList.remove('visible'); 
-        setTimeout(() => { GID('passModal').style.display = 'none'; }, 300);
-        setScrollLock(false); 
-    }
-
-    // --- Settings Modal ---
-    function showSettingsModal() { 
-        GID('set-email-notif').checked = localStorage.getItem('setEmailNotif') !== 'false';
-        GID('set-autosave').checked = localStorage.getItem('setAutosave') !== 'false';
-        GID('set-contrast').checked = localStorage.getItem('setContrast') === 'true';
-        
-        GID('settingsModal').style.display = 'flex';
-        GID('settingsModal').classList.add('visible'); 
-        setScrollLock(true); 
-    }
-    function hideSettingsModal() { 
-        GID('settingsModal').classList.remove('visible'); 
-        setTimeout(() => { GID('settingsModal').style.display = 'none'; }, 300);
-        setScrollLock(false); 
-    }
-    function saveSettings() {
-        localStorage.setItem('setEmailNotif', GID('set-email-notif').checked);
-        localStorage.setItem('setAutosave', GID('set-autosave').checked);
-        localStorage.setItem('setContrast', GID('set-contrast').checked);
-        
-        if(GID('set-contrast').checked) {
-            document.body.style.filter = "contrast(115%)";
-        } else {
-            document.body.style.filter = "none";
-        }
-        
-        hideSettingsModal();
     }
 
     // --- UI UPDATER ---
@@ -1268,7 +1288,9 @@
             showAuthModal();
         }
 
-        if(localStorage.getItem('setContrast') === 'true') document.body.style.filter = "contrast(115%)";
+        if(localStorage.getItem('setContrast') === 'true') {
+            document.body.classList.add('contrast-mode');
+        }
 
         document.addEventListener('click', (e) => {
             if(!e.target.closest('#profile-menu-container') && !e.target.closest('#profileModal')) { const pd = GID('profile-dropdown'); if(pd) pd.style.display = 'none'; }
