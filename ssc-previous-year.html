@@ -265,7 +265,6 @@
     #viewSwitchBtn { background-color: var(--accent-purple-light); color: var(--accent-purple); border-color: var(--accent-purple); }
     #viewSwitchBtn:hover { background-color: #dadaf7; }
 
-    #deepAnalysisBtn { background-color: #374151; color: white; }
     #toggleReevaluateBtn { background-color: var(--accent-amber); color: white; }
 
     .reevaluate-wrapper { position: relative; display: inline-flex; align-items: center; gap: 8px; }
@@ -429,7 +428,7 @@
             <div class="disclaimer-body">
                 <p>This interactive training environment is maintained in alignment with academic principles to provide specialized shorthand skill support:</p>
                 <ul>
-                    <li><strong>Pedagogium Purpose:</strong> The streams and associated text references serve exclusively as an educational asset, assisting transcriptionists and stenography students in skill development.</li>
+                    <li><strong>Pedagogical Purpose:</strong> The streams and associated text references serve exclusively as an educational asset, assisting transcriptionists and stenography students in skill development.</li>
                     <li><strong>No Financial Exchange:</strong> Access to this dictation tool is supplied completely free of charge. No proprietary margins are extracted from playback of the voice files provided.</li>
                     <li><strong>Standardized API Interface:</strong> All audio streaming operations are mediated through the public, standardized IFrame integration infrastructure provided by YouTube.</li>
                     <li><strong>Rights Preservation:</strong> All proprietary licensing, distribution privileges, voice performance rights, and copyrights belong fully and unconditionally to their respective original publishers and copyright holders.</li>
@@ -1483,6 +1482,7 @@ function updateSpeedDisplay(val) {
     document.getElementById('wpmSpeedDisplay').textContent = val + " WPM";
 }
 
+// Player controls mapping
 function togglePlay() { if (!player || !player.getPlayerState) return; player.getPlayerState() === YT.PlayerState.PLAYING ? player.pauseVideo() : player.playVideo(); }
 function restartVideo() { if (player) { player.seekTo(0, true); player.playVideo(); } }
 function seekRelative(seconds) { if (!player || !player.getCurrentTime) return; const newTime = player.getCurrentTime() + seconds; player.seekTo(newTime, true); }
@@ -1738,10 +1738,6 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             
             <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.01); flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
-                        🔍 Deep Analysis
-                    </button>
-                    
                     <div class="reevaluate-wrapper">
                         <button id="toggleReevaluateBtn" class="view-switch-btn" style="background-color: var(--accent-amber); color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(249,115,22,0.15);">
                             🔄 Enter Re-evaluate Mode
@@ -2091,7 +2087,6 @@ function initializeResultInteractivity() {
 
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
-    document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
 
     document.getElementById('viewSwitchBtn').addEventListener('click', () => {
         const columnsContainer = document.getElementById('comparisonColumns');
