@@ -1,4 +1,3 @@
---- START OF FILE plans.html ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -486,6 +485,15 @@
         const orderId = document.getElementById('uniqueCodeInput').value;
         const planName = document.getElementById('planNameInput').value;
         const price = parseFloat(document.getElementById('planPriceInput').value);
+        const utr = document.getElementById('transactionId').value.trim();
+
+        // Calculate Start/End date approximations based on pass duration for history storage
+        const startDate = new Date();
+        let durationDays = 30;
+        if (planName.includes("Silver")) durationDays = 90;
+        else if (planName.includes("Gold")) durationDays = 180;
+        const endDate = new Date();
+        endDate.setDate(startDate.getDate() + durationDays);
 
         const verificationData = {
             uid: currentUser.uid,
@@ -493,7 +501,7 @@
             email: currentUser.email,
             plan: planName,
             price: price,
-            transactionId: document.getElementById('transactionId').value.trim(),
+            transactionId: utr,
             uniqueCode: orderId,
             verified: false,
             status: 'pending',
@@ -507,13 +515,18 @@
         const verificationRef = DB.collection('paymentVerifications').doc(orderId);
         batch.set(verificationRef, verificationData);
 
-        // Path 2: Write instantly to User subcollection history
+        // Path 2: Write instantly to User subcollection history with full details
         const userHistoryRef = DB.collection('users').doc(currentUser.uid).collection('payments').doc(orderId);
         batch.set(userHistoryRef, {
             amount: price,
             planName: planName,
             status: "pending",
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            transactionId: utr,
+            orderId: orderId,
+            couponUsed: appliedCoupon || null,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            startDate: startDate,
+            endDate: endDate
         });
 
         try {
@@ -540,10 +553,21 @@
         document.getElementById('pending-email').textContent = email;
         
         if (paymentListener) paymentListener();
-        paymentListener = DB.collection('paymentVerifications').doc(orderId).onSnapshot(doc => {
+        paymentListener = DB.collection('paymentVerifications').doc(orderId).onSnapshot(async doc => {
             if (doc.exists) {
                 const data = doc.data();
                 if (data.verified) {
+                    const finalStatus = data.status === 'approved' ? 'success' : 'failed';
+                    
+                    // Write immediate client-side sync update to User subcollection
+                    try {
+                        await DB.collection('users').doc(currentUser.uid).collection('payments').doc(orderId).update({
+                            status: finalStatus
+                        });
+                    } catch(err) {
+                        console.error("Local sync update failed:", err);
+                    }
+
                     document.getElementById('pending-section').classList.add('hidden');
                     if (data.status === 'approved') {
                         document.getElementById('success-section').classList.remove('hidden');
