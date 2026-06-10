@@ -13,6 +13,9 @@
 <script src="https://www.youtube.com/iframe_api"></script>
 <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
+<!-- Centralized Common Assets Script (Reads the base64 code from common-assets.js) -->
+<script src="common-assets.js" onerror="console.warn('Common assets script not found; using local fallback logo.')"></script>
+
 <!-- NEW: DigiWallet Script attached here -->
 <script src="digiwallet.js"></script>
 
@@ -213,7 +216,7 @@
     .practice-station { background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px -5px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0,0,0,0.04); overflow: visible; position: relative; }
 
     .player-header { background: #fff; padding: 15px 25px; border-bottom: 1px solid #f1f5f9; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
-    .player-info h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; }
+    .player-info h2 { margin: 0; font-size: 1.1rem; font-weight: 700; color: #1e293b; display: flex; align-items: center; gap: 6px; }
     .player-info p { margin: 2px 0 0 0; font-size: 0.85rem; color: #64748b; }
 
     .transcript-btn { background: #f8fafc; border: 1px solid #e2e8f0; padding: 6px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; color: #475569; display: flex; align-items: center; gap: 6px; transition: all 0.2s; }
@@ -547,7 +550,7 @@
     #reportErrorModal label { font-weight: 600; color: var(--text-header); }
     #reportErrorModal select, #reportErrorModal textarea { width: 100%; padding: 10px 12px; background-color: var(--bg-main); border: 1px solid var(--border-subtle); border-radius: 8px; font-size: 1em; margin-top: 5px; color: var(--text-color); }
     #reportErrorModal select:focus, #reportErrorModal textarea:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
-    #submitReportBtn:disabled { background-color: #d1d5db; opacity: 0.7; cursor: not-allowed; box-shadow: none; }
+    #submitReportBtn:disabled { background-color: #d1d5db; opacity: 0.7; cursor: not-allowed; }
 
     #deepAnalysisModal .modal-content { max-width: 900px; width: 95%; text-align: left; }
     #deepAnalysisModal table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 0.95em; }
@@ -640,6 +643,59 @@
         transform: scale(1.2);
         background-color: #4338ca;
     }
+
+    /* Soft Boundary Full Screen Modal Overhaul */
+    #disclaimer-modal .modal-content {
+        max-width: 100vw !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        padding: 60px 80px !important;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: #f8fafc !important; /* Soft off-white backdrop */
+        border: none !important;
+        overflow-y: auto;
+    }
+    
+    .disclaimer-card {
+        background-color: #ffffff;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        padding: 50px;
+        box-shadow: var(--shadow-lg);
+        max-width: 800px;
+        margin: auto;
+        line-height: 1.8;
+    }
+    .disclaimer-card h3 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        margin-bottom: 25px;
+        color: #0f172a;
+    }
+    .disclaimer-body p {
+        font-size: 0.95rem;
+        color: #334155;
+        margin-bottom: 20px;
+    }
+    .disclaimer-body ul {
+        padding-left: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+        list-style-type: disc;
+    }
+    .disclaimer-body li {
+        font-size: 0.92rem;
+        color: #475569;
+    }
+    .disclaimer-body strong {
+        color: #0f172a;
+        font-weight: 700;
+    }
 </style>
 </head>
 <body oncontextmenu="return false;">
@@ -661,6 +717,27 @@
         <div style="display: flex; gap: 12px; justify-content: center;">
             <button onclick="document.getElementById('premiumUpgradeModal').classList.remove('visible')" style="background-color: #f1f5f9; color: #475569; padding: 12px 24px; border-radius: 8px; font-weight: 600;">Cancel</button>
             <button onclick="redirectToPlans()" style="background-color: #7c3aed; color: white; padding: 12px 24px; border-radius: 8px; font-weight: 700; box-shadow: 0 4px 12px rgba(124,58,237,0.25);">Get Premium Pass 🚀</button>
+        </div>
+    </div>
+</div>
+
+<!-- Fair Use Disclaimer Full Screen Modal Overlay -->
+<div id="disclaimer-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="disclaimer-card">
+            <h3>Fair Use & Technical Integration Statement</h3>
+            <div class="disclaimer-body">
+                <p>This interactive training environment is maintained in alignment with non-commercial, non-profit academic principles to provide specialized shorthand skill support:</p>
+                <ul>
+                    <li><strong>Pedagogical Purpose:</strong> The stream and associated text references serve exclusively as an educational asset, assisting transcriptionists and stenography students in skill development and objective evaluation.</li>
+                    <li><strong>No Financial Exchange:</strong> Access to this dictation tool is supplied completely free of charge. No monetary benefit, licensing revenue, commercial gains, or proprietary margins are extracted from the hosting, utilization, or playback of the voice files provided.</li>
+                    <li><strong>Standardized API Interface:</strong> All audio streaming operations are mediated through the public, standardized IFrame integration infrastructure provided by YouTube. The system does not replicate, modify, download, store, or locally host proprietary data streams.</li>
+                    <li><strong>Rights Preservation:</strong> We explicitly declare that this platform does not assume, imply, or assert any ownership interest or copyright over the auditory files utilized. All proprietary licensing, distribution privileges, voice performance rights, and copyrights belong fully and unconditionally to their respective original publishers and copyright holders.</li>
+                </ul>
+            </div>
+            <div style="text-align: right; margin-top: 35px;">
+                <button onclick="document.getElementById('disclaimer-modal').classList.remove('visible')" class="modal-close-btn" style="padding: 12px 30px; font-size: 0.9rem; border-radius: 8px; font-weight: bold;">Return to Player</button>
+            </div>
         </div>
     </div>
 </div>
@@ -719,7 +796,15 @@
             <!-- Modern Header -->
             <div class="player-header">
                 <div class="player-info">
-                    <h2 class="player-title">Dictation Player</h2>
+                    <h2 class="player-title">
+                        Dictation Player
+                        <!-- Dynamic Pop-up Information Button -->
+                        <button onclick="document.getElementById('disclaimer-modal').classList.add('visible')" style="background: none; border: none; color: #94a3b8; padding: 4px; display: inline-flex; align-items: center; justify-content: center; cursor: pointer; transition: color 0.15s ease;" title="Fair Use Disclaimer">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" style="width: 18px; height: 18px;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 111.063.852l-.708 2.836a.75.75 0 001.063.852l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" />
+                            </svg>
+                        </button>
+                    </h2>
                     <p id="player-subtitle">Kailash Chandra - Loading...</p>
                 </div>
                 <button class="transcript-btn" onclick="openTranscriptModal()">
@@ -989,7 +1074,7 @@
                 <div><b>Name:</b> <span id="candidate-name-display">CANDIDATE</span></div>
                 <div><b>Roll No.:</b> 9876543210</div>
                 <div><b>Language:</b> English</div>
-                <div><b>Exam -</b> SSC Stenographer Grade C & D Examination - 2024</div>
+                <div><b>Exam -</b> SSC Stenographer Grade C & D EXAMINATION - 2024</div>
             </div>
         </aside>
     </main>
@@ -1123,9 +1208,20 @@ function setupAntiInspection() {
 }
 
 function setLogoSource() {
-    const defaultLogo = ""; 
     const logoImg = document.getElementById('ssc-logo-img');
-    if (logoImg) logoImg.src = defaultLogo || "";
+    if (!logoImg) return;
+    
+    // Checks standard locations for a common loaded base64 asset
+    if (window.SSC_LOGO_B64) {
+        logoImg.src = window.SSC_LOGO_B64;
+    } else if (window.commonAssets && window.commonAssets.sscLogo) {
+        logoImg.src = window.commonAssets.sscLogo;
+    } else if (typeof DigiWallet !== 'undefined' && typeof DigiWallet.getLogo === 'function') {
+        logoImg.src = DigiWallet.getLogo();
+    } else {
+        // Fallback default vector indicator
+        logoImg.src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2'><circle cx='12' cy='12' r='10'/><path d='M12 8v8M8 12h8'/></svg>";
+    }
 }
 
 // --- Initialization ---
@@ -1225,7 +1321,7 @@ function showPremiumUpgradeModal() {
 }
 
 function redirectToPlans() {
-    window.location.href = 'plan.html';
+    window.location.href = 'plans.html';
 }
 
 /**
@@ -1506,7 +1602,7 @@ function setupWordCountOptions() {
     const select = document.getElementById('wordCountSelect');
     select.innerHTML = ''; 
     
-    let step = 200;
+    let step = 100;
     for (let i = step; i < wordCount; i += step) {
         let option = document.createElement('option');
         option.value = i;
@@ -1698,7 +1794,7 @@ async function setPlaybackSpeed() {
         currentPlaybackRate = 1;
     }
 
-    if (!activePrem && Math.abs(currentPlaybackRate - 1) > 0.01) {
+    if (!activePrem) {
         // Fall back to original video speed (1.0 rate)
         currentPlaybackRate = 1;
         // Calculate and show the actual WPM of the original video
@@ -1711,7 +1807,11 @@ async function setPlaybackSpeed() {
             updateSpeedDisplay(100);
         }
         player.setPlaybackRate(1);
-        showPremiumUpgradeModal();
+        
+        // Show upgrade prompt if user attempted to bypass by changing slider target speed
+        if (Math.abs(targetWPM - (wordCount / (totalVideoDuration / 60))) > 5) {
+            showPremiumUpgradeModal();
+        }
         return;
     }
     
