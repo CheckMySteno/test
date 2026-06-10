@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
 <meta name="robots" content="noindex">
-<title>Steno Practice Tool - SSC Previous Year Passages</title>
+<title>Steno Practice Tool - SSC PYQ Passages</title>
 
 <!-- External Scripts -->
 <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
@@ -99,8 +99,6 @@
     .quick-resume-box button { flex: 1; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85em; transition: all 0.2s; }
     #resume-again-btn { background: var(--accent-purple-light); color: var(--accent-purple); }
     #resume-again-btn:hover { background: #ebd5ff; }
-    #resume-next-btn { background: #1e293b; color: white; }
-    #resume-next-btn:hover { background: #0f172a; }
 
     .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; }
     .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); outline: none; }
@@ -431,7 +429,7 @@
             <div class="disclaimer-body">
                 <p>This interactive training environment is maintained in alignment with academic principles to provide specialized shorthand skill support:</p>
                 <ul>
-                    <li><strong>Pedagogical Purpose:</strong> The streams and associated text references serve exclusively as an educational asset, assisting transcriptionists and stenography students in skill development.</li>
+                    <li><strong>Pedagogium Purpose:</strong> The streams and associated text references serve exclusively as an educational asset, assisting transcriptionists and stenography students in skill development.</li>
                     <li><strong>No Financial Exchange:</strong> Access to this dictation tool is supplied completely free of charge. No proprietary margins are extracted from playback of the voice files provided.</li>
                     <li><strong>Standardized API Interface:</strong> All audio streaming operations are mediated through the public, standardized IFrame integration infrastructure provided by YouTube.</li>
                     <li><strong>Rights Preservation:</strong> All proprietary licensing, distribution privileges, voice performance rights, and copyrights belong fully and unconditionally to their respective original publishers and copyright holders.</li>
@@ -447,7 +445,7 @@
 <div class="app-container">
     <div id="selection-view" class="view">
         <div class="page-header">
-            <h1>SSC Previous Year Passages</h1>
+            <h1>SSC Previous Year Passages (PYQ)</h1>
             <div class="header-controls">
                 <div class="search-wrapper">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" /></svg>
@@ -479,7 +477,7 @@
                 <option value="not-attempted">Show Not Attempted</option>
             </select>
             <select id="sort-select">
-                <option value="default">Sort by Date/Year</option>
+                <option value="default">Sort sequentially</option>
                 <option value="score-asc">Sort by Latest Score (Low to High)</option>
                 <option value="score-desc">Sort by Latest Score (High to Low)</option>
                 <option value="best-desc">Sort by Best Score (High to Low)</option>
@@ -505,7 +503,7 @@
                             </svg>
                         </button>
                     </h2>
-                    <p id="player-subtitle">SSC Exam Matter - Loading...</p>
+                    <p id="player-subtitle">SSC PYQ - Loading...</p>
                 </div>
                 <button class="transcript-btn" onclick="openTranscriptModal()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
@@ -832,7 +830,7 @@ let db = null;
 // --- Global State Variables ---
 let player, originalText = "", wordCount = 0, currentPassageTitle = "";
 let totalVideoDuration = 0, currentPlaybackRate = 1, progressInterval;
-let g_vol = "ssc", g_tran = "", candidateId, attemptsRef;
+let g_vol = "sscPreviousYear", g_tran = "", candidateId, attemptsRef;
 let transcriptionTimerTotalTime = 0, timeLeft = 0, timer = null, timerStarted = false;
 let g_lastAnalysisResult; 
 let allPassageData = [];
@@ -880,7 +878,7 @@ async function checkPremiumStatusOnServer() {
     return false;
 }
 
-document.addEventListener("DOMContentLoaded", initializePracticeSSC);
+document.addEventListener("DOMContentLoaded", initializePracticeSSCPYQ);
 
 function setupAntiInspection() {
     document.addEventListener('keydown', (e) => {
@@ -908,7 +906,7 @@ function setLogoSource() {
     }
 }
 
-async function initializePracticeSSC() {
+async function initializePracticeSSCPYQ() {
     const user = DigiWallet.getUser();
     if (!user) {
         showErrorModal("Access Denied", "Please log in using your account first.");
@@ -1022,46 +1020,36 @@ function getCurrentConfigForWorker() {
     };
 }
 
-/* Bulletproof SSC Passage Loading Mechanism */
+/* SSC PYQ Loading Logic from Firestore Index Schema */
 async function loadSSCPassages() {
     document.getElementById('fullPageLoader').style.display = 'flex';
     try {
         if (!db) throw new Error("Database reference not initialized.");
         
-        let querySnapshot;
-        try {
-            // Priority 1: dedicated collection
-            querySnapshot = await db.collection("ssc").get();
-            if (querySnapshot.empty) {
-                // Priority 2: alternate collection identifier
-                querySnapshot = await db.collection("sscPreviousYear").get();
-            }
-            if (querySnapshot.empty) {
-                // Priority 3: category query from central collection
-                querySnapshot = await db.collection("dictations").where("category", "==", "ssc").get();
-            }
-        } catch (err) {
-            console.warn("Fallback query active...", err);
-            querySnapshot = await db.collection("dictations").where("category", "==", "ssc").get();
+        const indexDoc = await db.collection("sscPreviousYear_index").doc("main").get();
+        if (!indexDoc.exists) {
+            throw new Error("Catalog index document 'sscPreviousYear_index/main' was not found.");
         }
-
+        
+        const indexData = indexDoc.data();
+        const passagesMap = indexData.passages || {};
+        
         allPassageData = [];
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
-            allPassageData.push({
-                id: doc.id,
-                title: data.title || `SSC ${data.year || 'Exam'} - ${data.grade || 'Passage'}`,
-                year: data.year || "Unknown",
-                grade: data.grade || "C/D",
-                wordCount: data.wordCount || 800,
-                audioUrl: data.audioUrl,
-                text: data.text,
-                category: "ssc"
-            });
+        Object.keys(passagesMap).forEach(key => {
+            const item = passagesMap[key];
+            // REQUIREMENT: Filter on availability logic
+            if (item.status === "available") {
+                allPassageData.push({
+                    id: key, // e.g., "ssc_2022_grade_c"
+                    title: item.title || `SSC Passage ${key}`,
+                    meta: item.meta || "",
+                    status: item.status
+                });
+            }
         });
 
-        // Default: Sort by year descending, then title ascending
-        allPassageData.sort((a, b) => b.year.toString().localeCompare(a.year.toString()) || a.title.localeCompare(b.title));
+        // Default sorting
+        allPassageData.sort((a, b) => b.meta.localeCompare(a.meta) || a.title.localeCompare(b.title));
         renderGrid();
     } catch (error) {
         console.error("Database sync failed:", error);
@@ -1076,7 +1064,7 @@ function renderGrid() {
     if (!grid) return;
     grid.innerHTML = '';
 
-    const progressData = JSON.parse(localStorage.getItem(`sscProgress_${candidateId}`) || '{}');
+    const progressData = JSON.parse(localStorage.getItem(`sscPyqProgress_${candidateId}`) || '{}');
     let dataToRender = [...allPassageData];
 
     const filterValue = document.getElementById('filter-select').value;
@@ -1114,7 +1102,7 @@ function renderGrid() {
 
     const searchTerm = document.getElementById('passageSearch').value.toLowerCase();
     if (searchTerm) {
-        dataToRender = dataToRender.filter(p => p.title.toLowerCase().includes(searchTerm) || p.year.toString().includes(searchTerm));
+        dataToRender = dataToRender.filter(p => p.title.toLowerCase().includes(searchTerm) || p.meta.toLowerCase().includes(searchTerm));
     }
 
     const fragment = document.createDocumentFragment();
@@ -1168,7 +1156,7 @@ function renderGrid() {
         card.innerHTML = `
               <div class="card-header">
                   <div class="card-title-group">
-                      <span class="card-id-badge">SSC / ${data.year} / GRADE ${data.grade}</span>
+                      <span class="card-id-badge">SSC PYQ / ${data.meta}</span>
                       ${badgeHtml}
                   </div>
                   <h3>${data.title}</h3>
@@ -1182,11 +1170,11 @@ function renderGrid() {
     grid.appendChild(fragment);
 }
 
-function saveState(state) { localStorage.setItem('sscStenoState', JSON.stringify(state)); }
-function clearState() { localStorage.removeItem('sscStenoState'); }
+function saveState(state) { localStorage.setItem('sscPyqStenoState', JSON.stringify(state)); }
+function clearState() { localStorage.removeItem('sscPyqStenoState'); }
 
 function restoreSession() {
-    const savedState = JSON.parse(localStorage.getItem('sscStenoState'));
+    const savedState = JSON.parse(localStorage.getItem('sscPyqStenoState'));
     if (!savedState) {
         showView('selection-view');
         return;
@@ -1248,13 +1236,24 @@ async function loadPractice(passageId) {
     g_tran = passageId;
     document.getElementById('fullPageLoader').style.display = 'flex';
     try {
-        originalText = passage.text;
-        wordCount = passage.wordCount;
+        const passageDoc = await db.collection("sscPreviousYear_passages").doc(passageId).get();
+        if (!passageDoc.exists) {
+            throw new Error(`Passage content for '${passageId}' was not found in 'sscPreviousYear_passages'.`);
+        }
+        
+        const pData = passageDoc.data();
+        originalText = pData.originalText || pData.text || pData.transcript || "";
+        const audioUrl = pData.audioUrl || pData.audio || pData.url || "";
+        wordCount = pData.wordCount || pData.words || (originalText ? originalText.trim().split(/\s+/).length : 800);
         currentPassageTitle = passage.title;
+
+        if (!originalText) {
+            throw new Error("Original transcription text is missing inside database.");
+        }
 
         document.getElementById('transcriptTextBody').textContent = originalText;
 
-        saveState({ view: 'player-view', passageId: passageId, originalText, wordCount, audioUrl: passage.audioUrl, title: passage.title });
+        saveState({ view: 'player-view', passageId: passageId, originalText, wordCount, audioUrl: audioUrl, title: passage.title });
 
         showView('player-view');
         setPlayerLoading(true);
@@ -1262,7 +1261,7 @@ async function loadPractice(passageId) {
         setupWordCountOptions();
 
         document.getElementById('player-subtitle').textContent = passage.title;
-        loadVideo(passage.audioUrl, false);
+        loadVideo(audioUrl, false);
     } catch (error) {
         showErrorModal("Loading Error", "Error: " + error.message);
         showView('selection-view');
@@ -1354,7 +1353,7 @@ function startTranscriptionTest() {
     box.removeEventListener('keydown', handleFirstKeydown);
     box.addEventListener('keydown', handleFirstKeydown);
 
-    const currentState = JSON.parse(localStorage.getItem('sscStenoState'));
+    const currentState = JSON.parse(localStorage.getItem('sscPyqStenoState'));
     saveState({ ...currentState, view: 'exam-view', totalTime: transcriptionTimerTotalTime, timeLeft: timeLeft, typedText: '' });
 }
 
@@ -1375,7 +1374,7 @@ function startTimer() {
             submitTranscription();
         } else {
             document.getElementById("typingTimerDisplay").innerText = formatTime(timeLeft);
-            const currentState = JSON.parse(localStorage.getItem('sscStenoState'));
+            const currentState = JSON.parse(localStorage.getItem('sscPyqStenoState'));
             if (currentState) saveState({ ...currentState, timeLeft, typedText: document.getElementById('typingBox').value });
         }
     }, 1000);
@@ -1889,7 +1888,7 @@ function submitTranscription() {
 function saveProgressToLocalStorage(resultData) {
     if (!candidateId) return;
     const key = g_tran;
-    const progressData = JSON.parse(localStorage.getItem(`sscProgress_${candidateId}`) || '{}');
+    const progressData = JSON.parse(localStorage.getItem(`sscPyqProgress_${candidateId}`) || '{}');
 
     const newAccuracy = parseFloat(resultData.accuracy) || 0;
     const newWpm = parseFloat(resultData.wpm) || 0;
@@ -1917,15 +1916,15 @@ function saveProgressToLocalStorage(resultData) {
         bestWpm: Math.max(prevBestWpm, newWpm)
     };
 
-    localStorage.setItem(`sscProgress_${candidateId}`, JSON.stringify(progressData));
-    localStorage.setItem(`sscLastAttempt_${candidateId}`, JSON.stringify({ passageId: g_tran }));
+    localStorage.setItem(`sscPyqProgress_${candidateId}`, JSON.stringify(progressData));
+    localStorage.setItem(`sscPyqLastAttempt_${candidateId}`, JSON.stringify({ passageId: g_tran }));
 }
 
 async function resetProgress() {
     if (!candidateId) { showErrorModal("Reset Failed", "User identification missing."); return; }
 
-    localStorage.removeItem(`sscProgress_${candidateId}`);
-    localStorage.removeItem(`sscLastAttempt_${candidateId}`);
+    localStorage.removeItem(`sscPyqProgress_${candidateId}`);
+    localStorage.removeItem(`sscPyqLastAttempt_${candidateId}`);
     localStorage.removeItem('hideResultsWelcome');
 
     try {
@@ -1999,7 +1998,7 @@ async function saveAttemptHybrid(original, typed, analysisResult) {
 
     const fullResultData = {
         timestamp: new Date().toISOString(),
-        dictationName: currentPassageTitle || `SSC Previous Year Skill Test`,
+        dictationName: currentPassageTitle || `SSC PYQ Practice Test`,
         accuracy: parseFloat(analysisResult.accuracy) || 0,
         wpm: parseFloat(analysisResult.wpm) || 0,
         originalText: original,
@@ -2070,6 +2069,13 @@ function initializeEventListeners() {
     document.getElementById('otherErrorText').addEventListener('input', validateReportForm);
     
     document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.add('visible'));
+
+    const errorCloseBtn = document.getElementById('error-close-btn');
+    if (errorCloseBtn) {
+        errorCloseBtn.addEventListener('click', () => {
+            document.getElementById('error-modal').classList.remove('visible');
+        });
+    }
 
     const printBtn = document.getElementById('printReportBtn');
     if (printBtn) {
@@ -2265,7 +2271,7 @@ async function submitErrorReport() {
         alert("Report submitted successfully.");
         reportModal.classList.remove('visible');
     } catch (error) {
-        console.error("Error logging typo ticket:", error);
+        console.error("Error logging ticket:", error);
         alert("Submission failed.");
     }
 }
@@ -2276,7 +2282,7 @@ function showErrorModal(title, message) { document.getElementById('error-title')
 function renderQuickResume() {
     const container = document.getElementById('quick-resume-container');
     container.innerHTML = '';
-    const lastAttempt = JSON.parse(localStorage.getItem(`sscLastAttempt_${candidateId}`));
+    const lastAttempt = JSON.parse(localStorage.getItem(`sscPyqLastAttempt_${candidateId}`));
     const heroSection = document.getElementById('dashboardHeroSection');
 
     if (lastAttempt && allPassageData.length > 0) {
