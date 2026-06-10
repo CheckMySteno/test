@@ -1,4 +1,3 @@
---- START OF FILE index.html ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -142,29 +141,106 @@
     body[data-theme="galaxy"] .dock-item:hover { background: rgba(255,255,255,0.1); }
 
     /* DICTATION POPUP MENU */
-    .dictation-popup { position: fixed; left: 110px; top: 50%; transform: translateY(-50%); display: none; flex-direction: column; gap: 10px; padding: 15px; background: rgba(255,255,255,0.85); backdrop-filter: blur(12px); border: 1px solid var(--card-border); border-radius: 18px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 1000; }
-    body[data-theme="galaxy"] .dictation-popup { background: rgba(30, 41, 59, 0.85); }
-    .dictation-popup.visible { display: flex; animation: fadeInPopup 0.2s ease-out; }
+    .dictation-popup { 
+        position: fixed; 
+        left: 110px; 
+        top: 50%; 
+        transform: translateY(-50%); 
+        display: none; 
+        flex-direction: column; 
+        gap: 8px; 
+        padding: 16px; 
+        background: var(--card-bg); 
+        border: 1px solid var(--card-border); 
+        border-radius: 18px; 
+        box-shadow: 0 15px 40px var(--card-shadow); 
+        z-index: 1050; 
+        min-width: 220px; 
+        transition: opacity 0.3s ease;
+    }
+    body[data-theme="galaxy"] .dictation-popup { background: rgba(30, 41, 59, 0.95); }
+    .dictation-popup.visible { display: flex; animation: fadeInPopup 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
     @keyframes fadeInPopup { from { opacity: 0; transform: translateY(-50%) translateX(-10px); } to { opacity: 1; transform: translateY(-50%) translateX(0); } }
-    .dictation-btn { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 10px; cursor: pointer; transition: 0.2s; font-size: 14px; color: var(--text-color); font-weight: 600; text-decoration: none; border: none; background: transparent; text-align: left; }
-    .dictation-btn:hover { background: rgba(0,0,0,0.06); color: var(--button-gradient-start); }
-    body[data-theme="galaxy"] .dictation-btn:hover { background: rgba(255,255,255,0.1); }
+    
+    .dictation-popup-header {
+        font-size: 0.8rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--secondary-text-color);
+        margin-bottom: 6px;
+        padding-bottom: 6px;
+        border-bottom: 1px solid var(--card-border);
+    }
+    .dictation-btn { 
+        display: flex; 
+        align-items: center; 
+        gap: 12px; 
+        padding: 10px 14px; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        transition: all 0.2s ease; 
+        font-size: 13px; 
+        color: var(--text-color); 
+        font-weight: 700; 
+        text-decoration: none; 
+        border: none; 
+        background: var(--primary-bg); 
+        text-align: left; 
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .dictation-btn:hover { 
+        background: linear-gradient(135deg, var(--button-gradient-start), var(--button-gradient-end)); 
+        color: white !important; 
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px var(--card-shadow);
+    }
+    .dictation-btn:hover i { color: white !important; }
 
     /* --- MODALS & EXTRAS --- */
     .header-icon-btn { position: relative; background: none; border: none; color: var(--secondary-text-color); font-size: 1.4rem; cursor: pointer; padding: 0.5rem; text-decoration: none; }
     
     #theme-switcher { position: relative; display: inline-flex; align-items: center; } 
-    #theme-menu { display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 8px; box-shadow: 0 5px 20px var(--card-shadow); z-index: 1100; overflow: hidden; white-space: nowrap; } 
+    #theme-menu { 
+        display: none; 
+        position: absolute; 
+        right: 0; 
+        top: 120%; 
+        background: var(--card-bg); 
+        border-radius: 12px; 
+        box-shadow: 0 10px 30px var(--card-shadow); 
+        border: 1px solid var(--card-border);
+        z-index: 1100; 
+        overflow: hidden; 
+        white-space: nowrap; 
+        animation: dropdownFade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    } 
     #theme-menu.visible { display: block; } 
     .theme-option { padding: 0.8rem 1.5rem; cursor: pointer; display: flex; align-items: center; gap: 0.8rem; font-weight: 600; } 
     .theme-option:hover { background-color: var(--primary-bg); } 
     .theme-option .color-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--card-border); }
 
     .notification-badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; background-color: var(--error-color); color: white; border-radius: 9px; pointer-events: none; font-size: 12px; font-weight: 700; line-height: 18px; text-align: center; padding: 0 4px; border: 2px solid var(--card-bg); }
-    .notification-panel { display: none; position: fixed; top: 80px; right: 5%; width: 350px; max-width: 90%; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: 0 10px 30px var(--card-shadow); z-index: 1050; overflow: hidden; text-align: left; } 
+    .notification-panel { 
+        display: none; 
+        position: fixed; 
+        top: 80px; 
+        right: 5%; 
+        width: 350px; 
+        max-width: 90%; 
+        background-color: var(--card-bg); 
+        border: 1px solid var(--card-border); 
+        border-radius: 16px; 
+        box-shadow: 0 12px 35px var(--card-shadow); 
+        z-index: 1050; 
+        overflow: hidden; 
+        text-align: left; 
+        animation: dropdownFade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    } 
     .notification-panel.visible { display: block; } 
-    .notification-header { padding: 1rem; border-bottom: 1px solid var(--card-border); } 
-    .notification-header h3 { margin: 0; font-size: 1.1rem; } 
+    .notification-header { padding: 1.2rem; border-bottom: 1px solid var(--card-border); background: var(--primary-bg); } 
+    .notification-header h3 { margin: 0; font-size: 1rem; font-weight: 800; } 
     .notification-list { max-height: 400px; overflow-y: auto; } 
     .notification-item { padding: 1rem; border-bottom: 1px solid var(--card-border); font-size: 0.9rem; line-height: 1.5; color: var(--text-color); font-weight: 600; transition: background-color 0.2s; }
     .notification-item a { text-decoration: none; color: inherit; display: block; } 
@@ -228,6 +304,17 @@
     input:checked + .toggle-slider { background-color: var(--button-gradient-start); }
     input:checked + .toggle-slider:before { transform: translateX(20px); }
 
+    /* PROFILE DROPDOWN ENGINE */
+    #profile-dropdown {
+        display: none; position: absolute; right: 0; top: 120%; background: var(--card-bg); border-radius: 16px; box-shadow: 0 15px 40px var(--card-shadow); border: 1px solid var(--card-border); width: 280px; padding: 1.5rem; z-index: 1100; text-align: left;
+        transform-origin: top right;
+        animation: dropdownFade 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    @keyframes dropdownFade {
+        from { opacity: 0; transform: translateY(10px) scale(0.95); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
     /* RESPONSIVE UPDATES FOR NEW DOCK AND BANNER */
     @media only screen and (max-width: 1024px) {
         .promo-banner { padding: 2rem 3rem; gap: 2rem; }
@@ -266,7 +353,7 @@
         .dock { left: 50%; top: auto; bottom: 20px; transform: translateX(-50%); flex-direction: row; padding: 5px; height: 60px; width: 90%; justify-content: space-around; }
         .dock-item { width: 50px; height: 50px; }
         .dock-item span { display: none; } /* Hide text on mobile to save space */
-        .dictation-popup { left: 50%; top: auto; bottom: 90px; transform: translateX(-50%); width: 200px; }
+        .dictation-popup { left: 50%; top: auto; bottom: 90px; transform: translateX(-50%); width: 240px; }
         @keyframes fadeInPopup { from { opacity: 0; transform: translateX(-50%) translateY(10px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
     }
   </style>
@@ -344,7 +431,7 @@
                <div class="text-content">
                    <h2>Practice KC</h2>
                    <p>Hone your muscle memory with our interactive keyboard drills. Designed to build both speed and accuracy.</p>
-                   <!-- SECURE BY DEFAULT: Button unlocked in HTML -->
+                   <!-- Free Tool by Default -->
                    <button class="launch-button" data-tool="kc" data-unlocked-text="Launch Practice Tool">Launch Practice Tool</button>
                </div>
                <div class="graphic-content"><i class="fas fa-keyboard"></i></div>
@@ -378,6 +465,7 @@
                <div class="text-content">
                    <h2>Transcription Checker</h2>
                    <p>Instantly verify your transcriptions against the source text, highlighting discrepancies with precision.</p>
+                   <!-- Secured Premium Tool -->
                    <button class="launch-button" data-tool="transcription-checker" data-unlocked-text="Launch Checker Tool">Launch Checker Tool</button>
                </div>
                <div class="graphic-content"><i class="fas fa-check-double"></i></div>
@@ -418,9 +506,19 @@
 
     <!-- DICTATIONS POPUP MENU -->
     <div class="dictation-popup" id="dictationMenu">
-        <button class="dictation-btn" onclick="launchTool('kc'); toggleDictationPopup();"><i class="fas fa-book-open"></i> Kailash Chandra</button>
-        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();"><i class="fas fa-chart-line"></i> Progressive</button>
-        <button class="dictation-btn" onclick="launchTool('ssc'); toggleDictationPopup();"><i class="fas fa-history"></i> Previous Year (SSC C & D)</button>
+        <div class="dictation-popup-header">Dictations</div>
+        <button class="dictation-btn" onclick="launchTool('kc'); toggleDictationPopup();">
+            <i class="fas fa-book-open" style="color: #6366f1; width: 16px;"></i> <span>KC Matter</span>
+        </button>
+        <button class="dictation-btn" onclick="launchTool('dictations'); toggleDictationPopup();">
+            <i class="fas fa-chart-line" style="color: #ec4899; width: 16px;"></i> <span>Prog Matter</span>
+        </button>
+        <button class="dictation-btn" onclick="launchTool('general-matter'); toggleDictationPopup();">
+            <i class="fas fa-folder-open" style="color: #22c55e; width: 16px;"></i> <span>Gen Matter</span>
+        </button>
+        <button class="dictation-btn" onclick="launchTool('ssc-previous-year'); toggleDictationPopup();">
+            <i class="fas fa-history" style="color: #f59e0b; width: 16px;"></i> <span>SSC PYQ</span>
+        </button>
     </div>
 
     <!-- Backend Modals & Notification Panels -->
@@ -770,11 +868,12 @@
         let destination = 'index.html';
         if (toolName === 'kc') destination = 'kc.html';
         else if (toolName === 'dictations') destination = 'dictations.html';
+        else if (toolName === 'general-matter') destination = 'general-matter.html';
+        else if (toolName === 'ssc-previous-year' || toolName === 'ssc') destination = 'ssc-previous-year.html';
         else if (toolName === 'test-analysis') destination = 'test-analysis.html';
         else if (toolName === 'transcription-checker') destination = 'transcription-checker.html';
         else if (toolName === 'about') destination = 'about.html';
         else if (toolName === 'plans') destination = 'plans.html';
-        else if (toolName === 'ssc') destination = 'sscpreviousyear.html';
         else if (toolName === 'status') destination = 'status.html';
         else if (toolName === 'contact') destination = 'contact.html';
         
@@ -1050,7 +1149,9 @@
     function updateUserUI(userData) {
         const headerActions = GID('headerActions');
         const allLaunchButtons = document.querySelectorAll('.launch-button');
-        const premiumTools =['kc', 'test-analysis', 'transcription-checker', 'dictations'];
+        
+        // ONLY lock the transcription checker for non-premium users
+        const premiumTools = ['transcription-checker'];
 
         const headerIconsHTML = `
             <div class="header-icons-toolbar">
@@ -1085,7 +1186,7 @@
                         <img src="${displayAvatar}" style="width:100%; height:100%; object-fit:cover; background-color: var(--card-bg);" alt="Profile">
                     </button>
                     
-                    <div id="profile-dropdown" style="display:none; position:absolute; right:0; top:120%; background:var(--card-bg); border-radius:12px; box-shadow:0 10px 30px var(--card-shadow); border:1px solid var(--card-border); width:280px; padding:1.5rem; z-index:1100; text-align:left;">
+                    <div id="profile-dropdown">
                         <h3 style="margin:0 0 5px 0; font-size:1.1rem; color:var(--text-color);">${userData.name}</h3>
                         <p style="margin:0 0 15px 0; font-size:0.85rem; color:var(--secondary-text-color); word-break:break-all;">${userData.email}</p>
                         
@@ -1121,6 +1222,8 @@
                         btn.onclick = () => { window.location.href = 'plans.html'; };
                     }
                 } else {
+                    btn.classList.remove('locked');
+                    if (btn.dataset.unlockedText) btn.innerHTML = btn.dataset.unlockedText;
                     btn.onclick = () => launchTool(tool);
                 }
             });
