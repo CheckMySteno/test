@@ -99,8 +99,6 @@
     .quick-resume-box button { flex: 1; padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 0.85em; transition: all 0.2s; }
     #resume-again-btn { background: var(--accent-purple-light); color: var(--accent-purple); }
     #resume-again-btn:hover { background: #ebd5ff; }
-    #resume-next-btn { background: #1e293b; color: white; }
-    #resume-next-btn:hover { background: #0f172a; }
 
     .filter-bar { display: flex; gap: 12px; margin-bottom: 24px; }
     .filter-bar select { padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border-color); background-color: white; color: #4b5563; font-weight: 500; font-size: 0.9em; cursor: pointer; box-shadow: var(--shadow-sm); outline: none; }
@@ -267,7 +265,6 @@
     #viewSwitchBtn { background-color: var(--accent-purple-light); color: var(--accent-purple); border-color: var(--accent-purple); }
     #viewSwitchBtn:hover { background-color: #dadaf7; }
 
-    #deepAnalysisBtn { background-color: #374151; color: white; }
     #toggleReevaluateBtn { background-color: var(--accent-amber); color: white; }
 
     .reevaluate-wrapper { position: relative; display: inline-flex; align-items: center; gap: 8px; }
@@ -356,7 +353,7 @@
     #reportErrorModal p { color: var(--text-color); }
     #reportErrorModal label { font-weight: 600; color: #0f172a; }
     #reportErrorModal select, #reportErrorModal textarea { width: 100%; padding: 10px 12px; background-color: #f8fafc; border: 1px solid var(--border-color); border-radius: 8px; font-size: 1em; margin-top: 5px; color: var(--text-color); }
-    #reportErrorModal select:focus, #reportErrorModal textarea:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+    #reportErrorModal select:focus, #reportErrorModal textarea:focus { outline: none; border-color: var(--accent-purple); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
     #submitReportBtn:disabled { background-color: #d1d5db; opacity: 0.7; cursor: not-allowed; }
 
     #deepAnalysisModal .modal-content { max-width: 900px; width: 95%; text-align: left; }
@@ -1245,7 +1242,6 @@ async function loadPractice(passageId) {
         }
         
         const pData = passageDoc.data();
-        // Checked: Matches database schema structure
         originalText = pData.originalText || pData.text || pData.transcript || "";
         const audioUrl = pData.audioUrl || pData.audio || pData.url || "";
         wordCount = pData.wordCount || pData.words || (originalText ? originalText.trim().split(/\s+/).length : 800);
@@ -1743,10 +1739,6 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
             
             <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.01); flex-wrap: wrap; gap: 15px;">
                 <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
-                    <button id="deepAnalysisBtn" class="view-switch-btn" style="background-color: #0f172a; color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); display: flex; align-items: center; gap: 6px;">
-                        🔍 Deep Analysis
-                    </button>
-                    
                     <div class="reevaluate-wrapper">
                         <button id="toggleReevaluateBtn" class="view-switch-btn" style="background-color: var(--accent-amber); color: white; font-weight: 700; font-size: 0.85rem; padding: 11px 20px; border-radius: 8px; border: none; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: all 0.2s; box-shadow: 0 4px 6px rgba(249,115,22,0.15);">
                             🔄 Enter Re-evaluate Mode
@@ -1773,6 +1765,120 @@ function renderResultSheet(analysisResult, isReevaluation = false) {
 
         if (!localStorage.getItem('hideResultsWelcome')) document.getElementById('resultsWelcomeModal').classList.add('visible');
         initializeResultInteractivity();
+    }
+}
+
+function submitTranscription() {
+    AITeacher.clearCache(); 
+
+    clearState();
+    if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
+
+    try {
+        if (!originalText) throw new Error("Original transcript text not loaded.");
+
+        let typedText = document.getElementById('typingBox').value;
+
+        if (typedText.trim().split(/\s+/).filter(Boolean).length < 10) {
+            alert("Please transcribe a minimum of 10 words before submitting.");
+            goHome();
+            return;
+        }
+
+        let textForAnalysis = originalText;
+        let typedTextForAnalysis = typedText;
+
+        if (g_selectedTarget !== "full") {
+            let targetWords = parseInt(g_selectedTarget);
+            let orgWordsArray = originalText.trim().split(/\s+/).filter(Boolean);
+            let userWordsArray = typedText.trim().split(/\s+/).filter(Boolean);
+            
+            if (targetWords < orgWordsArray.length) {
+                let targetOrgWords = orgWordsArray.slice(0, targetWords);
+                textForAnalysis = targetOrgWords.join(" ");
+                
+                const n = targetOrgWords.length;
+                const m = userWordsArray.length;
+                
+                if (m > 0 && n > 0) {
+                    let dp = [];
+                    for (let i = 0; i <= n; i++) {
+                        dp[i] = new Int32Array(m + 1);
+                        dp[i][0] = i; 
+                    }
+                    for (let j = 0; j <= m; j++) {
+                        dp[0][j] = j; 
+                    }
+
+                    for (let i = 1; i <= n; i++) {
+                        let oWord = targetOrgWords[i - 1].toLowerCase().replace(/[^a-z0-9]/g, '');
+                        for (let j = 1; j <= m; j++) {
+                            let uWord = userWordsArray[j - 1].toLowerCase().replace(/[^a-z0-9]/g, '');
+                            if (oWord === uWord && oWord !== '') {
+                                dp[i][j] = dp[i - 1][j - 1];
+                            } else {
+                                dp[i][j] = 1 + Math.min(
+                                    dp[i - 1][j - 1], 
+                                    dp[i - 1][j],     
+                                    dp[i][j - 1]      
+                                );
+                            }
+                        }
+                    }
+
+                    let minCost = Infinity;
+                    let bestJ = m;
+
+                    for (let j = 0; j <= m; j++) {
+                        if (dp[n][j] <= minCost) {
+                            minCost = dp[n][j];
+                            bestJ = j;
+                        }
+                    }
+                    typedTextForAnalysis = userWordsArray.slice(0, bestJ).join(" ");
+                } else {
+                    typedTextForAnalysis = typedText;
+                }
+            }
+        }
+
+        g_lastTypedText = typedTextForAnalysis;
+        document.getElementById('fullPageLoader').style.display = 'flex';
+
+        const config = getCurrentConfigForWorker();
+        
+        analysisWorker.postMessage({
+            originalText: textForAnalysis,
+            userText: g_lastTypedText,
+            config: config, 
+            synonymData: g_synonymData 
+        });
+
+        analysisWorker.onmessage = function(event) {
+            const analysisResult = event.data;
+            document.getElementById('fullPageLoader').style.display = 'none';
+            
+            showView('results-view');
+            renderResultSheet(analysisResult, false);
+
+            saveProgressToLocalStorage(analysisResult);
+            saveAttemptHybrid(textForAnalysis, g_lastTypedText, analysisResult);
+
+            resetTimer();
+        };
+
+        analysisWorker.onerror = function(error) {
+            console.error("Worker Execution Error:", error);
+            document.getElementById('fullPageLoader').style.display = 'none';
+            showErrorModal("Evaluation Failure", "Could not complete text analysis. Returning to menu.");
+            goHome();
+        };
+
+    } catch (error) {
+        console.error("Transcription Submission Error:", error);
+        document.getElementById('fullPageLoader').style.display = 'none';
+        showErrorModal("Result Processing Error", "An error occurred compiling results.");
+        goHome();
     }
 }
 
@@ -1982,7 +2088,6 @@ function initializeResultInteractivity() {
 
     document.getElementById('toggleReevaluateBtn').addEventListener('click', toggleReevaluateMode);
     document.getElementById('reportErrorBtn').addEventListener('click', showReportModal);
-    document.getElementById('deepAnalysisBtn').addEventListener('click', showDeepAnalysisModal);
 
     document.getElementById('viewSwitchBtn').addEventListener('click', () => {
         const columnsContainer = document.getElementById('comparisonColumns');
