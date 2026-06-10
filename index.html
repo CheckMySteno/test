@@ -935,50 +935,7 @@
         }
     }
 
-    async function saveProfileDetails() {
-        if (!currentUser) return;
-        
-        const newName = GID('editProfileName').value.trim();
-        const newPhone = GID('editProfilePhone').value.trim();
-        const newLocation = GID('editProfileLocation').value.trim();
-        
-        const statusEl = GID('profileSaveStatus');
-        statusEl.style.display = 'block';
-        statusEl.style.color = 'var(--text-color)';
-        statusEl.textContent = 'Saving details...';
-        
-        try {
-            // Update Firestore
-            await DB.collection('users').doc(currentUser.uid).update({
-                name: newName,
-                phone: newPhone,
-                location: newLocation
-            });
-            
-            // Update Firebase Auth Profile if name changed
-            if (newName && newName !== currentUser.name && AUTH.currentUser) {
-                await AUTH.currentUser.updateProfile({ displayName: newName });
-            }
-            
-            statusEl.style.color = 'var(--success-color)';
-            statusEl.textContent = 'Profile updated successfully!';
-            GID('profileModalName').textContent = newName || 'User';
-            
-            // Update Avatar if name changed
-            let displayAvatar = currentUser.photoURL;
-            if (!displayAvatar || displayAvatar.includes('gravatar') || displayAvatar === '') {
-                GID('profileModalAvatar').src = `https://ui-avatars.com/api/?name=${encodeURIComponent(newName || 'User')}&background=6366f1&color=fff&bold=true&rounded=true&size=128`;
-            }
-            
-            setTimeout(() => { statusEl.style.display = 'none'; }, 3000);
-        } catch (err) {
-            console.error("Error updating profile:", err);
-            statusEl.style.color = 'var(--error-color)';
-            statusEl.textContent = 'Failed to update profile. Try again.';
-        }
-    }
-
-    // --- HYBRID TRANSACTIONS AND ACCESS HISTORY SYNC ENGINE ---
+    // --- DYNAMIC SUBSCRIPTION PURCHASE HISTORY ENGINE ---
     async function loadPurchaseHistory() {
         const container = GID('historyListContainer');
         container.innerHTML = '<div class="loader" style="display: block; position: relative; margin: 2rem auto;"></div>';
@@ -993,25 +950,9 @@
             }
             
             let html = '';
-            
-            for (const doc of snapshot.docs) {
+            snapshot.forEach(doc => {
                 const data = doc.data();
-                let status = data.status || 'Success';
-                const docId = doc.id;
-                
-                // Cross-reference pending client history records instantly on runtime open
-                if (status === 'pending') {
-                    const validationDoc = await DB.collection('paymentVerifications').doc(docId).get();
-                    if (validationDoc.exists) {
-                        const validationData = validationDoc.data();
-                        if (validationData.verified) {
-                            status = validationData.status === 'approved' ? 'success' : 'failed';
-                            // Sync state write directly back to history collection
-                            await userRef.collection('payments').doc(docId).update({ status: status });
-                        }
-                    }
-                }
-
+                const status = data.status || 'pending'; // Pure read-only status delivery
                 const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleDateString() : 'N/A';
                 const amount = data.amount || 0;
                 const planName = data.planName || 'Premium Subscription';
@@ -1029,7 +970,7 @@
                         <div class="history-item-price">₹${amount}</div>
                     </div>
                 `;
-            }
+            });
             container.innerHTML = html;
         } catch (err) {
             console.error("Error loading history:", err);
