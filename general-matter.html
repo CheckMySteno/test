@@ -479,7 +479,7 @@
                 <option value="not-attempted">Show Not Attempted</option>
             </select>
             <select id="sort-select">
-                <option value="default">Sort Alphabetically</option>
+                <option value="default">Sort by Passage Number</option>
                 <option value="score-asc">Sort by Latest Score (Low to High)</option>
                 <option value="score-desc">Sort by Latest Score (High to Low)</option>
                 <option value="best-desc">Sort by Best Score (High to Low)</option>
@@ -1022,42 +1022,34 @@ function getCurrentConfigForWorker() {
     };
 }
 
-/* General Matter Loading Logic from Firestore */
+/* General Matter Loading Logic from Firestore Map Schema */
 async function loadGeneralPassages() {
     document.getElementById('fullPageLoader').style.display = 'flex';
     try {
         if (!db) throw new Error("Database reference not initialized.");
         
-        let querySnapshot;
-        try {
-            querySnapshot = await db.collection("general").get();
-            if (querySnapshot.empty) {
-                querySnapshot = await db.collection("generalMatter").get();
-            }
-            if (querySnapshot.empty) {
-                querySnapshot = await db.collection("dictations").where("category", "==", "general").get();
-            }
-        } catch (err) {
-            console.warn("Fallback query active...", err);
-            querySnapshot = await db.collection("dictations").where("category", "==", "general").get();
+        const indexDoc = await db.collection("generalMatter_index").doc("main").get();
+        if (!indexDoc.exists) {
+            throw new Error("Catalog index document 'generalMatter_index/main' was not found.");
         }
-
+        
+        const indexData = indexDoc.data();
+        const passagesMap = indexData.passages || {};
+        
         allPassageData = [];
-        querySnapshot.forEach(doc => {
-            const data = doc.data();
+        Object.keys(passagesMap).forEach(key => {
+            const item = passagesMap[key];
             allPassageData.push({
-                id: doc.id,
-                title: data.title || `General Passage - ${doc.id}`,
-                topic: data.topic || "General Matter",
-                wordCount: data.wordCount || 800,
-                audioUrl: data.audioUrl,
-                text: data.text,
-                category: "general"
+                id: key, // e.g., "gen_001"
+                title: item.title || `General Passage ${item.passageNumber || ''}`,
+                passageNumber: item.passageNumber !== undefined ? parseInt(item.passageNumber) : 999,
+                meta: item.meta || "",
+                status: item.status || "available"
             });
         });
 
-        // Default: Sort alphabetically by title
-        allPassageData.sort((a, b) => a.title.localeCompare(b.title));
+        // Default: Sort by sequential passage number
+        allPassageData.sort((a, b) => a.passageNumber - b.passageNumber);
         renderGrid();
     } catch (error) {
         console.error("Database sync failed:", error);
@@ -1106,11 +1098,14 @@ function renderGrid() {
             }
             return 0;
         });
+    } else {
+        // Fallback default: Sort sequentially
+        dataToRender.sort((a, b) => a.passageNumber - b.passageNumber);
     }
 
     const searchTerm = document.getElementById('passageSearch').value.toLowerCase();
     if (searchTerm) {
-        dataToRender = dataToRender.filter(p => p.title.toLowerCase().includes(searchTerm) || p.topic.toLowerCase().includes(searchTerm));
+        dataToRender = dataToRender.filter(p => p.title.toLowerCase().includes(searchTerm) || p.id.toLowerCase().includes(searchTerm));
     }
 
     const fragment = document.createDocumentFragment();
@@ -1164,7 +1159,7 @@ function renderGrid() {
         card.innerHTML = `
               <div class="card-header">
                   <div class="card-title-group">
-                      <span class="card-id-badge">GENERAL / ${data.topic}</span>
+                      <span class="card-id-badge">GENERAL / PASSAGE ${data.passageNumber}</span>
                       ${badgeHtml}
                   </div>
                   <h3>${data.title}</h3>
@@ -1244,13 +1239,24 @@ async function loadPractice(passageId) {
     g_tran = passageId;
     document.getElementById('fullPageLoader').style.display = 'flex';
     try {
-        originalText = passage.text;
-        wordCount = passage.wordCount;
+        const passageDoc = await db.collection("generalMatter_passages").doc(passageId).get();
+        if (!passageDoc.exists) {
+            throw new Error(`Passage content for '${passageId}' was not found in 'generalMatter_passages'.`);
+        }
+        
+        const pData = passageDoc.data();
+        originalText = pData.text || pData.transcript || "";
+        const audioUrl = pData.audioUrl || pData.audio || pData.url || "";
+        wordCount = pData.wordCount || pData.words || (originalText ? originalText.trim().split(/\s+/).length : 800);
         currentPassageTitle = passage.title;
+
+        if (!originalText) {
+            throw new Error("Original transcription text is missing inside database.");
+        }
 
         document.getElementById('transcriptTextBody').textContent = originalText;
 
-        saveState({ view: 'player-view', passageId: passageId, originalText, wordCount, audioUrl: passage.audioUrl, title: passage.title });
+        saveState({ view: 'player-view', passageId: passageId, originalText, wordCount, audioUrl: audioUrl, title: passage.title });
 
         showView('player-view');
         setPlayerLoading(true);
@@ -1258,7 +1264,7 @@ async function loadPractice(passageId) {
         setupWordCountOptions();
 
         document.getElementById('player-subtitle').textContent = passage.title;
-        loadVideo(passage.audioUrl, false);
+        loadVideo(audioUrl, false);
     } catch (error) {
         showErrorModal("Loading Error", "Error: " + error.message);
         showView('selection-view');
@@ -2066,6 +2072,13 @@ function initializeEventListeners() {
     document.getElementById('otherErrorText').addEventListener('input', validateReportForm);
     
     document.getElementById('closeDeepAnalysisBtn').addEventListener('click', () => document.getElementById('deepAnalysisModal').classList.add('visible'));
+
+    const errorCloseBtn = document.getElementById('error-close-btn');
+    if (errorCloseBtn) {
+        errorCloseBtn.addEventListener('click', () => {
+            document.getElementById('error-modal').classList.remove('visible');
+        });
+    }
 
     const printBtn = document.getElementById('printReportBtn');
     if (printBtn) {
