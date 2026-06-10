@@ -161,8 +161,6 @@
     .theme-option .color-swatch { width: 16px; height: 16px; border-radius: 50%; border: 1px solid var(--card-border); }
 
     .notification-badge { position: absolute; top: -2px; right: -2px; min-width: 18px; height: 18px; background-color: var(--error-color); color: white; border-radius: 9px; pointer-events: none; font-size: 12px; font-weight: 700; line-height: 18px; text-align: center; padding: 0 4px; border: 2px solid var(--card-bg); }
-    
-    /* Decoupled settings panel to completely remove unprompted visual blurs */
     .notification-panel { display: none; position: fixed; top: 80px; right: 5%; width: 350px; max-width: 90%; background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; box-shadow: 0 10px 30px var(--card-shadow); z-index: 1050; overflow: hidden; text-align: left; } 
     .notification-panel.visible { display: block; } 
     .notification-header { padding: 1rem; border-bottom: 1px solid var(--card-border); } 
@@ -980,13 +978,14 @@
         }
     }
 
+    // --- HYBRID TRANSACTIONS AND ACCESS HISTORY SYNC ENGINE ---
     async function loadPurchaseHistory() {
         const container = GID('historyListContainer');
         container.innerHTML = '<div class="loader" style="display: block; position: relative; margin: 2rem auto;"></div>';
         
         try {
-            // Fetching from a 'payments' subcollection
-            const snapshot = await DB.collection('users').doc(currentUser.uid).collection('payments').orderBy('timestamp', 'desc').get();
+            const userRef = DB.collection('users').doc(currentUser.uid);
+            const snapshot = await userRef.collection('payments').orderBy('timestamp', 'desc').get();
             
             if (snapshot.empty) {
                 container.innerHTML = '<p style="text-align: center; color: var(--secondary-text-color); margin-top: 2rem;">No recent purchases found.</p>';
@@ -994,23 +993,43 @@
             }
             
             let html = '';
-            snapshot.forEach(doc => {
+            
+            for (const doc of snapshot.docs) {
                 const data = doc.data();
+                let status = data.status || 'Success';
+                const docId = doc.id;
+                
+                // Cross-reference pending client history records instantly on runtime open
+                if (status === 'pending') {
+                    const validationDoc = await DB.collection('paymentVerifications').doc(docId).get();
+                    if (validationDoc.exists) {
+                        const validationData = validationDoc.data();
+                        if (validationData.verified) {
+                            status = validationData.status === 'approved' ? 'success' : 'failed';
+                            // Sync state write directly back to history collection
+                            await userRef.collection('payments').doc(docId).update({ status: status });
+                        }
+                    }
+                }
+
                 const dateStr = data.timestamp ? data.timestamp.toDate().toLocaleDateString() : 'N/A';
                 const amount = data.amount || 0;
                 const planName = data.planName || 'Premium Subscription';
-                const status = data.status || 'Success';
+                
+                let statusColor = 'var(--secondary-text-color)';
+                if (status === 'success' || status === 'approved') statusColor = 'var(--success-color)';
+                else if (status === 'failed' || status === 'rejected') statusColor = 'var(--error-color)';
                 
                 html += `
-                    <div class="history-item">
+                    <div class="history-item" style="border-left: 4px solid ${statusColor};">
                         <div>
                             <h4 class="history-item-title">${planName}</h4>
-                            <p class="history-item-date">${dateStr} &bull; <span style="text-transform: capitalize;">${status}</span></p>
+                            <p class="history-item-date">${dateStr} &bull; <span style="text-transform: capitalize; color: ${statusColor}; font-weight: bold;">${status}</span></p>
                         </div>
                         <div class="history-item-price">₹${amount}</div>
                     </div>
                 `;
-            });
+            }
             container.innerHTML = html;
         } catch (err) {
             console.error("Error loading history:", err);
