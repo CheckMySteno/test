@@ -1,11 +1,27 @@
---- START OF FILE plans.html ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Plans - Check My Steno</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        stenoBlue: '#2563eb',
+                        stenoDark: '#0f172a',
+                        stenoBg: '#f8fafc'
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css"/>
     
     <!-- Firebase Scripts -->
@@ -16,263 +32,406 @@
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
     
     <style>
-        :root {
-            --primary-bg: #F0F2F5; --card-bg: #FFFFFF; --text-color: #1a202c; --secondary-text-color: #718096;
-            --border-color: #E2E8F0; --accent-gold: #f59e0b; --accent-silver: #4A5568; --accent-bronze: #CD7F32;
-            --success-color: #10b981; --error-color: #ef4444;
-            --color-book: #3182ce; --color-general: #38a169; --color-court: #805ad5; --color-speech: #dd6b20;
-            --color-evaluation: #d53f8c; --color-progress: #38b2ac;
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
         }
-        body, html { font-family: 'Inter', sans-serif; margin: 0; padding: 0; background-color: var(--primary-bg); color: var(--text-color); }
-        .site-banner { background: linear-gradient(90deg, #38b2ac, #5eead4); color: white; text-align: center; padding: 0.75rem 1rem; font-weight: 700; font-size: 1rem; }
-        .page-container { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
-        .hidden { display: none !important; }
-        
-        .header-section { text-align: center; margin-bottom: 5rem; }
-        .header-section h1 { font-size: 3.5rem; font-weight: 900; margin-bottom: 1rem; letter-spacing: -0.05em; line-height: 1.2; }
-        .header-section .highlight { background: linear-gradient(90deg, #4A5568, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .header-section p { font-size: 1.25rem; color: var(--secondary-text-color); max-width: 700px; margin: 0 auto; }
-        
-        .features-section { margin-bottom: 5rem; }
-        .features-section h2 { text-align: center; font-size: 2.5rem; font-weight: 800; margin-bottom: 3rem; }
-        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .feature-item { background-color: var(--card-bg); padding: 1.5rem; border-radius: 12px; display: flex; align-items: center; gap: 1.5rem; border: 2px solid var(--border-color); transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease; }
-        .feature-icon-wrapper { flex-shrink: 0; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .feature-icon-wrapper i { font-size: 1.5rem; color: white; }
-        .feature-item .feature-text h3 { margin: 0 0 0.25rem 0; font-size: 1.1rem; font-weight: 600; }
-        .feature-item .feature-text p { margin: 0; color: var(--secondary-text-color); font-size: 0.95rem; }
-        .feature-item:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
-        .feature-item[data-color="book"] .feature-icon-wrapper { background-color: var(--color-book); }
-        .feature-item[data-color="general"] .feature-icon-wrapper { background-color: var(--color-general); }
-        .feature-item[data-color="court"] .feature-icon-wrapper { background-color: var(--color-court); }
-        .feature-item[data-color="speech"] .feature-icon-wrapper { background-color: var(--color-speech); }
-        .feature-item[data-color="evaluation"] .feature-icon-wrapper { background-color: var(--color-evaluation); }
-        .feature-item[data-color="progress"] .feature-icon-wrapper { background-color: var(--color-progress); }
-
-        .pricing-section { text-align: center; }
-        .plans-wrapper { display: flex; justify-content: center; align-items: stretch; gap: 2rem; flex-wrap: wrap; }
-        .plan-card { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 2.5rem; width: 100%; max-width: 340px; text-align: center; transition: transform 0.3s ease, box-shadow 0.3s ease; position: relative; display: flex; flex-direction: column; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .plan-card:hover { transform: translateY(-10px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
-        .plan-card h3 { font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; }
-        .plan-card .duration { font-size: 1rem; color: var(--secondary-text-color); margin-bottom: 1.5rem; font-weight: 500; }
-        .plan-card .price { font-size: 3.5rem; font-weight: 900; margin-bottom: 0.5rem; }
-        .plan-card .old-price { color: var(--secondary-text-color); text-decoration: line-through; margin-bottom: 1.5rem; height: 1.5em; font-size: 1.2rem; font-weight: 600; }
-        .plan-features { list-style-type: none; padding: 0; margin: 1.5rem 0; text-align: left; flex-grow: 1; }
-        .plan-features li { display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 0.8rem; font-size: 0.95rem; }
-        .plan-features li i { color: var(--success-color); margin-top: 4px; }
-        .plan-card .cta-button { display: block; width: 100%; padding: 1rem; border-radius: 8px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; color: white; margin-top: auto; }
-        .plan-card.bronze { border-top: 4px solid var(--accent-bronze); } .plan-card.bronze .cta-button { background: var(--accent-bronze); }
-        .plan-card.silver { border: 2px solid var(--accent-silver); transform: scale(1.05); box-shadow: 0 0 30px rgba(74, 85, 104, 0.2); } .plan-card.silver:hover { transform: scale(1.1) translateY(-10px); } .plan-card.silver .cta-button { background: var(--accent-silver); }
-        .plan-card.gold { border-top: 4px solid var(--accent-gold); } .plan-card.gold .cta-button { background: var(--accent-gold); }
-        .popular-badge { position: absolute; top: 0; left: 50%; transform: translate(-50%, -50%); background: var(--accent-silver); color: white; padding: 0.5rem 1.5rem; border-radius: 20px; font-weight: 700; font-size: 0.9rem; }
-        
-        .back-button-container { text-align: center; margin-top: 4rem; }
-        .back-button { color: var(--secondary-text-color); text-decoration: none; font-weight: 600; display: inline-block; padding: 10px 20px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; }
-        .back-button:hover { background: var(--border-color); color: var(--text-color); }
-        
-        /* Modals & Status */
-        .status-container { text-align: center; padding: 4rem 1rem; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 16px; max-width: 700px; margin: 5rem auto; }
-        .spinner { border: 5px solid var(--border-color); border-top: 5px solid var(--accent-silver); border-radius: 50%; width: 50px; height: 50px; animation: spin 1s linear infinite; margin: 0 auto 2rem auto; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .status-details { background-color: var(--primary-bg); padding: 1.5rem; border-radius: 8px; margin-top: 2rem; text-align: left; }
-        .detail-row { display: flex; justify-content: space-between; margin-bottom: 0.5rem; } .detail-row span { color: var(--secondary-text-color); } .detail-row strong { color: var(--text-color); }
-        .verification-notice { background-color: rgba(245, 158, 11, 0.1); border-left: 4px solid var(--accent-gold); padding: 1rem; text-align: left; border-radius: 4px; margin: 2rem 0; color: var(--secondary-text-color); }
-        .cancel-button { background: none; border: none; color: var(--secondary-text-color); text-decoration: underline; cursor: pointer; font-size: 0.9rem; margin-top: 2rem; font-family: 'Inter', sans-serif; }
-        .status-icon { font-size: 5rem; margin-bottom: 1.5rem; } .success-icon { color: var(--success-color); } .rejected-icon { color: var(--error-color); }
-        .status-container h1 { font-size: 2.5rem; margin-bottom: 1rem; } .status-container p { color: var(--secondary-text-color); max-width: 450px; margin: 0 auto 2rem auto; }
-        .action-button { display: inline-block; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; color:white; border:none; margin-top:1.5rem; } .login-button { background: var(--success-color); } .try-again-button { background: var(--accent-gold); }
-        
-        /* Payment Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
-        .modal-overlay.visible { display: flex; opacity: 1; }
-        .modal-content { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 480px; border: 1px solid var(--border-color); position: relative; max-height: 95vh; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.3s ease; }
-        .modal-overlay.visible .modal-content { transform: scale(1); }
-        .modal-header { padding: 1rem 1.5rem; text-align: center; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
-        .modal-header .close-button { font-size: 2rem; color: var(--secondary-text-color); background: none; border: none; cursor: pointer; }
-        .modal-stepper { display: flex; justify-content: center; gap: 0.5rem; } .step { color: var(--secondary-text-color); font-weight: 600; font-size: 0.9rem; padding: 0.5rem 1rem; border-radius: 20px; } .step.active { color: white; background-color: var(--accent-silver); }
-        .modal-body { padding: 1.5rem; overflow-y: auto; flex-grow: 1; }
-        .step-content { display: none; animation: fadeIn 0.5s ease-in-out; } .step-content.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .order-summary-card { background-color: var(--primary-bg); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--border-color); }
-        .summary-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; } .summary-row.total { font-size: 1.5rem; font-weight: 800; border-top: 1px solid var(--border-color); padding-top: 1rem; }
-        .modal-footer { padding: 1rem 1.5rem; border-top: 1px solid var(--border-color); background-color: rgba(0,0,0,0.02); flex-shrink: 0; }
-        .modal-button { display: block; width: 100%; padding: 1rem; border-radius: 8px; border: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; background: var(--accent-silver); color: white; }
-        .payment-options { display: grid; grid-template-columns: 1fr; gap: 1rem; }
-        .payment-option { background: var(--primary-bg); border: 2px solid var(--border-color); padding: 1.5rem; border-radius: 12px; cursor: pointer; }
-        .payment-option.selected { border-color: var(--accent-silver); box-shadow: 0 0 20px rgba(74,85,104, 0.2); }
-        .payment-option-header { display: flex; align-items: center; gap: 1rem; font-size: 1.2rem; font-weight: 600; }
-        .payment-option-details { margin-top: 1.5rem; display: block; animation: fadeIn 0.5s; }
-        .unique-code-container { display: flex; align-items: center; gap: 1rem; background-color: #edf2f7; padding: 0.5rem 1rem; border-radius: 8px; border: 2px dashed var(--accent-gold); margin-top: 10px;}
-        .unique-code-text { flex-grow: 1; font-size: 1.3rem; letter-spacing: 2px; color: var(--accent-gold); text-align: center; }
-        .copy-button { background: none; border: 1px solid var(--accent-gold); color: var(--accent-gold); padding: 0.5rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: 600; }
-        .upi-id { background-color: var(--primary-bg); padding: 0.8rem 1rem; border-radius: 8px; font-weight: 600; text-align: center; }
-        #qr-code-area { display: flex; gap: 1.5rem; align-items: center; justify-content: center; }
-        #qr-code-container { width: 150px; height: 150px; background: #fff; border-radius: 8px; display: flex; justify-content: center; align-items: center; padding: 10px; }
-        .verification-form input { width: 100%; background-color: #edf2f7; border: 1px solid var(--border-color); padding: 0.8rem; border-radius: 8px; font-size: 1rem; margin-bottom: 1rem; box-sizing: border-box; }
-        .error-message { color: var(--error-color); text-align:center; margin-top: 1rem;}
-        
-        #loginAlert { display:none; background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; margin-bottom: 2rem; border: 1px solid #f87171; }
-        
-        /* Coupon Code input styling */
-        .coupon-area { margin-top: 1.5rem; }
-        .coupon-input-group { display: flex; gap: 0.5rem; }
-        .coupon-input-group input { flex-grow: 1; background-color: #edf2f7; border: 1px solid var(--border-color); color: var(--text-color); padding: 0.8rem; border-radius: 8px; font-size: 1rem; }
-        .coupon-input-group button { background-color: var(--accent-silver); color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
-        #coupon-message { font-size: 0.9rem; font-weight: 500; margin-top: 0.75rem; min-height: 1.2rem; }
-        .coupon-message-success { color: var(--success-color); }
-        .coupon-message-error { color: var(--error-color); }
-        .summary-row-discount { color: var(--success-color); }
+        .glow-hover:hover {
+            box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.2);
+            transform: translateY(-4px);
+        }
+        /* Custom modal animation */
+        .modal-animate-in {
+            animation: modalFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        /* Spinner */
+        .loader-spin {
+            border: 3px solid rgba(37, 99, 235, 0.1);
+            border-top: 3px solid #2563eb;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
-<body>
+<body class="text-slate-800 antialiased">
     
-    <div class="site-banner">
-        📘 Invite & Earn ₹50 💸 Instantly on Every Referral 👥 | Limited Time Offers Inside!
+    <!-- Site Banner -->
+    <div class="bg-gradient-to-r from-emerald-500 to-teal-500 text-white text-center py-2.5 px-4 font-semibold text-sm shadow-sm">
+        <i class="fa-solid fa-gift mr-2"></i> Invite & Earn ₹50 Instantly on Every Referral | Limited Time Offers Inside!
     </div>
 
     <!-- PENDING / VERIFICATION STATUS AREA -->
-    <div id="status-area" class="page-container hidden">
-        <div class="status-container">
+    <div id="status-area" class="max-w-4xl mx-auto px-4 py-16 hidden">
+        <div class="bg-white rounded-3xl border border-slate-100 shadow-xl p-8 md:p-12 text-center max-w-2xl mx-auto">
+            
             <!-- Pending State -->
-            <div id="pending-section">
-                <div class="spinner"></div>
-                <h1>Verification in Progress</h1>
-                <p>Your payment is being verified. This page will update automatically once the admin approves your upgrade.</p>
-                <div class="verification-notice">
-                    <p style="margin:0;"><strong>Please Note:</strong> Activation can take <strong>1 minute to 1 hour</strong>. You don't need to stay on this page. Your account will be upgraded automatically.</p>
+            <div id="pending-section" class="space-y-6">
+                <div class="flex justify-center">
+                    <div class="loader-spin"></div>
                 </div>
-                <div class="status-details">
-                    <div class="detail-row"><span>Account Email:</span><strong id="pending-email"></strong></div>
-                    <div class="detail-row"><span>Order ID:</span><strong id="pending-code"></strong></div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Verification in Progress</h1>
+                <p class="text-slate-500 text-base max-w-md mx-auto">Your payment is being verified. This screen will update automatically once verified by our team.</p>
+                
+                <div class="bg-amber-50 border-l-4 border-amber-500 p-4 text-left rounded-r-xl max-w-md mx-auto">
+                    <p class="text-xs text-amber-800 font-medium leading-relaxed">
+                        <strong>Please Note:</strong> Verification generally takes between <strong>1 minute to 1 hour</strong>. You do not need to keep this window open; your account is automatically upgraded.
+                    </p>
                 </div>
-                <button class="cancel-button" onclick="startOver()">Go Back</button>
+                
+                <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 max-w-md mx-auto text-sm text-left space-y-3">
+                    <div class="flex justify-between"><span class="text-slate-500">Account Email:</span><strong class="text-slate-800" id="pending-email"></strong></div>
+                    <div class="flex justify-between border-t border-slate-150 pt-2"><span class="text-slate-500">Order ID:</span><strong class="text-slate-800 font-mono" id="pending-code"></strong></div>
+                </div>
+                
+                <button class="text-xs text-slate-400 hover:text-slate-600 transition underline pt-4" onclick="startOver()">
+                    Go Back & View Plans
+                </button>
             </div>
             
             <!-- Success State -->
-            <div id="success-section" class="hidden">
-                <div class="status-icon success-icon"><i class="fas fa-check-circle"></i></div>
-                <h1>Premium Active!</h1>
-                <p>Your payment was verified. Your account has been upgraded and all premium features are now unlocked.</p>
-                <a href="index.html" class="action-button login-button">Go to Dashboard</a>
+            <div id="success-section" class="hidden space-y-6">
+                <div class="text-emerald-500 flex justify-center text-7xl">
+                    <i class="fas fa-check-circle animate-bounce"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Premium Activated!</h1>
+                <p class="text-slate-500 text-base max-w-md mx-auto">Your payment has been successfully verified. All premium features, dictations, and analytical libraries are now unlocked.</p>
+                <a href="index.html" class="inline-flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold py-3.5 px-8 rounded-xl transition shadow-lg shadow-emerald-500/15">
+                    Go to Dashboard <i class="fa-solid fa-arrow-right ml-2 text-sm"></i>
+                </a>
             </div>
             
             <!-- Rejected State -->
-            <div id="rejected-section" class="hidden">
-                <div class="status-icon rejected-icon"><i class="fas fa-times-circle"></i></div>
-                <h1>Verification Failed</h1>
-                <p>Unfortunately, we couldn't verify your payment. Please contact support via Telegram if you believe this is an error.</p>
-                <button class="action-button try-again-button" onclick="startOver()">Try Again</button>
+            <div id="rejected-section" class="hidden space-y-6">
+                <div class="text-rose-500 flex justify-center text-7xl">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">Verification Failed</h1>
+                <p class="text-slate-500 text-base max-w-md mx-auto">We were unable to verify your payment. If you believe this is an error, please reach out to our team immediately.</p>
+                
+                <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+                    <button class="bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-6 rounded-xl transition" onclick="startOver()">
+                        Try Again
+                    </button>
+                    <a href="https://t.me/" target="_blank" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 px-6 rounded-xl transition inline-flex items-center justify-center">
+                        <i class="fa-brands fa-telegram mr-2 text-sky-500 text-lg"></i> Contact Support
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 
     <!-- MAIN PLANS AREA -->
-    <div id="main-content" class="page-container">
-        <div id="loginAlert">You must be logged in to purchase a pass. Please go back to the Home page and log in first.</div>
+    <div id="main-content" class="max-w-6xl mx-auto px-4 py-16">
+        <div id="loginAlert" class="mb-8 hidden">
+            <div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-center text-rose-700 font-semibold max-w-xl mx-auto flex items-center justify-center gap-3">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                <span>You must be logged in to purchase a pass. Please log in first.</span>
+            </div>
+        </div>
         
-        <div class="header-section">
-             <h1>Unlock <span class="highlight">Every Powerful Feature.</span><br>Choose Your Access Pass.</h1>
-            <p>All plans grant 100% access to the most advanced stenography toolkit. No holding back. Just pure practice and flawless analysis.</p>
+        <!-- Header -->
+        <div class="text-center mb-16 space-y-4">
+            <span class="bg-blue-50 text-blue-600 font-semibold text-xs uppercase tracking-widest px-3.5 py-1.5 rounded-full border border-blue-100">
+                Unlock Premium Access
+            </span>
+            <h1 class="text-4xl sm:text-5xl font-black text-slate-950 tracking-tight leading-tight">
+                Get Over Your Fears. <br><span class="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-500">Accelerate Your Steno Skills.</span>
+            </h1>
+            <p class="text-slate-500 text-lg max-w-2xl mx-auto leading-relaxed">
+                Choose a pass and gain complete 100% access to all exam dictations, advanced tracking indicators, and exam simulation mock software.
+            </p>
         </div>
 
-        <div class="features-section">
-            <h2>Your All-in-One Steno Practice Library</h2>
-            <div class="features-grid">
-                 <div class="feature-item" data-color="book"><div class="feature-icon-wrapper"><i class="fa-solid fa-book-open"></i></div><div class="feature-text"><h3>📖 Master the SSC Standard</h3><p>Conquer government exams with our complete, pre-loaded library of all 24 Kailash Chandra volumes.</p></div></div>
-                 <div class="feature-item" data-color="general"><div class="feature-icon-wrapper"><i class="fa-solid fa-newspaper"></i></div><div class="feature-text"><h3>📰 Build Real-World Speed</h3><p>Practice with a massive library of current affairs and editorial content.</p></div></div>
-                 <div class="feature-item" data-color="court"><div class="feature-icon-wrapper"><i class="fa-solid fa-gavel"></i></div><div class="feature-text"><h3>⚖️ Dominate Court Exams</h3><p>Step into the courtroom with confidence using specialized legal dictations.</p></div></div>
+        <!-- Features Matrix Grid -->
+        <div class="mb-16">
+            <div class="text-center mb-8">
+                <h2 class="text-xl font-bold text-slate-900">What's Included in Your Premium Pass</h2>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-200 flex items-start gap-4">
+                    <div class="bg-blue-50 text-blue-600 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-book-open text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">SSC Standard Libraries</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Includes standard dictations spanning Kailash Chandra Volumes 1-24 and modern editorial archives.</p>
+                    </div>
+                </div>
+                <!-- Feature 2 -->
+                <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-200 flex items-start gap-4">
+                    <div class="bg-indigo-50 text-indigo-600 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-gavel text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">Court Exam Libraries</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">High-yield specialized legal templates, litigation reports, and court judgment dictations.</p>
+                    </div>
+                </div>
+                <!-- Feature 3 -->
+                <div class="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm hover:shadow-md transition duration-200 flex items-start gap-4">
+                    <div class="bg-emerald-50 text-emerald-600 w-12 h-12 rounded-xl flex items-center justify-center shrink-0">
+                        <i class="fa-solid fa-chart-line text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-slate-900 text-base mb-1">Advanced Real-time Analytics</h3>
+                        <p class="text-slate-500 text-sm leading-relaxed">Mistake profiling, detailed substitution indicators, speed graphing, and progress boards.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="pricing-section">
-            <h2>Get Your Pass</h2>
-            <div class="plans-wrapper">
-                <div class="plan-card bronze">
-                    <h3>Bronze Pass</h3>
-                    <p class="duration">1 Month Access</p>
-                    <div class="price">₹299</div>
-                    <ul class="plan-features">
-                        <li><i class="fa-solid fa-check"></i> Full Access to All Dictations</li>
-                        <li><i class="fa-solid fa-check"></i> Unlimited Practice</li>
-                    </ul>
-                    <button class="cta-button" onclick="selectPlan('Bronze Pass', 299)">Get Bronze</button>
+        <!-- Pricing Cards Section -->
+        <div class="max-w-5xl mx-auto mb-16">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
+                
+                <!-- Bronze Pass -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 hover:border-amber-300 relative glow-hover">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-amber-700 bg-amber-50 text-xs font-semibold px-3 py-1 rounded-full border border-amber-100">
+                                Bronze Pass
+                            </span>
+                        </div>
+                        <div class="mb-6">
+                            <span class="text-4xl font-black text-slate-900">₹299</span>
+                            <span class="text-slate-400 text-sm block mt-1">1 Month Premium Access</span>
+                        </div>
+                        <div class="border-t border-slate-100 pt-6 mb-8">
+                            <ul class="space-y-3 text-sm text-slate-600">
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                    <span>Full access to all 24 volumes of KC</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                    <span>Specialized Court & General Dictations</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                    <span>Complete transcription evaluations</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button onclick="handlePlanSelection('Bronze Pass', 299)" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-xl transition text-center text-sm">
+                        Choose Bronze
+                    </button>
                 </div>
-                <div class="plan-card silver">
-                    <div class="popular-badge">Best Value</div>
-                    <h3>Silver Pass</h3>
-                    <p class="duration">3 Months Access</p>
-                    <div class="price">₹599</div>
-                    <ul class="plan-features">
-                        <li><i class="fa-solid fa-check"></i> Full Access to All Dictations</li>
-                        <li><i class="fa-solid fa-check"></i> Save 33% overall</li>
-                    </ul>
-                    <button class="cta-button" onclick="selectPlan('Silver Pass', 599)">Get Silver</button>
+
+                <!-- Silver Pass (Popular) -->
+                <div class="bg-slate-950 text-white rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 relative shadow-xl shadow-slate-900/10 scale-100 md:scale-105 border-2 border-blue-500 glow-hover z-10">
+                    <div class="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-wider shadow-md">
+                        Best Seller
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-4 mt-2">
+                            <span class="text-blue-400 bg-blue-900/40 text-xs font-semibold px-3 py-1 rounded-full border border-blue-800/30">
+                                Silver Pass
+                            </span>
+                            <span class="text-xs font-bold text-emerald-400">Save 33%</span>
+                        </div>
+                        <div class="mb-6">
+                            <span class="text-5xl font-black text-white">₹599</span>
+                            <span class="text-slate-400 text-sm block mt-1">3 Months Premium Access</span>
+                        </div>
+                        <div class="border-t border-slate-800 pt-6 mb-8">
+                            <ul class="space-y-3 text-sm text-slate-300">
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-circle-check text-blue-400 mt-1"></i>
+                                    <span>Full access to all 24 volumes of KC</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-circle-check text-blue-400 mt-1"></i>
+                                    <span>Specialized Court & General Dictations</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-circle-check text-blue-400 mt-1"></i>
+                                    <span>Complete transcription evaluations</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-circle-check text-blue-400 mt-1"></i>
+                                    <span class="text-white font-medium">Saves ₹298 compared to Monthly</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button onclick="handlePlanSelection('Silver Pass', 599)" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-4 rounded-xl transition text-center text-sm shadow-lg shadow-blue-500/20">
+                        Choose Silver
+                    </button>
                 </div>
-                <div class="plan-card gold">
-                    <h3>Gold Pass</h3>
-                    <p class="duration">6 Months Access</p>
-                    <div class="price">₹899</div>
-                    <ul class="plan-features">
-                        <li><i class="fa-solid fa-check"></i> Full Access to All Dictations</li>
-                        <li><i class="fa-solid fa-check"></i> Maximum Savings!</li>
-                    </ul>
-                    <button class="cta-button" onclick="selectPlan('Gold Pass', 899)">Get Gold</button>
+
+                <!-- Gold Pass -->
+                <div class="bg-white border border-slate-200 rounded-3xl p-8 flex flex-col justify-between transition-all duration-300 hover:border-yellow-400 relative glow-hover">
+                    <div>
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-yellow-700 bg-yellow-50 text-xs font-semibold px-3 py-1 rounded-full border border-yellow-100">
+                                Gold Pass
+                            </span>
+                            <span class="text-xs font-bold text-emerald-600">Save 50%</span>
+                        </div>
+                        <div class="mb-6">
+                            <span class="text-4xl font-black text-slate-900">₹899</span>
+                            <span class="text-slate-400 text-sm block mt-1">6 Months Premium Access</span>
+                        </div>
+                        <div class="border-t border-slate-100 pt-6 mb-8">
+                            <ul class="space-y-3 text-sm text-slate-600">
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                    <span>Full access to all 24 volumes of KC</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                    <span>Specialized Court & General Dictations</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                    <span>Complete transcription evaluations</span>
+                                </li>
+                                <li class="flex items-start gap-2.5">
+                                    <i class="fa-solid fa-check text-emerald-500 mt-1"></i>
+                                    <span class="text-slate-900 font-medium">Maximum Savings Strategy</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <button onclick="handlePlanSelection('Gold Pass', 899)" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold py-3 px-4 rounded-xl transition text-center text-sm">
+                        Choose Gold
+                    </button>
                 </div>
+
             </div>
         </div>
-        <div class="back-button-container">
-            <a href="index.html" class="back-button">← Back to Home Dashboard</a>
+
+        <div class="text-center">
+            <a href="index.html" class="inline-flex items-center text-sm font-semibold text-slate-500 hover:text-slate-800 transition py-2 px-4 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-150">
+                <i class="fa-solid fa-arrow-left mr-2"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <!-- PERSUASIVE UPSELL DIALOG MODAL -->
+    <div id="upsellModal" class="fixed inset-0 bg-slate-900/70 backdrop-blur-md hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl max-w-lg w-full p-8 relative shadow-2xl modal-animate-in border border-slate-100">
+            <button onclick="closeUpsellModal()" class="absolute top-5 right-5 text-slate-400 hover:text-slate-600 text-xl transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <div class="text-center space-y-4">
+                <div class="mx-auto w-16 h-16 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-3xl mb-2">
+                    <i class="fa-solid fa-piggy-bank"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900 leading-snug">Smart Choice! Save Up to 33% Overall</h3>
+                <p class="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto">
+                    Instead of renewing the <strong class="text-slate-700">Bronze Pass (1 Month)</strong> every month, pick the <strong class="text-slate-700">Silver Pass (3 Months)</strong> today and get continuous practice with maximum savings!
+                </p>
+                
+                <!-- Package comparison -->
+                <div class="grid grid-cols-2 gap-4 pt-3 pb-2 text-left">
+                    <div class="border border-slate-150 rounded-2xl p-4 bg-slate-50">
+                        <span class="text-slate-400 text-xs font-semibold uppercase block">Bronze Pass</span>
+                        <span class="text-lg font-bold text-slate-800">₹299</span>
+                        <span class="text-slate-400 text-xs block">Only 30 Days</span>
+                    </div>
+                    <div class="border-2 border-emerald-500 rounded-2xl p-4 bg-emerald-50/50 relative">
+                        <span class="absolute -top-2.5 right-3 bg-emerald-500 text-white font-bold text-[9px] px-2 py-0.5 rounded-full uppercase">Saves ₹298</span>
+                        <span class="text-emerald-700 text-xs font-semibold uppercase block">Silver Pass</span>
+                        <span class="text-xl font-bold text-slate-800">₹599</span>
+                        <span class="text-emerald-600 text-xs font-medium block">90 Days (Value Option)</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3 pt-4">
+                    <button onclick="upgradeFromUpsell()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-4 rounded-2xl transition shadow-lg shadow-emerald-500/10 text-sm">
+                        Yes, Upgrade to Silver & Save 33%
+                    </button>
+                    <button onclick="continueWithBronze()" class="w-full text-slate-400 hover:text-slate-600 transition font-semibold text-xs py-2">
+                        No, continue with Bronze (1 Month) for ₹299
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
     <!-- PAYMENT MODAL -->
-    <div class="modal-overlay" id="paymentModal">
-        <div class="modal-content">
-             <div class="modal-header">
-                <span class="brand">Check My Steno</span>
-                <div class="modal-stepper">
-                    <div id="step-indicator-1" class="step active">1. Order</div>
-                    <div id="step-indicator-2" class="step">2. Payment</div>
-                    <div id="step-indicator-3" class="step">3. Verify</div>
+    <div class="fixed inset-0 bg-slate-900/75 backdrop-blur-md hidden items-center justify-center z-40 p-4 opacity-0 transition-opacity duration-300" id="paymentModal">
+        <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-slate-100 flex flex-col max-h-[92vh] modal-animate-in">
+             
+             <!-- Header -->
+             <div class="p-6 border-b border-slate-100 flex items-center justify-between shrink-0">
+                <div>
+                    <h3 class="font-extrabold text-slate-900 text-lg">Check My Steno</h3>
+                    <p class="text-xs text-slate-400 font-medium">Premium Billing Center</p>
                 </div>
-                <button class="close-button" onclick="hidePaymentModal()">&times;</button>
+                <div class="flex items-center gap-1.5">
+                    <div id="step-indicator-1" class="text-xs font-bold px-2.5 py-1 rounded-full transition bg-blue-100 text-blue-600">1. Order</div>
+                    <div id="step-indicator-2" class="text-xs font-bold px-2.5 py-1 rounded-full transition bg-slate-100 text-slate-500">2. Pay</div>
+                    <div id="step-indicator-3" class="text-xs font-bold px-2.5 py-1 rounded-full transition bg-slate-100 text-slate-500">3. Verify</div>
+                </div>
+                <button onclick="hidePaymentModal()" class="text-slate-400 hover:text-slate-600 transition text-lg px-2 py-1">&times;</button>
             </div>
-            <div class="modal-body">
+            
+            <!-- Body -->
+            <div class="p-6 overflow-y-auto flex-grow space-y-6">
+                
                 <!-- STEP 1 -->
-                <div id="step-1-order" class="step-content active">
-                    <h3>Confirm Your Order</h3>
-                    <div class="order-summary-card">
-                        <div class="summary-row"><span>Plan Selected:</span><strong id="summary-plan-name"></strong></div>
-                        <div class="summary-row hidden" id="discount-row">
-                            <span class="summary-row-discount">Discount:</span>
-                            <strong class="summary-row-discount" id="summary-discount-amount"></strong>
+                <div id="step-1-order" class="step-content active space-y-4">
+                    <h4 class="font-bold text-slate-900 text-base">Confirm Your Order</h4>
+                    <div class="bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-3.5">
+                        <div class="flex justify-between text-sm"><span class="text-slate-500">Selected Plan:</span><strong class="text-slate-900" id="summary-plan-name"></strong></div>
+                        
+                        <div class="flex justify-between text-sm hidden" id="discount-row">
+                            <span class="text-emerald-600 font-medium">Discount Applied:</span>
+                            <strong class="text-emerald-600" id="summary-discount-amount"></strong>
                         </div>
-                        <div class="summary-row total"><span>Total Amount:</span><strong id="summary-total-price"></strong></div>
+                        
+                        <div class="flex justify-between items-center border-t border-slate-150 pt-3.5">
+                            <span class="text-slate-900 font-bold">Total Payable:</span>
+                            <strong class="text-2xl font-black text-slate-900" id="summary-total-price"></strong>
+                        </div>
                     </div>
                     
-                    <!-- Coupon Code Input Group -->
-                    <div class="coupon-area">
-                        <div class="coupon-input-group">
-                            <input type="text" id="coupon-code-input" placeholder="Promo / Referral Code" style="margin-bottom:0;">
-                            <button id="apply-coupon-btn" onclick="applyCoupon()">Apply</button>
+                    <!-- Coupon -->
+                    <div class="space-y-2">
+                        <label class="text-xs font-bold text-slate-500 block uppercase tracking-wider">Promo / Referral Code</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="coupon-code-input" class="bg-slate-50 border border-slate-250 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-800 text-sm rounded-xl p-3 flex-grow outline-none transition" placeholder="Enter coupon code">
+                            <button id="apply-coupon-btn" onclick="applyCoupon()" class="bg-slate-900 hover:bg-slate-800 text-white font-bold px-5 py-3 rounded-xl transition text-sm">
+                                Apply
+                            </button>
                         </div>
-                        <p id="coupon-message"></p>
+                        <p id="coupon-message" class="text-xs font-medium min-height-[1.2rem]"></p>
                     </div>
                 </div>
                 
                 <!-- STEP 2 -->
-                <div id="step-2-payment" class="step-content">
-                    <h3>Payment Instructions</h3>
-                    <p>Scan the QR code or use the UPI ID. <strong style="color:var(--error-color);">Important:</strong> Put your Order ID in the payment remarks/notes!</p>
-                    <div class="payment-options">
-                        <div class="payment-option selected">
-                            <div id="qr-code-area">
-                                <div id="qr-code-container"></div>
+                <div id="step-2-payment" class="step-content hidden space-y-4">
+                    <h4 class="font-bold text-slate-900 text-base">Payment Instructions</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        Scan the QR code using any UPI Application (PhonePe, GPay, Paytm) or copy our UPI ID. <strong class="text-rose-500 font-bold">Important:</strong> Please paste your Unique Order ID in the payment remarks/notes.
+                    </p>
+                    
+                    <div class="border border-slate-200 rounded-2xl p-4 bg-white shadow-sm space-y-4">
+                        <div id="qr-code-area" class="flex flex-col sm:flex-row items-center gap-6 justify-center">
+                            <div id="qr-code-container" class="p-2 border border-slate-100 rounded-xl bg-white shrink-0 shadow-sm"></div>
+                            <div class="space-y-3 w-full text-center sm:text-left">
                                 <div>
-                                    <p style="margin:0 0 10px 0;"><strong>UPI ID:</strong> <br>checkmysteno@upi</p>
-                                    <p style="margin:0 0 5px 0; font-size: 0.9rem;">Your Order ID (Put in notes):</p>
-                                    <div class="unique-code-container" style="padding: 5px;">
-                                        <span class="unique-code-text" id="unique-code-display" style="font-size: 1rem;"></span>
+                                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Official UPI ID</span>
+                                    <strong class="text-sm text-slate-800 block select-all">checkmysteno@upi</strong>
+                                </div>
+                                <div class="border-t border-slate-100 pt-3">
+                                    <span class="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">Required Remarks Note (Order ID)</span>
+                                    <div class="flex items-center justify-center sm:justify-start gap-2 mt-1">
+                                        <span class="font-mono bg-blue-50 text-blue-700 font-bold px-2.5 py-1 text-sm border border-blue-100 rounded-lg select-all" id="unique-code-display"></span>
                                     </div>
                                 </div>
                             </div>
@@ -281,21 +440,35 @@
                 </div>
                 
                 <!-- STEP 3 -->
-                <div id="step-3-verify" class="step-content">
-                    <h3>Verify Your Payment</h3>
-                    <p>Enter the 12-digit UTR/Transaction ID from your payment app.</p>
-                    <form id="verifyForm" onsubmit="submitVerification(event)" class="verification-form">
-                        <input type="text" id="transactionId" placeholder="UPI Transaction ID / UTR No." required>
+                <div id="step-3-verify" class="step-content hidden space-y-4">
+                    <h4 class="font-bold text-slate-900 text-base font-inter">Verify Your Payment</h4>
+                    <p class="text-xs text-slate-500 leading-relaxed">
+                        To activate your account, paste the <strong class="text-slate-800">12-digit UPI Transaction ID (UTR No.)</strong> generated upon your payment transfer.
+                    </p>
+                    
+                    <form id="verifyForm" onsubmit="submitVerification(event)" class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold text-slate-500 block uppercase tracking-wider">Transaction ID / UTR Number</label>
+                            <input type="text" id="transactionId" class="w-full bg-slate-50 border border-slate-200 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-slate-800 text-sm rounded-xl p-3.5 outline-none font-semibold transition" placeholder="e.g. 401234567890" required>
+                        </div>
+                        
                         <input type="hidden" id="planNameInput">
                         <input type="hidden" id="planPriceInput">
                         <input type="hidden" id="uniqueCodeInput">
-                        <button type="submit" id="submit-verify-btn" class="modal-button" style="margin-top: 10px;">Submit Verification</button>
-                        <p id="form-message" class="error-message"></p>
+                        
+                        <button type="submit" id="submit-verify-btn" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl transition text-sm shadow-lg shadow-blue-500/15">
+                            Submit Verification
+                        </button>
+                        <p id="form-message" class="text-xs text-rose-500 font-semibold text-center"></p>
                     </form>
                 </div>
             </div>
-            <div class="modal-footer" id="modal-footer-nav">
-                <button id="modal-action-button" class="modal-button" onclick="navigateToStep(2)">Proceed to Payment</button>
+            
+            <!-- Footer controls -->
+            <div class="p-6 border-t border-slate-100 bg-slate-50 flex items-center justify-between shrink-0" id="modal-footer-nav">
+                <button id="modal-action-button" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-4 rounded-xl transition text-center text-sm shadow-md" onclick="navigateToStep(2)">
+                    Proceed to Payment
+                </button>
             </div>
         </div>
     </div>
@@ -318,11 +491,11 @@
     AUTH.onAuthStateChanged(user => {
         if (user) {
             currentUser = { uid: user.uid, email: user.email, name: user.displayName };
-            document.getElementById('loginAlert').style.display = 'none';
+            document.getElementById('loginAlert').classList.add('hidden');
             checkForPendingRequests(); 
         } else {
             currentUser = null;
-            document.getElementById('loginAlert').style.display = 'block';
+            document.getElementById('loginAlert').classList.remove('hidden');
         }
     });
 
@@ -335,20 +508,45 @@
         }
     }
 
-    function selectPlan(name, price) {
+    // INTERACTION ENGINE: Upselling & Plan triggers
+    function handlePlanSelection(name, price) {
         if (!currentUser) {
-            alert("Please go back to the Home page and log in first.");
+            alert("Please sign in or return to the Dashboard to initiate an account upgrade.");
             window.location.href = "index.html";
             return;
         }
-        
+
+        if (name === 'Bronze Pass') {
+            // Trigger customized upsell suggestion model
+            document.getElementById('upsellModal').style.display = 'flex';
+        } else {
+            setupCheckoutWorkflow(name, price);
+        }
+    }
+
+    function closeUpsellModal() {
+        document.getElementById('upsellModal').style.display = 'none';
+    }
+
+    function upgradeFromUpsell() {
+        closeUpsellModal();
+        setupCheckoutWorkflow('Silver Pass', 599);
+    }
+
+    function continueWithBronze() {
+        closeUpsellModal();
+        setupCheckoutWorkflow('Bronze Pass', 299);
+    }
+
+    function setupCheckoutWorkflow(name, price) {
         basePrice = price;
         finalPrice = price;
         appliedCoupon = null;
         
-        // Reset Coupon Inputs
+        // Clear Coupon UI State
         document.getElementById('coupon-code-input').value = '';
         document.getElementById('coupon-message').textContent = '';
+        document.getElementById('coupon-message').className = "text-xs font-medium";
         document.getElementById('discount-row').classList.add('hidden');
         
         document.getElementById('planNameInput').value = name;
@@ -363,8 +561,9 @@
         
         generatePaymentQR(finalPrice, orderId);
 
-        document.getElementById('paymentModal').style.display = 'flex';
-        document.getElementById('paymentModal').classList.add('visible');
+        const modal = document.getElementById('paymentModal');
+        modal.style.display = 'flex';
+        setTimeout(() => modal.classList.add('opacity-100'), 10);
         navigateToStep(1);
     }
 
@@ -372,7 +571,7 @@
         document.getElementById('qr-code-container').innerHTML = '';
         new QRCode(document.getElementById("qr-code-container"), {
             text: `upi://pay?pa=checkmysteno@upi&pn=CheckMySteno&am=${price}&tn=${orderId}`,
-            width: 130, height: 130
+            width: 140, height: 140
         });
     }
 
@@ -383,23 +582,23 @@
         const discountRow = document.getElementById('discount-row');
         const discountAmtEl = document.getElementById('summary-discount-amount');
         const totalEl = document.getElementById('summary-total-price');
-        const currentPlan = document.getElementById('planNameInput').value; // e.g. "Bronze Pass"
+        const currentPlan = document.getElementById('planNameInput').value;
         
         if (!codeInput) {
             msgEl.textContent = "Please enter a code.";
-            msgEl.className = "coupon-message-error";
+            msgEl.className = "text-xs text-rose-500 font-semibold";
             return;
         }
 
-        msgEl.textContent = "Checking...";
-        msgEl.className = "";
+        msgEl.textContent = "Verifying...";
+        msgEl.className = "text-xs text-slate-500 font-semibold";
 
         try {
             const couponDoc = await DB.collection('discountCodes').doc(codeInput).get();
             
             if (!couponDoc.exists || !couponDoc.data().isActive) {
                 msgEl.textContent = "Invalid or expired code.";
-                msgEl.className = "coupon-message-error";
+                msgEl.className = "text-xs text-rose-500 font-semibold";
                 return;
             }
 
@@ -408,7 +607,7 @@
             // Validate Targeted Plan restriction
             if (data.targetPlan && data.targetPlan !== "all" && data.targetPlan !== currentPlan) {
                 msgEl.textContent = `This code is only valid for the ${data.targetPlan}!`;
-                msgEl.className = "coupon-message-error";
+                msgEl.className = "text-xs text-rose-500 font-semibold";
                 return;
             }
 
@@ -432,26 +631,35 @@
             // Regenerate Payment QR with New Discounted Price
             generatePaymentQR(finalPrice, document.getElementById('uniqueCodeInput').value);
 
-            msgEl.textContent = `Code Applied! You saved ₹${discount}.`;
-            msgEl.className = "coupon-message-success";
+            msgEl.textContent = `Applied! You saved ₹${discount}.`;
+            msgEl.className = "text-xs text-emerald-600 font-semibold";
 
         } catch (err) {
             console.error(err);
-            msgEl.textContent = "Error applying code.";
-            msgEl.className = "coupon-message-error";
+            msgEl.textContent = "Error applying coupon code.";
+            msgEl.className = "text-xs text-rose-500 font-semibold";
         }
     }
 
     function navigateToStep(step) {
         currentStep = step;
-        document.querySelectorAll('.step-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+        
+        // Handle step content views
+        document.querySelectorAll('.step-content').forEach(el => el.classList.add('hidden'));
         
         const stepIdMap = {1: 'order', 2: 'payment', 3: 'verify'};
-        document.getElementById(`step-${step}-${stepIdMap[step]}`).classList.add('active');
+        document.getElementById(`step-${step}-${stepIdMap[step]}`).classList.remove('hidden');
         
-        for(let i=1; i<=step; i++) { 
-            document.getElementById(`step-indicator-${i}`).classList.add('active'); 
+        // Adjust indicator styles
+        for(let i=1; i<=3; i++) {
+            const indicator = document.getElementById(`step-indicator-${i}`);
+            if (i === step) {
+                indicator.className = "text-xs font-bold px-2.5 py-1 rounded-full transition bg-blue-100 text-blue-600";
+            } else if (i < step) {
+                indicator.className = "text-xs font-bold px-2.5 py-1 rounded-full transition bg-emerald-50 text-emerald-600";
+            } else {
+                indicator.className = "text-xs font-bold px-2.5 py-1 rounded-full transition bg-slate-100 text-slate-500";
+            }
         }
         
         const actionBtn = document.getElementById('modal-action-button');
@@ -473,8 +681,9 @@
     }
 
     function hidePaymentModal() {
-        document.getElementById('paymentModal').classList.remove('visible');
-        setTimeout(() => { document.getElementById('paymentModal').style.display = 'none'; }, 300);
+        const modal = document.getElementById('paymentModal');
+        modal.classList.remove('opacity-100');
+        setTimeout(() => { modal.style.display = 'none'; }, 300);
         document.getElementById('modal-footer-nav').style.display = 'block';
     }
 
@@ -488,7 +697,7 @@
         const price = parseFloat(document.getElementById('planPriceInput').value);
         const utr = document.getElementById('transactionId').value.trim();
 
-        // Calculate Start/End date approximations based on pass duration for history storage
+        // Calculate Start/End dates
         const startDate = new Date();
         let durationDays = 30;
         if (planName.includes("Silver")) durationDays = 90;
@@ -512,11 +721,11 @@
 
         const batch = DB.batch();
 
-        // Path 1: Write to global validation queue
+        // Write verification item
         const verificationRef = DB.collection('paymentVerifications').doc(orderId);
         batch.set(verificationRef, verificationData);
 
-        // Path 2: Write instantly to User subcollection history with full details
+        // Write to history log
         const userHistoryRef = DB.collection('users').doc(currentUser.uid).collection('payments').doc(orderId);
         batch.set(userHistoryRef, {
             amount: price,
@@ -536,7 +745,7 @@
             showStatusScreen(orderId, currentUser.email);
             document.getElementById('verifyForm').reset();
         } catch (error) {
-            document.getElementById('form-message').textContent = "Error saving request. Please try again.";
+            document.getElementById('form-message').textContent = "Unable to process verification. Please try again.";
             console.error(error);
         } finally {
             btn.disabled = false; btn.textContent = "Submit Verification";
@@ -560,13 +769,12 @@
                 if (data.verified) {
                     const finalStatus = data.status === 'approved' ? 'success' : 'failed';
                     
-                    // Write immediate client-side sync update to User subcollection
                     try {
                         await DB.collection('users').doc(currentUser.uid).collection('payments').doc(orderId).update({
                             status: finalStatus
                         });
                     } catch(err) {
-                        console.error("Local sync update failed:", err);
+                        console.error("Verification state sync failure:", err);
                     }
 
                     document.getElementById('pending-section').classList.add('hidden');
