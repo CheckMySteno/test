@@ -1,3 +1,4 @@
+--- START OF FILE plans.html ---
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -10,7 +11,7 @@
     <!-- Firebase Scripts -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.9.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
     <!-- QR Code Generation Library -->
     <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
     
@@ -82,8 +83,8 @@
         .action-button { display: inline-block; padding: 1rem 2rem; border-radius: 8px; text-decoration: none; font-size: 1.1rem; font-weight: 700; cursor: pointer; color:white; border:none; margin-top:1.5rem; } .login-button { background: var(--success-color); } .try-again-button { background: var(--accent-gold); }
         
         /* Payment Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; visibility: hidden; transition: opacity 0.3s ease; }
-        .modal-overlay.visible { opacity: 1; visibility: visible; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(11, 17, 32, 0.8); backdrop-filter: blur(10px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; }
+        .modal-overlay.visible { display: flex; opacity: 1; }
         .modal-content { background: var(--card-bg); border-radius: 20px; width: 100%; max-width: 480px; border: 1px solid var(--border-color); position: relative; max-height: 95vh; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.3s ease; }
         .modal-overlay.visible .modal-content { transform: scale(1); }
         .modal-header { padding: 1rem 1.5rem; text-align: center; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-shrink: 0; }
@@ -111,6 +112,16 @@
         .error-message { color: var(--error-color); text-align:center; margin-top: 1rem;}
         
         #loginAlert { display:none; background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; text-align: center; font-weight: 600; margin-bottom: 2rem; border: 1px solid #f87171; }
+        
+        /* Coupon Code input styling */
+        .coupon-area { margin-top: 1.5rem; }
+        .coupon-input-group { display: flex; gap: 0.5rem; }
+        .coupon-input-group input { flex-grow: 1; background-color: #edf2f7; border: 1px solid var(--border-color); color: var(--text-color); padding: 0.8rem; border-radius: 8px; font-size: 1rem; }
+        .coupon-input-group button { background-color: var(--accent-silver); color: white; border: none; padding: 0.8rem 1.2rem; border-radius: 8px; font-weight: 700; cursor: pointer; }
+        #coupon-message { font-size: 0.9rem; font-weight: 500; margin-top: 0.75rem; min-height: 1.2rem; }
+        .coupon-message-success { color: var(--success-color); }
+        .coupon-message-error { color: var(--error-color); }
+        .summary-row-discount { color: var(--success-color); }
     </style>
 </head>
 <body>
@@ -232,7 +243,20 @@
                     <h3>Confirm Your Order</h3>
                     <div class="order-summary-card">
                         <div class="summary-row"><span>Plan Selected:</span><strong id="summary-plan-name"></strong></div>
+                        <div class="summary-row hidden" id="discount-row">
+                            <span class="summary-row-discount">Discount:</span>
+                            <strong class="summary-row-discount" id="summary-discount-amount"></strong>
+                        </div>
                         <div class="summary-row total"><span>Total Amount:</span><strong id="summary-total-price"></strong></div>
+                    </div>
+                    
+                    <!-- Coupon Code Input Group -->
+                    <div class="coupon-area">
+                        <div class="coupon-input-group">
+                            <input type="text" id="coupon-code-input" placeholder="Promo / Referral Code" style="margin-bottom:0;">
+                            <button id="apply-coupon-btn" onclick="applyCoupon()">Apply</button>
+                        </div>
+                        <p id="coupon-message"></p>
                     </div>
                 </div>
                 
@@ -280,19 +304,22 @@
     // --- FIREBASE INIT ---
     const FBCONFIG = {apiKey:"AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",authDomain:"checkmysteno.firebaseapp.com",projectId:"checkmysteno",storageBucket:"checkmysteno.firebasestorage.app",messagingSenderId:"719325115943",appId:"1:719325115943:web:0dd50a67978816d42a8002"};
     if (!firebase.apps.length) { firebase.initializeApp(FBCONFIG); }
-    const db = firebase.firestore();
-    const auth = firebase.auth();
+    const DB = firebase.firestore();
+    const AUTH = firebase.auth();
     
     let currentUser = null;
     let currentStep = 1;
     let paymentListener = null;
+    let basePrice = 0;
+    let finalPrice = 0;
+    let appliedCoupon = null;
 
     // Listen to Auth State
-    auth.onAuthStateChanged(user => {
+    AUTH.onAuthStateChanged(user => {
         if (user) {
             currentUser = { uid: user.uid, email: user.email, name: user.displayName };
             document.getElementById('loginAlert').style.display = 'none';
-            checkForPendingRequests(); // Check if user already paid and is waiting
+            checkForPendingRequests(); 
         } else {
             currentUser = null;
             document.getElementById('loginAlert').style.display = 'block';
@@ -301,7 +328,7 @@
 
     async function checkForPendingRequests() {
         if (!currentUser) return;
-        const reqs = await db.collection('paymentVerifications').where('uid', '==', currentUser.uid).where('verified', '==', false).get();
+        const reqs = await DB.collection('paymentVerifications').where('uid', '==', currentUser.uid).where('verified', '==', false).get();
         if (!reqs.empty) {
             const req = reqs.docs[0];
             showStatusScreen(req.data().uniqueCode, currentUser.email);
@@ -314,6 +341,16 @@
             window.location.href = "index.html";
             return;
         }
+        
+        basePrice = price;
+        finalPrice = price;
+        appliedCoupon = null;
+        
+        // Reset Coupon Inputs
+        document.getElementById('coupon-code-input').value = '';
+        document.getElementById('coupon-message').textContent = '';
+        document.getElementById('discount-row').classList.add('hidden');
+        
         document.getElementById('planNameInput').value = name;
         document.getElementById('planPriceInput').value = price;
         document.getElementById('summary-plan-name').textContent = name;
@@ -324,15 +361,85 @@
         document.getElementById('uniqueCodeInput').value = orderId;
         document.getElementById('unique-code-display').textContent = orderId;
         
-        // Generate QR
+        generatePaymentQR(finalPrice, orderId);
+
+        document.getElementById('paymentModal').style.display = 'flex';
+        document.getElementById('paymentModal').classList.add('visible');
+        navigateToStep(1);
+    }
+
+    function generatePaymentQR(price, orderId) {
         document.getElementById('qr-code-container').innerHTML = '';
         new QRCode(document.getElementById("qr-code-container"), {
             text: `upi://pay?pa=checkmysteno@upi&pn=CheckMySteno&am=${price}&tn=${orderId}`,
             width: 130, height: 130
         });
+    }
 
-        document.getElementById('paymentModal').classList.add('visible');
-        navigateToStep(1);
+    // --- TARGETED PLAN COUPON ENGINE ---
+    async function applyCoupon() {
+        const codeInput = document.getElementById('coupon-code-input').value.trim().toUpperCase();
+        const msgEl = document.getElementById('coupon-message');
+        const discountRow = document.getElementById('discount-row');
+        const discountAmtEl = document.getElementById('summary-discount-amount');
+        const totalEl = document.getElementById('summary-total-price');
+        const currentPlan = document.getElementById('planNameInput').value; // e.g. "Bronze Pass"
+        
+        if (!codeInput) {
+            msgEl.textContent = "Please enter a code.";
+            msgEl.className = "coupon-message-error";
+            return;
+        }
+
+        msgEl.textContent = "Checking...";
+        msgEl.className = "";
+
+        try {
+            const couponDoc = await DB.collection('discountCodes').doc(codeInput).get();
+            
+            if (!couponDoc.exists || !couponDoc.data().isActive) {
+                msgEl.textContent = "Invalid or expired code.";
+                msgEl.className = "coupon-message-error";
+                return;
+            }
+
+            const data = couponDoc.data();
+            
+            // Validate Targeted Plan restriction
+            if (data.targetPlan && data.targetPlan !== "all" && data.targetPlan !== currentPlan) {
+                msgEl.textContent = `This code is only valid for the ${data.targetPlan}!`;
+                msgEl.className = "coupon-message-error";
+                return;
+            }
+
+            // Apply Discount
+            let discount = 0;
+            if (data.type === "percent") {
+                discount = Math.round(basePrice * (data.value / 100));
+            } else if (data.type === "flat") {
+                discount = data.value;
+            }
+
+            finalPrice = Math.max(0, basePrice - discount);
+            appliedCoupon = codeInput;
+
+            // Update UI Summary
+            discountAmtEl.textContent = `-₹${discount}`;
+            discountRow.classList.remove('hidden');
+            totalEl.textContent = `₹${finalPrice}`;
+            document.getElementById('planPriceInput').value = finalPrice;
+
+            // Regenerate Payment QR with New Discounted Price
+            generatePaymentQR(finalPrice, document.getElementById('uniqueCodeInput').value);
+
+            msgEl.textContent = `Code Applied! You saved ₹${discount}.`;
+            msgEl.className = "coupon-message-success";
+
+        } catch (err) {
+            console.error(err);
+            msgEl.textContent = "Error applying code.";
+            msgEl.className = "coupon-message-error";
+        }
     }
 
     function navigateToStep(step) {
@@ -361,12 +468,13 @@
             footer.style.display = 'block'; 
         }
         else if (step === 3) { 
-            footer.style.display = 'none'; // Hide footer, use submit button inside form
+            footer.style.display = 'none'; 
         }
     }
 
     function hidePaymentModal() {
         document.getElementById('paymentModal').classList.remove('visible');
+        setTimeout(() => { document.getElementById('paymentModal').style.display = 'none'; }, 300);
         document.getElementById('modal-footer-nav').style.display = 'block';
     }
 
@@ -375,23 +483,43 @@
         const btn = document.getElementById('submit-verify-btn');
         btn.disabled = true; btn.textContent = "Submitting...";
         
-        const data = {
+        const orderId = document.getElementById('uniqueCodeInput').value;
+        const planName = document.getElementById('planNameInput').value;
+        const price = parseFloat(document.getElementById('planPriceInput').value);
+
+        const verificationData = {
             uid: currentUser.uid,
             name: currentUser.name || 'User',
             email: currentUser.email,
-            plan: document.getElementById('planNameInput').value,
-            price: document.getElementById('planPriceInput').value,
+            plan: planName,
+            price: price,
             transactionId: document.getElementById('transactionId').value.trim(),
-            uniqueCode: document.getElementById('uniqueCodeInput').value,
+            uniqueCode: orderId,
             verified: false,
             status: 'pending',
+            couponUsed: appliedCoupon || null,
             submissionTimestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
 
+        const batch = DB.batch();
+
+        // Path 1: Write to global validation queue
+        const verificationRef = DB.collection('paymentVerifications').doc(orderId);
+        batch.set(verificationRef, verificationData);
+
+        // Path 2: Write instantly to User subcollection history
+        const userHistoryRef = DB.collection('users').doc(currentUser.uid).collection('payments').doc(orderId);
+        batch.set(userHistoryRef, {
+            amount: price,
+            planName: planName,
+            status: "pending",
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
         try {
-            await db.collection('paymentVerifications').doc(data.uniqueCode).set(data);
+            await batch.commit();
             hidePaymentModal();
-            showStatusScreen(data.uniqueCode, data.email);
+            showStatusScreen(orderId, currentUser.email);
             document.getElementById('verifyForm').reset();
         } catch (error) {
             document.getElementById('form-message').textContent = "Error saving request. Please try again.";
@@ -412,7 +540,7 @@
         document.getElementById('pending-email').textContent = email;
         
         if (paymentListener) paymentListener();
-        paymentListener = db.collection('paymentVerifications').doc(orderId).onSnapshot(doc => {
+        paymentListener = DB.collection('paymentVerifications').doc(orderId).onSnapshot(doc => {
             if (doc.exists) {
                 const data = doc.data();
                 if (data.verified) {
@@ -422,7 +550,7 @@
                     } else {
                         document.getElementById('rejected-section').classList.remove('hidden');
                     }
-                    paymentListener(); // Stop listening once verified
+                    paymentListener(); 
                 }
             }
         });
