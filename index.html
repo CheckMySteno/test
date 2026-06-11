@@ -1122,6 +1122,71 @@
         }
     }
 
+    // --- PROFILE DETAILS UPDATE SYSTEM ---
+    async function saveProfileDetails() {
+        if (!currentUser) {
+            alert("No user is currently logged in.");
+            return;
+        }
+
+        const nameInput = GID('editProfileName');
+        const phoneInput = GID('editProfilePhone');
+        const locationInput = GID('editProfileLocation');
+        const statusEl = GID('profileSaveStatus');
+
+        if (!nameInput) return;
+
+        const newName = nameInput.value.trim();
+        const newPhone = phoneInput ? phoneInput.value.trim() : "";
+        const newLocation = locationInput ? locationInput.value.trim() : "";
+
+        if (!newName) {
+            alert("Name field cannot be left blank.");
+            return;
+        }
+
+        try {
+            if (statusEl) {
+                statusEl.textContent = "Saving changes...";
+                statusEl.style.color = "var(--button-gradient-start)";
+                statusEl.style.display = "block";
+            }
+
+            // 1. Update Profile Display Name in Firebase Auth
+            const user = AUTH.currentUser;
+            if (user) {
+                await user.updateProfile({
+                    displayName: newName
+                });
+            }
+
+            // 2. Update Document details inside Firestore User Document
+            await DB.collection('users').doc(currentUser.uid).set({
+                name: newName,
+                phone: newPhone,
+                location: newLocation
+            }, { merge: true });
+
+            if (statusEl) {
+                statusEl.textContent = "Changes saved successfully!";
+                statusEl.style.color = "var(--success-color)";
+                statusEl.style.display = "block";
+                
+                // Hide status message and close the modal after a short delay
+                setTimeout(() => {
+                    hideProfileModal();
+                }, 1500);
+            }
+        } catch (error) {
+            console.error("Error saving profile details:", error);
+            if (statusEl) {
+                statusEl.textContent = "Failed to save: " + error.message;
+                statusEl.style.color = "var(--error-color)";
+                statusEl.style.display = "block";
+            }
+        }
+    }
+
     // --- DYNAMIC SUBSCRIPTION PURCHASE HISTORY ENGINE ---
     async function loadPurchaseHistory() {
         const container = GID('historyListContainer');
