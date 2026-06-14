@@ -20,7 +20,7 @@
   <script src="digiwallet.js" onerror="console.warn('DigiWallet script failed to load; using local fallback profile.')"></script>
 
   <style>
-    /* --- 1. Global & Base Styles --- */
+    /* --- Global Styles --- */
     :root {
       --primary-blue: #007bff; --primary-blue-dark: #0056b3;
       --text-color: #0f172a; --dark-grey: #334155; --medium-grey: #64748b;
@@ -61,7 +61,7 @@
     .view { display: none; animation: fadeIn 0.4s ease-out; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    /* --- Choice Screen --- */
+    /* Choice screen layout card styling */
     .main-choice-card {
         background: white; border: 1px solid var(--border-color); border-radius: 16px;
         padding: 40px; text-align: center; box-shadow: var(--shadow-sm); max-width: 600px; margin: 40px auto;
@@ -222,6 +222,17 @@
     /* Tooltip styling */
     .mistake-hover-tooltip { position: absolute; background: #0f172a; color: #ffffff; padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; font-family: 'Inter', sans-serif; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); z-index: 9999; display: none; pointer-events: none; line-height: 1.4; border: 1px solid rgba(255,255,255,0.1); }
     
+    /* --- Modern Unified Modal CSS Overrides --- */
+    .modal-overlay { 
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+        background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); 
+        display: none; justify-content: center; align-items: center; 
+        z-index: 1000; opacity: 0; transition: opacity 0.3s ease; 
+    }
+    .modal-overlay.visible { 
+        display: flex; opacity: 1; 
+    }
+
     .full-page-loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(4px); display: none; justify-content: center; align-items: center; z-index: 9999; }
     .spinner { border: 3px solid #f1f5f9; border-top: 3px solid var(--accent-purple); border-radius: 50%; width: 32px; height: 32px; animation: spin 0.8s linear infinite; }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -229,6 +240,7 @@
 </head>
 <body>
 
+  <!-- FIXED: Standardized full page loader added to avoid 'null reading style' crash -->
   <div id="fullPageLoader" class="full-page-loader">
       <div class="spinner"></div>
   </div>
@@ -260,15 +272,15 @@
                 <div class="file-upload-group">
                     <label for="audioUpload" id="audioUploadLabel" class="file-upload-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" /></svg>
-                        Upload Local Audio
+                        Upload Audio
                     </label>
-                    <input type="file" id="audioUpload" accept="audio/*" style="display:none;">
+                    <input type="file" id="audioUpload" accept="audio/*" class="hidden">
                     <span id="fileName">No file selected</span>
                 </div>
                 <div class="settings-group">
                     <div class="setting-item">
                         <label for="wordCount">Words:</label>
-                        <input type="number" id="wordCount" placeholder="e.g., 800" class="setting-input">
+                        <input type="number" id="wordCount" placeholder="e.g., 1000" class="setting-input">
                     </div>
                     <div class="setting-item">
                         <label for="speedSelector">Speed:</label>
@@ -286,9 +298,7 @@
             
             <div class="modern-player">
                 <button class="play-pause-btn" id="playPauseBtn">
-                    <!-- Play icon -->
                     <svg id="playIcon" viewBox="0 0 24 24" style="width:24px; height:24px;"><path fill="white" d="M8 5v14l11-7z"/></svg>
-                    <!-- Pause icon -->
                     <svg id="pauseIcon" class="hidden" viewBox="0 0 24 24" style="width:24px; height:24px;"><path fill="white" d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
                 </button>
                 <div class="time-display"><span id="currentTime">0:00</span></div>
@@ -300,7 +310,7 @@
                 </div>
             </div>
         </div>
-        <button id="goToCheckerBtn" class="primary-btn" style="max-width: 400px; margin: 0 auto; display: block;">🚀 Start Transcription Checker</button>
+        <button id="goToCheckerBtn" class="primary-btn" style="max-width:400px; display:block; margin: 0 auto;">Start Transcription</button>
     </div>
 
     <!-- Text Checker Input Section -->
@@ -315,7 +325,7 @@
             </div>
             
             <div id="typed-box" class="transcription-box hidden">
-                <label for="typed">Your Typed Transcription</label>
+                <label for="typed">Your Transcription</label>
                 <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
             </div>
             
@@ -329,7 +339,7 @@
             <div id="resultSheetContainer"></div>
             <div class="action-buttons">
                 <button id="printReportBtn" class="primary-btn">Download Report</button>
-                <button id="tryAnotherBtn" class="primary-btn" style="background-color:#1e293b;">🏠 Start New Checker</button>
+                <button id="tryAnotherBtn" class="primary-btn" style="background-color: var(--text-header);">🏠 Start New Checker</button>
             </div>
         </div>
     </div>
@@ -346,7 +356,7 @@
             <li>Typing the first character begins the rolling 50-minute test.</li>
             <li>Submit the test when completed to receive a detailed evaluation sheet.</li>
         </ul>
-        <button id="close-instructions-btn" class="modal-close-btn" style="background-color: var(--accent-purple);">Got it, Let's Start!</button>
+        <button id="close-instructions-btn" class="modal-close-btn" style="background-color: var(--accent-purple); color: white;">Got it, Let's Start!</button>
     </div>
 </div>
 
@@ -354,16 +364,15 @@
 <div id="start-test-modal" class="modal-overlay">
     <div class="modal-content">
         <h2>Initiate Focus Evaluation?</h2>
-        <p>A timed evaluation session will be initialized. Commas will be handled based on configuration selection.</p>
+        <p>A timed evaluation session will be initialized. Select options before continuing.</p>
         <div class="modal-options" style="margin-bottom: 25px;">
             <label style="font-weight: 600; display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="checkbox" id="includeComma" style="accent-color: var(--accent-purple); width: 18px; height: 18px;">
-                Count comma (,) mistakes
+                <input type="checkbox" id="includeComma" style="accent-color: var(--primary-accent); width: 18px; height: 18px;"> Count comma (,) mistakes
             </label>
         </div>
         <div class="modal-btn-group">
             <button id="cancel-start-btn" class="modal-cancel-btn">Cancel</button>
-            <button id="confirm-start-btn" class="modal-confirm-btn" style="background-color: var(--accent-purple); color:white;">Start Focus Mode</button>
+            <button id="confirm-start-btn" class="modal-confirm-btn" style="background-color: var(--primary-accent); color: white;">Start Timed Test</button>
         </div>
     </div>
 </div>
@@ -462,6 +471,7 @@
     }
 
     function resetApp() {
+        goHome();
         resetPlayerState();
         document.getElementById("wordCount").value = "";
         showScreen('choiceSection');
@@ -686,7 +696,7 @@
                     <div class="legend-item" data-filter-type="spelling"><span class="legend-color-box" style="background-color: var(--hl-spelling); border-bottom: 2px dashed #d97706;"></span>Spelling<span class="mistake-count"></span></div>
                     <div class="legend-item" data-filter-type="capitalization"><span class="legend-color-box" style="background-color: var(--hl-capitalization); border-bottom: 2px solid #0284c7;"></span>Capitalization<span class="mistake-count"></span></div>
                     <div class="legend-item" data-filter-type="punctuation"><span class="legend-color-box" style="background-color: var(--hl-punctuation); border-bottom: 2px solid #7c3aed;"></span>Punctuation<span class="mistake-count"></span></div>
-                    <button id="reset-filter-btn" class="view-switch-btn" style="border: 1px solid var(--border-color); font-weight: 700;">Show All Highlights</button>
+                    <button id="reset-filter-btn" class="view-switch-btn" style="border: 1px solid var(--border-subtle); font-weight: 700;">Show All Highlights</button>
                 </div>
                 
                 <div class="result-action-bar" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; box-shadow: 0 4px 12px rgba(0,0,0,0.01); flex-wrap: wrap; gap: 15px;">
