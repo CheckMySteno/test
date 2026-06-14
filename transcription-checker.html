@@ -290,7 +290,7 @@
       margin: 30px auto;
     }
     
-    /* --- Modern Unified Results Dashboard (Matched to Dictation) --- */
+    /* --- Modern Unified Results Dashboard --- */
     .result-sheet-container {
         background-color: #ffffff;
         border: 1px solid var(--border-subtle);
@@ -408,7 +408,7 @@
     .word-wrapper { cursor: pointer; display: inline; transition: background-color 0.2s ease, transform 0.2s ease; position: relative; }
     .active-highlight { background-color: #4B0082 !important; color: white !important; border-radius: 3px; }
     
-    /* Hover Tooltip Overlay */
+    /* Hover Tooltip Overlay Styling */
     .mistake-hover-tooltip {
         position: absolute;
         background: #0f172a;
@@ -487,7 +487,6 @@
         }
     }
 
-    /* SPECIFICITY FILTERS FOR MISTAKES DISPLAY PANEL */
     #editableTypedText .hidden-mistake,
     #editableTypedText span.hidden-mistake,
     #editableTypedText .hidden-mistake.mis,
@@ -1181,6 +1180,67 @@
         AITeacher.init();
     }
 
+    function setupHoverTooltips() {
+        let tooltip = document.getElementById('mistakeTooltip');
+        if (!tooltip) {
+            tooltip = document.createElement('div');
+            tooltip.id = 'mistakeTooltip';
+            tooltip.className = 'mistake-hover-tooltip';
+            document.body.appendChild(tooltip);
+        }
+
+        const columns = document.getElementById('comparisonColumns');
+        if (!columns) return;
+
+        // Clear listeners to avoid memory leaks
+        columns.removeEventListener('mouseover', handleTooltipOver);
+        columns.removeEventListener('mouseout', handleTooltipOut);
+        
+        columns.addEventListener('mouseover', handleTooltipOver);
+        columns.addEventListener('mouseout', handleTooltipOut);
+    }
+
+    function handleTooltipOver(e) {
+        const el = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
+        if (!el || el.classList.contains('hidden-mistake') || el.classList.contains('ai-icon')) return;
+
+        const tooltip = document.getElementById('mistakeTooltip');
+        if (!tooltip) return;
+
+        let type = "Mistake";
+        if (el.classList.contains('omission')) type = "Omission";
+        else if (el.classList.contains('extra') || el.classList.contains('addition')) type = "Addition";
+        else if (el.classList.contains('spelling')) type = "Spelling Mistake";
+        else if (el.classList.contains('capitalization')) type = "Capitalization Mistake";
+        else if (el.classList.contains('punctuation')) type = "Punctuation Mistake";
+        else if (el.classList.contains('substitution')) type = "Word Substitution";
+
+        const { typed, correct } = extractTypedAndCorrect(el);
+
+        tooltip.innerHTML = `
+            <div style="font-weight: 700; margin-bottom: 4px; color: #a78bfa; font-size: 0.9em; text-transform: uppercase;">${type}</div>
+            <div style="margin-bottom: 2px;">Typed: <span style="color: #fecdd3; font-weight: 600;">${escapeHtml(typed)}</span></div>
+            <div>Expected: <span style="color: #d9f99d; font-weight: 600;">${escapeHtml(correct)}</span></div>
+        `;
+
+        tooltip.style.display = 'block';
+        
+        const rect = el.getBoundingClientRect();
+        const tooltipHeight = tooltip.offsetHeight;
+        const tooltipWidth = tooltip.offsetWidth;
+        
+        tooltip.style.left = (window.scrollX + rect.left + (rect.width / 2) - (tooltipWidth / 2)) + 'px';
+        tooltip.style.top = (window.scrollY + rect.top - tooltipHeight - 10) + 'px';
+    }
+
+    function handleTooltipOut(e) {
+        const el = e.target.closest('.highlight, .mis, .extra, .substitution, .omission, .spelling, .capitalization, .punctuation');
+        if (el) {
+            const tooltip = document.getElementById('mistakeTooltip');
+            if (tooltip) tooltip.style.display = 'none';
+        }
+    }
+
     function initializeInteractiveLegend() {
         const legendContainer = document.getElementById('interactive-legend');
         if (!legendContainer || !g_lastAnalysisResult) return;
@@ -1367,6 +1427,58 @@
             console.error("Error submitting report:", error);
             alert("Could not submit report. Please check your internet connection.");
         }
+    }
+
+    function extractTypedAndCorrect(el) {
+        let typed = "";
+        let correct = "";
+
+        const wrongEl = el.querySelector('del, s, strike');
+        const correctEl = el.querySelector('b, ins, strong');
+
+        if (wrongEl) typed = wrongEl.textContent.trim();
+        if (correctEl) correct = correctEl.textContent.trim();
+
+        if (!typed || !correct) {
+            const clone = el.cloneNode(true);
+            const wrongInClone = clone.querySelector('del, s, strike');
+            if (wrongInClone) {
+                if (!typed) typed = wrongInClone.textContent.trim();
+                wrongInClone.remove();
+            }
+            clone.querySelectorAll('.ai-icon').forEach(node => node.remove());
+            const remainingText = clone.textContent.trim();
+
+            if (!correct && remainingText) correct = remainingText;
+            if (!typed && remainingText) typed = remainingText;
+        }
+
+        const indexAttr = el.getAttribute('data-index');
+        const idx = indexAttr !== null ? parseInt(indexAttr) : NaN;
+
+        if (!correct || correct === "unknown") {
+            if (!isNaN(idx) && g_lastAnalysisResult?.originalWords?.[idx]) {
+                correct = g_lastAnalysisResult.originalWords[idx];
+            }
+        }
+        if (!typed) {
+            if (!isNaN(idx) && g_lastAnalysisResult?.userWords?.[idx]) {
+                typed = g_lastAnalysisResult.userWords[idx];
+            }
+        }
+
+        if (el.classList.contains('omission')) {
+            typed = "[None]";
+            if (!correct) correct = el.textContent.trim();
+        } else if (el.classList.contains('addition') || el.classList.contains('extra')) {
+            correct = "[None]";
+            if (!typed) typed = el.textContent.trim();
+        }
+
+        if (!typed) typed = "[Check Transcription]";
+        if (!correct) correct = "[Check Original]";
+
+        return { typed, correct };
     }
 
     // --- UI & EVENT HANDLERS ---
