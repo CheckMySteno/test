@@ -13,6 +13,9 @@
   <!-- Dexie.js for Local Database -->
   <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
+  <!-- DigiWallet Script -->
+  <script src="digiwallet.js" onerror="console.warn('DigiWallet script failed to load; using local fallback logic.')"></script>
+
   <style>
     /* --- 1. Global & Base Styles from Original File --- */
     :root {
@@ -697,7 +700,7 @@
         }
 
         document.getElementById("inputSection").classList.add("hidden");
-        document.getElementById("modern-results-view").classList.remove("hidden");
+        document.getElementById("results-view").classList.remove("hidden");
         
         const submitBtn = document.getElementById('submitButton');
         submitBtn.disabled = false;
@@ -724,7 +727,7 @@
         const wrongEl = el.querySelector('del, s, strike');
         const correctEl = el.querySelector('b, ins, strong');
 
-        if (wrongEl && !typed) typed = wrongEl.textContent.trim();
+        if (wrongEl && !typed) wrongEl.textContent.trim();
         if (correctEl && !correct) correct = correctEl.textContent.trim();
 
         if (el.classList.contains('omission')) {
@@ -1323,12 +1326,17 @@
 
     // --- Onload Handlers ---
     document.addEventListener("DOMContentLoaded", () => {
-        // Safe DigiWallet integration check
-        const user = DigiWallet.getUser();
-        if (user) {
-            candidateId = user.uid;
-            const nameDisplay = document.getElementById('candidate-name-display');
-            if (nameDisplay) nameDisplay.textContent = (user.name || "CANDIDATE").toUpperCase();
+        let candidateName = "CANDIDATE";
+        if (typeof DigiWallet !== 'undefined') {
+            const user = DigiWallet.getUser();
+            if (user) {
+                candidateId = user.uid;
+                candidateName = user.name || "CANDIDATE";
+            }
+        }
+        const nameDisplay = document.getElementById('candidate-name-display');
+        if (nameDisplay) {
+            nameDisplay.textContent = candidateName.toUpperCase();
         }
 
         loadSynonyms();
