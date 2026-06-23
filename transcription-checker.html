@@ -397,7 +397,7 @@
     #toggleReevaluateBtn { background-color: var(--accent-amber); color: white; }
     #reportErrorBtn { background-color: #ef4444; color: white; }
 
-    .reevaluate-wrapper { position: relative; display: inline-flex; align-items: center; gap: 8px; }
+    .reeevaluate-wrapper { position: relative; display: inline-flex; align-items: center; gap: 8px; }
     
     .columns { display: grid; grid-template-columns: 1fr; gap: 16px; }
     @media (min-width: 900px) { .columns.view-side-by-side { grid-template-columns: 1fr 1fr; } }
@@ -601,23 +601,6 @@
     .ai-explanation-text { font-size: 1rem; color: #1e293b; }
     .ai-rule-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform:uppercase; margin-bottom: 5px; }
 
-    /* --- Visual Guide Map Keys Style --- */
-    .visual-key-cell {
-        background: var(--surface-light);
-        border: 1px solid var(--border-subtle);
-        padding: 6px 10px;
-        border-radius: 6px;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        font-family: var(--font-family);
-        transition: all 0.2s ease;
-    }
-    .visual-key-cell:hover {
-        background: #f1f5f9;
-        transform: translateY(-1px);
-    }
-
     @media print {
       body, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
       .action-buttons, .result-controls, .legend-container, #inputSection { display: none !important; }
@@ -698,20 +681,8 @@
           <textarea id="original" placeholder="Paste the original text here..."></textarea>
       </div>
       <div id="typed-box" class="transcription-box hidden">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-              <label for="typed" style="margin: 0;">Your Transcription</label>
-              <button type="button" id="showMapToggleBtn" class="hidden" style="background-color: var(--primary-accent); color: white; border: none; padding: 6px 12px; border-radius: 6px; font-size: 0.85em; font-weight: 600; cursor: pointer; transition: background-color 0.2s;">Show/Hide Keyboard Map</button>
-          </div>
+          <label for="typed">Your Transcription</label>
           <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
-          
-          <!-- Key map container inserted here inside the card for neat aesthetics -->
-          <div id="keyboardMapContainer" class="hidden" style="margin-top: 15px; padding: 15px; background: #ffffff; border: 1px solid var(--border-subtle); border-radius: 12px; max-height: 250px; overflow-y: auto;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                  <span style="font-weight: 700; color: var(--text-header); font-size: 0.9em;" id="keyboardMapTitle">Active Keyboard Map</span>
-                  <span style="font-size: 0.75em; color: var(--text-muted); font-style: italic;">Standard QWERTY keys are mapped dynamically. Matras and half-consonants will form logically.</span>
-              </div>
-              <div id="keyboardMapKeys"></div>
-          </div>
       </div>
       <button id="submitButton" class="primary-btn">Submit</button>
     </div>
@@ -742,35 +713,30 @@
       </div>
     </div>
 
-    <!-- Start Test Confirmation Modal (Includes Language & Layout configurations) -->
+    <!-- Start Test Confirmation Modal -->
     <div id="start-test-modal" class="modal-overlay">
-        <div class="modal-content" style="max-width: 500px;">
-            <h2>Configure Transcription Test</h2>
-            <p>A 50-minute timer will begin, and the interface will switch to a full-screen focus mode for your transcription. Choose your configurations below:</p>
+        <div class="modal-content">
+            <h2>Start Timed Transcription?</h2>
+            <p style="margin-bottom: 20px;">A 50-minute timer will begin, and the interface will switch to a full-screen focus mode for your transcription.</p>
             
-            <div class="modal-options" style="display: flex; flex-direction: column; gap: 15px; text-align: left; margin-bottom: 25px;">
-              <div style="display: flex; flex-direction: column; gap: 6px;">
-                <label for="typingLanguage" style="font-weight: 700; font-size: 0.9em; color: var(--text-header);">Dictation Language:</label>
-                <select id="typingLanguage" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-family: var(--font-family); font-size: 0.95em;">
+            <div class="modal-options" style="display: flex; flex-direction: column; gap: 15px; text-align: left; max-width: 400px; margin: 0 auto 20px auto;">
+              <div style="display: flex; flex-direction: column; gap: 5px;">
+                <label style="font-weight: 700; font-size: 0.95em;">Typing Language:</label>
+                <select id="typingLanguage" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main);">
                   <option value="english" selected>English</option>
                   <option value="hindi">Hindi (हिन्दी)</option>
                 </select>
               </div>
 
-              <div id="hindiLayoutGroup" style="display: none; flex-direction: column; gap: 6px;">
-                <label for="hindiLayout" style="font-weight: 700; font-size: 0.9em; color: var(--text-header);">Hindi Keyboard Layout:</label>
-                <select id="hindiLayout" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main); font-family: var(--font-family); font-size: 0.95em;">
-                  <option value="system" selected>System Input (Use your computer's native Hindi IME)</option>
-                  <option value="remington_gail">In-Browser Remington Gail (Mangal Unicode)</option>
-                  <option value="krutidev">In-Browser Krutidev 010 (Outputs Unicode)</option>
-                  <option value="inscript">In-Browser Devanagari Inscript</option>
+              <div id="hindiLayoutGroup" style="display: none; flex-direction: column; gap: 5px;">
+                <label style="font-weight: 700; font-size: 0.95em;">Hindi Typing Method:</label>
+                <select id="hindiLayout" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main);">
+                  <option value="system" selected>Hindi Mangal Unicode (Remington Gail / Inscript / Standard OS keyboard)</option>
+                  <option value="krutidev">Hindi Krutidev / Devlys (Legacy Font-based typing)</option>
                 </select>
-                <p style="font-size: 0.8em; color: var(--text-muted); margin: 2px 0 0 0; line-height: 1.4;">
-                  *In-browser layouts convert QWERTY inputs to standard Hindi Unicode, allowing you to type without system-wide tools installed.
-                </p>
               </div>
 
-              <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px; cursor: pointer; color: var(--text-body);">
+              <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px; margin-top: 5px;">
                   <input type="checkbox" id="includeComma"> Count comma (,) mistakes
               </label>
             </div>
@@ -839,40 +805,6 @@
   </div>
 
 <script>
-    // --- Keyboard Translation Mappings for Hindi Layouts ---
-    const REMINGTON_GAIL_MAP = {
-        'q': 'ु', 'w': 'ू', 'e': 'म', 'r': 'त', 't': 'ज', 'y': 'ल', 'u': 'न', 'i': 'प', 'o': 'व', 'p': 'च', '[': 'ख्', ']': 'द्व', '\\': '?',
-        'a': 'ं', 's': 'े', 'd': 'क', 'f': 'ि', 'g': 'ह', 'h': 'ी', 'j': 'र', 'k': 'ा', 'l': 'स', ';': 'य', "'": 'श्',
-        'z': '्र', 'x': 'ग', 'c': 'ब', 'v': 'अ', 'b': 'इ', 'n': 'द', 'm': 'उ', ',': 'ए', '.': 'ण्', '/': 'ध्', '`': '़',
-        '1': '१', '2': '२', '3': '३', '4': '४', '5': '५', '6': '६', '7': '७', '8': '८', '9': '९', '0': '०', '-': '-', '=': 'ृ',
-        'Q': 'फ', 'W': 'ॅ', 'E': 'म्', 'R': 'त्', 'T': 'ज्', 'Y': 'ल्', 'U': 'न्', 'I': 'प्', 'O': 'व्', 'P': 'च्', '{': 'क्ष', '}': 'द्या', '|': ')',
-        'A': 'ँ', 'S': 'ै', 'D': 'क्', 'F': 'थ्', 'G': 'ळ', 'H': 'भ्', 'J': 'श्र', 'K': 'ज्ञा', 'L': 'स्स', ':': 'रू', '"': 'ष्',
-        'Z': 'र्', 'X': 'ग्', 'C': 'ब्', 'V': 'ट', 'B': 'ठ', 'N': 'छ', 'M': 'ड', '<': 'ढ', '>': 'झ', '?': 'घ्', '~': 'द्य',
-        '!': '।', '@': '/', '#': ':', '$': '*', '%': '-', '^': "'", '&': '"', '*': 'द्ध', '(': 'त्र', ')': 'ऋ', '_': '.', '+': '्'
-    };
-
-    const KRUTIDEV_MAP = {
-        'q': 'ु', 'w': 'ू', 'e': 'म', 'r': 'त', 't': 'ज', 'y': 'ल', 'u': 'न', 'i': 'प', 'o': 'व', 'p': 'च', '[': 'ख्', ']': ',', '\\': '?',
-        'a': 'ं', 's': 'े', 'd': 'क', 'f': 'ि', 'g': 'ह', 'h': 'ी', 'j': 'र', 'k': 'ा', 'l': 'स', ';': 'य', "'": 'श्',
-        'z': '्र', 'x': 'ग', 'c': 'ब', 'v': 'अ', 'b': 'इ', 'n': 'द', 'm': 'उ', ',': 'ए', '.': 'ण्', '/': 'ध्', '`': '़',
-        '1': '१', '2': '२', '3': '३', '4': '४', '5': '५', '6': '६', '7': '७', '8': '८', '9': '९', '0': '०', '-': '-', '=': 'ृ',
-        'Q': 'फ', 'W': 'ॅ', 'E': 'म्', 'R': 'त्', 'T': 'ज्', 'Y': 'ल्', 'U': 'न्', 'I': 'प्', 'O': 'व्', 'P': 'च्', '{': 'क्ष', '}': 'द्व', '|': 'द्य',
-        'A': 'ँ', 'S': 'ै', 'D': 'क्', 'F': 'थ्', 'G': 'भ्', 'H': 'ी', 'J': 'श्र', 'K': 'ज्ञा', 'L': 'स्स', ':': 'रू', '"': 'ष्',
-        'Z': 'र्', 'X': 'ग्', 'C': 'ब्', 'V': 'ट', 'B': 'ठ', 'N': 'छ', 'M': 'ड', '<': 'ढ', '>': 'झ', '?': 'घ्', '~': 'द्य',
-        '!': '।', '@': '/', '#': ':', '$': '*', '%': '-', '^': "'", '&': '"', '*': 'द्ध', '(': 'त्र', ')': 'ऋ', '_': '.', '+': '्'
-    };
-
-    const INSCRIPT_MAP = {
-        'q': 'ौ', 'w': 'ै', 'e': 'ा', 'r': 'ी', 't': 'ू', 'y': 'ब', 'u': 'ह', 'i': 'ग', 'o': 'द', 'p': 'ज', '[': 'ड', ']': '़', '\\': 'ॉ',
-        'a': 'ो', 's': 'े', 'd': '्', 'f': 'ि', 'g': 'ु', 'h': 'प', 'j': 'र', 'k': 'क', 'l': 'त', ';': 'च', "'": 'ट',
-        'z': 'ॆ', 'x': 'ं', 'c': 'म', 'v': 'न', 'b': 'व', 'n': 'ल', 'm': 'स', ',': 'ष', '.': '।', '/': 'य', '`': 'ऒ',
-        '1': '१', '2': '२', '3': '३', '4': '४', '5': '५', '6': '६', '7': '७', '8': '८', '9': '९', '0': '०', '-': '-', '=': 'ृ',
-        'Q': 'औ', 'W': 'ऐ', 'E': 'आ', 'R': 'ई', 'T': 'ऊ', 'Y': 'भ', 'U': 'ङ', 'I': 'घ', 'O': 'ध', 'P': 'झ', '{': 'ढ', '}': 'ञ', '|': 'ऑ',
-        'A': 'ओ', 'S': 'ए', 'D': 'अ', 'F': 'इ', 'G': 'उ', 'H': 'फ', 'J': 'ऱ', 'K': 'ख', 'L': 'थ', ':': 'छ', '"': 'ठ',
-        'Z': 'ऎ', 'X': 'ँ', 'C': 'ण', 'V': 'ऩ', 'B': 'ऴ', 'N': 'ळ', 'M': 'श', '<': 'ष', '>': '॥', '?': 'य़', '~': 'ऒ',
-        '!': '!', '@': '@', '#': '#', '$': '$', '%': '%', '^': '^', '&': '&', '*': '*', '(': '(', ')': ')', '_': '_', '+': '+'
-    };
-
     // --- Firebase Setup ---
     const firebaseConfig = {
       apiKey: "AIzaSyDPkUWIrsibI-hzKJ8ljhvawdJ9Nq4-cpE",
@@ -990,6 +922,41 @@
         document.getElementById('analysis-overlay').classList.remove('visible');
     }
 
+    // --- Legacy Krutidev to Unicode conversion function ---
+    function convertKrutidevToUnicode(inputText) {
+        if (!inputText) return "";
+        let modified_substring = inputText;
+
+        const array_one = [
+            "ñ","Q+Z","sas","aa",")Z","ZZ","'","'","“","”",
+            "å", "ƒ", "„", "…", "†", "‡", "ˆ", "‰", "Š", "‹", 
+            "¶+", "¶", "ď+", "ď", "ť+", "ť", "ť",
+            "Q", "a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F", "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L", "m", "M", "n", "N", "o", "O", "p", "P", "r", "R", "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X", "y", "Y", "z", "Z",
+            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+            "[", "]", "{", "}", "\\", "|", ";", ":", "<", ">", "?", "/", "@", ",", ".", "!", "-", "_", "+", "=", "*", "(", ")"
+        ];
+
+        const array_two = [
+            "ज्", "क्र", "श्", "ाा", "र्द्ध", "ज्ञ", "म", "म", "“", "”",
+            "०", "१", "२", "३", "४", "५", "६", "७", "८", "९",
+            "फ़्", "फ़", "क़", "क़", "ख़", "ख़", "ख़्",
+            "फ", "ा", "ा", "ि", "ी", "ब", "ब्", "क", "क्", "म", "म्", "ि", "ी", "ु", "ू", "ह", "ह्", "प", "प्", "र", "्र", "ा", "ा", "त", "त्", "उ", "उ", "द", "द्", "व", "व्", "च", "च्", "त", "त्", "े", "ै", "ज", "ज्", "न", "न्", "अ", "अ", "ू", "ू", "ग", "ग्", "ल", "ल्", "्र", "र्",
+            "१", "२", "३", "४", "५", "६", "७", "८", "९", "०",
+            "ख्", ",", "क्ष", "द्व", "?", "द्य", "य", "रू", "ढ", "झ", "घ्", "ध्", "त्र", "ए", "।", "।", "-", "_", "्", "ृ", "द्ध", "(", ")"
+        ];
+
+        for (let i = 0; i < array_one.length; i++) {
+            let regex = new RegExp(array_one[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+            modified_substring = modified_substring.replace(regex, array_two[i]);
+        }
+
+        // Adjust position of legacy "f" (ि) vowel placements
+        modified_substring = modified_substring.replace(/(ि)([कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह][्]?)/g, "$2$1");
+        modified_substring = modified_substring.replace(/(ि)([कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह]्)([कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह])/g, "$2$3$1");
+
+        return modified_substring;
+    }
+
     // --- CORE LOGIC ---
     function escapeHtml(s = "") {
         return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -1002,11 +969,16 @@
         document.getElementById('finishButton').classList.add('hidden');
         document.getElementById('checkerContainer').classList.remove('focus-mode');
         const originalText = document.getElementById("original").value.trim();
-        const typedText = document.getElementById("typed").value.trim();
+        let typedText = document.getElementById("typed").value.trim();
         if (!originalText || !typedText) {
             alert("Please fill in both the original and transcription text boxes.");
             goHome(); // Go back if submission fails
             return;
+        }
+
+        // Apply Krutidev to Unicode conversion if selected
+        if (g_typingLanguage === "hindi" && g_hindiLayout === "krutidev") {
+            typedText = convertKrutidevToUnicode(typedText);
         }
 
         showAnalyzingOverlay(); // Show animation
@@ -1569,71 +1541,6 @@
         return { typed, correct };
     }
 
-    // --- Keyboard Helper Layout Map HTML Generator ---
-    function generateKeyboardMapHTML(layoutType) {
-        let mapping = {};
-        if (layoutType === 'remington_gail') mapping = REMINGTON_GAIL_MAP;
-        else if (layoutType === 'krutidev') mapping = KRUTIDEV_MAP;
-        else if (layoutType === 'inscript') mapping = INSCRIPT_MAP;
-        else return '';
-
-        let html = `<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px; text-align: left;">`;
-        const keys = "1234567890-=qwertyuiop[]\\asdfghjkl;'zxcvbnm,./".split('');
-        keys.forEach(k => {
-            let normalChar = mapping[k] || k;
-            let shiftChar = mapping[k.toUpperCase()] || '';
-            html += `
-              <div class="visual-key-cell">
-                <div style="display: flex; justify-content: space-between; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 2px; margin-bottom: 3px; font-weight: 700; color: var(--text-muted); font-size: 0.8em;">
-                  <span>${k.toUpperCase()}</span>
-                  <span style="color: var(--accent-purple); font-size: 0.9em;">${shiftChar ? '⇧' : ''}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: flex-end;">
-                  <span style="color: var(--text-header); font-weight: 700; font-size: 1.1em;">${normalChar}</span>
-                  <span style="color: var(--accent-purple); font-weight: 600; font-size: 0.95em;">${shiftChar || '&nbsp;'}</span>
-                </div>
-              </div>
-            `;
-        });
-        html += `</div>`;
-        return html;
-    }
-
-    // --- On-the-fly In-browser Translation Typing Mechanism ---
-    function handleHindiTyping(e) {
-        if (g_typingLanguage !== "hindi" || g_hindiLayout === "system") return;
-
-        // Allow systemic keys (backspace, delete, arrows, copy-pastes, tab, etc.)
-        if (e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) {
-            return;
-        }
-
-        e.preventDefault();
-
-        let map = {};
-        if (g_hindiLayout === "remington_gail") map = REMINGTON_GAIL_MAP;
-        else if (g_hindiLayout === "krutidev") map = KRUTIDEV_MAP;
-        else if (g_hindiLayout === "inscript") map = INSCRIPT_MAP;
-
-        let charToInsert = map[e.key];
-        if (charToInsert === undefined) {
-            charToInsert = e.key; // Fallback to typed key if not explicitly mapped
-        }
-
-        const textarea = e.target;
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const text = textarea.value;
-
-        textarea.value = text.substring(0, start) + charToInsert + text.substring(end);
-        
-        // Relocate cursor position dynamically
-        textarea.selectionStart = textarea.selectionEnd = start + charToInsert.length;
-
-        // Propagate programmatic input event to update stats or heights
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
     // --- UI & EVENT HANDLERS ---
     function goHome() {
         document.getElementById("inputSection").classList.remove("hidden");
@@ -1843,17 +1750,7 @@
         });
         if (!localStorage.getItem('hasSeenInstructions')) instructionsModal.classList.add('visible');
 
-        // Toggle Keyboard Map Display
-        const showMapToggleBtn = document.getElementById("showMapToggleBtn");
-        const keyboardMapContainer = document.getElementById("keyboardMapContainer");
-        showMapToggleBtn.addEventListener("click", () => {
-            keyboardMapContainer.classList.toggle("hidden");
-        });
-
-        // Intercept typing in transcription window for on-the-fly layout translation
-        document.getElementById("typed").addEventListener("keydown", handleHindiTyping);
-
-        // Language Select Toggle in Modal
+        // Toggle dropdown logic for Language Selection inside modal
         document.getElementById("typingLanguage").addEventListener("change", (e) => {
             const hindiLayoutGroup = document.getElementById("hindiLayoutGroup");
             if (e.target.value === "hindi") {
@@ -1867,29 +1764,21 @@
         document.getElementById("original").addEventListener("paste", () => {
             setTimeout(() => { if(document.getElementById("original").value.trim() !== "") startTestModal.classList.add('visible'); }, 100);
         });
-        
+
         document.getElementById('confirm-start-btn').addEventListener('click', () => {
             startTestModal.classList.remove('visible');
             
-            // Set languages configuration
             g_typingLanguage = document.getElementById("typingLanguage").value;
             g_hindiLayout = document.getElementById("hindiLayout").value;
             
-            // Layout map display configuration
-            const mapKeys = document.getElementById("keyboardMapKeys");
-            const mapTitle = document.getElementById("keyboardMapTitle");
-            
-            if (g_typingLanguage === 'hindi' && g_hindiLayout !== 'system') {
-                showMapToggleBtn.classList.remove("hidden");
-                keyboardMapContainer.classList.remove("hidden");
-                mapKeys.innerHTML = generateKeyboardMapHTML(g_hindiLayout);
-                let readableName = "Remington Gail";
-                if (g_hindiLayout === 'krutidev') readableName = "Krutidev 010 Layout";
-                else if (g_hindiLayout === 'inscript') readableName = "Devanagari Inscript";
-                mapTitle.textContent = `Keyboard Helper Reference: ${readableName}`;
+            const typedArea = document.getElementById("typed");
+            if (g_typingLanguage === 'hindi' && g_hindiLayout === 'krutidev') {
+                // Apply Krutidev font-family styling so typewriter ASCII text renders as Hindi on screen
+                typedArea.style.fontFamily = '"Kruti Dev 010", "Devlys 010", "Krutidev", "Devlys", sans-serif';
+                typedArea.placeholder = "Krutidev layout typing is active. Text converts to Unicode on submission.";
             } else {
-                showMapToggleBtn.classList.add("hidden");
-                keyboardMapContainer.classList.add("hidden");
+                typedArea.style.fontFamily = '';
+                typedArea.placeholder = "Paste or type your transcription here...";
             }
             
             document.getElementById("original-box").classList.add("hidden");
@@ -1897,10 +1786,10 @@
             document.getElementById("submitButton").classList.add("hidden");
             document.getElementById('checkerContainer').classList.add('focus-mode');
             document.getElementById('finishButton').classList.remove('hidden');
-            document.getElementById("typed").focus();
+            typedArea.focus();
             startTypingTimer(50);
         });
-        
+
         document.getElementById('cancel-start-btn').addEventListener('click', () => startTestModal.classList.remove('visible'));
         
         const audio = document.getElementById('audioPlayer'), audioUpload = document.getElementById('audioUpload');
