@@ -23,16 +23,6 @@
   <script src="https://unpkg.com/dexie@latest/dist/dexie.js"></script>
 
   <style>
-    /* --- Load Kruti Dev 010 Legacy Font cleanly from high-availability CDNs --- */
-    @font-face {
-        font-family: 'Kruti Dev 010';
-        src: local('Kruti Dev 010'), local('Krutidev010'), 
-             url('https://cdn.jsdelivr.net/gh/hybofreak/Krutidev-Fonts/Kruti%20Dev%20010.ttf') format('truetype'),
-             url('https://raw.githubusercontent.com/en-arjun/krutidev-font/main/Kruti_Dev_010.ttf') format('truetype');
-        font-weight: normal;
-        font-style: normal;
-    }
-
     /* --- 1. Global & Base Styles --- */
     :root {
       --bg-main: #f8fafc;
@@ -178,6 +168,8 @@
         height: 20px; width: 20px; background-color: var(--primary-accent);
         border-radius: 50%; border: none;
     }
+    
+    #youtube-player-container { position: absolute; top: -9999px; left: -9999px; }
     
     /* --- 3. Checker & Result Styles --- */
     #inputSection {
@@ -536,34 +528,6 @@
       width: auto;
     }
     #analysisBtn { background-color: #4f46e5; }
-
-    /* Custom Styles for Modern Card-Based Option Selector */
-    .font-option-card {
-        border: 2px solid var(--border-subtle);
-        padding: 15px;
-        border-radius: 12px;
-        cursor: pointer;
-        background: #fff;
-        transition: all 0.2s ease;
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.02);
-        user-select: none;
-    }
-    .font-option-card:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    }
-    .font-option-card.active[data-value="inscript"],
-    .font-option-card.active[data-value="remington_gail"] {
-        border-color: var(--primary-accent) !important;
-        background-color: #f0fdf4 !important; /* Elegant light green tint */
-    }
-    .font-option-card.active[data-value="krutidev"] {
-        border-color: var(--accent-purple) !important;
-        background-color: #faf5ff !important; /* Elegant light purple tint */
-    }
     
     /* --- Modal Overlays & Overlay Animators --- */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(20, 20, 30, 0.8); backdrop-filter: blur(5px); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s ease; pointer-events: none; }
@@ -636,6 +600,118 @@
     .ai-mistake-context { background:#f1f5f9; padding:10px; border-radius:6px; margin-bottom:15px; border-left:4px solid #4f46e5; font-size: 0.95rem; }
     .ai-explanation-text { font-size: 1rem; color: #1e293b; }
     .ai-rule-badge { display: inline-block; background: #e0e7ff; color: #4338ca; font-size: 0.7rem; padding: 2px 8px; border-radius: 4px; font-weight: 700; text-transform:uppercase; margin-bottom: 5px; }
+
+    /* --- Hindi Font Card Layout & Animations --- */
+    .hindi-cards-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 15px;
+        width: 100%;
+        margin-top: 10px;
+    }
+    .hindi-font-card {
+        background: var(--surface-card);
+        border: 2px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 15px 18px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.01);
+    }
+    .hindi-font-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0,0,0,0.04);
+        border-color: #cbd5e1;
+    }
+    .hindi-font-card .card-icon-box {
+        width: 42px;
+        height: 42px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 800;
+        font-size: 1.3em;
+        flex-shrink: 0;
+        transition: transform 0.2s ease;
+    }
+    .hindi-font-card:hover .card-icon-box {
+        transform: scale(1.08);
+    }
+    .hindi-font-card .card-details {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
+    }
+    .hindi-font-card .card-title {
+        font-weight: 700;
+        font-size: 0.95rem;
+        color: var(--text-header);
+        line-height: 1.3;
+    }
+    .hindi-font-card .card-subtitle {
+        font-size: 0.75rem;
+        color: var(--text-muted);
+        line-height: 1.3;
+        margin-top: 2px;
+    }
+    .hindi-font-card .card-checkmark {
+        position: absolute;
+        top: -6px;
+        right: -6px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        border: 2px solid white;
+        opacity: 0;
+        transform: scale(0.5);
+        transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    /* Dedicated Active Theme Colors */
+    .hindi-font-card[data-layout="inscript"].active {
+        border-color: #ea580c !important;
+        background-color: #fffaf8;
+        box-shadow: 0 4px 12px rgba(234, 88, 12, 0.08);
+    }
+    .hindi-font-card[data-layout="inscript"].active .card-checkmark {
+        background-color: #ea580c !important;
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    .hindi-font-card[data-layout="remington_gail"].active {
+        border-color: #16a34a !important;
+        background-color: #f0fdf4;
+        box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08);
+    }
+    .hindi-font-card[data-layout="remington_gail"].active .card-checkmark {
+        background-color: #16a34a !important;
+        opacity: 1;
+        transform: scale(1);
+    }
+    
+    .hindi-font-card[data-layout="krutidev"].active {
+        border-color: #7c3aed !important;
+        background-color: #f5f3ff;
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.08);
+    }
+    .hindi-font-card[data-layout="krutidev"].active .card-checkmark {
+        background-color: #7c3aed !important;
+        opacity: 1;
+        transform: scale(1);
+    }
 
     @media print {
       body, .result-sheet-container { background: #fff !important; color: #000 !important; box-shadow: none; border: none; }
@@ -718,7 +794,7 @@
       </div>
       <div id="typed-box" class="transcription-box hidden">
           <label for="typed">Your Transcription</label>
-          <textarea id="typed" placeholder="Paste or type your transcription here..."></textarea>
+          <textarea id="typed" placeholder="Paste or type your transcription here..." spellcheck="false" autocorrect="off" autocapitalize="none" autocomplete="off"></textarea>
       </div>
       <button id="submitButton" class="primary-btn">Submit</button>
     </div>
@@ -753,9 +829,9 @@
     <div id="start-test-modal" class="modal-overlay">
         <div class="modal-content" style="max-width: 550px;">
             <h2>Start Timed Transcription?</h2>
-            <p style="margin-bottom: 20px;">A 50-minute timer will begin, and the interface will switch to a full-screen focus mode for your transcription.</p>
+            <p style="margin-bottom: 20px;">A 50-minute timer will begin, and the interface will switch to a full-screen focus mode for your transcription. Are you ready to start?</p>
             
-            <div class="modal-options" style="display: flex; flex-direction: column; gap: 15px; text-align: left; margin-bottom: 25px;">
+            <div class="modal-options" style="display: flex; flex-direction: column; gap: 15px; text-align: left; max-width: 480px; margin: 0 auto 20px auto; width: 100%;">
               <div style="display: flex; flex-direction: column; gap: 5px;">
                 <label style="font-weight: 700; font-size: 0.95em;">Typing Language:</label>
                 <select id="typingLanguage" style="width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--border-subtle); background-color: var(--bg-main);">
@@ -764,53 +840,47 @@
                 </select>
               </div>
 
-              <!-- Sleek Card-Based Hindi Typing Font Selector -->
-              <div id="hindiLayoutGroup" style="display: none; flex-direction: column; gap: 10px; width: 100%;">
-                <span style="font-weight: 700; font-size: 0.9em; text-transform: uppercase; color: var(--text-header); display: flex; align-items: center; gap: 6px; margin-top: 5px;">
-                  ⌨️ CHOOSE HINDI TYPING FONT
-                </span>
+              <!-- Beautiful New Card-based Hindi Typing Font Selector -->
+              <div id="hindiLayoutGroup" style="display: none; flex-direction: column; gap: 5px; width: 100%;">
+                <label style="font-weight: 700; font-size: 0.95em; color: var(--text-header); display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                  <span style="display: flex; align-items: center; gap: 6px;">⌨️ CHOOSE HINDI TYPING FONT</span>
+                  <span style="background-color: #cbd5e1; color: #475569; border-radius: 50%; width: 16px; height: 16px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; cursor: help;" title="Select your desired keyboard mapping layout to simulate physical typing in Hindi.">i</span>
+                </label>
                 
-                <div style="display: grid; grid-template-columns: 1fr; gap: 12px; width: 100%;">
-                  <!-- Card 1: Mangal Inscript -->
-                  <div class="font-option-card active" data-value="inscript">
-                    <div style="width: 44px; height: 44px; border-radius: 8px; background: #e0f2f1; color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; flex-shrink: 0;">
-                      अ
+                <div class="hindi-cards-container">
+                    <!-- Mangal Inscript Card -->
+                    <div class="hindi-font-card active" data-layout="inscript">
+                        <div class="card-icon-box" style="background-color: #ea580c;">A</div>
+                        <div class="card-details">
+                            <span class="card-title">Mangal — Inscript</span>
+                            <span class="card-subtitle">Unicode Devanagari • INSCRIPT keyboard</span>
+                        </div>
+                        <div class="card-checkmark">✓</div>
                     </div>
-                    <div>
-                      <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-header);">Mangal — Inscript</h4>
-                      <p style="margin: 3px 0 0 0; font-size: 0.8em; color: var(--text-muted); font-weight: 500;">Unicode Devanagari · INSCRIPT keyboard</p>
+                    
+                    <!-- Mangal Remington Gail Card -->
+                    <div class="hindi-font-card" data-layout="remington_gail">
+                        <div class="card-icon-box" style="background-color: #16a34a;">A</div>
+                        <div class="card-details">
+                            <span class="card-title">Mangal — Remington Gail</span>
+                            <span class="card-subtitle">Unicode Devanagari • Typewriter layout</span>
+                        </div>
+                        <div class="card-checkmark">✓</div>
                     </div>
-                  </div>
-                  
-                  <!-- Card 2: Mangal Remington Gail -->
-                  <div class="font-option-card" data-value="remington_gail">
-                    <div style="width: 44px; height: 44px; border-radius: 8px; background: #e0f2f1; color: var(--primary-accent); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; flex-shrink: 0;">
-                      अ
+                    
+                    <!-- KrutiDev Card -->
+                    <div class="hindi-font-card" data-layout="krutidev">
+                        <div class="card-icon-box" style="background-color: #7c3aed;">A</div>
+                        <div class="card-details">
+                            <span class="card-title">KrutiDev</span>
+                            <span class="card-subtitle">Legacy non-Unicode font • Remington layout</span>
+                        </div>
+                        <div class="card-checkmark">✓</div>
                     </div>
-                    <div>
-                      <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-header);">Mangal — Remington Gail</h4>
-                      <p style="margin: 3px 0 0 0; font-size: 0.8em; color: var(--text-muted); font-weight: 500;">Unicode Devanagari · Typewriter layout</p>
-                    </div>
-                  </div>
-
-                  <!-- Card 3: KrutiDev 010 (Haryana Stenographer Special) -->
-                  <div class="font-option-card" data-value="krutidev">
-                    <div style="width: 44px; height: 44px; border-radius: 8px; background: #ede7f6; color: var(--accent-purple); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; flex-shrink: 0;">
-                      क
-                    </div>
-                    <div>
-                      <h4 style="margin: 0; font-size: 1rem; font-weight: 800; color: var(--text-header);">KrutiDev</h4>
-                      <p style="margin: 3px 0 0 0; font-size: 0.8em; color: var(--text-muted); font-weight: 500;">Legacy non-Unicode font · Remington layout</p>
-                    </div>
-                  </div>
                 </div>
-
-                <p style="font-size: 0.8em; color: var(--text-muted); margin: 2px 0 0 0; line-height: 1.4;">
-                  *KrutiDev types English ASCII styled with standard legacy fonts (used in Haryana stenography). It automatically translates to Unicode on submission for grading.
-                </p>
               </div>
 
-              <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px; margin-top: 5px; cursor: pointer;">
+              <label style="font-weight: normal; display: inline-flex; align-items: center; gap: 8px; margin-top: 5px;">
                   <input type="checkbox" id="includeComma"> Count comma (,) mistakes
               </label>
             </div>
@@ -887,6 +957,17 @@
         '1': '१', '2': '२', '3': '३', '4': '४', '5': '५', '6': '६', '7': '७', '8': '८', '9': '९', '0': '०', '-': '-', '=': 'ृ',
         'Q': 'फ', 'W': 'ॅ', 'E': 'म्', 'R': 'त्', 'T': 'ज्', 'Y': 'ल्', 'U': 'न्', 'I': 'प्', 'O': 'व्', 'P': 'च्', '{': 'क्ष', '}': 'द्या', '|': ')',
         'A': 'ँ', 'S': 'ै', 'D': 'क्', 'F': 'थ्', 'G': 'ळ', 'H': 'भ्', 'J': 'श्र', 'K': 'ज्ञा', 'L': 'स्स', ':': 'रू', '"': 'ष्',
+        'Z': 'र्', 'X': 'ग्', 'C': 'ब्', 'V': 'ट', 'B': 'ठ', 'N': 'छ', 'M': 'ड', '<': 'ढ', '>': 'झ', '?': 'घ्', '~': 'द्य',
+        '!': '।', '@': '/', '#': ':', '$': '*', '%': '-', '^': "'", '&': '"', '*': 'द्ध', '(': 'त्र', ')': 'ऋ', '_': '.', '+': '्'
+    };
+
+    const KRUTIDEV_MAP = {
+        'q': 'ु', 'w': 'ू', 'e': 'म', 'r': 'त', 't': 'ज', 'y': 'ल', 'u': 'न', 'i': 'प', 'o': 'व', 'p': 'च', '[': 'ख्', ']': ',', '\\': '?',
+        'a': 'ं', 's': 'े', 'd': 'क', 'f': 'ि', 'g': 'ह', 'h': 'ी', 'j': 'र', 'k': 'ा', 'l': 'स', ';': 'य', "'": 'श्',
+        'z': '्र', 'x': 'ग', 'c': 'ब', 'v': 'अ', 'b': 'इ', 'n': 'द', 'm': 'उ', ',': 'ए', '.': 'ण्', '/': 'ध्', '`': '़',
+        '1': '१', '2': '२', '3': '३', '4': '४', '5': '५', '6': '६', '7': '७', '8': '८', '9': '९', '0': '०', '-': '-', '=': 'ृ',
+        'Q': 'फ', 'W': 'ॅ', 'E': 'म्', 'R': 'त्', 'T': 'ज्', 'Y': 'ल्', 'U': 'न्', 'I': 'प्', 'O': 'व्', 'P': 'च्', '{': 'क्ष', '}': 'द्व', '|': 'द्य',
+        'A': 'ँ', 'S': 'ै', 'D': 'क्', 'F': 'थ्', 'G': 'भ्', 'H': 'ी', 'J': 'श्र', 'K': 'ज्ञा', 'L': 'स्स', ':': 'रू', '"': 'ष्',
         'Z': 'र्', 'X': 'ग्', 'C': 'ब्', 'V': 'ट', 'B': 'ठ', 'N': 'छ', 'M': 'ड', '<': 'ढ', '>': 'झ', '?': 'घ्', '~': 'द्य',
         '!': '।', '@': '/', '#': ':', '$': '*', '%': '-', '^': "'", '&': '"', '*': 'द्ध', '(': 'त्र', ')': 'ऋ', '_': '.', '+': '्'
     };
@@ -975,8 +1056,8 @@
     function showScreen(screenId) {
         document.getElementById('choiceSection').classList.add('hidden');
         document.getElementById('audioPlayerSection').classList.add('hidden');
-        document.getElementById('checkerContainer').classList.remove('focus-mode');
         document.getElementById('checkerContainer').classList.add('hidden');
+        document.getElementById('checkerContainer').classList.remove('focus-mode');
         document.getElementById(screenId).classList.remove('hidden');
     }
 
@@ -1020,76 +1101,41 @@
     }
 
     // --- On-the-fly Background Custom Translation Engine ---
-    function handleHindiTyping(e) {
+    function handleHindiBeforeInput(e) {
         if (g_typingLanguage !== "hindi") return;
 
-        // Skip translation completely if KrutiDev legacy font layout is selected.
-        // In KrutiDev, the user types English ASCII characters which visually render as Devanagari.
-        if (g_hindiLayout === "krutidev") return;
+        // Only handle printable text insertion actions
+        if (e.inputType === 'insertText' || e.inputType === 'insertReplacementText') {
+            const dataToInsert = e.data;
+            if (!dataToInsert) return;
 
-        // Allow systemic keys (backspace, delete, arrows, pastes, tab, etc.)
-        if (e.key.length !== 1 || e.ctrlKey || e.metaKey || e.altKey) {
-            return;
+            e.preventDefault();
+
+            let map = {};
+            if (g_hindiLayout === "remington_gail") map = REMINGTON_GAIL_MAP;
+            else if (g_hindiLayout === "krutidev") map = KRUTIDEV_MAP;
+            else if (g_hindiLayout === "inscript") map = INSCRIPT_MAP;
+
+            let convertedText = "";
+            for (let i = 0; i < dataToInsert.length; i++) {
+                const char = dataToInsert[i];
+                const mappedChar = map[char];
+                convertedText += (mappedChar !== undefined) ? mappedChar : char;
+            }
+
+            const textarea = e.target;
+            const startPosition = textarea.selectionStart;
+            const endPosition = textarea.selectionEnd;
+            const currentContent = textarea.value;
+
+            textarea.value = currentContent.substring(0, startPosition) + convertedText + currentContent.substring(endPosition);
+            
+            // Relocate cursor position dynamically
+            textarea.selectionStart = textarea.selectionEnd = startPosition + convertedText.length;
+
+            // Propagate programmatic input event to update heights/stats
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
         }
-
-        e.preventDefault();
-
-        let map = {};
-        if (g_hindiLayout === "remington_gail") map = REMINGTON_GAIL_MAP;
-        else if (g_hindiLayout === "inscript") map = INSCRIPT_MAP;
-
-        let charToInsert = map[e.key];
-        if (charToInsert === undefined) {
-            charToInsert = e.key; // Fallback to typed key if not explicitly mapped
-        }
-
-        const textarea = e.target;
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const text = textarea.value;
-
-        textarea.value = text.substring(0, start) + charToInsert + text.substring(end);
-        
-        // Relocate cursor position dynamically
-        textarea.selectionStart = textarea.selectionEnd = start + charToInsert.length;
-
-        // Propagate programmatic input event to update stats or heights
-        textarea.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
-    // --- Legacy Krutidev to Unicode conversion function ---
-    function convertKrutidevToUnicode(inputText) {
-        if (!inputText) return "";
-        let modified_substring = inputText;
-
-        const array_one = [
-            "ñ","Q+Z","sas","aa",")Z","ZZ","'","'","“","”",
-            "å", "ƒ", "„", "…", "†", "‡", "ˆ", "‰", "Š", "‹", 
-            "¶+", "¶", "ď+", "ď", "ť+", "ť", "ť",
-            "Q", "a", "A", "b", "B", "c", "C", "d", "D", "e", "E", "f", "F", "g", "G", "h", "H", "i", "I", "j", "J", "k", "K", "l", "L", "m", "M", "n", "N", "o", "O", "p", "P", "r", "R", "s", "S", "t", "T", "u", "U", "v", "V", "w", "W", "x", "X", "y", "Y", "z", "Z",
-            "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-            "[", "]", "{", "}", "\\", "|", ";", ":", "<", ">", "?", "/", "@", ",", ".", "!", "-", "_", "+", "=", "*", "(", ")"
-        ];
-
-        const array_two = [
-            "ज्", "क्र", "श्", "ाा", "र्द्ध", "ज्ञ", "म", "म", "“", "”",
-            "०", "१", "२", "३", "४", "५", "६", "७", "८", "९",
-            "फ़्", "फ़", "क़", "क़", "ख़", "ख़", "ख़्",
-            "फ", "ा", "ा", "ि", "ी", "ब", "ब्", "क", "क्", "म", "म्", "ि", "ी", "ु", "ू", "ह", "ह्", "प", "प्", "र", "्र", "ा", "ा", "त", "त्", "उ", "उ", "द", "द्", "व", "व्", "च", "च्", "त", "त्", "े", "ै", "ज", "ज्", "न", "न्", "अ", "अ", "ू", "ू", "ग", "ग्", "ल", "ल्", "्र", "र्",
-            "१", "२", "३", "४", "५", "६", "७", "८", "९", "०",
-            "ख्", ",", "क्ष", "द्व", "?", "द्य", "य", "रू", "ढ", "झ", "घ्", "ध्", "त्र", "ए", "।", "।", "-", "_", "्", "ृ", "द्ध", "(", ")"
-        ];
-
-        for (let i = 0; i < array_one.length; i++) {
-            let regex = new RegExp(array_one[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
-            modified_substring = modified_substring.replace(regex, array_two[i]);
-        }
-
-        // Adjust position of legacy "f" (ि) vowel placements
-        modified_substring = modified_substring.replace(/(ि)([कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह][्]?)/g, "$2$1");
-        modified_substring = modified_substring.replace(/(ि)([कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह]्)([कखगघङचछजझञटठडढणतथदधनपफबभमयरलवशषसह])/g, "$2$3$1");
-
-        return modified_substring;
     }
 
     // --- CORE LOGIC ---
@@ -1104,16 +1150,11 @@
         document.getElementById('finishButton').classList.add('hidden');
         document.getElementById('checkerContainer').classList.remove('focus-mode');
         const originalText = document.getElementById("original").value.trim();
-        let typedText = document.getElementById("typed").value.trim();
+        const typedText = document.getElementById("typed").value.trim();
         if (!originalText || !typedText) {
             alert("Please fill in both the original and transcription text boxes.");
             goHome(); // Go back if submission fails
             return;
-        }
-
-        // Apply Krutidev to Unicode conversion on submit if selected
-        if (g_typingLanguage === "hindi" && g_hindiLayout === "krutidev") {
-            typedText = convertKrutidevToUnicode(typedText);
         }
 
         showAnalyzingOverlay(); // Show animation
@@ -1895,13 +1936,20 @@
             }
         });
 
-        // Background Key Interception for custom key translation
-        document.getElementById("typed").addEventListener("keydown", handleHindiTyping);
+        // Interactive Card Font Picker logic
+        const fontCards = document.querySelectorAll('.hindi-font-card');
+        fontCards.forEach(card => {
+            card.addEventListener('click', () => {
+                fontCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                g_hindiLayout = card.getAttribute('data-layout');
+            });
+        });
 
-        // Click listeners for the Hindi font selection cards (visual updates)
-        let activeHindiLayout = "system";
-        const fontCards = document.querySelectorAll(".modal-options select, #hindiLayout");
-        
+        // Robust Background Key Interception for custom character mapping layout
+        const typedTextarea = document.getElementById("typed");
+        typedTextarea.addEventListener("beforeinput", handleHindiBeforeInput);
+
         const startTestModal = document.getElementById('start-test-modal');
         document.getElementById("original").addEventListener("paste", () => {
             setTimeout(() => { if(document.getElementById("original").value.trim() !== "") startTestModal.classList.add('visible'); }, 100);
@@ -1911,7 +1959,9 @@
             startTestModal.classList.remove('visible');
             
             g_typingLanguage = document.getElementById("typingLanguage").value;
-            g_hindiLayout = document.getElementById("hindiLayout").value;
+            
+            const activeCard = document.querySelector('.hindi-font-card.active');
+            g_hindiLayout = activeCard ? activeCard.getAttribute('data-layout') : 'inscript';
             
             document.getElementById("original-box").classList.add("hidden");
             document.getElementById("typed-box").classList.remove("hidden");
@@ -1920,15 +1970,6 @@
             document.getElementById('finishButton').classList.remove('hidden');
             
             const typedArea = document.getElementById("typed");
-            if (g_typingLanguage === 'hindi' && g_hindiLayout === 'krutidev') {
-                // Style the input area with local fallback and cdn fallback Kruti Dev 010 fonts
-                typedArea.style.fontFamily = '"Kruti Dev 010", "Devlys 010", "Krutidev", "Devlys", sans-serif';
-                typedArea.placeholder = "Krutidev layout typing active. Raw ASCII will display on-screen as Hindi, and convert to Devanagari Unicode upon submission.";
-            } else {
-                typedArea.style.fontFamily = '';
-                typedArea.placeholder = "Paste or type your transcription here...";
-            }
-
             typedArea.focus();
             startTypingTimer(50);
         });
@@ -2208,17 +2249,6 @@ Respond EXACTLY in this JSON format:
             `;
         }
     };
-</script>
-<script>
-    // --- Card-Based Hindi Font Selection Controller ---
-    const fontCards = document.querySelectorAll('.font-option-card');
-    fontCards.forEach(card => {
-        card.addEventListener('click', () => {
-            fontCards.forEach(c => c.classList.remove('active'));
-            card.classList.add('active');
-            g_hindiLayout = card.dataset.value;
-        });
-    });
 </script>
 </body>
 </html>
