@@ -922,7 +922,7 @@
         let modified_substring = text;
 
         const array_one = [
-            "ñ", "Q+Z", "sas", "aa", ")Z", "ZZ", "'", "'", "“", "”", 
+            "ñ", "Q+Z", "sas", "aa", ")Z", "ZZ", "“", "”",
             "å", "ƒ", "„", "…", "†", "‡", "ˆ", "‰", "Š", "‹", "¶+", "d+", "[+k", "[+", "x+", "T+", "t+", "M+", "<+", "Q+", ";+", "j+", "u+",
             "k|m", "em", "km", "Qm", "qm", "N~", "¡", "¢", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
             "T", "t", "Y", "y", "b", "W", "w", "G", "g", "K", "k", "ˆ", "A", "a", "E", "e", "D", "d",
@@ -932,13 +932,11 @@
         ];
 
         const array_two = [
-            "॰", "QZ+", "sa", "a", "र्द्ध", "Z", "\"", "\"", "'", "'",
+            "॰", "QZ+", "sa", "a", "र्द्ध", "Z", "\"", "\"",
             "०", "१", "२", "३", "४", "५", "६", "७", "८", "९", "फ़्", "द़", "ख़्", "ख़", "ग़", "ज़", "ध्रु", "थ्रु", "ध्र", "फ़", "्य", "्र", "ु",
             "फ्र", "झ", "फ", "क्त", "क्र", "ल", "ज्ञ्", "द्घ", "१", "२", "३", "४", "५", "६", "७", "८", "९", "०",
-            "त्", "त", "थ्", "ध", "ज", "ल", "न", "प", "व", "च", "ख्", "द्व", "?",
-            "ं", "े", "क", "ि", "ह", "ी", "र", "ा", "स", "य", "श्",
-            "्र", "ग", "ब", "अ", "इ", "द", "उ", "ए", "ण्", "ध",
-            "द", "द", "न", "न", "ज", "ज", "र", "र", "इ", "इ", "य", "य", "श", 
+            "त्", "त", "थ्", "ध", "ब्", "ब", "भ्", "भ", "म्", "म", "ा", "अ", "अं", "ा", "इ", "ई", "ध्", "ध",
+            "द्", "द", "न्", "न", "ज", "ज", "र", "र", "इ", "इ", "य", "य", "श", 
             "ऑ", "ऑ", "ओ", "ओ", "ओ", "ओ", "ई", "इ", "ऊ", "उ", "ऋ", "ऐ", "ए",
             "ीं", "ष", "श", "ं", "ि", "ख्", "ह", "ज", "ब", "क", "स", "ह"
         ];
@@ -957,7 +955,7 @@
         modified_substring = modified_substring.replace(/ि([क-ह]्?[क-ह]?)/g, "$1ि");
         
         // Handle post-base Reph (र्) reordering
-        modified_substring = modified_substring.replace(/([क-ह])([ािीुूृेैोौंँ]*)र्/g, "र्$1$2");
+        modified_substring = modified_substring.replace(/([क-ह])([ािीुूृेैोौँं]*)र्/g, "र्$1$2");
 
         return modified_substring;
     }
@@ -976,12 +974,12 @@
             return;
         }
 
-        // Automatic Krutidev to Unicode conversion before checking
+        // Smart, automatic detection of Krutidev input
         const hasDevanagari = /[\u0900-\u097F]/.test(originalText);
-        const isEnglishASCII = /^[A-Za-z0-9\s.,\/#!$%\^&\*;:{}=\-_`~()?"'’[\]\\+]+$/.test(typedText);
+        const typedHasDevanagari = /[\u0900-\u097F]/.test(typedText);
 
-        if (g_typingLanguage === "hindi" && hasDevanagari && isEnglishASCII) {
-            console.log("📝 Auto-converting typed Krutidev text to Unicode Devanagari...");
+        if (hasDevanagari && !typedHasDevanagari) {
+            console.log("📝 Auto-detected Krutidev input. Converting to Unicode Devanagari...");
             typedText = convertKrutidevToUnicode(typedText);
         }
 
@@ -1029,7 +1027,7 @@
         const wpm = timeTakenMinutes > 0 ? (totalWordsP2 / timeTakenMinutes).toFixed(2) : "0.00";
         results.typingSpeed = wpm;
 
-        hideAnalyzingOverlay(); // Hide animation
+        hideAnalyzingOverlay(); // Show animation
         renderResultSheet(results);
         
         // --- Auto-Save to Database ---
