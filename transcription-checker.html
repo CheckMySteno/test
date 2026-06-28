@@ -917,6 +917,51 @@
         return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
+    // --- Dynamic Krutidev 010 to Unicode Devanagari Converter ---
+    function convertKrutidevToUnicode(text) {
+        let modified_substring = text;
+
+        const array_one = [
+            "ñ", "Q+Z", "sas", "aa", ")Z", "ZZ", "'", "'", "“", "”", 
+            "å", "ƒ", "„", "…", "†", "‡", "ˆ", "‰", "Š", "‹", "¶+", "d+", "[+k", "[+", "x+", "T+", "t+", "M+", "<+", "Q+", ";+", "j+", "u+",
+            "k|m", "em", "km", "Qm", "qm", "N~", "¡", "¢", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
+            "T", "t", "Y", "y", "b", "W", "w", "G", "g", "K", "k", "ˆ", "A", "a", "E", "e", "D", "d",
+            "o", "/", "N", "n", "J", "j", "Z", "z", "i", ":", ";", "X", "x", 
+            "cf'", "c'f", "cf}", "cf]", "cf", "c", "O{", "O", "pm", "p", "C", "P]", "P",
+            "f'", "\"", "'", "+", "f", "[", "\\", "]", "}", "F", "L", "M"
+        ];
+
+        const array_two = [
+            "॰", "QZ+", "sa", "a", "र्द्ध", "Z", "\"", "\"", "'", "'",
+            "०", "१", "२", "३", "४", "५", "६", "७", "८", "९", "फ़्", "द़", "ख़्", "ख़", "ग़", "ज़", "ध्रु", "थ्रु", "ध्र", "फ़", "्य", "्र", "ु",
+            "फ्र", "झ", "फ", "क्त", "क्र", "ल", "ज्ञ्", "द्घ", "१", "२", "३", "४", "५", "६", "७", "८", "९", "०",
+            "त्", "त", "थ्", "ध", "ज", "ल", "न", "प", "व", "च", "ख्", "द्व", "?",
+            "ं", "े", "क", "ि", "ह", "ी", "र", "ा", "स", "य", "श्",
+            "्र", "ग", "ब", "अ", "इ", "द", "उ", "ए", "ण्", "ध",
+            "द", "द", "न", "न", "ज", "ज", "र", "र", "इ", "इ", "य", "य", "श", 
+            "ऑ", "ऑ", "ओ", "ओ", "ओ", "ओ", "ई", "इ", "ऊ", "उ", "ऋ", "ऐ", "ए",
+            "ीं", "ष", "श", "ं", "ि", "ख्", "ह", "ज", "ब", "क", "स", "ह"
+        ];
+
+        const array_one_length = array_one.length;
+        for (let input_symbol_idx = 0; input_symbol_idx < array_one_length; input_symbol_idx++) {
+            while (modified_substring.indexOf(array_one[input_symbol_idx]) !== -1) {
+                modified_substring = modified_substring.replace(array_one[input_symbol_idx], array_two[input_symbol_idx]);
+            }
+        }
+
+        // Handle half-consonant combinations that type as full letters
+        modified_substring = modified_substring.replace(/([क-ह])्ा/g, "$1");
+
+        // Handle pre-base chhoti i (ि) matra reordering
+        modified_substring = modified_substring.replace(/ि([क-ह]्?[क-ह]?)/g, "$1ि");
+        
+        // Handle post-base Reph (र्) reordering
+        modified_substring = modified_substring.replace(/([क-ह])([ािीुूृेैोौंँ]*)र्/g, "र्$1$2");
+
+        return modified_substring;
+    }
+
     function submitTranscription() {
         const timerDisplay = document.getElementById('timerDisplay');
         if (timerDisplay) timerDisplay.remove();
@@ -924,11 +969,20 @@
         document.getElementById('finishButton').classList.add('hidden');
         document.getElementById('checkerContainer').classList.remove('focus-mode');
         const originalText = document.getElementById("original").value.trim();
-        const typedText = document.getElementById("typed").value.trim();
+        let typedText = document.getElementById("typed").value.trim();
         if (!originalText || !typedText) {
             alert("Please fill in both the original and transcription text boxes.");
             goHome(); // Go back if submission fails
             return;
+        }
+
+        // Automatic Krutidev to Unicode conversion before checking
+        const hasDevanagari = /[\u0900-\u097F]/.test(originalText);
+        const isEnglishASCII = /^[A-Za-z0-9\s.,\/#!$%\^&\*;:{}=\-_`~()?"'’[\]\\+]+$/.test(typedText);
+
+        if (g_typingLanguage === "hindi" && hasDevanagari && isEnglishASCII) {
+            console.log("📝 Auto-converting typed Krutidev text to Unicode Devanagari...");
+            typedText = convertKrutidevToUnicode(typedText);
         }
 
         showAnalyzingOverlay(); // Show animation
