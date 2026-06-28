@@ -917,47 +917,45 @@
         return s.toString().replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
     }
 
-    // --- Dynamic Krutidev 010 to Unicode Devanagari Converter ---
+    // --- Dictionary-Based Krutidev 010 to Unicode Devanagari Converter ---
     function convertKrutidevToUnicode(text) {
-        let modified_substring = text;
+        if (!text) return "";
 
-        const array_one = [
-            "ñ", "Q+Z", "sas", "aa", ")Z", "ZZ", "“", "”",
-            "å", "ƒ", "„", "…", "†", "‡", "ˆ", "‰", "Š", "‹", "¶+", "d+", "[+k", "[+", "x+", "T+", "t+", "M+", "<+", "Q+", ";+", "j+", "u+",
-            "k|m", "em", "km", "Qm", "qm", "N~", "¡", "¢", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-            "T", "t", "Y", "y", "b", "W", "w", "G", "g", "K", "k", "ˆ", "A", "a", "E", "e", "D", "d",
-            "o", "/", "N", "n", "J", "j", "Z", "z", "i", ":", ";", "X", "x", 
-            "cf'", "c'f", "cf}", "cf]", "cf", "c", "O{", "O", "pm", "p", "C", "P]", "P",
-            "f'", "\"", "'", "+", "f", "[", "\\", "]", "}", "F", "L", "M"
-        ];
+        const KRUTIDEV_UNICODE_MAP = {
+            'q': 'ु', 'w': 'ू', 'e': 'म', 'r': 'त', 't': 'ज', 'y': 'ल', 'u': 'न', 'i': 'प', 'o': 'व', 'p': 'च', '[': 'ख्', ']': 'द्व', '\\': '?',
+            'a': 'ं', 's': 'े', 'd': 'क', 'f': 'ि', 'g': 'ह', 'h': 'ी', 'j': 'र', 'k': 'ा', 'l': 'स', ';': 'य', "'": 'श्',
+            'z': '्र', 'x': 'ग', 'c': 'ब', 'v': 'अ', 'b': 'इ', 'n': 'द', 'm': 'उ', ',': 'ए', '.': 'ण्', '/': 'ध्', '`': '़',
+            '1': '१', '2': '२', '3': '३', '4': '४', '5': '५', '6': '६', '7': '७', '8': '८', '9': '९', '0': '०', '-': '-', '=': 'ृ',
+            'Q': 'फ', 'W': 'ॅ', 'E': 'म्', 'R': 'त्', 'T': 'ज्', 'Y': 'ल्', 'U': 'न्', 'I': 'प्', 'O': 'व्', 'P': 'च्', '{': 'क्ष', '}': 'द्व', '|': 'द्य',
+            'A': 'ँ', 'S': 'ै', 'D': 'क्', 'F': 'थ्', 'G': 'ळ', 'H': 'भ्', 'J': 'श्र', 'K': 'ज्ञा', 'L': 'स्स', ':': 'रू', '"': 'ष्',
+            'Z': 'र्', 'X': 'ग्', 'C': 'ब्', 'V': 'ट', 'B': 'ठ', 'N': 'छ', 'M': 'ड', '<': 'ढ', '>': 'झ', '?': 'घ्', '~': 'द्य',
+            '!': '।', '@': '/', '#': ':', '$': '*', '%': '-', '^': "'", '&': '"', '*': 'द्ध', '(': 'त्र', ')': 'ऋ', '_': '.', '+': '्'
+        };
 
-        const array_two = [
-            "॰", "QZ+", "sa", "a", "र्द्ध", "Z", "\"", "\"",
-            "०", "१", "२", "३", "४", "५", "६", "७", "८", "९", "फ़्", "द़", "ख़्", "ख़", "ग़", "ज़", "ध्रु", "थ्रु", "ध्र", "फ़", "्य", "्र", "ु",
-            "फ्र", "झ", "फ", "क्त", "क्र", "ल", "ज्ञ्", "द्घ", "१", "२", "३", "४", "५", "६", "७", "८", "९", "०",
-            "त्", "त", "थ्", "ध", "ब्", "ब", "भ्", "भ", "म्", "म", "ा", "अ", "अं", "ा", "इ", "ई", "ध्", "ध",
-            "द्", "द", "न्", "न", "ज", "ज", "र", "र", "इ", "इ", "य", "य", "श", 
-            "ऑ", "ऑ", "ओ", "ओ", "ओ", "ओ", "ई", "इ", "ऊ", "उ", "ऋ", "ऐ", "ए",
-            "ीं", "ष", "श", "ं", "ि", "ख्", "ह", "ज", "ब", "क", "स", "ह"
-        ];
-
-        const array_one_length = array_one.length;
-        for (let input_symbol_idx = 0; input_symbol_idx < array_one_length; input_symbol_idx++) {
-            while (modified_substring.indexOf(array_one[input_symbol_idx]) !== -1) {
-                modified_substring = modified_substring.replace(array_one[input_symbol_idx], array_two[input_symbol_idx]);
-            }
+        // Standard character replacements using the Krutidev dictionary
+        let converted = "";
+        for (let i = 0; i < text.length; i++) {
+            const char = text[i];
+            const mapped = KRUTIDEV_UNICODE_MAP[char];
+            converted += (mapped !== undefined) ? mapped : char;
         }
 
-        // Handle half-consonant combinations that type as full letters
-        modified_substring = modified_substring.replace(/([क-ह])्ा/g, "$1");
-
-        // Handle pre-base chhoti i (ि) matra reordering
-        modified_substring = modified_substring.replace(/ि([क-ह]्?[क-ह]?)/g, "$1ि");
+        // --- Post-Processing Rules ---
         
-        // Handle post-base Reph (र्) reordering
-        modified_substring = modified_substring.replace(/([क-ह])([ािीुूृेैोौँं]*)र्/g, "र्$1$2");
+        // Rule 1: Consonant Completion
+        // If a half-consonant (e.g. भ्) is directly followed by the aa matra (ा), it becomes a full consonant.
+        converted = converted.replace(/([क-ह])्ा/g, "$1");
 
-        return modified_substring;
+        // Rule 2: Chhoti-i (ि) reordering
+        // Visually typed before the consonant cluster in Krutidev, logically placed after the consonant in Unicode
+        converted = converted.replace(/ि([क-ह]्?)/g, "$1ि");
+        converted = converted.replace(/ि([क-ह]्?[क-ह]्?)/g, "$1ि");
+        
+        // Rule 3: Reph (र्) reordering
+        // Visually typed at the end of the cluster, logically placed before the consonant in Unicode
+        converted = converted.replace(/([क-ह])(ा|ि|ी|ु|ू|े|ै|ो|ौ|ं|ः)?र्/g, "र्$1$2");
+
+        return converted;
     }
 
     function submitTranscription() {
@@ -974,12 +972,13 @@
             return;
         }
 
-        // Smart, automatic detection of Krutidev input
+        // Automatic smart translation detection
+        // If original text is Hindi (Unicode), but typed text does not have Devanagari bytes, auto-convert it
         const hasDevanagari = /[\u0900-\u097F]/.test(originalText);
         const typedHasDevanagari = /[\u0900-\u097F]/.test(typedText);
 
         if (hasDevanagari && !typedHasDevanagari) {
-            console.log("📝 Auto-detected Krutidev input. Converting to Unicode Devanagari...");
+            console.log("📝 Auto-detected legacy Krutidev input. Converting to Unicode Devanagari...");
             typedText = convertKrutidevToUnicode(typedText);
         }
 
@@ -1464,6 +1463,7 @@
         document.getElementById('submitReportBtn').disabled = !(errorType && otherText);
     }
 
+    // --- REPORT ERROR DIALOGUE ---
     function showReportModal() {
         document.getElementById('reportErrorModal').classList.add('visible');
         validateReportForm();
